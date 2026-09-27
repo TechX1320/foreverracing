@@ -3,7 +3,7 @@ import { bindHome, pageShell } from "../ui/components.js";
 const KEY = "forever-racing-settings-v1";
 
 export function loadSettings() {
-  let settings = { reduceMotion: false, compactMenu: false };
+  let settings = { reduceMotion: false, compactMenu: true, vehicleRendering: 'procedural' };
   try { settings = { ...settings, ...JSON.parse(localStorage.getItem(KEY) || "{}") }; } catch {}
   applySettings(settings);
   return settings;
