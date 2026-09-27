@@ -19,37 +19,28 @@ final class GameService
     public static function defaultPlayer(): array
     {
         $now = time();
+        $config = app_config();
         return [
-            'schemaVersion' => 2,
-            'user' => [
-                'id' => 1,
-                'username' => 'Admin',
-                'createdAt' => $now,
+            'schemaVersion' => (int)$config['schema_version'],
+            'user' => ['id' => 1, 'username' => 'Admin', 'createdAt' => $now],
+            'wallet' => ['credits' => (int)$config['starting_credits']],
+            'progression' => ['level' => 1, 'rep' => 0],
+            'tutorial' => [
+                'version' => (int)$config['tutorial_version'],
+                'status' => 'active',
+                'step' => 'welcome',
+                'completedSteps' => [],
             ],
-            'wallet' => ['credits' => (int)app_config()['starting_credits']],
             'stats' => [
-                'races' => 0,
-                'wins' => 0,
-                'losses' => 0,
-                'bestReaction' => null,
-                'showroomPurchases' => 0,
-                'usedPurchases' => 0,
-                'partsPurchased' => 0,
+                'races' => 0, 'wins' => 0, 'losses' => 0, 'bestReaction' => null,
+                'showroomPurchases' => 0, 'usedPurchases' => 0, 'partsPurchased' => 0,
             ],
             'selectedCarId' => null,
             'garage' => [],
             'inventory' => ['parts' => []],
-            'roguelike' => [
-                'activeRun' => null,
-                'bestStage' => 0,
-                'runsStarted' => 0,
-                'runsCompleted' => 0,
-            ],
+            'roguelike' => ['activeRun' => null, 'bestStage' => 0, 'runsStarted' => 0, 'runsCompleted' => 0],
             'transactions' => [],
-            'meta' => [
-                'createdAt' => $now,
-                'updatedAt' => $now,
-            ],
+            'meta' => ['createdAt' => $now, 'updatedAt' => $now],
         ];
     }
 
@@ -67,11 +58,15 @@ final class GameService
     public static function normalizePlayer(array $player): array
     {
         $default = self::defaultPlayer();
-        $player['schemaVersion'] = 2;
+        $player['schemaVersion'] = (int)app_config()['schema_version'];
         $player['user'] = array_replace($default['user'], is_array($player['user'] ?? null) ? $player['user'] : []);
         $player['wallet'] = array_replace($default['wallet'], is_array($player['wallet'] ?? null) ? $player['wallet'] : []);
+        $player['progression'] = array_replace($default['progression'], is_array($player['progression'] ?? null) ? $player['progression'] : []);
+        $player['tutorial'] = array_replace($default['tutorial'], is_array($player['tutorial'] ?? null) ? $player['tutorial'] : []);
+        $player['tutorial']['completedSteps'] = array_values(is_array($player['tutorial']['completedSteps'] ?? null) ? $player['tutorial']['completedSteps'] : []);
         $player['stats'] = array_replace($default['stats'], is_array($player['stats'] ?? null) ? $player['stats'] : []);
-        $player['garage'] = array_values(is_array($player['garage'] ?? null) ? $player['garage'] : []);
+        $garage = array_values(is_array($player['garage'] ?? null) ? $player['garage'] : []);
+        $player['garage'] = array_map(fn(array $car): array => self::normalizeCar($car), $garage);
         $player['inventory'] = is_array($player['inventory'] ?? null) ? $player['inventory'] : $default['inventory'];
         $player['inventory']['parts'] = array_values(is_array($player['inventory']['parts'] ?? null) ? $player['inventory']['parts'] : []);
         $player['roguelike'] = array_replace($default['roguelike'], is_array($player['roguelike'] ?? null) ? $player['roguelike'] : []);
@@ -79,6 +74,8 @@ final class GameService
         $player['meta'] = array_replace($default['meta'], is_array($player['meta'] ?? null) ? $player['meta'] : []);
         $player['selectedCarId'] = $player['selectedCarId'] ?? null;
         $player['stats']['carsOwned'] = count($player['garage']);
+        $player['progression']['rep'] = (int)($player['progression']['rep'] ?? 0);
+        $player['progression']['level'] = max(1, 1 + (int)floor($player['progression']['rep'] / 100));
         return $player;
     }
 
@@ -96,17 +93,18 @@ final class GameService
 
     public static function purchaseNewCar(int $stockId): array
     {
-        $catalog = self::carCatalog();
-        $spec = self::findBy($catalog, 'stockId', $stockId);
+        $spec = self::findBy(self::carCatalog(), 'stockId', $stockId);
         if (!$spec) {
             throw new GameException('That showroom car does not exist.', 404);
         }
 
         return self::mutatePlayer(function (array $player) use ($spec): array {
+            if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'buy_first_car' && empty($spec['starter'])) {
+                throw new GameException('Choose one of the highlighted starter cars for your first build.');
+            }
             $price = (int)$spec['price'];
             self::requireCredits($player, $price);
             $player['wallet']['credits'] -= $price;
-
             $car = self::createOwnedCar($spec, 'new', 0, 100, $price);
             $player['garage'][] = $car;
             $player['stats']['showroomPurchases'] = (int)$player['stats']['showroomPurchases'] + 1;
@@ -114,6 +112,9 @@ final class GameService
                 $player['selectedCarId'] = $car['carId'];
             }
             self::addTransaction($player, 'showroom_purchase', -$price, $car['displayName']);
+            if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'buy_first_car') {
+                self::completeTutorialStep($player, 'buy_first_car', 'visit_garage');
+            }
             return $player;
         });
     }
@@ -143,24 +144,32 @@ final class GameService
 
     public static function purchasePart(string $catalogId): array
     {
-        $spec = self::findBy(self::partsCatalog(), 'catalogId', $catalogId);
+        $catalog = self::partsCatalog();
+        $spec = self::findBy($catalog, 'catalogId', $catalogId);
         if (!$spec) {
             throw new GameException('That part does not exist.', 404);
         }
 
-        return self::mutatePlayer(function (array $player) use ($spec): array {
+        return self::mutatePlayer(function (array $player) use ($spec, $catalog): array {
+            $car = self::selectedCar($player);
+            if (!$car) {
+                throw new GameException('Select a car before buying build parts.');
+            }
+            self::requirePartCompatible($player, $car, $spec, $catalog, true);
             $price = (int)$spec['price'];
             self::requireCredits($player, $price);
             $player['wallet']['credits'] -= $price;
-            $instance = [
+            $player['inventory']['parts'][] = [
                 'inventoryId' => self::id('part'),
                 'catalogId' => (string)$spec['catalogId'],
                 'installedOnCarId' => null,
                 'purchasedAt' => time(),
             ];
-            $player['inventory']['parts'][] = $instance;
             $player['stats']['partsPurchased'] = (int)$player['stats']['partsPurchased'] + 1;
             self::addTransaction($player, 'part_purchase', -$price, (string)$spec['name']);
+            if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'buy_first_upgrade') {
+                self::completeTutorialStep($player, 'buy_first_upgrade', 'install_first_upgrade');
+            }
             return $player;
         });
     }
@@ -177,8 +186,17 @@ final class GameService
             if (!$spec) {
                 throw new GameException('Part catalog entry is missing.', 500);
             }
+            $car = $player['garage'][$carIndex];
+            self::requirePartCompatible($player, $car, $spec, $catalog, false);
 
             $slot = (string)$spec['slot'];
+            if ((int)($car['buildStage'] ?? 1) === 1 && (int)($spec['simpleTier'] ?? 0) > 0) {
+                $currentTier = self::installedSimpleTier($player, $carId, (string)($spec['categoryKey'] ?? $slot), $catalog);
+                if ((int)$spec['simpleTier'] < $currentTier) {
+                    throw new GameException('Stage 1 upgrades cannot be downgraded.');
+                }
+            }
+
             foreach ($player['inventory']['parts'] as &$ownedPart) {
                 if (($ownedPart['installedOnCarId'] ?? null) !== $carId) {
                     continue;
@@ -196,6 +214,9 @@ final class GameService
                 $previousCarIndex = self::requireOwnedCarIndex($player, (string)$previousCarId);
                 $player['garage'][$previousCarIndex] = self::recalculateCar($player['garage'][$previousCarIndex], $player['inventory']['parts'], $catalog);
             }
+            if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'install_first_upgrade') {
+                self::completeTutorialStep($player, 'install_first_upgrade', 'build_stages');
+            }
             return $player;
         });
     }
@@ -206,11 +227,81 @@ final class GameService
         return self::mutatePlayer(function (array $player) use ($inventoryId, $catalog): array {
             $partIndex = self::requireOwnedPartIndex($player, $inventoryId);
             $carId = $player['inventory']['parts'][$partIndex]['installedOnCarId'] ?? null;
+            $spec = self::findBy($catalog, 'catalogId', (string)($player['inventory']['parts'][$partIndex]['catalogId'] ?? ''));
+            if ($carId && !empty($spec['simpleTier'])) {
+                $car = self::requireOwnedCar($player, (string)$carId);
+                if ((int)($car['buildStage'] ?? 1) === 1) {
+                    throw new GameException('Stage 1 upgrades are permanent progression and cannot be downgraded.');
+                }
+            }
             $player['inventory']['parts'][$partIndex]['installedOnCarId'] = null;
             if ($carId) {
                 $carIndex = self::requireOwnedCarIndex($player, (string)$carId);
                 $player['garage'][$carIndex] = self::recalculateCar($player['garage'][$carIndex], $player['inventory']['parts'], $catalog);
             }
+            return $player;
+        });
+    }
+
+    public static function stageUp(string $carId): array
+    {
+        $catalog = self::partsCatalog();
+        $stageConfig = JsonStore::read(FR_DATA . '/config/build-stages.json', []);
+        $required = $stageConfig['stages'][0]['requiredCategories'] ?? ['intake','exhaust','ecu','fuel','drivetrain','tires','weight'];
+
+        return self::mutatePlayer(function (array $player) use ($carId, $catalog, $required): array {
+            $index = self::requireOwnedCarIndex($player, $carId);
+            $car = $player['garage'][$index];
+            if ((int)($car['buildStage'] ?? 1) !== 1) {
+                throw new GameException('Only the Stage 1 to Stage 2 conversion is enabled in this build.');
+            }
+            foreach ($required as $category) {
+                if (self::installedSimpleTier($player, $carId, (string)$category, $catalog) < 3) {
+                    throw new GameException('Max every Stage 1 category before converting to Stage 2.');
+                }
+            }
+            $car['stageBaseline'] = $car['derived'];
+            $car['buildStage'] = 2;
+            foreach ($player['inventory']['parts'] as &$ownedPart) {
+                if (($ownedPart['installedOnCarId'] ?? null) !== $carId) {
+                    continue;
+                }
+                $partSpec = self::findBy($catalog, 'catalogId', (string)($ownedPart['catalogId'] ?? ''));
+                if (!empty($partSpec['simpleTier'])) {
+                    $ownedPart['installedOnCarId'] = null;
+                }
+            }
+            unset($ownedPart);
+            $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'], $catalog);
+            self::addTransaction($player, 'stage_conversion', 0, self::carName($car) . ' converted to Build Stage 2');
+            return $player;
+        });
+    }
+
+    public static function tutorialAdvance(string $action): array
+    {
+        return self::mutatePlayer(function (array $player) use ($action): array {
+            $step = (string)($player['tutorial']['step'] ?? '');
+            if ($action === 'welcome_complete' && $step === 'welcome') {
+                self::completeTutorialStep($player, 'welcome', count($player['garage']) ? 'visit_garage' : 'buy_first_car');
+            } elseif ($action === 'garage_explained' && $step === 'visit_garage') {
+                self::completeTutorialStep($player, 'visit_garage', 'buy_first_upgrade');
+            } elseif ($action === 'build_stages_explained' && $step === 'build_stages') {
+                self::completeTutorialStep($player, 'build_stages', 'first_race');
+            }
+            return $player;
+        });
+    }
+
+    public static function tutorialReset(): array
+    {
+        return self::mutatePlayer(function (array $player): array {
+            $player['tutorial'] = [
+                'version' => (int)app_config()['tutorial_version'],
+                'status' => 'active',
+                'step' => 'welcome',
+                'completedSteps' => [],
+            ];
             return $player;
         });
     }
@@ -293,22 +384,19 @@ final class GameService
             $weight = max(500.0, (float)$car['derived']['weight']);
             $grip = max(0.5, (float)($car['derived']['grip'] ?? 1.0));
             $playerPwr = $hp / $weight;
-
             $difficulty = mt_rand(92, 108) / 100;
             $oppPwr = $playerPwr * $difficulty;
             $oppWeight = (int)round($weight * (mt_rand(92, 108) / 100));
             $oppHp = (int)round($oppPwr * $oppWeight);
-
             $reaction = mt_rand(80, 420) / 1000;
             $oppReaction = mt_rand(100, 450) / 1000;
-            $playerEt = 17.6 - ($playerPwr * 38.0) - (($grip - 1.0) * 0.45) + $reaction + (mt_rand(-12, 12) / 100);
-            $oppEt = 17.6 - ($oppPwr * 38.0) + $oppReaction + (mt_rand(-12, 12) / 100);
-            $playerEt = max(6.2, round($playerEt, 3));
-            $oppEt = max(6.2, round($oppEt, 3));
+            $playerEt = max(6.2, round(17.6 - ($playerPwr * 38.0) - (($grip - 1.0) * 0.45) + $reaction + (mt_rand(-12, 12) / 100), 3));
+            $oppEt = max(6.2, round(17.6 - ($oppPwr * 38.0) + $oppReaction + (mt_rand(-12, 12) / 100), 3));
             $won = $playerEt < $oppEt;
             $reward = $won ? mt_rand(450, 850) : mt_rand(90, 220);
 
             $player['wallet']['credits'] += $reward;
+            $player['progression']['rep'] = (int)($player['progression']['rep'] ?? 0) + ($won ? 5 : 2);
             $player['stats']['races'] = (int)$player['stats']['races'] + 1;
             $player['stats'][$won ? 'wins' : 'losses'] = (int)$player['stats'][$won ? 'wins' : 'losses'] + 1;
             $bestReaction = $player['stats']['bestReaction'];
@@ -317,16 +405,23 @@ final class GameService
             }
             self::addTransaction($player, 'race_reward', $reward, $won ? 'Quick Race win' : 'Quick Race participation');
 
+            if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'first_race') {
+                $tutorialCredits = (int)app_config()['tutorial_completion_credits'];
+                $tutorialRep = (int)app_config()['tutorial_completion_rep'];
+                $player['wallet']['credits'] += $tutorialCredits;
+                $player['progression']['rep'] += $tutorialRep;
+                self::addTransaction($player, 'tutorial_reward', $tutorialCredits, 'FTUE completion reward');
+                self::completeTutorialStep($player, 'first_race', null);
+                $player['tutorial']['status'] = 'complete';
+                $player['tutorial']['step'] = 'complete';
+            }
+
             $result = [
                 'won' => $won,
                 'reaction' => $reaction,
                 'playerEt' => $playerEt,
                 'opponentEt' => $oppEt,
-                'opponent' => [
-                    'name' => self::opponentName(),
-                    'hp' => $oppHp,
-                    'weight' => $oppWeight,
-                ],
+                'opponent' => ['name' => self::opponentName(), 'hp' => $oppHp, 'weight' => $oppWeight],
                 'reward' => $reward,
                 'carName' => self::carName($car),
             ];
@@ -451,6 +546,18 @@ final class GameService
         return null;
     }
 
+    private static function normalizeCar(array $car): array
+    {
+        $spec = self::findBy(self::carCatalog(), 'stockId', (int)($car['stockId'] ?? 0));
+        $car['buildStage'] = max(1, (int)($car['buildStage'] ?? 1));
+        $car['stageBaseline'] = is_array($car['stageBaseline'] ?? null) ? $car['stageBaseline'] : null;
+        $car['factoryEngineId'] = $car['factoryEngineId'] ?? ($spec['factoryEngineId'] ?? null);
+        $car['engineId'] = $car['engineId'] ?? $car['factoryEngineId'];
+        $car['engineBay'] = $car['engineBay'] ?? ($spec['engineBay'] ?? null);
+        $car['visual'] = $car['visual'] ?? ($spec['visual'] ?? ['profile' => 'sedan', 'color' => '#78838d']);
+        return $car;
+    }
+
     private static function createOwnedCar(array $spec, string $source, int $mileage, int $condition, int $purchasePrice): array
     {
         $base = $spec['base'];
@@ -463,18 +570,18 @@ final class GameService
             'purchasePrice' => $purchasePrice,
             'mileage' => $mileage,
             'condition' => $condition,
+            'buildStage' => 1,
+            'stageBaseline' => null,
+            'factoryEngineId' => $spec['factoryEngineId'] ?? null,
+            'engineId' => $spec['factoryEngineId'] ?? null,
+            'engineBay' => $spec['engineBay'] ?? null,
+            'visual' => $spec['visual'] ?? ['profile' => 'sedan', 'color' => '#78838d'],
             'base' => [
-                'hp' => (int)$base['hp'],
-                'torque' => (int)$base['torque'],
-                'weight' => (int)$base['weight'],
-                'grip' => (float)($base['grip'] ?? 1.0),
-                'drivetrain' => (string)($base['drivetrain'] ?? 'FWD'),
+                'hp' => (int)$base['hp'], 'torque' => (int)$base['torque'], 'weight' => (int)$base['weight'],
+                'grip' => (float)($base['grip'] ?? 1.0), 'drivetrain' => (string)($base['drivetrain'] ?? 'FWD'),
             ],
             'derived' => [
-                'hp' => (int)$base['hp'],
-                'torque' => (int)$base['torque'],
-                'weight' => (int)$base['weight'],
-                'grip' => (float)($base['grip'] ?? 1.0),
+                'hp' => (int)$base['hp'], 'torque' => (int)$base['torque'], 'weight' => (int)$base['weight'], 'grip' => (float)($base['grip'] ?? 1.0),
             ],
             'createdAt' => time(),
         ];
@@ -482,12 +589,15 @@ final class GameService
 
     private static function recalculateCar(array $car, array $inventory, array $catalog): array
     {
+        $car = self::normalizeCar($car);
+        $seed = (int)($car['buildStage'] ?? 1) >= 2 && is_array($car['stageBaseline'] ?? null) ? $car['stageBaseline'] : $car['base'];
         $derived = [
-            'hp' => (float)$car['base']['hp'],
-            'torque' => (float)$car['base']['torque'],
-            'weight' => (float)$car['base']['weight'],
-            'grip' => (float)($car['base']['grip'] ?? 1.0),
+            'hp' => (float)$seed['hp'],
+            'torque' => (float)$seed['torque'],
+            'weight' => (float)$seed['weight'],
+            'grip' => (float)($seed['grip'] ?? 1.0),
         ];
+        $installedParts = [];
 
         foreach ($inventory as $instance) {
             if (($instance['installedOnCarId'] ?? null) !== ($car['carId'] ?? null)) {
@@ -497,14 +607,14 @@ final class GameService
             if (!$spec) {
                 continue;
             }
+            $installedParts[] = $instance['inventoryId'] ?? '';
             foreach (($spec['effects'] ?? []) as $effect) {
                 $stat = (string)($effect['stat'] ?? '');
                 if (!array_key_exists($stat, $derived)) {
                     continue;
                 }
                 $value = (float)($effect['value'] ?? 0);
-                $op = (string)($effect['op'] ?? 'add');
-                if ($op === 'mul') {
+                if ((string)($effect['op'] ?? 'add') === 'mul') {
                     $derived[$stat] *= $value;
                 } else {
                     $derived[$stat] += $value;
@@ -518,7 +628,62 @@ final class GameService
             'weight' => (int)round(max(500, $derived['weight'])),
             'grip' => round(max(0.5, $derived['grip']), 3),
         ];
+        $car['installedParts'] = array_values(array_filter($installedParts));
         return $car;
+    }
+
+    private static function installedSimpleTier(array $player, string $carId, string $categoryKey, array $catalog): int
+    {
+        $tier = 0;
+        foreach (($player['inventory']['parts'] ?? []) as $instance) {
+            if ((string)($instance['installedOnCarId'] ?? '') !== $carId) {
+                continue;
+            }
+            $spec = self::findBy($catalog, 'catalogId', (string)($instance['catalogId'] ?? ''));
+            if ($spec && (string)($spec['categoryKey'] ?? '') === $categoryKey) {
+                $tier = max($tier, (int)($spec['simpleTier'] ?? 0));
+            }
+        }
+        return $tier;
+    }
+
+    private static function requirePartCompatible(array $player, array $car, array $spec, array $catalog, bool $purchasing): void
+    {
+        $stage = (int)($car['buildStage'] ?? 1);
+        if ($stage === 1) {
+            if ((int)($spec['buildStage'] ?? 1) !== 1 || (int)($spec['simpleTier'] ?? 0) <= 0) {
+                throw new GameException('Stage 1 cars use the simple three-level upgrade path.');
+            }
+            $currentTier = self::installedSimpleTier($player, (string)$car['carId'], (string)($spec['categoryKey'] ?? $spec['slot'] ?? ''), $catalog);
+            if ($purchasing && (int)$spec['simpleTier'] !== $currentTier + 1) {
+                throw new GameException('Complete the previous ' . (string)$spec['category'] . ' upgrade first.');
+            }
+            if (!$purchasing && (int)$spec['simpleTier'] < $currentTier) {
+                throw new GameException('Stage 1 upgrades cannot be downgraded.');
+            }
+            return;
+        }
+        if (!empty($spec['simpleTier'])) {
+            throw new GameException('Simple Stage 1 parts are incorporated into the Stage 2 conversion.');
+        }
+        if ((int)($spec['buildStage'] ?? 2) > $stage) {
+            throw new GameException('This part requires Build Stage ' . (int)$spec['buildStage'] . '.');
+        }
+        if ((int)($spec['persistentFromStage'] ?? $spec['buildStage'] ?? 2) > $stage) {
+            throw new GameException('This part is not available at the current Build Stage.');
+        }
+    }
+
+    private static function completeTutorialStep(array &$player, string $completed, ?string $next): void
+    {
+        $completedSteps = is_array($player['tutorial']['completedSteps'] ?? null) ? $player['tutorial']['completedSteps'] : [];
+        if (!in_array($completed, $completedSteps, true)) {
+            $completedSteps[] = $completed;
+        }
+        $player['tutorial']['completedSteps'] = $completedSteps;
+        if ($next !== null) {
+            $player['tutorial']['step'] = $next;
+        }
     }
 
     private static function generateUsedLot(int $now, int $refresh): array
