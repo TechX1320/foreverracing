@@ -1,0 +1,122 @@
+[
+  {
+    "catalogId": "intake_street_1",
+    "name": "Street Intake",
+    "category": "Intake",
+    "slot": "intake",
+    "tier": 1,
+    "price": 650,
+    "description": "A simple high-flow intake for a small bump in power.",
+    "effects": [{"stat": "hp", "op": "add", "value": 5}, {"stat": "torque", "op": "add", "value": 3}]
+  },
+  {
+    "catalogId": "intake_race_2",
+    "name": "Race Intake",
+    "category": "Intake",
+    "slot": "intake",
+    "tier": 2,
+    "price": 1800,
+    "description": "Larger intake path and revised ducting.",
+    "effects": [{"stat": "hp", "op": "add", "value": 11}, {"stat": "torque", "op": "add", "value": 7}]
+  },
+  {
+    "catalogId": "exhaust_street_1",
+    "name": "Street Exhaust",
+    "category": "Exhaust",
+    "slot": "exhaust",
+    "tier": 1,
+    "price": 900,
+    "description": "Less restriction without going full race-car.",
+    "effects": [{"stat": "hp", "op": "add", "value": 7}, {"stat": "torque", "op": "add", "value": 4}, {"stat": "weight", "op": "add", "value": -9}]
+  },
+  {
+    "catalogId": "exhaust_race_2",
+    "name": "Race Exhaust",
+    "category": "Exhaust",
+    "slot": "exhaust",
+    "tier": 2,
+    "price": 2400,
+    "description": "High-flow race system with meaningful weight savings.",
+    "effects": [{"stat": "hp", "op": "add", "value": 15}, {"stat": "torque", "op": "add", "value": 10}, {"stat": "weight", "op": "add", "value": -18}]
+  },
+  {
+    "catalogId": "ecu_street_1",
+    "name": "Street ECU Tune",
+    "category": "Engine Management",
+    "slot": "ecu",
+    "tier": 1,
+    "price": 1200,
+    "description": "Conservative calibration for a modest all-around gain.",
+    "effects": [{"stat": "hp", "op": "mul", "value": 1.035}, {"stat": "torque", "op": "mul", "value": 1.035}]
+  },
+  {
+    "catalogId": "ecu_race_2",
+    "name": "Race ECU Tune",
+    "category": "Engine Management",
+    "slot": "ecu",
+    "tier": 2,
+    "price": 3300,
+    "description": "More aggressive calibration intended for upgraded hardware.",
+    "effects": [{"stat": "hp", "op": "mul", "value": 1.075}, {"stat": "torque", "op": "mul", "value": 1.065}]
+  },
+  {
+    "catalogId": "tires_street_1",
+    "name": "Performance Tires",
+    "category": "Tires",
+    "slot": "tires",
+    "tier": 1,
+    "price": 1100,
+    "description": "More launch grip without the compromises of a full drag tire.",
+    "effects": [{"stat": "grip", "op": "add", "value": 0.055}]
+  },
+  {
+    "catalogId": "tires_drag_2",
+    "name": "Drag Radials",
+    "category": "Tires",
+    "slot": "tires",
+    "tier": 2,
+    "price": 2600,
+    "description": "Purpose-built traction for hard launches.",
+    "effects": [{"stat": "grip", "op": "add", "value": 0.125}, {"stat": "weight", "op": "add", "value": 5}]
+  },
+  {
+    "catalogId": "weight_stage1",
+    "name": "Weight Reduction I",
+    "category": "Chassis",
+    "slot": "weight",
+    "tier": 1,
+    "price": 1500,
+    "description": "Remove nonessential weight while keeping the car streetable.",
+    "effects": [{"stat": "weight", "op": "add", "value": -65}]
+  },
+  {
+    "catalogId": "weight_stage2",
+    "name": "Weight Reduction II",
+    "category": "Chassis",
+    "slot": "weight",
+    "tier": 2,
+    "price": 4200,
+    "description": "More aggressive lightweight interior and chassis pieces.",
+    "effects": [{"stat": "weight", "op": "add", "value": -155}]
+  },
+  {
+    "catalogId": "nitrous_50",
+    "name": "50 Shot Nitrous",
+    "category": "Power Adder",
+    "slot": "power_adder",
+    "tier": 1,
+    "price": 2500,
+    "description": "Entry-level nitrous system represented as always available in the prototype sim.",
+    "effects": [{"stat": "hp", "op": "add", "value": 50}, {"stat": "torque", "op": "add", "value": 48}, {"stat": "weight", "op": "add", "value": 11}]
+  },
+  {
+    "catalogId": "nitrous_100",
+    "name": "100 Shot Nitrous",
+    "category": "Power Adder",
+    "slot": "power_adder",
+    "tier": 2,
+    "price": 5200,
+    "description": "A large nitrous hit for cars that need instant power.",
+    "effects": [{"stat": "hp", "op": "add", "value": 100}, {"stat": "torque", "op": "add", "value": 92}, {"stat": "weight", "op": "add", "value": 13}]
+  }
+]

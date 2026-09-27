@@ -1,0 +1,12 @@
+{
+  "name": "Forever Racing",
+  "short_name": "Forever Racing",
+  "description": "A systems-first browser drag racing game prototype.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#080b13",
+  "theme_color": "#080b13",
+  "categories": ["games"]
+}

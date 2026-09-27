@@ -1,0 +1,3 @@
+Generated from shared source for GitHub Pages.
+Storage mode: local
+Do not edit docs/ by hand; run php scripts/build-static.php.
