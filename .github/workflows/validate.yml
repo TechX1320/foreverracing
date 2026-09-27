@@ -1,0 +1,53 @@
+name: Validate Forever Racing
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - name: PHP syntax
+        run: find . -path './docs' -prune -o -name '*.php' -type f -print0 | xargs -0 -n1 php -l
+
+      - name: JavaScript syntax
+        run: find assets/js -name '*.js' -type f -exec node --check {} \;
+
+      - name: Case-insensitive login
+        run: php scripts/test-auth-case.php
+
+      - name: Local FTUE and Build Stage flow
+        run: node --experimental-default-type=module scripts/test-local-game.mjs
+
+      - name: PHP API FTUE smoke test
+        run: bash scripts/test-api.sh
+
+      - name: Generate GitHub Pages build
+        run: php scripts/build-static.php
+
+      - name: Static build smoke test
+        run: node --experimental-vm-modules scripts/test-static.mjs
+
+      - name: Verify generated docs are static
+        run: |
+          ! grep -R "<?php" docs
+          test -f docs/.nojekyll
