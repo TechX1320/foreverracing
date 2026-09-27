@@ -29,7 +29,7 @@ jobs:
         run: find . -path './docs' -prune -o -name '*.php' -type f -print0 | xargs -0 -n1 php -l
 
       - name: JavaScript syntax
-        run: find assets/js -name '*.js' -type f -exec node --check {} \;
+        run: find assets/js -name '*.js' -type f -print0 | xargs -0 -n1 node --check
 
       - name: Case-insensitive login
         run: php scripts/test-auth-case.php
