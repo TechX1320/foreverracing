@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en" data-storage-mode="local">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080b13">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Forever Racing - a browser-based drag racing game prototype.">
+  <title>Forever Racing</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="assets/css/app.css?v=0.2.0-dev.1">
+</head>
+<body>
+  <div class="ambient" aria-hidden="true">
+    <div class="ambient__grid"></div>
+    <div class="ambient__glow ambient__glow--a"></div>
+    <div class="ambient__glow ambient__glow--b"></div>
+  </div>
+
+  <div id="bootScreen" class="boot-screen">
+    <div class="boot-mark">FR</div>
+    <div>
+      <strong>Forever Racing</strong>
+      <span>Starting garage systems…</span>
+    </div>
+  </div>
+
+  <div id="appRoot" hidden>
+    <main class="app-shell">
+      <header class="topbar">
+        <button class="brand" type="button" data-nav="home" aria-label="Forever Racing home">
+          <span class="brand__mark">FR</span>
+          <span class="brand__copy">
+            <strong>FOREVER RACING</strong>
+            <small>Build 0.2.0-dev.1</small>
+          </span>
+        </button>
+
+        <div class="topbar__status">
+          <span class="pill"><i class="status-dot"></i> Local Dev</span>
+          <span class="pill pill--accent">DEV</span>
+        </div>
+      </header>
+
+      <section id="homeHero" class="hero surface">
+        <div class="hero__eyebrow">BROWSER DRAG RACING • EARLY DEVELOPMENT</div>
+        <h1>Build it. Tune it. <span>Make it yours.</span></h1>
+        <p>
+          Forever Racing is being built systems-first: collect cars, build your garage,
+          buy parts, hunt the used market, run events, and grow a team before the visual race layer arrives.
+        </p>
+        <div class="hero__actions">
+          <button class="button button--primary" type="button" data-nav="showroom">
+            <span>Showroom</span><small>Buy new</small>
+          </button>
+          <button class="button" type="button" data-nav="garage">
+            <span>Garage</span><small>Your cars</small>
+          </button>
+          <button class="button" type="button" data-nav="parts">
+            <span>Parts Shop</span><small>Build power</small>
+          </button>
+        </div>
+        <div class="ticker" role="status" aria-live="polite">
+          <span class="ticker__label">LIVE</span>
+          <span id="tickerText">Systems-first build: Showroom, Garage, Parts, Used Lot, Quick Race and RogueLike are playable.</span>
+        </div>
+      </section>
+
+      <section id="homeGrid" class="home-grid">
+        <section class="surface menu-panel">
+          <div class="section-heading">
+            <div>
+              <small>FOREVER RACING</small>
+              <h2>Main Menu</h2>
+            </div>
+            <span class="muted">No page reloads</span>
+          </div>
+
+          <div class="menu-grid">
+            <button class="menu-tile" type="button" data-nav="showroom">
+              <span class="menu-tile__icon">▣</span><strong>Showroom</strong><small>Buy new cars</small>
+            </button>
+            <button class="menu-tile" type="button" data-nav="garage">
+              <span class="menu-tile__icon">◇</span><strong>Garage</strong><small>Manage your collection</small>
+            </button>
+            <button class="menu-tile" type="button" data-nav="parts">
+              <span class="menu-tile__icon">⚙</span><strong>Parts Shop</strong><small>Buy & install upgrades</small>
+            </button>
+            <button class="menu-tile" type="button" data-nav="usedlot">
+              <span class="menu-tile__icon">↺</span><strong>Used Car Lot</strong><small>Rotating bargains</small>
+            </button>
+            <button class="menu-tile" type="button" data-nav="quick-race">
+              <span class="menu-tile__icon">⚑</span><strong>Quick Race</strong><small>Text simulation</small>
+            </button>
+            <button class="menu-tile" type="button" data-nav="roguelike">
+              <span class="menu-tile__icon">∞</span><strong>RogueLike</strong><small>PvE run prototype</small>
+            </button>
+            <button class="menu-tile" type="button" data-nav="events">
+              <span class="menu-tile__icon">◆</span><strong>Events</strong><small>Daily & weekly</small>
+            </button>
+            <button class="menu-tile" type="button" data-nav="teams">
+              <span class="menu-tile__icon">⌁</span><strong>Teams</strong><small>Crew up</small>
+            </button>
+            <button class="menu-tile" type="button" data-nav="leaderboards">
+              <span class="menu-tile__icon">▲</span><strong>Leaderboards</strong><small>Records & seasons</small>
+            </button>
+            <button class="menu-tile" type="button" data-nav="multiplayer">
+              <span class="menu-tile__icon">⇄</span><strong>Multiplayer</strong><small>Challenge players</small>
+            </button>
+            <button class="menu-tile" type="button" data-nav="settings">
+              <span class="menu-tile__icon">☷</span><strong>Settings</strong><small>UI preferences</small>
+            </button>
+          </div>
+        </section>
+
+        <aside class="surface player-panel">
+          <div class="section-heading">
+            <div>
+              <small>PROFILE</small>
+              <h2>Player Card</h2>
+            </div>
+            <span class="pill pill--accent">ADMIN DEV</span>
+          </div>
+
+          <div class="player-card">
+            <div class="player-avatar">A</div>
+            <div class="player-card__main">
+              <strong id="playerName">Admin</strong>
+              <div class="stat-row">
+                <span><b id="statCars">0</b> cars</span>
+                <span><b id="statCredits">0</b> cr</span>
+                <span><b id="statWins">0</b> wins</span>
+              </div>
+              <div class="current-car">Current Car: <b id="currentCarName">None</b></div>
+            </div>
+          </div>
+
+          <div class="profile-actions">
+            <button class="button button--wide" type="button" data-nav="garage">Open Garage</button>
+            <button class="button button--quiet button--wide" id="logoutButton" type="button">Sign Out</button>
+          </div>
+
+          <div class="mini-feed">
+            <div><span>Storage</span><strong>Browser Local</strong></div>
+            <div><span>Session</span><strong>Simulated Local</strong></div>
+            <div><span>Race view</span><strong>Text prototype</strong></div>
+          </div>
+        </aside>
+      </section>
+
+      <section id="screenRoot" class="screen-root" aria-live="polite"></section>
+
+      <footer class="footer">
+        <span>Forever Racing • systems prototype</span>
+        <span>Mobile • Foldable • Desktop</span>
+      </footer>
+    </main>
+  </div>
+
+  <div id="dialogRoot"></div>
+  <div id="toastRoot" class="toast-root" aria-live="polite" aria-atomic="true"></div>
+  <noscript><div class="noscript">Forever Racing requires JavaScript.</div></noscript>
+
+  <script type="module" src="assets/js/app.js?v=0.2.0-dev.1"></script>
+</body>
+</html>

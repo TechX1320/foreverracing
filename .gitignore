@@ -1,0 +1,22 @@
+# Forever Racing runtime/player data
+/data/players/*
+!/data/players/.gitkeep
+/data/runtime/*
+!/data/runtime/.gitkeep
+
+# Local/environment secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Temporary build files
+*.tmp
+*.log

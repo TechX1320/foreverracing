@@ -1,0 +1,110 @@
+[
+  {
+    "stockId": 1,
+    "year": 1998,
+    "make": "Honda",
+    "model": "Civic DX",
+    "class": "D",
+    "price": 9500,
+    "base": {"hp": 106, "torque": 103, "weight": 2388, "grip": 0.92, "drivetrain": "FWD"}
+  },
+  {
+    "stockId": 2,
+    "year": 2002,
+    "make": "Acura",
+    "model": "RSX",
+    "class": "D",
+    "price": 16800,
+    "base": {"hp": 160, "torque": 141, "weight": 2721, "grip": 0.96, "drivetrain": "FWD"}
+  },
+  {
+    "stockId": 3,
+    "year": 2005,
+    "make": "Ford",
+    "model": "Mustang GT",
+    "class": "C",
+    "price": 24500,
+    "base": {"hp": 300, "torque": 320, "weight": 3483, "grip": 0.98, "drivetrain": "RWD"}
+  },
+  {
+    "stockId": 4,
+    "year": 2003,
+    "make": "Nissan",
+    "model": "350Z",
+    "class": "C",
+    "price": 27800,
+    "base": {"hp": 287, "torque": 274, "weight": 3197, "grip": 1.01, "drivetrain": "RWD"}
+  },
+  {
+    "stockId": 5,
+    "year": 2002,
+    "make": "Chevrolet",
+    "model": "Camaro Z28",
+    "class": "C",
+    "price": 26400,
+    "base": {"hp": 310, "torque": 340, "weight": 3439, "grip": 0.97, "drivetrain": "RWD"}
+  },
+  {
+    "stockId": 6,
+    "year": 2004,
+    "make": "Subaru",
+    "model": "Impreza WRX STI",
+    "class": "C",
+    "price": 32200,
+    "base": {"hp": 300, "torque": 300, "weight": 3263, "grip": 1.08, "drivetrain": "AWD"}
+  },
+  {
+    "stockId": 7,
+    "year": 1999,
+    "make": "Mazda",
+    "model": "MX-5 Miata",
+    "class": "D",
+    "price": 14900,
+    "base": {"hp": 140, "torque": 119, "weight": 2350, "grip": 1.02, "drivetrain": "RWD"}
+  },
+  {
+    "stockId": 8,
+    "year": 2013,
+    "make": "Fiat",
+    "model": "500 Abarth",
+    "class": "D",
+    "price": 21900,
+    "base": {"hp": 160, "torque": 170, "weight": 2512, "grip": 0.98, "drivetrain": "FWD"}
+  },
+  {
+    "stockId": 9,
+    "year": 2013,
+    "make": "Hyundai",
+    "model": "Veloster Turbo",
+    "class": "D",
+    "price": 22500,
+    "base": {"hp": 201, "torque": 195, "weight": 2800, "grip": 0.99, "drivetrain": "FWD"}
+  },
+  {
+    "stockId": 10,
+    "year": 2018,
+    "make": "Subaru",
+    "model": "Impreza 2.0i",
+    "class": "D",
+    "price": 21400,
+    "base": {"hp": 152, "torque": 145, "weight": 3076, "grip": 1.04, "drivetrain": "AWD"}
+  },
+  {
+    "stockId": 11,
+    "year": 2016,
+    "make": "Ford",
+    "model": "Shelby GT350",
+    "class": "B",
+    "price": 54800,
+    "base": {"hp": 526, "torque": 429, "weight": 3760, "grip": 1.08, "drivetrain": "RWD"}
+  },
+  {
+    "stockId": 12,
+    "year": 2003,
+    "make": "Acura",
+    "model": "NSX",
+    "class": "B",
+    "price": 68500,
+    "base": {"hp": 290, "torque": 224, "weight": 3153, "grip": 1.10, "drivetrain": "RWD"}
+  }
+]
