@@ -23,6 +23,16 @@ const screenRoot = document.getElementById('screenRoot');
 
 loadSettings();
 
+const TUTORIAL_ROUTES = {
+  welcome: ['home', 'settings'],
+  buy_first_car: ['home', 'showroom', 'settings'],
+  visit_garage: ['home', 'garage', 'settings'],
+  buy_first_upgrade: ['home', 'garage', 'parts', 'settings'],
+  install_first_upgrade: ['home', 'garage', 'parts', 'settings'],
+  build_stages: ['home', 'garage', 'parts', 'settings'],
+  first_race: ['home', 'garage', 'parts', 'quick-race', 'settings']
+};
+
 const ctx = { storage, store, screenRoot, router: null, toast };
 const router = new Router(ctx);
 ctx.router = router;
@@ -48,7 +58,14 @@ store.onPlayer((player) => {
 
 document.addEventListener('click', (event) => {
   const nav = event.target.closest('[data-nav]');
-  if (nav && !nav.disabled && !appRoot.hidden) router.navigate(nav.dataset.nav || 'home');
+  if (!nav || appRoot.hidden) return;
+  const route = nav.dataset.nav || 'home';
+  if (!routeAllowed(store.player, route)) {
+    event.preventDefault();
+    toast('Tutorial objective first', 'Finish the highlighted FTUE step before opening that section.');
+    return;
+  }
+  if (!nav.disabled) router.navigate(route);
 });
 
 document.getElementById('logoutButton')?.addEventListener('click', logout);
@@ -246,21 +263,16 @@ function renderObjectiveRail(player) {
   node.innerHTML = `<span class="rail-state">${info.code}</span><strong>${info.title}</strong><p>${info.copy}</p>${info.route ? `<button class="rail-link" data-nav="${info.route}">${info.action}</button>` : ''}`;
 }
 
-function applyTutorialNavigation(player) {
+function routeAllowed(player, route) {
   const tutorial = player?.tutorial;
-  const allowedByStep = {
-    welcome: ['home', 'settings'],
-    buy_first_car: ['home', 'showroom', 'settings'],
-    visit_garage: ['home', 'garage', 'settings'],
-    buy_first_upgrade: ['home', 'garage', 'parts', 'settings'],
-    install_first_upgrade: ['home', 'garage', 'parts', 'settings'],
-    build_stages: ['home', 'garage', 'parts', 'settings'],
-    first_race: ['home', 'garage', 'parts', 'quick-race', 'settings']
-  };
-  const restricted = tutorial?.status === 'active';
-  const allowed = restricted ? (allowedByStep[tutorial.step] || ['home', 'settings']) : null;
-  document.querySelectorAll('.nav-rail [data-nav]').forEach((button) => {
-    const locked = restricted && !allowed.includes(button.dataset.nav);
+  if (tutorial?.status !== 'active') return true;
+  const allowed = TUTORIAL_ROUTES[tutorial.step] || ['home', 'settings'];
+  return allowed.includes(route);
+}
+
+function applyTutorialNavigation(player) {
+  document.querySelectorAll('button[data-nav]').forEach((button) => {
+    const locked = !routeAllowed(player, button.dataset.nav || 'home');
     button.disabled = locked;
     button.classList.toggle('is-locked', locked);
   });
