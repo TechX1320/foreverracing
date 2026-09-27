@@ -25,6 +25,9 @@ export class StorageProvider {
   async buyPart(_catalogId) { throw new Error('buyPart() is not implemented.'); }
   async installPart(_inventoryId, _carId) { throw new Error('installPart() is not implemented.'); }
   async uninstallPart(_inventoryId) { throw new Error('uninstallPart() is not implemented.'); }
+  async stageUp(_carId) { throw new Error('stageUp() is not implemented.'); }
+  async tutorialAdvance(_action) { throw new Error('tutorialAdvance() is not implemented.'); }
+  async tutorialReset() { throw new Error('tutorialReset() is not implemented.'); }
   async usedLot() { throw new Error('usedLot() is not implemented.'); }
   async refreshUsedLot() { throw new Error('refreshUsedLot() is not implemented.'); }
   async buyUsedCar(_listingId) { throw new Error('buyUsedCar() is not implemented.'); }
