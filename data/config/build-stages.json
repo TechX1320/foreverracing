@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "stages": [
+    {
+      "stage": 1,
+      "name": "Street / Stock Chassis",
+      "shortName": "S1",
+      "description": "Production shell and layout with simple, sequential upgrades that teach the build system.",
+      "requiredCategories": ["intake", "exhaust", "ecu", "fuel", "drivetrain", "tires", "weight"],
+      "simpleTierMax": 3,
+      "engineSwaps": false
+    },
+    {
+      "stage": 2,
+      "name": "Street Race",
+      "shortName": "S2",
+      "description": "Stock body, gutted and caged. Parts become choices instead of numbered upgrades.",
+      "requiredCategories": [],
+      "engineSwaps": false
+    },
+    {
+      "stage": 3,
+      "name": "Front-Half / Tube Chassis",
+      "shortName": "S3",
+      "description": "Front structure work, serious chassis changes and engine swaps with physical compatibility limits.",
+      "requiredCategories": [],
+      "engineSwaps": true,
+      "defaultDisplacementAllowanceLiters": 0.6
+    },
+    {
+      "stage": 4,
+      "name": "Full Race Car",
+      "shortName": "S4",
+      "description": "Full race-car construction with much wider powertrain and chassis freedom.",
+      "requiredCategories": [],
+      "engineSwaps": true,
+      "defaultDisplacementAllowanceLiters": 1.0
+    }
+  ]
+}

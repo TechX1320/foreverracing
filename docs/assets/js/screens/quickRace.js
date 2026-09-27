@@ -1,4 +1,5 @@
 import { bindHome, carLabel, money, number, pageShell, selectedCar } from "../ui/components.js";
+import { renderVehicle } from "../ui/vehicleRenderer.js";
 
 let lastRace = null;
 
@@ -13,9 +14,11 @@ export async function renderQuickRace(ctx) {
     hint: current ? carLabel(current) : "No current car",
     trail: "Visual racing intentionally comes later",
     body: `
+      ${player?.tutorial?.status === "active" && player?.tutorial?.step === "first_race" ? '<div class="objective-box objective-box--active"><div><span class="objective-kicker">FTUE / FINAL STEP</span><strong>Run your first race</strong></div><p>The visual race layer comes later. For now, this text simulation lets us test whether your build, rewards and progression make sense.</p></div>' : ""}
       ${result ? raceResult(result) : ""}
       ${current ? `
-        <div class="game-card is-selected">
+        <div class="race-car-panel is-selected">
+          <div class="race-car-panel__visual">${renderVehicle(current, { stage: Number(current.buildStage || 1) })}</div>
           <div class="game-card__top"><div><h3>${carLabel(current)}</h3><p>${current.displayName} • ${current.base?.drivetrain}</p></div><span class="pill pill--accent">CURRENT</span></div>
           <div class="spec-grid">
             <div class="spec"><span>Power</span><strong>${number(current.derived?.hp)} hp</strong></div>
@@ -23,7 +26,7 @@ export async function renderQuickRace(ctx) {
             <div class="spec"><span>Weight</span><strong>${number(current.derived?.weight)} lb</strong></div>
             <div class="spec"><span>Grip</span><strong>${number(current.derived?.grip, 3)}</strong></div>
           </div>
-          <div class="game-card__actions"><button class="button button--primary" type="button" data-run-race>Find Opponent & Race</button></div>
+          <div class="game-card__actions"><button class="button button--primary" type="button" data-run-race>FIND OPPONENT & RACE</button></div>
         </div>` : `
         <div class="empty-state"><strong>You need a Current Car.</strong><span>Buy a car and select it in the Garage first.</span><div class="cluster" style="justify-content:center;margin-top:14px"><button class="button button--primary button--small" data-go-garage>Open Garage</button><button class="button button--small" data-go-showroom>Showroom</button></div></div>`}
       <p class="screen-copy" style="margin-bottom:0;margin-top:14px">The current race calculation is deliberately lightweight. It uses power-to-weight, grip, reaction-time variance and a matched opponent. It exists so the economy and progression loops can be tested before car/street assets are built.</p>
@@ -38,10 +41,14 @@ export async function renderQuickRace(ctx) {
     button.disabled = true;
     button.textContent = "Staging…";
     try {
+      const wasTutorialRace = ctx.store.player?.tutorial?.status === "active" && ctx.store.player?.tutorial?.step === "first_race";
       const data = await ctx.storage.quickRace();
       lastRace = data.race;
       ctx.store.setPlayer(data.player);
       ctx.toast(data.race.won ? "Win" : "Loss", `+${money(data.race.reward)} credits`);
+      if (wasTutorialRace && data.player?.tutorial?.status === "complete") {
+        ctx.toast("Tutorial complete", "FTUE reward added. The rest of Forever Racing is now open.");
+      }
       await renderQuickRace(ctx);
     } catch (err) {
       ctx.toast("Race failed", err.message);

@@ -1,4 +1,4 @@
-const CACHE = 'forever-racing-shell-v0.2.0-dev.1';
+const CACHE = 'forever-racing-shell-v0.2.0-dev.2';
 const SHELL = [
   './',
   './manifest.webmanifest',
@@ -15,6 +15,7 @@ const SHELL = [
   './assets/js/ui/toast.js',
   './assets/js/ui/modal.js',
   './assets/js/ui/components.js',
+  './assets/js/ui/vehicleRenderer.js',
   './assets/js/screens/showroom.js',
   './assets/js/screens/garage.js',
   './assets/js/screens/parts.js',
@@ -25,7 +26,9 @@ const SHELL = [
   './assets/js/screens/settings.js',
   './data/catalog/cars.json',
   './data/catalog/parts.json',
-  './data/config/game.json'
+  './data/catalog/engines.json',
+  './data/config/game.json',
+  './data/config/build-stages.json'
 ];
 
 self.addEventListener('install', (event) => {

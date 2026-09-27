@@ -49,6 +49,9 @@ export class ApiClient {
   buyPart(catalogId) { return this.request("parts/purchase.php", { method: "POST", body: { catalogId }, csrf: true }); }
   installPart(inventoryId, carId) { return this.request("parts/install.php", { method: "POST", body: { inventoryId, carId }, csrf: true }); }
   uninstallPart(inventoryId) { return this.request("parts/uninstall.php", { method: "POST", body: { inventoryId }, csrf: true }); }
+  stageUp(carId) { return this.request("garage/stage-up.php", { method: "POST", body: { carId }, csrf: true }); }
+  tutorialAdvance(action) { return this.request("tutorial/advance.php", { method: "POST", body: { action }, csrf: true }); }
+  tutorialReset() { return this.request("tutorial/reset.php", { method: "POST", body: {}, csrf: true }); }
   usedLot() { return this.request("usedlot/listings.php"); }
   refreshUsedLot() { return this.request("usedlot/refresh.php", { method: "POST", body: {}, csrf: true }); }
   buyUsedCar(listingId) { return this.request("usedlot/purchase.php", { method: "POST", body: { listingId }, csrf: true }); }

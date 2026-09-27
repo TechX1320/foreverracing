@@ -1,7 +1,11 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "startingCredits": 75000,
   "usedLotRefreshSeconds": 1800,
   "localDevUsername": "Admin",
-  "localDevPassword": "12345"
+  "localDevPassword": "12345",
+  "tutorialVersion": 1,
+  "defaultVehicleRendering": "procedural",
+  "tutorialCompletionCredits": 2500,
+  "tutorialCompletionRep": 25
 }

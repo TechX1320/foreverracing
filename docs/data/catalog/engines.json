@@ -1,0 +1,65 @@
+[
+  {
+    "engineId": "honda_d16y7_16",
+    "name": "Honda D16Y7",
+    "displacement": 1.6,
+    "configuration": "I4",
+    "sizeClass": 2,
+    "orientations": ["transverse"],
+    "aspiration": "NA"
+  },
+  {
+    "engineId": "ford_modular_46_3v",
+    "name": "Ford 4.6L Modular 3V",
+    "displacement": 4.6,
+    "configuration": "V8",
+    "sizeClass": 5,
+    "orientations": ["longitudinal"],
+    "aspiration": "NA"
+  },
+  {
+    "engineId": "nissan_vq35de_35",
+    "name": "Nissan VQ35DE",
+    "displacement": 3.5,
+    "configuration": "V6",
+    "sizeClass": 4,
+    "orientations": ["longitudinal"],
+    "aspiration": "NA"
+  },
+  {
+    "engineId": "fiat_multiair_14t",
+    "name": "Fiat 1.4 MultiAir Turbo",
+    "displacement": 1.4,
+    "configuration": "I4",
+    "sizeClass": 2,
+    "orientations": ["transverse", "longitudinal"],
+    "aspiration": "Turbo"
+  },
+  {
+    "engineId": "vw_19_tdi",
+    "name": "Volkswagen 1.9 TDI",
+    "displacement": 1.9,
+    "configuration": "I4",
+    "sizeClass": 2,
+    "orientations": ["transverse", "longitudinal"],
+    "aspiration": "Turbo Diesel"
+  },
+  {
+    "engineId": "ford_ecoboost_23",
+    "name": "Ford 2.3 EcoBoost",
+    "displacement": 2.3,
+    "configuration": "I4",
+    "sizeClass": 3,
+    "orientations": ["longitudinal"],
+    "aspiration": "Turbo"
+  },
+  {
+    "engineId": "ford_coyote_50",
+    "name": "Ford 5.0 Coyote",
+    "displacement": 5.0,
+    "configuration": "V8",
+    "sizeClass": 5,
+    "orientations": ["longitudinal"],
+    "aspiration": "NA"
+  }
+]

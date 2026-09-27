@@ -6,7 +6,27 @@
     "model": "Civic DX",
     "class": "D",
     "price": 9500,
-    "base": {"hp": 106, "torque": 103, "weight": 2388, "grip": 0.92, "drivetrain": "FWD"}
+    "base": {
+      "hp": 106,
+      "torque": 103,
+      "weight": 2388,
+      "grip": 0.92,
+      "drivetrain": "FWD"
+    },
+    "starter": true,
+    "factoryEngineId": "honda_d16y7_16",
+    "engineBay": {
+      "sizeClass": 2,
+      "orientations": [
+        "transverse"
+      ],
+      "factoryDisplacement": 1.6,
+      "stage3DisplacementAllowance": 0.6
+    },
+    "visual": {
+      "profile": "compact",
+      "color": "#6d9bb8"
+    }
   },
   {
     "stockId": 2,
@@ -15,7 +35,19 @@
     "model": "RSX",
     "class": "D",
     "price": 16800,
-    "base": {"hp": 160, "torque": 141, "weight": 2721, "grip": 0.96, "drivetrain": "FWD"}
+    "base": {
+      "hp": 160,
+      "torque": 141,
+      "weight": 2721,
+      "grip": 0.96,
+      "drivetrain": "FWD"
+    },
+    "starter": false,
+    "factoryEngineId": null,
+    "visual": {
+      "profile": "sports",
+      "color": "#818891"
+    }
   },
   {
     "stockId": 3,
@@ -24,7 +56,27 @@
     "model": "Mustang GT",
     "class": "C",
     "price": 24500,
-    "base": {"hp": 300, "torque": 320, "weight": 3483, "grip": 0.98, "drivetrain": "RWD"}
+    "base": {
+      "hp": 300,
+      "torque": 320,
+      "weight": 3483,
+      "grip": 0.98,
+      "drivetrain": "RWD"
+    },
+    "starter": true,
+    "factoryEngineId": "ford_modular_46_3v",
+    "engineBay": {
+      "sizeClass": 5,
+      "orientations": [
+        "longitudinal"
+      ],
+      "factoryDisplacement": 4.6,
+      "stage3DisplacementAllowance": 0.6
+    },
+    "visual": {
+      "profile": "muscle",
+      "color": "#b84b43"
+    }
   },
   {
     "stockId": 4,
@@ -33,7 +85,27 @@
     "model": "350Z",
     "class": "C",
     "price": 27800,
-    "base": {"hp": 287, "torque": 274, "weight": 3197, "grip": 1.01, "drivetrain": "RWD"}
+    "base": {
+      "hp": 287,
+      "torque": 274,
+      "weight": 3197,
+      "grip": 1.01,
+      "drivetrain": "RWD"
+    },
+    "starter": true,
+    "factoryEngineId": "nissan_vq35de_35",
+    "engineBay": {
+      "sizeClass": 4,
+      "orientations": [
+        "longitudinal"
+      ],
+      "factoryDisplacement": 3.5,
+      "stage3DisplacementAllowance": 0.6
+    },
+    "visual": {
+      "profile": "sports",
+      "color": "#c59b3d"
+    }
   },
   {
     "stockId": 5,
@@ -42,7 +114,19 @@
     "model": "Camaro Z28",
     "class": "C",
     "price": 26400,
-    "base": {"hp": 310, "torque": 340, "weight": 3439, "grip": 0.97, "drivetrain": "RWD"}
+    "base": {
+      "hp": 310,
+      "torque": 340,
+      "weight": 3439,
+      "grip": 0.97,
+      "drivetrain": "RWD"
+    },
+    "starter": false,
+    "factoryEngineId": null,
+    "visual": {
+      "profile": "muscle",
+      "color": "#5b78a6"
+    }
   },
   {
     "stockId": 6,
@@ -51,7 +135,19 @@
     "model": "Impreza WRX STI",
     "class": "C",
     "price": 32200,
-    "base": {"hp": 300, "torque": 300, "weight": 3263, "grip": 1.08, "drivetrain": "AWD"}
+    "base": {
+      "hp": 300,
+      "torque": 300,
+      "weight": 3263,
+      "grip": 1.08,
+      "drivetrain": "AWD"
+    },
+    "starter": false,
+    "factoryEngineId": null,
+    "visual": {
+      "profile": "sedan",
+      "color": "#406a8c"
+    }
   },
   {
     "stockId": 7,
@@ -60,7 +156,19 @@
     "model": "MX-5 Miata",
     "class": "D",
     "price": 14900,
-    "base": {"hp": 140, "torque": 119, "weight": 2350, "grip": 1.02, "drivetrain": "RWD"}
+    "base": {
+      "hp": 140,
+      "torque": 119,
+      "weight": 2350,
+      "grip": 1.02,
+      "drivetrain": "RWD"
+    },
+    "starter": false,
+    "factoryEngineId": null,
+    "visual": {
+      "profile": "roadster",
+      "color": "#9d4b45"
+    }
   },
   {
     "stockId": 8,
@@ -69,7 +177,27 @@
     "model": "500 Abarth",
     "class": "D",
     "price": 21900,
-    "base": {"hp": 160, "torque": 170, "weight": 2512, "grip": 0.98, "drivetrain": "FWD"}
+    "base": {
+      "hp": 160,
+      "torque": 170,
+      "weight": 2512,
+      "grip": 0.98,
+      "drivetrain": "FWD"
+    },
+    "starter": false,
+    "factoryEngineId": "fiat_multiair_14t",
+    "engineBay": {
+      "sizeClass": 2,
+      "orientations": [
+        "transverse"
+      ],
+      "factoryDisplacement": 1.4,
+      "stage3DisplacementAllowance": 0.5
+    },
+    "visual": {
+      "profile": "micro",
+      "color": "#8f979e"
+    }
   },
   {
     "stockId": 9,
@@ -78,7 +206,19 @@
     "model": "Veloster Turbo",
     "class": "D",
     "price": 22500,
-    "base": {"hp": 201, "torque": 195, "weight": 2800, "grip": 0.99, "drivetrain": "FWD"}
+    "base": {
+      "hp": 201,
+      "torque": 195,
+      "weight": 2800,
+      "grip": 0.99,
+      "drivetrain": "FWD"
+    },
+    "starter": false,
+    "factoryEngineId": null,
+    "visual": {
+      "profile": "hatch",
+      "color": "#587d91"
+    }
   },
   {
     "stockId": 10,
@@ -87,7 +227,19 @@
     "model": "Impreza 2.0i",
     "class": "D",
     "price": 21400,
-    "base": {"hp": 152, "torque": 145, "weight": 3076, "grip": 1.04, "drivetrain": "AWD"}
+    "base": {
+      "hp": 152,
+      "torque": 145,
+      "weight": 3076,
+      "grip": 1.04,
+      "drivetrain": "AWD"
+    },
+    "starter": false,
+    "factoryEngineId": null,
+    "visual": {
+      "profile": "hatch",
+      "color": "#6c7d86"
+    }
   },
   {
     "stockId": 11,
@@ -96,7 +248,27 @@
     "model": "Shelby GT350",
     "class": "B",
     "price": 54800,
-    "base": {"hp": 526, "torque": 429, "weight": 3760, "grip": 1.08, "drivetrain": "RWD"}
+    "base": {
+      "hp": 526,
+      "torque": 429,
+      "weight": 3760,
+      "grip": 1.08,
+      "drivetrain": "RWD"
+    },
+    "starter": false,
+    "factoryEngineId": "ford_coyote_50",
+    "engineBay": {
+      "sizeClass": 5,
+      "orientations": [
+        "longitudinal"
+      ],
+      "factoryDisplacement": 5.2,
+      "stage3DisplacementAllowance": 0.6
+    },
+    "visual": {
+      "profile": "muscle",
+      "color": "#51627c"
+    }
   },
   {
     "stockId": 12,
@@ -105,6 +277,18 @@
     "model": "NSX",
     "class": "B",
     "price": 68500,
-    "base": {"hp": 290, "torque": 224, "weight": 3153, "grip": 1.10, "drivetrain": "RWD"}
+    "base": {
+      "hp": 290,
+      "torque": 224,
+      "weight": 3153,
+      "grip": 1.1,
+      "drivetrain": "RWD"
+    },
+    "starter": false,
+    "factoryEngineId": null,
+    "visual": {
+      "profile": "sports",
+      "color": "#9b4c48"
+    }
   }
 ]

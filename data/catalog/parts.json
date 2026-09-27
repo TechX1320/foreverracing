@@ -1,122 +1,832 @@
 [
   {
-    "catalogId": "intake_street_1",
-    "name": "Street Intake",
+    "catalogId": "s1_intake_1",
+    "name": "Stage 1 Intake",
     "category": "Intake",
+    "categoryKey": "intake",
     "slot": "intake",
-    "tier": 1,
-    "price": 650,
-    "description": "A simple high-flow intake for a small bump in power.",
-    "effects": [{"stat": "hp", "op": "add", "value": 5}, {"stat": "torque", "op": "add", "value": 3}]
+    "buildStage": 1,
+    "simpleTier": 1,
+    "persistentFromStage": null,
+    "price": 450,
+    "description": "Entry-level intake work.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 3
+      },
+      {
+        "stat": "torque",
+        "op": "add",
+        "value": 2
+      }
+    ]
   },
   {
-    "catalogId": "intake_race_2",
-    "name": "Race Intake",
+    "catalogId": "s1_intake_2",
+    "name": "Stage 2 Intake",
     "category": "Intake",
+    "categoryKey": "intake",
     "slot": "intake",
-    "tier": 2,
-    "price": 1800,
-    "description": "Larger intake path and revised ducting.",
-    "effects": [{"stat": "hp", "op": "add", "value": 11}, {"stat": "torque", "op": "add", "value": 7}]
+    "buildStage": 1,
+    "simpleTier": 2,
+    "persistentFromStage": null,
+    "price": 850,
+    "description": "Improved intake path and filter housing.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 6
+      },
+      {
+        "stat": "torque",
+        "op": "add",
+        "value": 4
+      }
+    ]
   },
   {
-    "catalogId": "exhaust_street_1",
-    "name": "Street Exhaust",
+    "catalogId": "s1_intake_3",
+    "name": "Stage 3 Intake",
+    "category": "Intake",
+    "categoryKey": "intake",
+    "slot": "intake",
+    "buildStage": 1,
+    "simpleTier": 3,
+    "persistentFromStage": null,
+    "price": 1450,
+    "description": "Maximum Stage 1 intake package.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 10
+      },
+      {
+        "stat": "torque",
+        "op": "add",
+        "value": 6
+      }
+    ]
+  },
+  {
+    "catalogId": "s1_exhaust_1",
+    "name": "Stage 1 Exhaust",
     "category": "Exhaust",
+    "categoryKey": "exhaust",
     "slot": "exhaust",
-    "tier": 1,
-    "price": 900,
-    "description": "Less restriction without going full race-car.",
-    "effects": [{"stat": "hp", "op": "add", "value": 7}, {"stat": "torque", "op": "add", "value": 4}, {"stat": "weight", "op": "add", "value": -9}]
+    "buildStage": 1,
+    "simpleTier": 1,
+    "persistentFromStage": null,
+    "price": 550,
+    "description": "Basic cat-back style exhaust work.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 4
+      },
+      {
+        "stat": "torque",
+        "op": "add",
+        "value": 3
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -4
+      }
+    ]
   },
   {
-    "catalogId": "exhaust_race_2",
-    "name": "Race Exhaust",
+    "catalogId": "s1_exhaust_2",
+    "name": "Stage 2 Exhaust",
     "category": "Exhaust",
+    "categoryKey": "exhaust",
     "slot": "exhaust",
-    "tier": 2,
-    "price": 2400,
-    "description": "High-flow race system with meaningful weight savings.",
-    "effects": [{"stat": "hp", "op": "add", "value": 15}, {"stat": "torque", "op": "add", "value": 10}, {"stat": "weight", "op": "add", "value": -18}]
+    "buildStage": 1,
+    "simpleTier": 2,
+    "persistentFromStage": null,
+    "price": 1050,
+    "description": "Freer-flowing street exhaust.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 8
+      },
+      {
+        "stat": "torque",
+        "op": "add",
+        "value": 5
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -7
+      }
+    ]
   },
   {
-    "catalogId": "ecu_street_1",
-    "name": "Street ECU Tune",
-    "category": "Engine Management",
+    "catalogId": "s1_exhaust_3",
+    "name": "Stage 3 Exhaust",
+    "category": "Exhaust",
+    "categoryKey": "exhaust",
+    "slot": "exhaust",
+    "buildStage": 1,
+    "simpleTier": 3,
+    "persistentFromStage": null,
+    "price": 1850,
+    "description": "Maximum Stage 1 exhaust package.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 13
+      },
+      {
+        "stat": "torque",
+        "op": "add",
+        "value": 8
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -12
+      }
+    ]
+  },
+  {
+    "catalogId": "s1_ecu_1",
+    "name": "Stage 1 ECU",
+    "category": "ECU",
+    "categoryKey": "ecu",
     "slot": "ecu",
-    "tier": 1,
+    "buildStage": 1,
+    "simpleTier": 1,
+    "persistentFromStage": null,
+    "price": 600,
+    "description": "Basic calibration cleanup.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.015
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.015
+      }
+    ]
+  },
+  {
+    "catalogId": "s1_ecu_2",
+    "name": "Stage 2 ECU",
+    "category": "ECU",
+    "categoryKey": "ecu",
+    "slot": "ecu",
+    "buildStage": 1,
+    "simpleTier": 2,
+    "persistentFromStage": null,
     "price": 1200,
-    "description": "Conservative calibration for a modest all-around gain.",
-    "effects": [{"stat": "hp", "op": "mul", "value": 1.035}, {"stat": "torque", "op": "mul", "value": 1.035}]
+    "description": "More aggressive street calibration.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.03
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.03
+      }
+    ]
   },
   {
-    "catalogId": "ecu_race_2",
-    "name": "Race ECU Tune",
-    "category": "Engine Management",
+    "catalogId": "s1_ecu_3",
+    "name": "Stage 3 ECU",
+    "category": "ECU",
+    "categoryKey": "ecu",
     "slot": "ecu",
-    "tier": 2,
-    "price": 3300,
-    "description": "More aggressive calibration intended for upgraded hardware.",
-    "effects": [{"stat": "hp", "op": "mul", "value": 1.075}, {"stat": "torque", "op": "mul", "value": 1.065}]
+    "buildStage": 1,
+    "simpleTier": 3,
+    "persistentFromStage": null,
+    "price": 2200,
+    "description": "Maximum Stage 1 calibration.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.05
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.045
+      }
+    ]
   },
   {
-    "catalogId": "tires_street_1",
-    "name": "Performance Tires",
+    "catalogId": "s1_fuel_1",
+    "name": "Stage 1 Fuel",
+    "category": "Fuel",
+    "categoryKey": "fuel",
+    "slot": "fuel",
+    "buildStage": 1,
+    "simpleTier": 1,
+    "persistentFromStage": null,
+    "price": 500,
+    "description": "Basic fuel delivery refresh.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 2
+      },
+      {
+        "stat": "torque",
+        "op": "add",
+        "value": 3
+      }
+    ]
+  },
+  {
+    "catalogId": "s1_fuel_2",
+    "name": "Stage 2 Fuel",
+    "category": "Fuel",
+    "categoryKey": "fuel",
+    "slot": "fuel",
+    "buildStage": 1,
+    "simpleTier": 2,
+    "persistentFromStage": null,
+    "price": 950,
+    "description": "Higher-flow fuel support.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 5
+      },
+      {
+        "stat": "torque",
+        "op": "add",
+        "value": 6
+      }
+    ]
+  },
+  {
+    "catalogId": "s1_fuel_3",
+    "name": "Stage 3 Fuel",
+    "category": "Fuel",
+    "categoryKey": "fuel",
+    "slot": "fuel",
+    "buildStage": 1,
+    "simpleTier": 3,
+    "persistentFromStage": null,
+    "price": 1750,
+    "description": "Maximum Stage 1 fuel system package.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 8
+      },
+      {
+        "stat": "torque",
+        "op": "add",
+        "value": 9
+      }
+    ]
+  },
+  {
+    "catalogId": "s1_drivetrain_1",
+    "name": "Stage 1 Drivetrain",
+    "category": "Drivetrain",
+    "categoryKey": "drivetrain",
+    "slot": "drivetrain",
+    "buildStage": 1,
+    "simpleTier": 1,
+    "persistentFromStage": null,
+    "price": 650,
+    "description": "Basic mounts and driveline cleanup.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.012
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -2
+      }
+    ]
+  },
+  {
+    "catalogId": "s1_drivetrain_2",
+    "name": "Stage 2 Drivetrain",
+    "category": "Drivetrain",
+    "categoryKey": "drivetrain",
+    "slot": "drivetrain",
+    "buildStage": 1,
+    "simpleTier": 2,
+    "persistentFromStage": null,
+    "price": 1350,
+    "description": "More serious street driveline setup.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.025
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -4
+      }
+    ]
+  },
+  {
+    "catalogId": "s1_drivetrain_3",
+    "name": "Stage 3 Drivetrain",
+    "category": "Drivetrain",
+    "categoryKey": "drivetrain",
+    "slot": "drivetrain",
+    "buildStage": 1,
+    "simpleTier": 3,
+    "persistentFromStage": null,
+    "price": 2400,
+    "description": "Maximum Stage 1 driveline package.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.04
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -7
+      }
+    ]
+  },
+  {
+    "catalogId": "s1_tires_1",
+    "name": "Stage 1 Tires",
     "category": "Tires",
+    "categoryKey": "tires",
     "slot": "tires",
-    "tier": 1,
-    "price": 1100,
-    "description": "More launch grip without the compromises of a full drag tire.",
-    "effects": [{"stat": "grip", "op": "add", "value": 0.055}]
+    "buildStage": 1,
+    "simpleTier": 1,
+    "persistentFromStage": null,
+    "price": 700,
+    "description": "Better street performance tire.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.025
+      }
+    ]
   },
   {
-    "catalogId": "tires_drag_2",
-    "name": "Drag Radials",
+    "catalogId": "s1_tires_2",
+    "name": "Stage 2 Tires",
     "category": "Tires",
+    "categoryKey": "tires",
     "slot": "tires",
-    "tier": 2,
-    "price": 2600,
-    "description": "Purpose-built traction for hard launches.",
-    "effects": [{"stat": "grip", "op": "add", "value": 0.125}, {"stat": "weight", "op": "add", "value": 5}]
+    "buildStage": 1,
+    "simpleTier": 2,
+    "persistentFromStage": null,
+    "price": 1350,
+    "description": "Aggressive street/strip compound.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.055
+      }
+    ]
   },
   {
-    "catalogId": "weight_stage1",
-    "name": "Weight Reduction I",
-    "category": "Chassis",
+    "catalogId": "s1_tires_3",
+    "name": "Stage 3 Tires",
+    "category": "Tires",
+    "categoryKey": "tires",
+    "slot": "tires",
+    "buildStage": 1,
+    "simpleTier": 3,
+    "persistentFromStage": null,
+    "price": 2300,
+    "description": "Maximum Stage 1 tire package.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.09
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "catalogId": "s1_weight_1",
+    "name": "Stage 1 Weight Reduction",
+    "category": "Weight Reduction",
+    "categoryKey": "weight",
     "slot": "weight",
-    "tier": 1,
+    "buildStage": 1,
+    "simpleTier": 1,
+    "persistentFromStage": null,
+    "price": 650,
+    "description": "Remove easy nonessential weight.",
+    "effects": [
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -30
+      }
+    ]
+  },
+  {
+    "catalogId": "s1_weight_2",
+    "name": "Stage 2 Weight Reduction",
+    "category": "Weight Reduction",
+    "categoryKey": "weight",
+    "slot": "weight",
+    "buildStage": 1,
+    "simpleTier": 2,
+    "persistentFromStage": null,
     "price": 1500,
-    "description": "Remove nonessential weight while keeping the car streetable.",
-    "effects": [{"stat": "weight", "op": "add", "value": -65}]
+    "description": "More involved interior and chassis weight removal.",
+    "effects": [
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -70
+      }
+    ]
   },
   {
-    "catalogId": "weight_stage2",
-    "name": "Weight Reduction II",
-    "category": "Chassis",
+    "catalogId": "s1_weight_3",
+    "name": "Stage 3 Weight Reduction",
+    "category": "Weight Reduction",
+    "categoryKey": "weight",
     "slot": "weight",
-    "tier": 2,
-    "price": 4200,
-    "description": "More aggressive lightweight interior and chassis pieces.",
-    "effects": [{"stat": "weight", "op": "add", "value": -155}]
+    "buildStage": 1,
+    "simpleTier": 3,
+    "persistentFromStage": null,
+    "price": 3000,
+    "description": "Maximum Stage 1 weight package.",
+    "effects": [
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -120
+      }
+    ]
   },
   {
-    "catalogId": "nitrous_50",
-    "name": "50 Shot Nitrous",
-    "category": "Power Adder",
-    "slot": "power_adder",
-    "tier": 1,
+    "catalogId": "s2_intake_01",
+    "name": "Short Runner Intake",
+    "category": "Intake",
+    "categoryKey": "intake",
+    "slot": "intake",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "price": 2400,
+    "description": "Trades some low-speed response for stronger high-rpm breathing.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 11
+      },
+      {
+        "stat": "torque",
+        "op": "add",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_intake_02",
+    "name": "Cold-Air Race Intake",
+    "category": "Intake",
+    "categoryKey": "intake",
+    "slot": "intake",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "price": 2200,
+    "description": "Broader street/strip gain with better charge-air routing.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 8
+      },
+      {
+        "stat": "torque",
+        "op": "add",
+        "value": 7
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_exhaust_03",
+    "name": "Lightweight Dump Exhaust",
+    "category": "Exhaust",
+    "categoryKey": "exhaust",
+    "slot": "exhaust",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "price": 2800,
+    "description": "Short, light race-oriented exhaust.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 13
+      },
+      {
+        "stat": "torque",
+        "op": "add",
+        "value": 5
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -24
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_exhaust_04",
+    "name": "Full Street Exhaust",
+    "category": "Exhaust",
+    "categoryKey": "exhaust",
+    "slot": "exhaust",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
     "price": 2500,
-    "description": "Entry-level nitrous system represented as always available in the prototype sim.",
-    "effects": [{"stat": "hp", "op": "add", "value": 50}, {"stat": "torque", "op": "add", "value": 48}, {"stat": "weight", "op": "add", "value": 11}]
+    "description": "Keeps more street manners while improving flow.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 9
+      },
+      {
+        "stat": "torque",
+        "op": "add",
+        "value": 9
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -10
+      }
+    ]
   },
   {
-    "catalogId": "nitrous_100",
-    "name": "100 Shot Nitrous",
-    "category": "Power Adder",
-    "slot": "power_adder",
-    "tier": 2,
-    "price": 5200,
-    "description": "A large nitrous hit for cars that need instant power.",
-    "effects": [{"stat": "hp", "op": "add", "value": 100}, {"stat": "torque", "op": "add", "value": 92}, {"stat": "weight", "op": "add", "value": 13}]
+    "catalogId": "s2_ecu_05",
+    "name": "Torque-Focused Calibration",
+    "category": "ECU",
+    "categoryKey": "ecu",
+    "slot": "ecu",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "price": 3100,
+    "description": "Prioritizes midrange torque and launch response.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.04
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.08
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_ecu_06",
+    "name": "High-RPM Calibration",
+    "category": "ECU",
+    "categoryKey": "ecu",
+    "slot": "ecu",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "price": 3300,
+    "description": "Prioritizes top-end power.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.08
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.03
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_fuel_07",
+    "name": "High-Flow Injector Package",
+    "category": "Fuel",
+    "categoryKey": "fuel",
+    "slot": "fuel",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "price": 2600,
+    "description": "Fuel system support for moderate power builds.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 6
+      },
+      {
+        "stat": "torque",
+        "op": "add",
+        "value": 8
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_fuel_08",
+    "name": "Ethanol Fuel System",
+    "category": "Fuel",
+    "categoryKey": "fuel",
+    "slot": "fuel",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "price": 3600,
+    "description": "Higher fuel capacity and ethanol-ready hardware.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 12
+      },
+      {
+        "stat": "torque",
+        "op": "add",
+        "value": 11
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_drivetrain_09",
+    "name": "Short Final Drive Setup",
+    "category": "Drivetrain",
+    "categoryKey": "drivetrain",
+    "slot": "drivetrain",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "price": 3000,
+    "description": "Launch-focused gearing and lighter driveline pieces.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.035
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -5
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_drivetrain_10",
+    "name": "Reinforced Street Axles",
+    "category": "Drivetrain",
+    "categoryKey": "drivetrain",
+    "slot": "drivetrain",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "price": 2800,
+    "description": "Adds launch durability with a small weight penalty.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.05
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 7
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_tires_11",
+    "name": "Street / Strip Radial",
+    "category": "Tires",
+    "categoryKey": "tires",
+    "slot": "tires",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "price": 2200,
+    "description": "Balanced tire for street use and hard launches.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.095
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_tires_12",
+    "name": "Soft Drag Radial",
+    "category": "Tires",
+    "categoryKey": "tires",
+    "slot": "tires",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "price": 3100,
+    "description": "More launch grip with additional rotating weight.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.145
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 4
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_weight_13",
+    "name": "Lightweight Interior",
+    "category": "Weight Reduction",
+    "categoryKey": "weight",
+    "slot": "weight",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "price": 3000,
+    "description": "Retains a usable cabin while dropping significant mass.",
+    "effects": [
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -85
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_weight_14",
+    "name": "Gutted + Cage Package",
+    "category": "Weight Reduction",
+    "categoryKey": "weight",
+    "slot": "weight",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "price": 4200,
+    "description": "Aggressive interior removal with cage hardware.",
+    "effects": [
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -125
+      },
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.01
+      }
+    ]
   }
 ]

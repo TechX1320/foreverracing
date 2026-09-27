@@ -1,40 +1,123 @@
 # Forever Racing
 
-Forever Racing is a browser-based drag-racing / garage-management game inspired by the earlier TextTuned Discord game.
+Forever Racing is a systems-first browser drag-racing / garage-management game inspired by the earlier TextTuned Discord game.
 
-V0.2 is being developed as one frontend with two interchangeable runtime/persistence modes: a browser-local GitHub Pages development build and a PHP-backed server build for eventual hosted accounts/player data.
+V0.2 uses one shared frontend with two interchangeable runtime/persistence modes: a browser-local GitHub Pages development build and a PHP-backed server build for eventual hosted accounts/player data.
 
-## Current playable systems
+## Live development build
 
-- Required development login; no guest-mode game UI.
-- Showroom purchases.
-- Garage selection and nicknames.
-- Parts inventory, installation, slot replacement, and derived stat recalculation.
-- Rotating Used Car Lot.
-- Quick Race text simulation.
-- Early RogueLike run prototype.
-- Events, Teams, Multiplayer, and Leaderboards shells.
-- Responsive phone, foldable, tablet, and desktop UI.
-- PWA/service-worker groundwork.
+GitHub Pages:
+
+`https://techx1320.github.io/foreverracing/`
+
+Development credentials: `Admin` / `12345`.
+
+The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
+
+## V0.2.0-dev.2 playable direction
+
+This build is the first gameplay/identity pass after the dual-runtime foundation.
+
+### Game UI
+
+- Compact navigation is the default.
+- Desktop uses persistent player/current-car status, a navigation rail, the main game workspace, and an objective/context rail.
+- Mobile/foldable layouts collapse into dense compact navigation without requiring the old oversized dashboard.
+- The visual language is deliberately flatter and denser: tiny radii, thin separators, tables/lists, status bars, restrained color, and no permanent emoji navigation.
+- The design takes inspiration from the information density of established browser games while keeping a garage/racing identity of its own.
+
+### First-time user experience
+
+New/migrated development profiles receive a persistent FTUE:
+
+1. Welcome / core loop.
+2. Choose one of three starter platforms.
+3. Learn the Garage and current-car stats.
+4. Buy the first upgrade.
+5. Install it.
+6. Learn Build Stages.
+7. Run the first race.
+8. Receive the tutorial reward and unlock normal navigation.
+
+Tutorial state is stored with the player. Settings includes a development-only Reset Tutorial action.
+
+### Build Stages
+
+#### Stage 1 — Street / Stock Chassis
+
+Seven required categories currently use a simple three-level progression:
+
+- Intake
+- Exhaust
+- ECU
+- Fuel
+- Drivetrain
+- Tires
+- Weight Reduction
+
+Stage 1 rules:
+
+- Upgrades are purchased in order: 1 -> 2 -> 3.
+- The UI shows projected HP / torque / weight before purchase.
+- A Stage 1 category cannot be downgraded after advancing.
+- All seven categories must reach Level 3 before the car can become Build Stage 2.
+
+#### Stage 2 — Street Race
+
+The completed Stage 1 setup becomes the car's new baseline.
+
+Stage 2:
+
+- removes the numbered training-wheel upgrade model;
+- uses named, choice-based parts;
+- shows exactly what each choice does to the current car;
+- keeps Stage 2 parts available for later stages.
+
+The first catalog contains two meaningful choices per category rather than randomized stat rolls.
+
+#### Stage 3 / Stage 4 groundwork
+
+Stage 3 and Stage 4 are represented in the data/schema and visual renderer but are not yet fully playable progression steps.
+
+The vehicle/engine model now has groundwork for:
+
+- engine bay size class;
+- transverse/longitudinal orientation;
+- factory displacement;
+- stage-specific displacement allowance;
+- engine size/configuration/orientation data;
+- smaller-engine-in-larger-bay builds without automatically permitting physically absurd large-engine swaps.
+
+Stage 3 is intended to unlock front-half/tube-chassis construction and engine swaps. Stage 4 is intended to widen powertrain/chassis freedom substantially.
+
+### Procedural vehicle visuals
+
+Forever Racing no longer requires every car to have a hand-authored image asset just to exist in the game.
+
+`assets/js/ui/vehicleRenderer.js` draws side-profile SVG vehicles from small profile definitions.
+
+Current visual progression includes:
+
+- Stage 1: stock-style side profile.
+- Stage 2: cage/race-prep cues.
+- Stage 3: additional front/race hardware.
+- Stage 4: drag-race details such as wing/chute/race stance cues.
+
+This is intentionally a base renderer. Pixel-art or higher-detail skins can be layered on later without changing game logic.
 
 ## Runtime modes
 
 ### Static development mode — GitHub Pages
 
-The committed playable build lives in `/docs` and contains only static HTML/CSS/JavaScript/data files.
+The committed playable build lives in `/docs` and contains static HTML/CSS/JavaScript/data files only.
 
-- Storage mode: `local`
+- Storage provider: `LocalStorageProvider`
 - Save data: browser `localStorage`
-- Identity: simulated local development login
-- Development credentials: `Admin` / `12345`
-- No shared accounts or shared player state
-- Intended only for gameplay, UI, and system testing
+- Simulated local development identity
+- No shared accounts/player state
+- Intended for gameplay, UI and system testing
 
-Expected development URL once Pages is enabled:
-
-`https://techx1320.github.io/foreverracing/`
-
-Do not edit `/docs` by hand. It is generated from the shared source with:
+Do not edit `/docs` by hand. Generate it from shared source:
 
 ```bash
 php scripts/build-static.php
@@ -44,17 +127,17 @@ php scripts/build-static.php
 
 The repository root remains the PHP/server build.
 
-- Storage mode: `api`
+- Storage provider: `ApiStorageProvider`
 - PHP sessions/authentication
 - CSRF-protected write API
 - Atomic JSON player/runtime persistence
 - SQL/database migration planned later
 
-Requirements: PHP 8.1+ and write access for `data/players/` and `data/runtime/`.
+Username matching is case-insensitive in both development runtime modes. A future real account/database system must also enforce case-insensitive canonical username uniqueness at registration time.
 
-## Storage/provider architecture
+## Shared provider architecture
 
-Screens use one gateway contract and do not know which persistence mode is active:
+Screens depend on the storage/game gateway instead of knowing which persistence mode is active:
 
 ```text
 assets/js/storage/
@@ -64,63 +147,57 @@ assets/js/storage/
   createStorageProvider.js
 ```
 
-`ApiStorageProvider` delegates to the existing PHP API. `LocalStorageProvider` supplies the same interface for the static development build. The authored screens, routing, UI, catalogs, and frontend systems are shared.
-
-Shared prototype constants are stored in `data/config/game.json` so important values such as starting credits and Used Lot refresh timing do not silently drift between modes.
+Gameplay rules are mirrored between the browser-local `LocalGameService` and PHP `GameService`, with automated tests covering both paths.
 
 ## Repository layout
 
 ```text
-api/                  PHP HTTP API
-app/                  PHP auth, JSON store, game service, config
-assets/               shared authored frontend
-  js/storage/         runtime provider abstraction
-  js/domain/          local static-mode game service
+.github/workflows/     automated validation
+api/                   PHP HTTP API
+app/                   PHP auth, JSON store, game service, config
+assets/                shared authored frontend
+  js/domain/           browser-local game service
+  js/storage/          runtime provider abstraction
+  js/ui/               shared UI + procedural vehicle renderer
 data/
-  catalog/            shared car + part catalogs
-  config/             shared non-secret game config
-  players/            generated server player saves (ignored)
-  runtime/            generated server runtime state (ignored)
-docs/                 generated GitHub Pages build
-scripts/               static build + smoke tests
+  catalog/             cars, engines and stage-aware parts
+  config/              game + Build Stage configuration
+  players/             generated server player saves (ignored)
+  runtime/             generated server runtime state (ignored)
+docs/                  generated GitHub Pages build
+scripts/               build and smoke/integration tests
 ```
 
-## V0.2 direction
+## Validation
 
-1. Preserve the working V1 gameplay loops while cleaning architecture.
-2. Redesign toward a compact garage-management browser game.
-3. Add persistent FTUE/tutorial progression.
-4. Add Build Stages 1–4 and stage-aware parts.
-5. Separate engine and chassis ownership/configuration.
-6. Prototype displacement-based engine-swap rules:
-   - Stage 3: factory displacement ±0.6 L
-   - Stage 4: factory displacement ±1.0 L
-7. Prototype procedural side-profile vehicle rendering.
-8. Keep racing text/simulation-first while core progression is built.
+PRs run the `Validate Forever Racing` workflow. It checks:
+
+```text
+PHP syntax
+JavaScript syntax
+case-insensitive server login
+browser-local FTUE + Build Stage flow
+authenticated PHP API FTUE flow
+GitHub Pages static build generation
+static-build/module smoke tests
+```
+
+Useful local commands:
+
+```bash
+find . -path './docs' -prune -o -name '*.php' -type f -print0 | xargs -0 -n1 php -l
+find assets/js -name '*.js' -type f -print0 | xargs -0 -n1 node --check
+php scripts/test-auth-case.php
+node --experimental-default-type=module scripts/test-local-game.mjs
+bash scripts/test-api.sh
+php scripts/build-static.php
+node --experimental-vm-modules scripts/test-static.mjs
+```
 
 ## Development workflow
 
-GitHub is the canonical source repository. At the start of a development session, inspect the current repository before editing because it may have advanced since the previous chat/build.
+GitHub is the canonical source repository. Inspect current `main` at the start of every development session.
 
-Meaningful features should be developed on feature branches, tested, committed, and landed through pull requests. `main` should remain the current stable development version.
+Meaningful features should be developed on feature branches, validated, committed, and landed through pull requests. `main` should represent the current stable development version.
 
 Never commit real credentials, API secrets, private keys, production player data, or real user save data.
-
-## Tests used for this foundation
-
-```bash
-# PHP syntax
-find . -path './docs' -prune -o -name '*.php' -type f -print0 | xargs -0 -n1 php -l
-
-# JavaScript syntax
-find assets/js -name '*.js' -type f -exec node --check {} \;
-
-# Static build
-php scripts/build-static.php
-node --experimental-vm-modules scripts/test-static.mjs
-
-# Local gameplay engine
-node --experimental-default-type=module scripts/test-local-game.mjs
-```
-
-The PHP API is also smoke-tested through an authenticated local HTTP session for catalog, car purchase, part purchase/install, and Quick Race state mutation.

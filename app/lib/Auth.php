@@ -16,7 +16,7 @@ final class Auth
     public static function login(string $username, string $password): bool
     {
         $config = app_config();
-        $validUser = hash_equals((string)$config['admin_username'], $username);
+        $validUser = hash_equals(strtolower((string)$config['admin_username']), strtolower(trim($username)));
         $validPass = hash_equals((string)$config['admin_password'], $password);
         if (!$validUser || !$validPass) {
             return false;

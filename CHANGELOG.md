@@ -1,5 +1,26 @@
 # Changelog
 
+## V0.2.0-dev.2 — game identity, FTUE and Build Stages
+
+- Replaced the glass-card/AI-dashboard presentation with a denser browser-game layout: persistent player/current-car status, compact navigation, flatter panels, thin separators and table/list-heavy screens.
+- Made compact navigation the default on desktop/mobile/foldable layouts.
+- Added a persistent FTUE: welcome, starter selection, Garage explanation, first upgrade, install, Build Stage explanation, first race and completion reward.
+- Added FTUE route locking so onboarding cannot be bypassed through alternate navigation buttons.
+- Added a development Reset Tutorial control.
+- Made username matching case-insensitive in both PHP/server and static/local development modes.
+- Added player progression fields for level and reputation.
+- Replaced the generic parts catalog with 21 Stage 1 upgrades across seven required categories and the first 14 Stage 2 choice-based parts.
+- Enforced Stage 1 sequential progression, permanent no-downgrade behavior and all-category completion before Stage 2.
+- Added the Stage 1 -> Stage 2 conversion: the completed Stage 1 setup becomes the new baseline and simple Stage 1 parts are incorporated into the conversion.
+- Added Build Stage 1-4 configuration and vehicle/engine compatibility schema groundwork for future engine swaps.
+- Added an engine catalog with displacement, size-class, orientation and aspiration metadata.
+- Added per-vehicle engine-bay, starter-car and procedural-visual metadata.
+- Added a procedural SVG side-profile vehicle renderer with visible Stage 2/3/4 race-prep cues.
+- Integrated procedural vehicles into Home, Showroom, Garage, Parts and Quick Race.
+- Rebuilt Showroom, Garage and Parts around denser game-oriented rows/progression views and explicit projected stat changes.
+- Added authenticated PHP FTUE API tests, browser-local FTUE/Build Stage tests, case-insensitive auth tests and GitHub Actions PR validation.
+- Bumped the service-worker cache and static-build requirements for the new assets/data.
+
 ## V0.2.0-dev.1 — dual-runtime foundation
 
 - Imported the V1 clean-room prototype as the server-mode baseline.

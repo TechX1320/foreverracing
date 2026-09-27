@@ -18,13 +18,14 @@ export class LocalStorageProvider extends StorageProvider {
 
   async #ready() {
     if (this.#service) return;
-    const [cars, parts, config] = await Promise.all([
+    const [cars, parts, config, buildStages] = await Promise.all([
       fetchJson('data/catalog/cars.json'),
       fetchJson('data/catalog/parts.json'),
       fetchJson('data/config/game.json'),
+      fetchJson('data/config/build-stages.json'),
     ]);
     this.#config = config;
-    this.#service = new LocalGameService({ cars, parts, config });
+    this.#service = new LocalGameService({ cars, parts, config, buildStages: buildStages.stages || buildStages });
   }
 
   async session() {
@@ -35,7 +36,7 @@ export class LocalStorageProvider extends StorageProvider {
 
   async login(username, password) {
     await this.#ready();
-    if (String(username) !== String(this.#config.localDevUsername || 'Admin') || String(password) !== String(this.#config.localDevPassword || '12345')) {
+    if (String(username).trim().toLowerCase() !== String(this.#config.localDevUsername || 'Admin').toLowerCase() || String(password) !== String(this.#config.localDevPassword || '12345')) {
       throw providerError('Invalid username or password.', 401);
     }
     localStorage.setItem(SESSION_KEY, 'authenticated');
@@ -100,6 +101,27 @@ export class LocalStorageProvider extends StorageProvider {
   async uninstallPart(inventoryId) {
     await this.#ready();
     const player = this.#service.uninstallPart(this.#loadPlayer(), inventoryId);
+    this.#savePlayer(player);
+    return { ok: true, player };
+  }
+
+  async stageUp(carId) {
+    await this.#ready();
+    const player = this.#service.stageUp(this.#loadPlayer(), carId);
+    this.#savePlayer(player);
+    return { ok: true, player };
+  }
+
+  async tutorialAdvance(action) {
+    await this.#ready();
+    const player = this.#service.tutorialAdvance(this.#loadPlayer(), action);
+    this.#savePlayer(player);
+    return { ok: true, player };
+  }
+
+  async tutorialReset() {
+    await this.#ready();
+    const player = this.#service.tutorialReset(this.#loadPlayer());
     this.#savePlayer(player);
     return { ok: true, player };
   }
