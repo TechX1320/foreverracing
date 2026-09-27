@@ -35,7 +35,7 @@ export class LocalStorageProvider extends StorageProvider {
 
   async login(username, password) {
     await this.#ready();
-    if (String(username) !== String(this.#config.localDevUsername || 'Admin') || String(password) !== String(this.#config.localDevPassword || '12345')) {
+    if (String(username).trim().toLowerCase() !== String(this.#config.localDevUsername || 'Admin').toLowerCase() || String(password) !== String(this.#config.localDevPassword || '12345')) {
       throw providerError('Invalid username or password.', 401);
     }
     localStorage.setItem(SESSION_KEY, 'authenticated');
