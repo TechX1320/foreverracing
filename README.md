@@ -14,38 +14,39 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.4.0-a playable direction
+## V0.4.0-b playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
 ### Game UI
 
-- Compact navigation is the default.
-- Desktop uses persistent player/current-car status, a navigation rail, the main game workspace, and an objective/context rail.
-- Mobile/foldable layouts collapse into dense compact navigation without requiring the old oversized dashboard.
-- The visual language is deliberately flatter and denser: tiny radii, thin separators, tables/lists, status bars, restrained color, and no permanent emoji navigation.
-- The design takes inspiration from the information density of established browser games while keeping a garage/racing identity of its own.
+- Readability is now a first-class constraint: the base type and navigation/card text are materially larger than V0.4A.
+- Desktop removes the oversized top player/current-car strip. Player Info lives in the right context rail under Build Rules.
+- The active navigation item owns the orange indicator; it follows the current route instead of remaining on Home.
+- Desktop screens are designed around a no-page-scroll target at 1080p+ for normal gameplay surfaces.
+- Mobile/foldable layouts keep the same information hierarchy while stacking compactly.
+- The visual language remains flat and dense: thin separators, restrained orange accents, compact panels and browser-MMO information density.
 
 ### First-time user experience
 
-New/migrated development profiles receive a persistent FTUE:
+New/migrated development profiles receive a shorter persistent FTUE:
 
 1. Welcome / core loop.
 2. Choose one of three starter platforms.
 3. Learn the Garage and current-car stats.
-4. Buy the first upgrade.
-5. Install it.
-6. Learn Build Stages.
-7. Run the first race.
-8. Receive the tutorial reward and unlock normal navigation.
+4. Buy the first upgrade from a Parts category.
+5. Install it from the car's Garage Inventory.
+6. Run the first race and receive the tutorial completion reward.
+
+The build-conversion explanation is no longer forced after a single part. The game introduces the next build type reactively when the Street Car actually has every required category maxed.
 
 Tutorial state is stored with the player. Settings includes a development-only Reset Tutorial action.
 
-### Build Stages
+### Build Types
 
-#### Stage 1 — Street / Stock Chassis
+#### Street Car
 
-Seven required categories currently use a simple three-level progression:
+The car retains its production shell/layout and uses a simple three-step progression in seven required categories:
 
 - Intake
 - Exhaust
@@ -55,40 +56,46 @@ Seven required categories currently use a simple three-level progression:
 - Tires
 - Weight Reduction
 
-Stage 1 rules:
+Street Car rules:
 
-- Upgrades are purchased in order: 1 -> 2 -> 3.
-- The UI shows projected HP / torque / weight before purchase.
-- A Stage 1 category cannot be downgraded after advancing.
-- All seven categories must reach Level 3 before the car can become Build Stage 2.
+- Upgrade steps are purchased in order: 1 -> 2 -> 3.
+- The Parts category dialog shows projected HP / torque / weight before purchase.
+- Buying a part puts it in that car's Garage Inventory; installation happens in the Garage.
+- An installed Street Car ladder step cannot be downgraded.
+- Once all seven categories reach Step 3, the game reactively asks whether to upgrade the car into a Street Race Car.
 
-#### Stage 2 — Street Race
+#### Street Race Car
 
-The completed Stage 1 setup becomes the car's new baseline.
+The completed Street Car setup is absorbed into the permanent baseline.
 
-Stage 2:
+A Street Race Car:
 
-- removes the numbered training-wheel upgrade model;
-- uses named, choice-based parts;
-- shows exactly what each choice does to the current car;
-- keeps Stage 2 parts available for later stages.
+- keeps the recognizable stock body;
+- can be gutted/caged and become questionably street legal;
+- replaces the numbered ladder with named, choice-based parts;
+- keeps purchased race parts available for future higher build types.
 
-The first catalog contains two meaningful choices per category rather than randomized stat rolls.
+#### Front-Half Race Car / Full Race Car groundwork
 
-#### Stage 3 / Stage 4 groundwork
+Front-Half Race Car and Full Race Car remain schema/design groundwork rather than complete playable progression steps.
 
-Stage 3 and Stage 4 are represented in the data/schema and visual renderer but are not yet fully playable progression steps.
+The vehicle/engine model already has groundwork for engine-bay size, transverse/longitudinal orientation, factory displacement and stage-specific displacement allowance. Front-Half Race Car is intended to unlock physically sensible engine swaps; Full Race Car widens chassis/powertrain freedom further.
 
-The vehicle/engine model now has groundwork for:
+### Parts and Garage Inventory
 
-- engine bay size class;
-- transverse/longitudinal orientation;
-- factory displacement;
-- stage-specific displacement allowance;
-- engine size/configuration/orientation data;
-- smaller-engine-in-larger-bay builds without automatically permitting physically absurd large-engine swaps.
+The Parts screen is a compact category launcher rather than one long upgrade table. Opening Intake, Exhaust, Tires, etc. creates a focused shopping dialog with the current car, its stats, projected results and the relevant purchasable options.
 
-Stage 3 is intended to unlock front-half/tube-chassis construction and engine swaps. Stage 4 is intended to widen powertrain/chassis freedom substantially.
+The shop only purchases parts. Owned parts are marked **OWNED**. Installation/removal/swapping happens from **Garage -> Inventory** on the car itself.
+
+### Classifieds
+
+The former Used Lot is presented as **Classifieds**, the home for older/used vehicles and eventually player listings.
+
+- Listing cards are image-first and open a full More Details dialog.
+- Purchase happens from the detail dialog instead of the grid.
+- Mileage and condition use separate visible price factors.
+- Poor-condition cars therefore lose materially more value than otherwise similar clean examples.
+- Showroom navigation is hidden after starter FTUE until the game has a meaningful genuinely-new vehicle catalog.
 
 ### V0.4A — real-time race presentation
 
