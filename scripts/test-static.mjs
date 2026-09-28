@@ -119,11 +119,11 @@ for (const file of modules) {
   new vm.SourceTextModule(source, { identifier: file });
 }
 
-console.log('Static identity + V0.4A race presentation build smoke test passed.');
+console.log('Static identity + race presentation build smoke test passed.');
 
 
 const garageSource = await fs.readFile(new URL('assets/js/screens/garage.js', root), 'utf8');
-if (!garageSource.includes('GARAGE INVENTORY') || !garageSource.includes('data-inventory-car')) throw new Error('Garage Inventory UI is missing.');
+if (!garageSource.includes('garage-inventory-dialog') || !garageSource.includes('data-inventory-car')) throw new Error('Garage Inventory UI is missing.');
 
 const partsSourceV04b = await fs.readFile(new URL('assets/js/screens/parts.js', root), 'utf8');
 if (!partsSourceV04b.includes('parts-category-grid') || !partsSourceV04b.includes('Purchasing puts the part')) throw new Error('Category-based Parts UI is missing.');
