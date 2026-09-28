@@ -38,7 +38,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.4.0-d"')) throw new Error('Static index is missing the V0.4D build marker.');
+if (!html.includes('data-build="0.4.0-e"')) throw new Error('Static index is missing the V0.4E build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -92,16 +92,16 @@ if ((raceConfig.weather || []).find((row) => row.name === 'Ice')?.minLevel !== 1
 const localProviderSource = await fs.readFile(new URL('assets/js/storage/LocalStorageProvider.js', root), 'utf8');
 if (!localProviderSource.includes('localStorage.removeItem(PLAYER_KEY)')) throw new Error('Admin local logout must erase player data.');
 if (!localProviderSource.includes('already logged in in this browser')) throw new Error('Local duplicate-login guard is missing.');
-if (!localProviderSource.includes('startQuickRace') || !localProviderSource.includes('finishQuickRace')) throw new Error('Local two-phase race storage lifecycle is missing.');
+if (!localProviderSource.includes('quickRacePreview') || !localProviderSource.includes('startQuickRace') || !localProviderSource.includes('finishQuickRace')) throw new Error('Local race preview / two-phase storage lifecycle is missing.');
 
 const localGameSource = await fs.readFile(new URL('assets/js/domain/LocalGameService.js', root), 'utf8');
-if (!localGameSource.includes('activeRace') || !localGameSource.includes('finishQuickRace')) throw new Error('Persistent active race lifecycle is missing.');
+if (!localGameSource.includes('quickRacePreview') || !localGameSource.includes('nextOpponentProfile') || !localGameSource.includes('activeRace') || !localGameSource.includes('finishQuickRace')) throw new Error('Deterministic preview / persistent active race lifecycle is missing.');
 
 const racePresentationSource = await fs.readFile(new URL('assets/js/ui/racePresentation.js', root), 'utf8');
 if (!racePresentationSource.includes('showModal()') || !racePresentationSource.includes('data-race-player-progress') || !racePresentationSource.includes('RETURN TO PITS')) throw new Error('Blocking race playback UI is incomplete.');
 
 const quickRaceSource = await fs.readFile(new URL('assets/js/screens/quickRace.js', root), 'utf8');
-if (!quickRaceSource.includes('playRacePresentation') || !quickRaceSource.includes('START 1/4 MI RACE') || !quickRaceSource.includes('unlockLevel: 5') || !quickRaceSource.includes('data-race-distance')) throw new Error('V0.4D Quick Race progression UI is incomplete.');
+if (!quickRaceSource.includes('playRacePresentation') || !quickRaceSource.includes('START 1/4 MI') || !quickRaceSource.includes('RACE PREVIEW') || !quickRaceSource.includes('data-run-distance') || quickRaceSource.includes('data-run-race')) throw new Error('V0.4E Quick Race preview / direct race actions are incomplete.');
 
 if (!appSource.includes('scheduleWelcomeTutorial')) throw new Error('Fresh-login FTUE welcome retry guard is missing.');
 
@@ -187,4 +187,25 @@ if (!racePresentationSourceV04d.includes('ratio >= 0.52 && ratio < 0.68') || !ra
   throw new Error('Drag-tree timing fix is missing.');
 }
 console.log('V0.4D guided FTUE, unlock progression and race-gating checks passed.');
+
+const settingsSourceV04e = await fs.readFile(new URL('assets/js/screens/settings.js', root), 'utf8');
+const apiPreviewSourceV04e = await fs.readFile(new URL('api/race/preview.php', root), 'utf8');
+const playerFacingTutorialSurface = [appSource, usedLotSourceV04d, garageSource, partsSourceV04b, quickRaceSource, settingsSourceV04e, html].join('\n');
+if (/\bFTUE\b/.test(playerFacingTutorialSurface)) {
+  throw new Error('Player-facing UI must say STEP / tutorial instead of FTUE.');
+}
+if (!cssV04b.includes('V0.4E dialog shell and race preview') ||
+    !cssV04b.includes('dialog.fr-dialog:has(.classified-detail-dialog)') ||
+    !cssV04b.includes('dialog.fr-dialog:has(.parts-shop-dialog)') ||
+    !cssV04b.includes('dialog.fr-dialog:has(.garage-inventory-dialog)') ||
+    !cssV04b.includes('.classified-detail-dialog,.parts-shop-dialog,.garage-inventory-dialog{')) {
+  throw new Error('V0.4E wide-dialog shell fix is incomplete.');
+}
+if (!cssV04b.includes('.race-preview-card{') || !cssV04b.includes('.race-distance-tabs--actions{')) {
+  throw new Error('V0.4E Race Preview layout is missing.');
+}
+if (!serverGameSourceV04c.includes('quickRacePreview') || !serverGameSourceV04c.includes('nextOpponentProfile') || !apiPreviewSourceV04e.includes('GameService::quickRacePreview')) {
+  throw new Error('Server deterministic Race Preview path is incomplete.');
+}
+console.log('V0.4E tutorial wording, dialog sizing and Race Preview checks passed.');
 
