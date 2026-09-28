@@ -368,7 +368,16 @@ export class LocalGameService {
     car.factoryEngineId = car.factoryEngineId || spec?.factoryEngineId || null;
     car.engineId = car.engineId || car.factoryEngineId || null;
     car.engineBay = car.engineBay || clone(spec?.engineBay || null);
-    car.visual = car.visual || clone(spec?.visual || { profile: 'sedan', color: '#78838d' });
+    const catalogVisual = clone(spec?.visual || { profile: 'sedan', color: '#78838d' });
+    const savedVisual = car.visual && typeof car.visual === 'object' ? car.visual : {};
+    car.visual = {
+      ...catalogVisual,
+      ...savedVisual,
+      sprites: {
+        ...(catalogVisual.sprites || {}),
+        ...(savedVisual.sprites || {}),
+      },
+    };
     return car;
   }
 
