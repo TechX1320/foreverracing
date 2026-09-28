@@ -11,6 +11,10 @@ const [cars, parts, config, buildStageConfig, racingConfig] = await Promise.all(
 ]);
 
 const game = new LocalGameService({ cars, parts, config, buildStages: buildStageConfig.stages, racingConfig });
+assert.equal(buildStageConfig.stages[0].name, 'Street Car');
+assert.equal(buildStageConfig.stages[1].name, 'Street Race Car');
+assert.equal(buildStageConfig.stages[2].name, 'Front-Half Race Car');
+assert.equal(buildStageConfig.stages[3].name, 'Full Race Car');
 let player = game.defaultPlayer();
 
 assert.equal(player.wallet.credits, 75000);
@@ -44,11 +48,9 @@ assert.equal(player.tutorial.step, 'buy_first_upgrade');
 player = game.purchasePart(player, 's1_intake_1');
 assert.equal(player.tutorial.step, 'install_first_upgrade');
 let intake1 = player.inventory.parts.find((row) => row.catalogId === 's1_intake_1');
+assert.equal(intake1.purchasedForCarId, player.selectedCarId);
 player = game.installPart(player, intake1.inventoryId, player.selectedCarId);
 assert.equal(player.garage[0].derived.hp, 109);
-assert.equal(player.tutorial.step, 'build_stages');
-
-player = game.tutorialAdvance(player, 'build_stages_explained');
 assert.equal(player.tutorial.step, 'first_race');
 
 const firstStart = game.startQuickRace(player, '1/4', 1_000_000);
@@ -155,10 +157,13 @@ assert.ok(player.garage[0].derived.hp > beforeStageUp.hp);
 const lot = game.generateUsedLot();
 assert.ok(lot.listings.length >= 4);
 assert.ok(lot.expiresAt > lot.generatedAt);
+assert.ok(lot.listings.every((row) => row.basePrice > 0 && row.conditionFactor > 0 && row.mileageFactor > 0));
+assert.ok(lot.listings.every((row) => row.price <= row.basePrice));
+assert.ok(lot.listings.every((row) => Number(cars.find((car) => Number(car.stockId) === Number(row.stockId))?.year || 9999) <= new Date().getFullYear() - 3));
 
 player = game.roguelikeStart(player);
 assert.ok(player.roguelike.activeRun);
 const step = game.roguelikeStep(player, 'safe');
 assert.ok(step.step && typeof step.step.won === 'boolean');
 
-console.log('FTUE + Build Stage + V0.4A two-phase race lifecycle local game flow test passed.');
+console.log('FTUE + named build progression + Garage Inventory + Classifieds + V0.4B local game flow test passed.');
