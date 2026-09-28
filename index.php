@@ -46,7 +46,7 @@ $storageText = $storageMode === 'local' ? 'BROWSER LOCAL' : 'PHP / JSON';
           <button type="button" data-nav="parts"><b>PARTS</b><span>Build car</span></button>
           <button type="button" data-nav="quick-race"><b>QUICK RACE</b><span>Run car</span></button>
           <button type="button" data-nav="usedlot"><b>CLASSIFIEDS</b><span>Older cars</span></button>
-          <button type="button" data-nav="roguelike"><b>ROGUELIKE</b><span>PvE run</span></button>
+          <button type="button" data-nav="roguelike"><b>THE CIRCUIT</b><span>PvE career</span></button>
           <button type="button" data-nav="events"><b>EVENTS</b><span>Coming online</span></button>
           <button type="button" data-nav="teams"><b>TEAMS</b><span>Social</span></button>
           <button type="button" data-nav="leaderboards"><b>RECORDS</b><span>Stats</span></button>
@@ -59,7 +59,7 @@ $storageText = $storageMode === 'local' ? 'BROWSER LOCAL' : 'PHP / JSON';
           <section id="homeDashboard" class="home-dashboard">
             <section class="current-build-panel">
               <header class="panel-heading">
-                <div><span>CURRENT BUILD</span><h1 id="homeCarName">No current car</h1><p id="homeCarFactory">Visit the Showroom to start a build.</p></div>
+                <div><span>CURRENT BUILD</span><h1 id="homeCarName">No current car</h1><p id="homeCarFactory">Visit Classifieds to start a build.</p></div>
                 <div id="homeBuildSummary" class="build-summary"><b>BUILD TYPE</b><span>No active build.</span></div>
               </header>
               <div id="homeVehicleVisual" class="home-vehicle-visual"><div class="no-car-visual">NO CURRENT CAR</div></div>

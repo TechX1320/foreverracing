@@ -3,7 +3,7 @@ import { renderVehicle } from "../ui/vehicleRenderer.js";
 import { showDialog, closeDialog } from "../ui/modal.js";
 
 let catalogCache = null;
-const REQUIRED = ["intake", "exhaust", "ecu", "fuel", "drivetrain", "tires", "weight"];
+const REQUIRED = ["intake", "exhaust", "ecu", "fuel", "drivetrain", "suspension", "tires", "weight"];
 const BUILD_NAMES = {
   1: "Street Car",
   2: "Street Race Car",
@@ -60,7 +60,7 @@ export async function renderParts(ctx) {
           <button class="button button--small" type="button" data-open-inventory>GARAGE INVENTORY</button>
         </div>
         <div class="parts-category-grid">
-          ${categories.map((key) => categoryCard(player, current, key)).join("")}
+          ${categories.map((key) => categoryCard(player, current, key, tutorialStep)).join("")}
         </div>
       </section>
 
@@ -76,7 +76,14 @@ export async function renderParts(ctx) {
   bindHome(ctx.screenRoot, ctx.router);
 
   ctx.screenRoot.querySelectorAll("[data-parts-category]").forEach((button) => {
-    button.addEventListener("click", () => openCategory(ctx, current.carId, button.dataset.partsCategory));
+    button.addEventListener("click", () => {
+      const key = button.dataset.partsCategory;
+      if (tutorialStep === "buy_first_upgrade" && key !== "intake") {
+        ctx.toast("Tutorial step", "Start with Intake. The other categories unlock after your first race.");
+        return;
+      }
+      openCategory(ctx, current.carId, key);
+    });
   });
 
   ctx.screenRoot.querySelector("[data-open-inventory]")?.addEventListener("click", () => {
@@ -103,7 +110,7 @@ function categoriesForCar(car) {
   return [...new Set(available.map((part) => part.categoryKey))];
 }
 
-function categoryCard(player, car, key) {
+function categoryCard(player, car, key, tutorialStep = null) {
   const stage = Number(car.buildStage || 1);
   const specs = categorySpecs(car, key);
   const label = specs[0]?.category || key;
@@ -116,11 +123,13 @@ function categoryCard(player, car, key) {
     const tier = installedSimpleTier(player, car.carId, key);
     const next = specs.find((part) => Number(part.simpleTier) === tier + 1);
     const ownedNext = next ? scopedOwned.find((item) => item.catalogId === next.catalogId) : null;
+    const ftueLocked = tutorialStep === "buy_first_upgrade" && key !== "intake";
+    const ftueTarget = tutorialStep === "buy_first_upgrade" && key === "intake";
     return `
-      <button class="parts-category-card ${tier >= 3 ? "is-complete" : ""}" type="button" data-parts-category="${escapeHtml(key)}">
+      <button class="parts-category-card ${tier >= 3 ? "is-complete" : ""} ${ftueTarget ? "tutorial-target parts-category-card--ftue" : ""}" type="button" data-parts-category="${escapeHtml(key)}" ${ftueLocked ? "disabled" : ""}>
         <span class="parts-category-card__name">${escapeHtml(label)}</span>
         <strong>${tier}/3 COMPLETE</strong>
-        <small>${tier >= 3 ? "Street Car category maxed" : ownedNext ? `${escapeHtml(next.name)} owned — install from Garage` : `Next: ${escapeHtml(next?.name || "Upgrade")}`}</small>
+        <small>${ftueLocked ? "LOCKED UNTIL FIRST RACE" : tier >= 3 ? "Street Car category maxed" : ownedNext ? `${escapeHtml(next.name)} owned — install from Garage` : `Next: ${escapeHtml(next?.name || "Upgrade")}`}</small>
         <i class="meter"><i style="width:${(tier / 3) * 100}%"></i></i>
       </button>`;
   }
@@ -139,25 +148,35 @@ function openCategory(ctx, carId, key) {
   const player = ctx.store.player;
   const car = player?.garage?.find((entry) => String(entry.carId) === String(carId));
   if (!car) return;
+  const tutorialStep = player?.tutorial?.status === "active" ? player.tutorial.step : null;
+  if (tutorialStep === "buy_first_upgrade" && key !== "intake") {
+    ctx.toast("Tutorial step", "Buy the Stage 1 Intake first.");
+    return;
+  }
   const specs = categorySpecs(car, key);
   if (!specs.length) return;
 
   const dialog = showDialog(`
     <div class="dialog-body parts-shop-dialog">
-      <div class="parts-shop-dialog__car">
-        <div class="dialog-vehicle">${renderVehicle(car, { stage: Number(car.buildStage || 1), view: "sideProfile" })}</div>
+      <div class="parts-shop-dialog__titlebar">
         <div>
-          <span class="section-label">${escapeHtml(buildName(Number(car.buildStage || 1)))}</span>
+          <span class="section-label">${tutorialStep === "buy_first_upgrade" ? "FTUE • BUY THIS PART" : escapeHtml(buildName(Number(car.buildStage || 1)))}</span>
           <h2>${escapeHtml(specs[0]?.category || key)}</h2>
-          <p>${escapeHtml(carLabel(car))} • ${number(car.derived?.hp)} hp • ${number(car.derived?.torque)} lb-ft • ${number(car.derived?.weight)} lb</p>
+          <p>${escapeHtml(carLabel(car))}</p>
+        </div>
+        <div class="parts-shop-dialog__stats">
+          <span><small>HP</small><b>${number(car.derived?.hp)}</b></span>
+          <span><small>TQ</small><b>${number(car.derived?.torque)}</b></span>
+          <span><small>WT</small><b>${number(car.derived?.weight)} lb</b></span>
         </div>
       </div>
+      ${tutorialStep === "buy_first_upgrade" ? '<div class="ftue-inline-command"><strong>BUY THE STAGE 1 INTAKE</strong><span>This is the only purchase available until you complete your first race.</span></div>' : ""}
       <div class="parts-shop-list">
         ${Number(car.buildStage || 1) === 1
-          ? streetCategoryRows(player, car, specs)
+          ? streetCategoryRows(player, car, specs, tutorialStep)
           : choiceCategoryRows(player, car, specs)}
       </div>
-      <div class="parts-shop-dialog__note">Purchasing puts the part in this car's Garage Inventory. Installation and part swapping happen from the Garage.</div>
+      <div class="parts-shop-dialog__note">Buying adds the part to this car. Installation happens from Garage Inventory.</div>
       <div class="dialog-actions"><button class="button button--small" type="button" data-close>CLOSE</button><button class="button button--primary button--small" type="button" data-inventory>GARAGE INVENTORY</button></div>
     </div>`);
 
@@ -174,8 +193,13 @@ function openCategory(ctx, carId, key) {
         const data = await ctx.storage.buyPart(button.dataset.buyPart);
         ctx.store.setPlayer(data.player);
         closeDialog(dialog);
-        ctx.toast("Part purchased", "Owned. Install it from this car's Garage Inventory.");
-        await renderParts(ctx);
+        ctx.toast("Part purchased", "Owned. Now install it from the car's Garage Inventory.");
+        if (data.player?.tutorial?.status === "active" && data.player?.tutorial?.step === "install_first_upgrade") {
+          sessionStorage.setItem("foreverRacing.openInventory", String(car.carId));
+          ctx.router.navigate("garage");
+        } else {
+          await renderParts(ctx);
+        }
       } catch (err) {
         ctx.toast("Purchase blocked", err.message);
         button.disabled = false;
@@ -184,10 +208,12 @@ function openCategory(ctx, carId, key) {
   });
 }
 
-function streetCategoryRows(player, car, specs) {
+function streetCategoryRows(player, car, specs, tutorialStep = null) {
   const currentTier = installedSimpleTier(player, car.carId, specs[0]?.categoryKey || "");
-  return specs
+  const rows = specs
     .sort((a, b) => Number(a.simpleTier) - Number(b.simpleTier))
+    .filter((part) => tutorialStep !== "buy_first_upgrade" || String(part.catalogId) === "s1_intake_1");
+  return rows
     .map((part) => {
       const tier = Number(part.simpleTier || 0);
       const owned = findInventory(player, part.catalogId, car.carId);
@@ -266,7 +292,11 @@ function promptStageConversion(ctx, carId) {
 
 function tutorialObjective(step, carId) {
   if (step === "buy_first_upgrade") {
-    return `<div class="objective-box objective-box--active"><div><span class="objective-kicker">FTUE • BUY AN UPGRADE</span><strong>Open Intake and buy Step 1</strong></div><p>The category window shows the result before you spend credits. Buying does not install the part.</p></div>`;
+    return `<section class="ftue-focus-panel ftue-focus-panel--compact">
+      <div class="ftue-focus-panel__step">FTUE 4/6</div>
+      <div class="ftue-focus-panel__copy"><span>FIRST MOD</span><strong>Click INTAKE.</strong><p>Everything else is locked. Buy the Stage 1 Intake, then the game will take you directly back to your Garage.</p></div>
+      <div class="ftue-focus-panel__arrow">↓ INTAKE IS HIGHLIGHTED</div>
+    </section>`;
   }
   if (step === "install_first_upgrade") {
     return `<div class="objective-box objective-box--active"><div><span class="objective-kicker">FTUE • INSTALL YOUR PART</span><strong>Your new part is in Garage Inventory</strong></div><p>The shop is for buying. Installation and swapping happen on the car itself in the Garage.</p><button class="button button--primary button--small" data-go-install data-car-id="${escapeHtml(carId)}">OPEN GARAGE INVENTORY</button></div>`;

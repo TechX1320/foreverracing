@@ -1,7 +1,7 @@
 Generated from shared source for GitHub Pages.
-Build: 0.4.0-c
+Build: 0.4.0-d
 Storage mode: local
 Offline service worker: disabled in static development mode
 Race presentation: persistent two-phase start/finish with blocking real-time playback
-V0.4C UI: readability hardening, compact header, named Build Type terminology and V0.4B core-flow systems
+V0.4D: guided D-Class FTUE, readable action-first UI, progression unlocks, The Circuit naming and race gating
 Do not edit docs/ by hand; run php scripts/build-static.php.

@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "historyLimit": 25,
   "distances": {
     "1": {
@@ -44,98 +44,113 @@
       "name": "Hot & Dry",
       "etModifier": -0.05,
       "mphModifier": 1.5,
-      "weight": 35
+      "weight": 35,
+      "minLevel": 1
     },
     {
       "name": "Cool & Cloudy",
       "etModifier": 0,
       "mphModifier": 0,
-      "weight": 30
+      "weight": 30,
+      "minLevel": 1
     },
     {
       "name": "Rainy",
       "etModifier": 0.15,
       "mphModifier": -2.5,
       "weight": 15,
-      "slippery": true
+      "slippery": true,
+      "minLevel": 3
     },
     {
       "name": "Snow",
       "etModifier": 0.3,
       "mphModifier": -6,
       "weight": 8,
-      "slippery": true
+      "slippery": true,
+      "minLevel": 7
     },
     {
       "name": "Ice",
       "etModifier": 0.5,
       "mphModifier": -9,
       "weight": 4,
-      "slippery": true
+      "slippery": true,
+      "minLevel": 10
     },
     {
       "name": "Hurricane",
       "etModifier": 1.5,
       "mphModifier": -20,
-      "weight": 1.5
+      "weight": 1.5,
+      "quickRace": false
     },
     {
       "name": "Tornado",
       "etModifier": 1,
       "mphModifier": -15,
-      "weight": 1.5
+      "weight": 1.5,
+      "quickRace": false
     },
     {
       "name": "Humid & Sticky",
       "etModifier": 0.05,
       "mphModifier": -0.5,
-      "weight": 12
+      "weight": 12,
+      "minLevel": 1
     },
     {
       "name": "Cold & Dry",
       "etModifier": 0.02,
       "mphModifier": 1,
-      "weight": 10
+      "weight": 10,
+      "minLevel": 1
     },
     {
       "name": "Windy",
       "etModifier": 0.1,
       "mphModifier": -2,
-      "weight": 7
+      "weight": 7,
+      "minLevel": 2
     },
     {
       "name": "Foggy",
       "etModifier": 0.12,
       "mphModifier": -1.5,
-      "weight": 6
+      "weight": 6,
+      "minLevel": 2
     },
     {
       "name": "Misty",
       "etModifier": 0.07,
       "mphModifier": -0.8,
       "weight": 8,
-      "slippery": true
+      "slippery": true,
+      "minLevel": 3
     },
     {
       "name": "Drizzle",
       "etModifier": 0.09,
       "mphModifier": -1.2,
       "weight": 9,
-      "slippery": true
+      "slippery": true,
+      "minLevel": 3
     },
     {
       "name": "Ash Storm",
       "etModifier": 1.75,
       "mphModifier": -18,
       "weight": 0.42,
-      "nightmare": true
+      "nightmare": true,
+      "quickRace": false
     },
     {
       "name": "Solar Flare Surge",
       "etModifier": 2,
       "mphModifier": -10,
       "weight": 0.3,
-      "nightmare": true
+      "nightmare": true,
+      "quickRace": false
     },
     {
       "name": "Oil Spill",
@@ -143,28 +158,32 @@
       "mphModifier": -14,
       "weight": 0.2,
       "slippery": true,
-      "nightmare": true
+      "nightmare": true,
+      "quickRace": false
     },
     {
       "name": "Microburst Winds",
       "etModifier": 1.3,
       "mphModifier": -22,
       "weight": 0.3,
-      "nightmare": true
+      "nightmare": true,
+      "quickRace": false
     },
     {
       "name": "Gravity Fluctuation",
       "etModifier": 3,
       "mphModifier": -25,
       "weight": 0.15,
-      "nightmare": true
+      "nightmare": true,
+      "quickRace": false
     },
     {
       "name": "Dinosaur Killer Meteor Strike",
       "etModifier": 7,
       "mphModifier": -50,
       "weight": 0.025,
-      "nightmare": true
+      "nightmare": true,
+      "quickRace": false
     }
   ],
   "locations": [

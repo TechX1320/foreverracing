@@ -24,8 +24,18 @@ assert.equal(player.garage.length, 0);
 player = game.tutorialAdvance(player, 'welcome_complete');
 assert.equal(player.tutorial.step, 'buy_first_car');
 
-assert.throws(() => game.purchaseNewCar(player, 10), /starter cars/i);
-player = game.purchaseNewCar(player, 1);
+assert.throws(() => game.purchaseNewCar(player, 1), /Classifieds/i);
+const starterLot = game.generateUsedLot();
+const starterListings = starterLot.listings.filter((row) => row.starterListing);
+assert.equal(starterListings.length, 3);
+assert.ok(starterListings.every((row) => {
+  const spec = cars.find((car) => Number(car.stockId) === Number(row.stockId));
+  return spec?.starter === true && spec?.class === 'D';
+}));
+const civicListing = starterListings.find((row) => Number(row.stockId) === 1);
+assert.ok(civicListing);
+const starterPurchase = game.purchaseUsedCar(player, starterLot, civicListing.listingId);
+player = starterPurchase.player;
 assert.equal(player.garage.length, 1);
 assert.equal(player.garage[0].buildStage, 1);
 assert.equal(player.garage[0].visual.sprites.topDown.sheet, 'assets/art/cars/cars-top-down-v1.png');
@@ -33,8 +43,11 @@ assert.equal(player.garage[0].visual.sprites.topDown.index, 0);
 assert.equal(player.garage[0].visual.sprites.sideProfile.src, 'assets/art/cars/vehicles/1998-honda-civic-dx-side-profile.png');
 assert.equal(player.garage[0].visual.sprites.topDown.src, 'assets/art/cars/vehicles/1998-honda-civic-dx-top-down-v03a.png');
 assert.equal(player.selectedCarId, player.garage[0].carId);
-assert.equal(player.wallet.credits, 65500);
+assert.equal(player.wallet.credits, 75000 - Number(civicListing.price));
 assert.equal(player.tutorial.step, 'visit_garage');
+assert.equal(player.garage[0].source, 'used');
+assert.ok(player.garage[0].mileage >= 105000);
+assert.ok(player.garage[0].condition <= 79);
 
 const legacyPlayer = structuredClone(player);
 legacyPlayer.garage[0].visual = { profile: 'compact', color: '#6d9bb8' };
@@ -45,6 +58,7 @@ assert.equal(migratedLegacy.garage[0].visual.sprites.topDown.src, 'assets/art/ca
 player = game.tutorialAdvance(player, 'garage_explained');
 assert.equal(player.tutorial.step, 'buy_first_upgrade');
 
+assert.throws(() => game.purchasePart(player, 's1_exhaust_1'), /Stage 1 Intake/i);
 player = game.purchasePart(player, 's1_intake_1');
 assert.equal(player.tutorial.step, 'install_first_upgrade');
 let intake1 = player.inventory.parts.find((row) => row.catalogId === 's1_intake_1');
@@ -58,9 +72,12 @@ player = firstStart.player;
 assert.ok(player.activeRace);
 assert.equal(firstStart.activeRace.distance, '1/4');
 assert.equal(firstStart.activeRace.race.distanceLabel, '1/4 Mile');
-assert.ok(firstStart.activeRace.race.location?.name);
-assert.ok(firstStart.activeRace.race.weather?.name);
+assert.equal(firstStart.activeRace.race.location?.name, 'Local Test & Tune');
+assert.equal(firstStart.activeRace.race.weather?.name, 'Cool & Cloudy');
 assert.ok(firstStart.activeRace.race.player?.trapSpeed > 0);
+assert.equal(firstStart.activeRace.race.player?.foul, false);
+assert.equal(firstStart.activeRace.race.opponent?.foul, false);
+assert.equal(firstStart.activeRace.race.won, true);
 assert.ok(firstStart.activeRace.race.playerVisualSrc);
 assert.ok(firstStart.activeRace.race.opponent?.visualSrc);
 assert.equal(player.stats.races, 0);
@@ -88,7 +105,8 @@ assert.ok(player.progression.rep >= 27);
 assert.ok(player.progression.exp > 0);
 assert.ok(firstRace.race.reward > 0);
 assert.equal(firstRace.race.distance, '1/4');
-assert.ok(typeof firstRace.race.player?.foul === 'boolean');
+assert.equal(firstRace.race.player?.foul, false);
+assert.equal(firstRace.race.won, true);
 assert.equal(player.raceHistory.length, 1);
 assert.equal(player.garage[0].raceRecords['1/4'].races, 1);
 
@@ -98,6 +116,12 @@ player = idempotentFinish.player;
 assert.equal(player.raceHistory.length, firstHistoryCount);
 assert.equal(player.stats.races, 1);
 
+assert.throws(() => game.startQuickRace(player, '1/2', 2_000_000), /Level 5/i);
+assert.throws(() => game.startQuickRace(player, '1', 2_000_000), /Level 10/i);
+
+player.progression.exp = 3000;
+player = game.normalizePlayer(player);
+assert.ok(player.progression.level >= 5);
 const halfStart = game.startQuickRace(player, '1/2', 2_000_000);
 player = halfStart.player;
 assert.equal(halfStart.activeRace.distance, '1/2');
@@ -107,6 +131,10 @@ player = halfRace.player;
 assert.equal(halfRace.race.distance, '1/2');
 assert.ok(halfRace.race.player.elapsedTime >= Number(racingConfig.distances['1/2'].minEt));
 
+assert.throws(() => game.startQuickRace(player, '1', 3_000_000), /Level 10/i);
+player.progression.exp = 6000;
+player = game.normalizePlayer(player);
+assert.ok(player.progression.level >= 10);
 const mileStart = game.startQuickRace(player, '1', 3_000_000);
 player = mileStart.player;
 assert.equal(mileStart.activeRace.distance, '1');
@@ -124,7 +152,7 @@ let intake2 = player.inventory.parts.find((row) => row.catalogId === 's1_intake_
 player = game.installPart(player, intake2.inventoryId, player.selectedCarId);
 assert.throws(() => game.installPart(player, intake1.inventoryId, player.selectedCarId), /cannot be downgraded/i);
 
-const categories = ['intake', 'exhaust', 'ecu', 'fuel', 'drivetrain', 'tires', 'weight'];
+const categories = ['intake', 'exhaust', 'ecu', 'fuel', 'drivetrain', 'suspension', 'tires', 'weight'];
 for (const category of categories) {
   const installed = player.inventory.parts
     .filter((row) => row.installedOnCarId === player.selectedCarId)
@@ -166,4 +194,4 @@ assert.ok(player.roguelike.activeRun);
 const step = game.roguelikeStep(player, 'safe');
 assert.ok(step.step && typeof step.step.won === 'boolean');
 
-console.log('FTUE + named build progression + Garage Inventory + Classifieds + V0.4B local game flow test passed.');
+console.log('V0.4D guided FTUE + progression gates + Garage Inventory + Classifieds local game flow test passed.');

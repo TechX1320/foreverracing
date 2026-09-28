@@ -76,12 +76,31 @@ post() {
 PLAYER="$(post tutorial/advance.php '{"action":"welcome_complete"}')"
 echo "$PLAYER" | jq -e '.player.tutorial.step == "buy_first_car"' >/dev/null
 
-PLAYER="$(post showroom/purchase.php '{"stockId":1}')"
+LOT="$(curl -sS -b "$COOKIE" "http://127.0.0.1:$PORT/api/usedlot/listings.php")"
+echo "$LOT" | jq -e '[.lot.listings[] | select(.starterListing == true)] | length == 3' >/dev/null
+echo "$LOT" | jq -e '. as $root | [.lot.listings[] | select(.starterListing == true) as $listing | $root.cars[] | select(.stockId == $listing.stockId) | select(.starter == true and .class == "D")] | length == 3' >/dev/null
+STARTER_LISTING_ID="$(echo "$LOT" | jq -r '.lot.listings[] | select(.starterListing == true and .stockId == 1) | .listingId' | head -n1)"
+if [[ -z "$STARTER_LISTING_ID" || "$STARTER_LISTING_ID" == "null" ]]; then
+  echo "Civic starter listing was not generated." >&2
+  exit 1
+fi
+STARTER_BODY="$(jq -nc --arg listingId "$STARTER_LISTING_ID" '{listingId:$listingId}')"
+PLAYER="$(post usedlot/purchase.php "$STARTER_BODY")"
 CAR_ID="$(echo "$PLAYER" | jq -r '.player.selectedCarId')"
-echo "$PLAYER" | jq -e '.player.garage[0].buildStage == 1 and .player.tutorial.step == "visit_garage"' >/dev/null
+echo "$PLAYER" | jq -e '.player.garage[0].buildStage == 1 and .player.garage[0].source == "used" and .player.garage[0].mileage >= 105000 and .player.tutorial.step == "visit_garage"' >/dev/null
 
 PLAYER="$(post tutorial/advance.php '{"action":"garage_explained"}')"
 echo "$PLAYER" | jq -e '.player.tutorial.step == "buy_first_upgrade"' >/dev/null
+
+BLOCKED_PART="$(mktemp)"
+BLOCKED_PART_STATUS="$(curl -sS -o "$BLOCKED_PART" -w '%{http_code}' -b "$COOKIE" -H "X-CSRF-Token: $CSRF" -H 'Content-Type: application/json' -d '{"catalogId":"s1_exhaust_1"}' "http://127.0.0.1:$PORT/api/parts/purchase.php")"
+if [[ "$BLOCKED_PART_STATUS" == "200" ]]; then
+  echo "FTUE incorrectly allowed a non-Intake first upgrade." >&2
+  cat "$BLOCKED_PART" >&2 || true
+  rm -f "$BLOCKED_PART"
+  exit 1
+fi
+rm -f "$BLOCKED_PART"
 
 PLAYER="$(post parts/purchase.php '{"catalogId":"s1_intake_1"}')"
 PART_ID="$(echo "$PLAYER" | jq -r '.player.inventory.parts[] | select(.catalogId=="s1_intake_1") | .inventoryId')"
@@ -93,7 +112,7 @@ echo "$PLAYER" | jq -e '.player.garage[0].derived.hp == 109 and .player.tutorial
 PLAYER="$(post race/start.php '{"distance":"1/4"}')"
 RACE_ID="$(echo "$PLAYER" | jq -r '.activeRace.raceId')"
 echo "$PLAYER" | jq -e '.player.tutorial.step == "first_race" and .player.stats.races == 0 and .player.progression.exp == 0 and (.player.raceHistory | length) == 0' >/dev/null
-echo "$PLAYER" | jq -e '.activeRace.distance == "1/4" and .activeRace.race.player.trapSpeed > 0 and (.activeRace.race.location.name | length) > 0 and (.activeRace.race.weather.name | length) > 0' >/dev/null
+echo "$PLAYER" | jq -e '.activeRace.distance == "1/4" and .activeRace.race.player.trapSpeed > 0 and .activeRace.race.location.name == "Local Test & Tune" and .activeRace.race.weather.name == "Cool & Cloudy" and .activeRace.race.player.foul == false and .activeRace.race.opponent.foul == false and .activeRace.race.won == true' >/dev/null
 
 DUP_RACE="$(post race/start.php '{"distance":"1/2"}')"
 echo "$DUP_RACE" | jq -e --arg raceId "$RACE_ID" '.activeRace.raceId == $raceId and .activeRace.distance == "1/4" and .player.stats.races == 0' >/dev/null
@@ -102,15 +121,18 @@ sleep 0.35
 RACE_BODY="$(printf '{"raceId":"%s"}' "$RACE_ID")"
 PLAYER="$(post race/finish.php "$RACE_BODY")"
 echo "$PLAYER" | jq -e '.player.activeRace == null and .player.tutorial.status == "complete" and .player.progression.rep >= 27 and .player.progression.exp > 0 and .player.stats.races == 1 and (.player.raceHistory | length) == 1' >/dev/null
-echo "$PLAYER" | jq -e '.race.distance == "1/4" and .race.player.trapSpeed > 0' >/dev/null
+echo "$PLAYER" | jq -e '.race.distance == "1/4" and .race.player.trapSpeed > 0 and .race.player.foul == false and .race.won == true' >/dev/null
 
-PLAYER="$(post race/start.php '{"distance":"1/2"}')"
-RACE_ID="$(echo "$PLAYER" | jq -r '.activeRace.raceId')"
-echo "$PLAYER" | jq -e '.activeRace.distance == "1/2" and .player.stats.races == 1' >/dev/null
-sleep 0.65
-RACE_BODY="$(printf '{"raceId":"%s"}' "$RACE_ID")"
-PLAYER="$(post race/finish.php "$RACE_BODY")"
-echo "$PLAYER" | jq -e '.race.distance == "1/2" and .player.stats.races == 2 and ((.player.raceHistory | length) == 2)' >/dev/null
+BLOCKED_HALF="$(mktemp)"
+BLOCKED_HALF_STATUS="$(curl -sS -o "$BLOCKED_HALF" -w '%{http_code}' -b "$COOKIE" -H "X-CSRF-Token: $CSRF" -H 'Content-Type: application/json' -d '{"distance":"1/2"}' "http://127.0.0.1:$PORT/api/race/start.php")"
+if [[ "$BLOCKED_HALF_STATUS" == "200" ]]; then
+  echo "Level 1 player incorrectly started a 1/2-mile race." >&2
+  cat "$BLOCKED_HALF" >&2 || true
+  rm -f "$BLOCKED_HALF"
+  exit 1
+fi
+grep -qi "Level 5" "$BLOCKED_HALF"
+rm -f "$BLOCKED_HALF"
 
 LOT="$(curl -sS -b "$COOKIE" "http://127.0.0.1:$PORT/api/usedlot/listings.php")"
 echo "$LOT" | jq -e '.lot.listings | length >= 4' >/dev/null
@@ -131,4 +153,4 @@ if [[ "$FRESH_STATUS" != "200" ]]; then
 fi
 jq -e '.authenticated == true and .player.tutorial.step == "welcome" and ((.player.garage | length) == 0) and .player.progression.exp == 0' "$LOGIN2" >/dev/null
 
-echo "Authenticated PHP API FTUE + Garage Inventory data + V0.4B race smoke test passed."
+echo "Authenticated PHP API V0.4D guided FTUE + progression gate smoke test passed."

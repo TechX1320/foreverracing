@@ -80,8 +80,11 @@ export class LocalGameService {
     const spec = this.findBy(this.cars, 'stockId', Number(stockId));
     if (!spec) throw new LocalGameError('That showroom car does not exist.', 404);
     return this.mutate(inputPlayer, (player) => {
-      if (player.tutorial?.status === 'active' && player.tutorial?.step === 'buy_first_car' && !spec.starter) {
-        throw new LocalGameError('Choose one of the highlighted starter cars for your first build.');
+      if (player.tutorial?.status === 'active' && player.tutorial?.step === 'buy_first_car') {
+        throw new LocalGameError('Your first car comes from the Classifieds. Start with a D Class used car and work your way up.');
+      }
+      if (player.tutorial?.status !== 'active' && Number(player.progression?.level || 1) < 5) {
+        throw new LocalGameError('The Showroom unlocks at Level 5. Keep building through Classifieds first.');
       }
       const price = Number(spec.price || 0);
       this.requireCredits(player, price);
@@ -120,6 +123,9 @@ export class LocalGameService {
       const car = this.selectedCar(player);
       if (!car) throw new LocalGameError('Select a car before buying build parts.');
       this.requirePartCompatible(player, car, spec, { purchasing: true });
+      if (player.tutorial?.status === 'active' && player.tutorial?.step === 'buy_first_upgrade' && String(spec.catalogId) !== 's1_intake_1') {
+        throw new LocalGameError('For the tutorial, start with the Stage 1 Intake.');
+      }
       const price = Number(spec.price || 0);
       this.requireCredits(player, price);
       player.wallet.credits -= price;
@@ -141,6 +147,9 @@ export class LocalGameService {
       const spec = this.findBy(this.parts, 'catalogId', String(instance.catalogId || ''));
       if (!spec) throw new LocalGameError('Part catalog entry is missing.', 500);
       const car = player.garage[carIndex];
+      if (player.tutorial?.status === 'active' && player.tutorial?.step === 'install_first_upgrade' && String(spec.catalogId) !== 's1_intake_1') {
+        throw new LocalGameError('Install the Stage 1 Intake to continue the tutorial.');
+      }
       this.requirePartCompatible(player, car, spec, { purchasing: false });
 
       const slot = String(spec.slot || '');
@@ -189,7 +198,7 @@ export class LocalGameService {
       const index = this.requireOwnedCarIndex(player, carId);
       const car = player.garage[index];
       if (Number(car.buildStage || 1) !== 1) throw new LocalGameError('Only Street Car to Street Race Car conversion is enabled in this build.');
-      const required = this.buildStages?.[0]?.requiredCategories || ['intake','exhaust','ecu','fuel','drivetrain','tires','weight'];
+      const required = this.buildStages?.[0]?.requiredCategories || ['intake','exhaust','ecu','fuel','drivetrain','suspension','tires','weight'];
       const incomplete = required.filter((key) => this.installedSimpleTier(player, carId, key) < 3);
       if (incomplete.length) throw new LocalGameError('Max every Street Car upgrade category before converting to a Street Race Car.');
       car.stageBaseline = clone(car.derived);
@@ -226,20 +235,19 @@ export class LocalGameService {
   generateUsedLot() {
     const timestamp = now();
     const currentYear = new Date().getFullYear();
-    const candidates = this.cars.filter((spec) => Number(spec.year || 0) <= currentYear - 3);
-    const pool = candidates.length ? candidates : this.cars;
+    const olderCars = this.cars.filter((spec) => Number(spec.year || 0) <= currentYear - 3);
+    const pool = olderCars.length ? olderCars : this.cars;
     if (!pool.length) return { generatedAt: timestamp, expiresAt: timestamp + this.config.usedLotRefreshSeconds, listings: [] };
-    const listings = [];
-    const count = Math.min(8, Math.max(4, pool.length));
-    for (let i = 0; i < count; i += 1) {
-      const spec = randomChoice(pool);
-      const mileage = randomInt(2800, 195000);
-      const condition = randomInt(58, 98);
+
+    const makeListing = (spec, starterListing = false) => {
+      const mileage = starterListing ? randomInt(105000, 190000) : randomInt(2800, 195000);
+      const condition = starterListing ? randomInt(62, 79) : randomInt(58, 98);
       const mileageFactor = Math.max(0.46, 1 - (mileage / 330000));
       const conditionFactor = 0.42 + (0.58 * Math.pow(condition / 100, 1.7));
       let price = Math.round((Number(spec.price || 0) * mileageFactor * conditionFactor) / 50) * 50;
+      if (starterListing) price = Math.min(8500, Math.max(2500, Math.round(price * 0.82 / 50) * 50));
       price = Math.max(1200, price);
-      listings.push({
+      return {
         listingId: this.id('used'),
         stockId: Number(spec.stockId),
         price,
@@ -248,8 +256,16 @@ export class LocalGameService {
         basePrice: Number(spec.price || 0),
         mileageFactor: Math.round(mileageFactor * 1000) / 1000,
         conditionFactor: Math.round(conditionFactor * 1000) / 1000,
-      });
-    }
+        starterListing,
+      };
+    };
+
+    const starters = pool
+      .filter((spec) => Boolean(spec.starter) && String(spec.class || '').toUpperCase() === 'D')
+      .slice(0, 3);
+    const listings = starters.map((spec) => makeListing(spec, true));
+    while (listings.length < 8) listings.push(makeListing(randomChoice(pool), false));
+
     return { generatedAt: timestamp, expiresAt: timestamp + this.config.usedLotRefreshSeconds, listings };
   }
 
@@ -259,6 +275,10 @@ export class LocalGameService {
     const spec = this.findBy(this.cars, 'stockId', Number(listing.stockId));
     if (!spec) throw new LocalGameError('Vehicle catalog entry is missing.', 500);
     const player = this.mutate(inputPlayer, (draft) => {
+      const tutorialStarter = draft.tutorial?.status === 'active' && draft.tutorial?.step === 'buy_first_car';
+      if (tutorialStarter && (!spec.starter || String(spec.class || '').toUpperCase() !== 'D')) {
+        throw new LocalGameError('Your first car must be one of the highlighted D Class starter listings.');
+      }
       const price = Number(listing.price || 0);
       this.requireCredits(draft, price);
       draft.wallet.credits -= price;
@@ -267,6 +287,7 @@ export class LocalGameService {
       draft.stats.usedPurchases = Number(draft.stats.usedPurchases || 0) + 1;
       if (!draft.selectedCarId) draft.selectedCarId = car.carId;
       this.addTransaction(draft, 'used_purchase', -price, car.displayName);
+      if (tutorialStarter) this.completeTutorialStep(draft, 'buy_first_car', 'visit_garage');
     });
     const nextLot = clone(lot);
     nextLot.listings = (nextLot.listings || []).filter((row) => String(row.listingId) !== String(listingId));
@@ -285,25 +306,40 @@ export class LocalGameService {
       const carIndex = this.requireOwnedCarIndex(draft, draft.selectedCarId);
       const car = draft.garage[carIndex];
       const level = Number(draft.progression?.level || 1);
-      const weather = this.raceSimulator.randomWeather();
-      const location = this.raceSimulator.randomLocation();
+      const tutorialRace = draft.tutorial?.status === 'active' && draft.tutorial?.step === 'first_race';
+      const unlockLevel = distance === '1' ? 10 : distance === '1/2' ? 5 : 1;
+      if (tutorialRace && distance !== '1/4') throw new LocalGameError('Your first race is the 1/4 mile.');
+      if (!tutorialRace && level < unlockLevel) throw new LocalGameError(`${distanceConfig.label || distance} unlocks at Level ${unlockLevel}.`);
+      const weather = tutorialRace
+        ? { name: 'Cool & Cloudy', etModifier: 0, mphModifier: 0, weight: 1 }
+        : this.raceSimulator.randomWeather(level);
+      const location = tutorialRace
+        ? { name: 'Local Test & Tune', weight: 1 }
+        : this.raceSimulator.randomLocation(level);
 
       const hp = Math.max(1, Number(car.derived?.hp || 1));
       const torque = Math.max(1, Number(car.derived?.torque || 1));
       const weight = Math.max(500, Number(car.derived?.weight || 500));
       const grip = Math.max(0.5, Number(car.derived?.grip || 1));
       const pwr = hp / weight;
-      const difficulty = 0.94 + (Math.random() * 0.14);
+      const difficulty = tutorialRace ? 0.84 + (Math.random() * 0.05) : 0.94 + (Math.random() * 0.14);
       const opponentWeight = Math.max(1200, Math.round(weight * (0.90 + (Math.random() * 0.20))));
       const opponentHp = Math.max(55, Math.round(pwr * difficulty * opponentWeight));
       const opponentTorque = Math.max(50, Math.round(torque * difficulty * (0.93 + (Math.random() * 0.14))));
       const opponentGrip = Math.max(0.65, Math.min(1.45, grip + ((Math.random() * 0.12) - 0.06)));
-      const opponentLevel = Math.max(1, level + randomInt(-3, 3));
+      const opponentLevel = tutorialRace ? 1 : Math.max(1, level + randomInt(-3, 3));
 
-      const playerRun = this.raceSimulator.simulate({ hp, torque, weight, grip, level }, distance, weather);
+      const playerRun = this.raceSimulator.simulate({ hp, torque, weight, grip, level, allowFoul: !tutorialRace }, distance, weather);
       const opponentRun = this.raceSimulator.simulate({
         hp: opponentHp, torque: opponentTorque, weight: opponentWeight, grip: opponentGrip, level: opponentLevel,
+        allowFoul: !tutorialRace, reactionOffset: tutorialRace ? 0.16 : 0,
       }, distance, weather);
+      if (tutorialRace && opponentRun.totalTime <= playerRun.totalTime) {
+        const delta = (playerRun.totalTime - opponentRun.totalTime) + 0.25;
+        opponentRun.reactionTime = round3(Number(opponentRun.reactionTime || 0) + delta);
+        opponentRun.totalTime = round3(Number(opponentRun.totalTime || 0) + delta);
+        opponentRun.foul = false;
+      }
 
       const won = playerRun.totalTime < opponentRun.totalTime;
       const creditMultiplier = Number(distanceConfig.creditMultiplier || 1);
@@ -443,8 +479,8 @@ export class LocalGameService {
 
   roguelikeStart(inputPlayer) {
     return this.mutate(inputPlayer, (player) => {
-      if (!this.selectedCar(player)) throw new LocalGameError('Select a car before starting a RogueLike run.');
-      if (player.roguelike.activeRun && typeof player.roguelike.activeRun === 'object') throw new LocalGameError('A RogueLike run is already active.');
+      if (!this.selectedCar(player)) throw new LocalGameError('Select a car before starting a The Circuit run.');
+      if (player.roguelike.activeRun && typeof player.roguelike.activeRun === 'object') throw new LocalGameError('A The Circuit run is already active.');
       player.roguelike.runsStarted = Number(player.roguelike.runsStarted || 0) + 1;
       player.roguelike.activeRun = {
         runId: this.id('run'), stage: 1, maxStages: 7, runCredits: 0, boost: 0, startedAt: now(), lastResult: null,
@@ -457,7 +493,7 @@ export class LocalGameService {
     let step = null;
     const player = this.mutate(inputPlayer, (draft) => {
       const run = draft.roguelike.activeRun;
-      if (!run || typeof run !== 'object') throw new LocalGameError('No active RogueLike run.');
+      if (!run || typeof run !== 'object') throw new LocalGameError('No active The Circuit run.');
       const car = this.selectedCar(draft);
       if (!car) throw new LocalGameError('Your selected car is missing.');
       const stage = Number(run.stage || 1);
@@ -471,7 +507,7 @@ export class LocalGameService {
       if (!won) {
         const banked = Math.floor(Number(run.runCredits || 0) * 0.35);
         draft.wallet.credits += banked;
-        this.addTransaction(draft, 'roguelike_cashout', banked, 'RogueLike consolation');
+        this.addTransaction(draft, 'roguelike_cashout', banked, 'The Circuit consolation');
         draft.roguelike.bestStage = Math.max(Number(draft.roguelike.bestStage || 0), stage);
         draft.roguelike.activeRun = null;
         step = { won: false, stage, banked, finished: true };
@@ -483,7 +519,7 @@ export class LocalGameService {
       if (finished) {
         const banked = Number(run.runCredits || 0);
         draft.wallet.credits += banked;
-        this.addTransaction(draft, 'roguelike_cashout', banked, 'RogueLike complete');
+        this.addTransaction(draft, 'roguelike_cashout', banked, 'The Circuit complete');
         draft.roguelike.runsCompleted = Number(draft.roguelike.runsCompleted || 0) + 1;
         draft.roguelike.bestStage = Math.max(Number(draft.roguelike.bestStage || 0), stage);
         draft.roguelike.activeRun = null;

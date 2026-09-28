@@ -3,7 +3,7 @@ import { renderVehicle } from "../ui/vehicleRenderer.js";
 import { showDialog, closeDialog } from "../ui/modal.js";
 
 let partsCache = null;
-const REQUIRED = ["intake", "exhaust", "ecu", "fuel", "drivetrain", "tires", "weight"];
+const REQUIRED = ["intake", "exhaust", "ecu", "fuel", "drivetrain", "suspension", "tires", "weight"];
 const BUILD_NAMES = {
   1: "Street Car",
   2: "Street Race Car",
@@ -21,11 +21,11 @@ export async function renderGarage(ctx) {
   const tutorialStep = player?.tutorial?.status === "active" ? player.tutorial.step : null;
 
   const body = garage.length === 0
-    ? `<div class="empty-state"><strong>Your garage is empty.</strong><span>Buy a car before there is anything to manage here.</span><div class="cluster" style="justify-content:center;margin-top:12px"><button class="button button--primary button--small" data-go-showroom>SHOWROOM</button></div></div>`
+    ? `<div class="empty-state"><strong>Your garage is empty.</strong><span>Find an older car in Classifieds before there is anything to manage here.</span><div class="cluster" style="justify-content:center;margin-top:12px"><button class="button button--primary" data-go-classifieds>OPEN CLASSIFIEDS</button></div></div>`
     : `
-      ${tutorialStep === "visit_garage" ? garageTutorial() : ""}
       ${tutorialStep === "install_first_upgrade" ? installTutorial() : ""}
-      <div class="garage-list">${garage.map((car) => carRow(player, car, partsCache, tutorialStep)).join("")}</div>`;
+      <div class="garage-list">${garage.map((car) => carRow(player, car, partsCache, tutorialStep)).join("")}</div>
+      ${tutorialStep === "visit_garage" ? garageTutorial() : ""}`;
 
   ctx.screenRoot.innerHTML = pageShell({
     title: "Garage",
@@ -36,7 +36,7 @@ export async function renderGarage(ctx) {
   });
 
   bindHome(ctx.screenRoot, ctx.router);
-  ctx.screenRoot.querySelector("[data-go-showroom]")?.addEventListener("click", () => ctx.router.navigate("showroom"));
+  ctx.screenRoot.querySelector("[data-go-classifieds]")?.addEventListener("click", () => ctx.router.navigate("usedlot"));
   ctx.screenRoot.querySelector("[data-ftue-garage]")?.addEventListener("click", async (event) => {
     event.currentTarget.disabled = true;
     try {
@@ -119,18 +119,23 @@ function carRow(player, car, catalog, tutorialStep) {
 }
 
 function garageTutorial() {
-  return `<div class="objective-box objective-box--active">
-    <div><span class="objective-kicker">FTUE • READ YOUR CAR</span><strong>Know what you are building</strong></div>
-    <p>Power, torque and weight are the basic performance picture. <b>Build Type</b> describes how radical the car has become. Your first build begins as a Street Car.</p>
-    <button class="button button--primary button--small" data-ftue-garage>GOT IT — SHOW ME PARTS</button>
-  </div>`;
+  return `<section class="ftue-focus-panel ftue-focus-panel--garage">
+    <div class="ftue-focus-panel__step">FTUE 3/6</div>
+    <div class="ftue-focus-panel__copy">
+      <span>THIS IS YOUR CAR</span>
+      <strong>Now make it faster.</strong>
+      <p>Power, torque, weight and Build Type live on the car card above. You will manage owned parts from this Garage later.</p>
+    </div>
+    <button class="button button--primary ftue-primary-action" data-ftue-garage>CONTINUE TO PARTS →</button>
+  </section>`;
 }
 
 function installTutorial() {
-  return `<div class="objective-box objective-box--active">
-    <div><span class="objective-kicker">FTUE • INSTALL YOUR PART</span><strong>Open the car's Inventory</strong></div>
-    <p>The shop only sells parts. Your Garage Inventory is where you install, remove and swap the parts you own for this car.</p>
-  </div>`;
+  return `<section class="ftue-focus-panel ftue-focus-panel--compact">
+    <div class="ftue-focus-panel__step">FTUE 5/6</div>
+    <div class="ftue-focus-panel__copy"><span>PART PURCHASED</span><strong>Install the Intake.</strong><p>Your car's Inventory opens automatically. Install the highlighted part to continue.</p></div>
+    <div class="ftue-focus-panel__arrow">↓ INSTALL</div>
+  </section>`;
 }
 
 function openInventory(ctx, carId) {
@@ -138,21 +143,28 @@ function openInventory(ctx, carId) {
   const car = player?.garage?.find((entry) => String(entry.carId) === String(carId));
   if (!car) return;
 
+  const tutorialInstall = player?.tutorial?.status === "active" && player?.tutorial?.step === "install_first_upgrade";
   const items = inventoryForCar(player, car)
     .map((item) => ({ item, spec: partsCache.find((part) => part.catalogId === item.catalogId) }))
-    .filter((row) => row.spec)
+    .filter((row) => row.spec && (!tutorialInstall || String(row.spec.catalogId) === "s1_intake_1"))
     .sort((a, b) => String(a.spec.category).localeCompare(String(b.spec.category)) || Number(a.spec.simpleTier || 0) - Number(b.spec.simpleTier || 0));
 
   const dialog = showDialog(`
-    <div class="dialog-body garage-inventory-dialog">
-      <div class="garage-inventory-dialog__head">
-        <div class="dialog-vehicle">${renderVehicle(car, { stage: Number(car.buildStage || 1), view: "sideProfile" })}</div>
-        <div><span class="section-label">${escapeHtml(buildName(Number(car.buildStage || 1)))} INVENTORY</span><h2>${escapeHtml(carLabel(car))}</h2><p>Install and swap parts here. Street Car ladder upgrades cannot be downgraded after installation.</p></div>
+    <div class="dialog-body garage-inventory-dialog ${tutorialInstall ? "garage-inventory-dialog--ftue" : ""}">
+      <div class="garage-inventory-dialog__titlebar">
+        <div>
+          <span class="section-label">${tutorialInstall ? "FTUE • INSTALL THIS PART" : `${escapeHtml(buildName(Number(car.buildStage || 1)))} INVENTORY`}</span>
+          <h2>${escapeHtml(carLabel(car))}</h2>
+          <p>${tutorialInstall ? "One action: install your new Stage 1 Intake." : "Owned parts live here. Install, remove and swap them without returning to the shop."}</p>
+        </div>
+        <div class="garage-inventory-dialog__car">${renderVehicle(car, { stage: Number(car.buildStage || 1), view: "sideProfile" })}</div>
       </div>
       <div class="garage-inventory-list">
-        ${items.length ? items.map(({ item, spec }) => inventoryRow(player, car, item, spec)).join("") : '<div class="empty-state"><strong>No parts owned for this car.</strong><span>Open Parts to buy upgrades. They will appear here.</span></div>'}
+        ${items.length ? items.map(({ item, spec }) => inventoryRow(player, car, item, spec, tutorialInstall)).join("") : '<div class="empty-state"><strong>No parts owned for this car.</strong><span>Open Parts to buy upgrades. They will appear here.</span></div>'}
       </div>
-      <div class="dialog-actions"><button class="button button--small" type="button" data-close>CLOSE</button><button class="button button--primary button--small" type="button" data-shop>OPEN PARTS</button></div>
+      <div class="dialog-actions">
+        ${tutorialInstall ? "" : '<button class="button" type="button" data-close>CLOSE</button><button class="button button--primary" type="button" data-shop>OPEN PARTS</button>'}
+      </div>
     </div>`);
 
   dialog.querySelector("[data-close]")?.addEventListener("click", () => closeDialog(dialog));
@@ -168,7 +180,11 @@ function openInventory(ctx, carId) {
         const data = await ctx.storage.installPart(button.dataset.installOwned, carId);
         ctx.store.setPlayer(data.player);
         closeDialog(dialog);
-        ctx.toast("Part installed", "The car's setup and stats were recalculated.");
+        ctx.toast("Part installed", "Upgrade installed. Your first 1/4-mile race is next.");
+        if (data.player?.tutorial?.status === "active" && data.player?.tutorial?.step === "first_race") {
+          ctx.router.navigate("quick-race");
+          return;
+        }
         await renderGarage(ctx);
         const updated = data.player?.garage?.find((entry) => String(entry.carId) === String(carId));
         if (updated && streetCarProgress(data.player, updated, partsCache)?.ready) {
@@ -199,7 +215,7 @@ function openInventory(ctx, carId) {
   });
 }
 
-function inventoryRow(player, car, item, spec) {
+function inventoryRow(player, car, item, spec, tutorialInstall = false) {
   const installed = String(item.installedOnCarId || "") === String(car.carId);
   const stage = Number(car.buildStage || 1);
   const simpleTier = Number(spec.simpleTier || 0);
@@ -217,10 +233,10 @@ function inventoryRow(player, car, item, spec) {
     action = `<button class="button button--primary button--small" data-install-owned="${escapeHtml(item.inventoryId)}">INSTALL</button>`;
   }
 
-  return `<article class="garage-inventory-row ${installed ? "is-installed" : ""}">
-    <div><span class="garage-inventory-row__category">${escapeHtml(spec.category || spec.categoryKey)}</span><strong>${escapeHtml(spec.name)}</strong><small>${escapeHtml(spec.description || "")}</small></div>
+  return `<article class="garage-inventory-row ${installed ? "is-installed" : ""} ${tutorialInstall ? "garage-inventory-row--ftue tutorial-target" : ""}">
+    <div class="garage-inventory-row__identity"><span class="garage-inventory-row__category">${escapeHtml(spec.category || spec.categoryKey)}</span><strong>${escapeHtml(spec.name)}</strong><small>${escapeHtml(spec.description || "")}</small></div>
     <div class="garage-inventory-row__effects">${effectsSummary(spec.effects || [])}</div>
-    <div class="garage-inventory-row__action">${action}</div>
+    <div class="garage-inventory-row__action">${tutorialInstall && !installed ? action.replace('button--small', 'ftue-primary-action') : action}</div>
   </article>`;
 }
 

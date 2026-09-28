@@ -6,22 +6,40 @@ export async function renderUsedLot(ctx) {
   const data = await ctx.storage.usedLot();
   const player = ctx.store.player;
   const catalog = data.cars || [];
-  const lot = data.lot || { listings: [] };
-  const listings = lot.listings || [];
+  let lot = data.lot || { listings: [] };
+  const tutorialStarter = player?.tutorial?.status === "active" && player?.tutorial?.step === "buy_first_car";
+  let listings = lot.listings || [];
+  let visibleListings = tutorialStarter
+    ? listings.filter((listing) => {
+        const car = catalog.find((entry) => Number(entry.stockId) === Number(listing.stockId));
+        return Boolean(car?.starter) && String(car?.class || "").toUpperCase() === "D";
+      })
+    : listings;
+
+  if (tutorialStarter && visibleListings.length < 3) {
+    const refreshed = await ctx.storage.refreshUsedLot();
+    lot = refreshed.lot || lot;
+    listings = lot.listings || [];
+    visibleListings = listings.filter((listing) => {
+      const car = catalog.find((entry) => Number(entry.stockId) === Number(listing.stockId));
+      return Boolean(car?.starter) && String(car?.class || "").toUpperCase() === "D";
+    });
+  }
 
   ctx.screenRoot.innerHTML = pageShell({
     title: "Classifieds",
-    eyebrow: "ROTATING MARKET",
-    hint: `${listings.length} listings`,
-    trail: `Refreshes ${formatTime(lot.expiresAt)}`,
+    eyebrow: tutorialStarter ? "YOUR FIRST CAR" : "USED & OLDER CARS",
+    hint: tutorialStarter ? "D CLASS STARTERS" : `${visibleListings.length} listings`,
+    trail: tutorialStarter ? "Pick one cheap platform and start from the bottom" : `Refreshes ${formatTime(lot.expiresAt)}`,
     body: `
-      <div class="classifieds-intro">
-        <p>Older cars, used cars and future player listings live here. Open a listing for the full vehicle and pricing details.</p>
-        <button class="button button--small" type="button" data-refresh-lot>DEV REFRESH</button>
-      </div>
-      ${listings.length
-        ? `<div class="classifieds-grid">${listings.map((listing) => listingCard(listing, catalog)).join("")}</div>`
-        : '<div class="empty-state"><strong>No listings right now.</strong><span>Refresh the market or check back later.</span></div>'}
+      ${tutorialStarter ? starterObjective() : `
+        <div class="classifieds-intro">
+          <p>Older cars, used cars and future player listings live here. Open a listing for the full vehicle and pricing details.</p>
+          <button class="button button--small" type="button" data-refresh-lot>DEV REFRESH</button>
+        </div>`}
+      ${visibleListings.length
+        ? `<div class="classifieds-grid ${tutorialStarter ? "classifieds-grid--starter" : ""}">${visibleListings.map((listing) => listingCard(listing, catalog, tutorialStarter)).join("")}</div>`
+        : '<div class="empty-state"><strong>No starter listings right now.</strong><span>Refresh the market and try again.</span></div>'}
     `,
   });
 
@@ -40,15 +58,27 @@ export async function renderUsedLot(ctx) {
   });
 
   ctx.screenRoot.querySelectorAll("[data-listing-details]").forEach((button) => {
-    button.addEventListener("click", () => openListing(ctx, button.dataset.listingDetails, listings, catalog, player));
+    button.addEventListener("click", () => openListing(ctx, button.dataset.listingDetails, listings, catalog, player, tutorialStarter));
   });
 }
 
-function listingCard(listing, catalog) {
+function starterObjective() {
+  return `<section class="ftue-focus-panel">
+    <div class="ftue-focus-panel__step">FTUE 2/6</div>
+    <div class="ftue-focus-panel__copy">
+      <span>FIRST CAR</span>
+      <strong>Pick a D Class beater.</strong>
+      <p>You are not starting rich. Choose one used starter below and build it into something worth racing.</p>
+    </div>
+    <div class="ftue-focus-panel__arrow">↓ SELECT A CAR BELOW</div>
+  </section>`;
+}
+
+function listingCard(listing, catalog, tutorialStarter = false) {
   const car = catalog.find((entry) => Number(entry.stockId) === Number(listing.stockId));
   if (!car) return "";
   return `
-    <article class="classified-card">
+    <article class="classified-card ${tutorialStarter ? "tutorial-target classified-card--starter" : ""}">
       <div class="classified-card__visual">${renderVehicle(car, { stage: 1, view: "sideProfile" })}</div>
       <div class="classified-card__body">
         <div class="classified-card__title">
@@ -56,12 +86,12 @@ function listingCard(listing, catalog) {
           <span class="condition-badge ${conditionClass(listing.condition)}">${number(listing.condition)}%</span>
         </div>
         <div class="classified-card__meta"><span>${number(listing.mileage)} mi</span><b>${money(listing.price)} cr</b></div>
-        <button class="button button--primary button--small button--wide" type="button" data-listing-details="${escapeHtml(listing.listingId)}">MORE DETAILS</button>
+        <button class="button button--primary button--wide" type="button" data-listing-details="${escapeHtml(listing.listingId)}">${tutorialStarter ? "SELECT THIS CAR" : "MORE DETAILS"}</button>
       </div>
     </article>`;
 }
 
-function openListing(ctx, listingId, listings, catalog, playerSnapshot) {
+function openListing(ctx, listingId, listings, catalog, playerSnapshot, tutorialStarter = false) {
   const listing = listings.find((entry) => String(entry.listingId) === String(listingId));
   const car = catalog.find((entry) => Number(entry.stockId) === Number(listing?.stockId));
   if (!listing || !car) return;
@@ -77,7 +107,7 @@ function openListing(ctx, listingId, listings, catalog, playerSnapshot) {
       <div class="classified-detail-dialog__hero">
         <div class="dialog-vehicle">${renderVehicle(car, { stage: 1, view: "sideProfile" })}</div>
         <div>
-          <span class="section-label">CLASSIFIED LISTING</span>
+          <span class="section-label">${tutorialStarter ? "FIRST CAR / D CLASS" : "CLASSIFIED LISTING"}</span>
           <h2>${car.year} ${escapeHtml(car.make)} ${escapeHtml(car.model)}</h2>
           <p>${conditionText(listing.condition)} • ${number(listing.mileage)} miles • ${escapeHtml(car.base?.drivetrain || "")}</p>
           <strong class="classified-detail-price">${money(listing.price)} cr</strong>
@@ -111,7 +141,7 @@ function openListing(ctx, listingId, listings, catalog, playerSnapshot) {
       <div class="dialog-actions">
         <button class="button button--small" type="button" data-cancel>CLOSE</button>
         <button class="button button--primary" type="button" data-confirm ${canBuy ? "" : "disabled"}>
-          ${canBuy ? `BUY CAR • ${money(listing.price)} CR` : "NOT ENOUGH CREDITS"}
+          ${canBuy ? (tutorialStarter ? `SELECT THIS CAR • ${money(listing.price)} CR` : `BUY CAR • ${money(listing.price)} CR`) : "NOT ENOUGH CREDITS"}
         </button>
       </div>
     </div>`);
@@ -124,7 +154,11 @@ function openListing(ctx, listingId, listings, catalog, playerSnapshot) {
       ctx.store.setPlayer(data.player);
       closeDialog(dialog);
       ctx.toast("Car purchased", `${car.year} ${car.make} ${car.model} is now in your Garage.`);
-      await renderUsedLot(ctx);
+      if (data.player?.tutorial?.status === "active" && data.player?.tutorial?.step === "visit_garage") {
+        ctx.router.navigate("garage");
+      } else {
+        await renderUsedLot(ctx);
+      }
     } catch (err) {
       dialog.querySelector("[data-error]").textContent = err.message;
       event.currentTarget.disabled = false;

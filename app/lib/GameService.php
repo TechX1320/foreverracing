@@ -120,8 +120,11 @@ final class GameService
         }
 
         return self::mutatePlayer(function (array $player) use ($spec): array {
-            if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'buy_first_car' && empty($spec['starter'])) {
-                throw new GameException('Choose one of the highlighted starter cars for your first build.');
+            if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'buy_first_car') {
+                throw new GameException('Your first car comes from the Classifieds. Start with a D Class used car and work your way up.');
+            }
+            if (($player['tutorial']['status'] ?? '') !== 'active' && (int)($player['progression']['level'] ?? 1) < 5) {
+                throw new GameException('The Showroom unlocks at Level 5. Keep building through Classifieds first.');
             }
             $price = (int)$spec['price'];
             self::requireCredits($player, $price);
@@ -177,6 +180,9 @@ final class GameService
                 throw new GameException('Select a car before buying build parts.');
             }
             self::requirePartCompatible($player, $car, $spec, $catalog, true);
+            if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'buy_first_upgrade' && (string)$spec['catalogId'] !== 's1_intake_1') {
+                throw new GameException('For the tutorial, start with the Stage 1 Intake.');
+            }
             $price = (int)$spec['price'];
             self::requireCredits($player, $price);
             $player['wallet']['credits'] -= $price;
@@ -209,6 +215,9 @@ final class GameService
                 throw new GameException('Part catalog entry is missing.', 500);
             }
             $car = $player['garage'][$carIndex];
+            if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'install_first_upgrade' && (string)$spec['catalogId'] !== 's1_intake_1') {
+                throw new GameException('Install the Stage 1 Intake to continue the tutorial.');
+            }
             self::requirePartCompatible($player, $car, $spec, $catalog, false);
 
             $slot = (string)$spec['slot'];
@@ -269,7 +278,7 @@ final class GameService
     {
         $catalog = self::partsCatalog();
         $stageConfig = JsonStore::read(FR_DATA . '/config/build-stages.json', []);
-        $required = $stageConfig['stages'][0]['requiredCategories'] ?? ['intake','exhaust','ecu','fuel','drivetrain','tires','weight'];
+        $required = $stageConfig['stages'][0]['requiredCategories'] ?? ['intake','exhaust','ecu','fuel','drivetrain','suspension','tires','weight'];
 
         return self::mutatePlayer(function (array $player) use ($carId, $catalog, $required): array {
             $index = self::requireOwnedCarIndex($player, $carId);
@@ -363,6 +372,10 @@ final class GameService
         }
 
         $player = self::mutatePlayer(function (array $player) use ($listing, $spec): array {
+            $tutorialStarter = ($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'buy_first_car';
+            if ($tutorialStarter && (empty($spec['starter']) || strtoupper((string)($spec['class'] ?? '')) !== 'D')) {
+                throw new GameException('Your first car must be one of the highlighted D Class starter listings.');
+            }
             $price = (int)$listing['price'];
             self::requireCredits($player, $price);
             $player['wallet']['credits'] -= $price;
@@ -379,6 +392,9 @@ final class GameService
                 $player['selectedCarId'] = $car['carId'];
             }
             self::addTransaction($player, 'used_purchase', -$price, $car['displayName']);
+            if ($tutorialStarter) {
+                self::completeTutorialStep($player, 'buy_first_car', 'visit_garage');
+            }
             return $player;
         });
 
@@ -410,25 +426,47 @@ final class GameService
             $carIndex = self::requireOwnedCarIndex($player, (string)($player['selectedCarId'] ?? ''));
             $car = $player['garage'][$carIndex];
             $level = max(1, (int)($player['progression']['level'] ?? 1));
-            $weather = $simulator->randomWeather();
-            $location = $simulator->randomLocation();
+            $tutorialRace = ($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'first_race';
+            $unlockLevel = $distance === '1' ? 10 : ($distance === '1/2' ? 5 : 1);
+            if ($tutorialRace && $distance !== '1/4') {
+                throw new GameException('Your first race is the 1/4 mile.');
+            }
+            if (!$tutorialRace && $level < $unlockLevel) {
+                throw new GameException((string)($distanceConfig['label'] ?? $distance) . ' unlocks at Level ' . $unlockLevel . '.');
+            }
+            $weather = $tutorialRace
+                ? ['name' => 'Cool & Cloudy', 'etModifier' => 0, 'mphModifier' => 0, 'weight' => 1]
+                : $simulator->randomWeather($level);
+            $location = $tutorialRace
+                ? ['name' => 'Local Test & Tune', 'weight' => 1]
+                : $simulator->randomLocation($level);
 
             $hp = max(1.0, (float)($car['derived']['hp'] ?? 1));
             $torque = max(1.0, (float)($car['derived']['torque'] ?? 1));
             $weight = max(500.0, (float)($car['derived']['weight'] ?? 500));
             $grip = max(0.5, (float)($car['derived']['grip'] ?? 1));
             $pwr = $hp / $weight;
-            $difficulty = self::randomFloat(0.94, 1.08);
+            $difficulty = $tutorialRace ? self::randomFloat(0.84, 0.89) : self::randomFloat(0.94, 1.08);
             $opponentWeight = max(1200, (int)round($weight * self::randomFloat(0.90, 1.10)));
             $opponentHp = max(55, (int)round($pwr * $difficulty * $opponentWeight));
             $opponentTorque = max(50, (int)round($torque * $difficulty * self::randomFloat(0.93, 1.07)));
             $opponentGrip = max(0.65, min(1.45, $grip + self::randomFloat(-0.06, 0.06)));
-            $opponentLevel = max(1, $level + mt_rand(-3, 3));
+            $opponentLevel = $tutorialRace ? 1 : max(1, $level + mt_rand(-3, 3));
 
-            $playerRun = $simulator->simulate(['hp' => $hp, 'torque' => $torque, 'weight' => $weight, 'grip' => $grip, 'level' => $level], $distance, $weather);
+            $playerRun = $simulator->simulate([
+                'hp' => $hp, 'torque' => $torque, 'weight' => $weight, 'grip' => $grip, 'level' => $level,
+                'allowFoul' => !$tutorialRace,
+            ], $distance, $weather);
             $opponentRun = $simulator->simulate([
                 'hp' => $opponentHp, 'torque' => $opponentTorque, 'weight' => $opponentWeight, 'grip' => $opponentGrip, 'level' => $opponentLevel,
+                'allowFoul' => !$tutorialRace, 'reactionOffset' => $tutorialRace ? 0.16 : 0,
             ], $distance, $weather);
+            if ($tutorialRace && (float)$opponentRun['totalTime'] <= (float)$playerRun['totalTime']) {
+                $delta = ((float)$playerRun['totalTime'] - (float)$opponentRun['totalTime']) + 0.25;
+                $opponentRun['reactionTime'] = round((float)$opponentRun['reactionTime'] + $delta, 3);
+                $opponentRun['totalTime'] = round((float)$opponentRun['totalTime'] + $delta, 3);
+                $opponentRun['foul'] = false;
+            }
 
             $won = (float)$playerRun['totalTime'] < (float)$opponentRun['totalTime'];
             $creditMultiplier = (float)($distanceConfig['creditMultiplier'] ?? 1);
@@ -592,10 +630,10 @@ final class GameService
     {
         return self::mutatePlayer(function (array $player): array {
             if (!self::selectedCar($player)) {
-                throw new GameException('Select a car before starting a RogueLike run.');
+                throw new GameException('Select a car before starting a The Circuit run.');
             }
             if (is_array($player['roguelike']['activeRun'] ?? null)) {
-                throw new GameException('A RogueLike run is already active.');
+                throw new GameException('A The Circuit run is already active.');
             }
             $player['roguelike']['runsStarted'] = (int)$player['roguelike']['runsStarted'] + 1;
             $player['roguelike']['activeRun'] = [
@@ -621,7 +659,7 @@ final class GameService
         $player = self::mutatePlayer(function (array $player) use ($choice, &$step): array {
             $run = $player['roguelike']['activeRun'] ?? null;
             if (!is_array($run)) {
-                throw new GameException('No active RogueLike run.');
+                throw new GameException('No active The Circuit run.');
             }
             $car = self::selectedCar($player);
             if (!$car) {
@@ -640,7 +678,7 @@ final class GameService
             if (!$won) {
                 $banked = (int)floor(((int)$run['runCredits']) * 0.35);
                 $player['wallet']['credits'] += $banked;
-                self::addTransaction($player, 'roguelike_cashout', $banked, 'RogueLike consolation');
+                self::addTransaction($player, 'roguelike_cashout', $banked, 'The Circuit consolation');
                 $player['roguelike']['bestStage'] = max((int)$player['roguelike']['bestStage'], $stage);
                 $player['roguelike']['activeRun'] = null;
                 $step = ['won' => false, 'stage' => $stage, 'banked' => $banked, 'finished' => true];
@@ -653,7 +691,7 @@ final class GameService
             if ($finished) {
                 $banked = (int)$run['runCredits'];
                 $player['wallet']['credits'] += $banked;
-                self::addTransaction($player, 'roguelike_cashout', $banked, 'RogueLike complete');
+                self::addTransaction($player, 'roguelike_cashout', $banked, 'The Circuit complete');
                 $player['roguelike']['runsCompleted'] = (int)$player['roguelike']['runsCompleted'] + 1;
                 $player['roguelike']['bestStage'] = max((int)$player['roguelike']['bestStage'], $stage);
                 $player['roguelike']['activeRun'] = null;
@@ -866,17 +904,18 @@ final class GameService
             return ['generatedAt' => $now, 'expiresAt' => $now + $refresh, 'listings' => []];
         }
 
-        $listings = [];
-        $count = min(8, max(4, count($candidates)));
-        for ($i = 0; $i < $count; $i++) {
-            $spec = $candidates[array_rand($candidates)];
-            $mileage = mt_rand(2800, 195000);
-            $condition = mt_rand(58, 98);
+        $makeListing = function (array $spec, bool $starterListing = false): array {
+            $mileage = $starterListing ? mt_rand(105000, 190000) : mt_rand(2800, 195000);
+            $condition = $starterListing ? mt_rand(62, 79) : mt_rand(58, 98);
             $mileageFactor = max(0.46, 1.0 - ($mileage / 330000));
             $conditionFactor = 0.42 + (0.58 * pow($condition / 100.0, 1.7));
             $price = (int)round(((int)$spec['price']) * $mileageFactor * $conditionFactor / 50) * 50;
+            if ($starterListing) {
+                $price = min(8500, max(2500, (int)round(($price * 0.82) / 50) * 50));
+            }
             $price = max(1200, $price);
-            $listings[] = [
+
+            return [
                 'listingId' => self::id('used'),
                 'stockId' => (int)$spec['stockId'],
                 'price' => $price,
@@ -885,7 +924,19 @@ final class GameService
                 'basePrice' => (int)$spec['price'],
                 'mileageFactor' => round($mileageFactor, 3),
                 'conditionFactor' => round($conditionFactor, 3),
+                'starterListing' => $starterListing,
             ];
+        };
+
+        $starters = array_slice(array_values(array_filter(
+            $candidates,
+            fn(array $spec): bool => !empty($spec['starter']) && strtoupper((string)($spec['class'] ?? '')) === 'D'
+        )), 0, 3);
+
+        $listings = array_map(fn(array $spec): array => $makeListing($spec, true), $starters);
+        while (count($listings) < 8) {
+            $spec = $candidates[array_rand($candidates)];
+            $listings[] = $makeListing($spec, false);
         }
 
         return ['generatedAt' => $now, 'expiresAt' => $now + $refresh, 'listings' => $listings];

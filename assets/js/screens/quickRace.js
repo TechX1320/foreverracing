@@ -7,15 +7,18 @@ let selectedDistance = "1/4";
 let playbackRaceId = null;
 
 const DISTANCES = [
-  { key: "1/4", label: "1/4 MILE", short: "1320 FT" },
-  { key: "1/2", label: "1/2 MILE", short: "2640 FT" },
-  { key: "1", label: "1 MILE", short: "5280 FT" },
+  { key: "1/4", label: "1/4 MILE", short: "1320 FT", unlockLevel: 1, button: "START 1/4 MI RACE" },
+  { key: "1/2", label: "1/2 MILE", short: "2640 FT", unlockLevel: 5, button: "START 1/2 MI RACE" },
+  { key: "1", label: "1 MILE", short: "5280 FT", unlockLevel: 10, button: "START 1 MI RACE" },
 ];
 
 export async function renderQuickRace(ctx) {
   const player = ctx.store.player;
   const activeRace = player?.activeRace || null;
+  const tutorialRace = player?.tutorial?.status === "active" && player?.tutorial?.step === "first_race";
+  const level = Number(player?.progression?.level || 1);
   if (activeRace?.distance) selectedDistance = activeRace.distance;
+  else if (tutorialRace || !DISTANCES.some((row) => row.key === selectedDistance && level >= row.unlockLevel)) selectedDistance = "1/4";
 
   const current = selectedCar(player);
   const result = lastRace;
@@ -24,13 +27,20 @@ export async function renderQuickRace(ctx) {
 
   ctx.screenRoot.innerHTML = pageShell({
     title: "Quick Race",
-    eyebrow: "V0.4A RACE PRESENTATION",
+    eyebrow: "DRAG STRIP",
     hint: current ? carLabel(current) : "No current car",
-    trail: activeRace ? "Race in progress / presentation locked" : "Automated simulation / real-time playback",
+    trail: activeRace ? "Race in progress" : "Choose an unlocked distance",
     body: `
-      ${player?.tutorial?.status === "active" && player?.tutorial?.step === "first_race" ? '<div class="objective-box objective-box--active"><div><span class="objective-kicker">FTUE / FINAL STEP</span><strong>Run your first race</strong></div><p>Choose a distance and stage. Once the tree starts, the race presentation blocks the rest of the game until both cars reach the finish.</p></div>' : ""}
+      ${tutorialRace ? `<section class="ftue-focus-panel ftue-focus-panel--race">
+        <div class="ftue-focus-panel__step">FTUE 6/6</div>
+        <div class="ftue-focus-panel__copy"><span>FIRST PASS</span><strong>Run the 1/4 mile.</strong><p>Your first race uses clear conditions, you cannot red-light, and the opponent is intentionally beginner-friendly.</p></div>
+        <div class="ftue-focus-panel__arrow">↓ CLICK START RACE</div>
+      </section>` : ""}
       <div class="race-distance-tabs" role="group" aria-label="Race distance">
-        ${DISTANCES.map((row) => `<button type="button" class="button button--small ${row.key === selectedDistance ? "button--primary" : ""}" data-race-distance="${row.key}" ${activeRace ? "disabled" : ""}><b>${row.label}</b><span>${row.short}</span></button>`).join("")}
+        ${DISTANCES.map((row) => {
+          const locked = tutorialRace ? row.key !== "1/4" : level < row.unlockLevel;
+          return `<button type="button" class="button race-distance-button ${row.key === selectedDistance ? "button--primary" : ""} ${locked ? "is-locked" : ""}" data-race-distance="${row.key}" ${activeRace || locked ? "disabled" : ""}><b>${row.label}</b><span>${locked ? `UNLOCKS LV ${row.unlockLevel}` : row.short}</span></button>`;
+        }).join("")}
       </div>
       ${result ? raceResult(result) : ""}
       ${current ? `
@@ -50,14 +60,17 @@ export async function renderQuickRace(ctx) {
             <span><small>EXP</small><b>${number(player.progression?.exp || 0)}</b></span>
           </div>
           <div class="game-card__actions">
-            <button class="button button--primary" type="button" data-run-race>
-              ${activeRace ? "RESUME ACTIVE RACE" : `STAGE & RUN ${distanceRow.label}`}
+            <button class="button button--primary race-start-button ${tutorialRace ? "tutorial-target ftue-primary-action" : ""}" type="button" data-run-race>
+              ${activeRace ? "RESUME ACTIVE RACE" : distanceRow.button}
             </button>
           </div>
         </div>` : `
         <div class="empty-state"><strong>You need a Current Car.</strong><span>Buy a car and select it in the Garage first.</span><div class="cluster" style="justify-content:center;margin-top:14px"><button class="button button--primary button--small" data-go-garage>Open Garage</button><button class="button button--small" data-go-showroom>Showroom</button></div></div>`}
       ${raceHistory(player)}
-      <p class="screen-copy" style="margin-bottom:0;margin-top:14px">The result is still calculated by the TextTuned-derived simulator, but V0.4A separates simulation from presentation. Starting a race creates one persistent active pass; money, EXP and records are awarded only after its real-time playback reaches the finish.</p>
+      <details class="collapsible-section">
+        <summary>HOW QUICK RACE WORKS</summary>
+        <p>Starting a race creates one persistent pass. Rewards, EXP and records are committed only after the cars reach the finish, and refreshing resumes the same active race.</p>
+      </details>
     `,
   });
 
@@ -67,7 +80,9 @@ export async function renderQuickRace(ctx) {
   ctx.screenRoot.querySelectorAll("[data-race-distance]").forEach((button) => {
     button.addEventListener("click", async () => {
       if (ctx.store.player?.activeRace) return;
-      selectedDistance = button.dataset.raceDistance || "1/4";
+      const row = DISTANCES.find((item) => item.key === button.dataset.raceDistance);
+      if (!row || (tutorialRace && row.key !== "1/4") || level < row.unlockLevel) return;
+      selectedDistance = row.key;
       await renderQuickRace(ctx);
     });
   });
@@ -90,7 +105,7 @@ export async function renderQuickRace(ctx) {
     } catch (err) {
       ctx.toast("Race failed", err.message);
       button.disabled = false;
-      button.textContent = `STAGE & RUN ${distanceRow.label}`;
+      button.textContent = distanceRow.button;
     }
   });
 
@@ -119,7 +134,7 @@ async function completeActiveRace(ctx, activeRace, tutorialBeforeStart = null) {
     ctx.toast(data.race?.won ? "Win" : "Loss", `+${money(data.race?.reward || 0)} cr • +${number(data.race?.expReward || 0)} EXP`);
     if (data.race?.newBest) ctx.toast("New best ET", `${number(data.race.player?.elapsedTime, 3)}s / ${data.race.distanceLabel}`);
     if (wasTutorialRace && data.player?.tutorial?.status === "complete") {
-      ctx.toast("Tutorial complete", "FTUE reward added. The rest of Forever Racing is now open.");
+      ctx.toast("Basics complete", "The Circuit is now unlocked. More race distances and game systems unlock as you level up.");
     }
     await renderQuickRace(ctx);
   } catch (err) {
@@ -163,11 +178,10 @@ function timeRow(label, player, opponent, playerBad = false, opponentBad = false
 function raceHistory(player) {
   const rows = [...(player?.raceHistory || [])].slice(-5).reverse();
   if (!rows.length) return "";
-  return `
-    <section class="race-history">
-      <div class="section-heading section-heading--small"><div><small>RECENT PASSES</small><h3>Race history</h3></div></div>
-      <div class="race-history-list">
-        ${rows.map((race) => `<div><span><b>${escapeHtml(race.distanceLabel || race.distance || "Race")}</b>${escapeHtml(race.location?.name || "")} • ${escapeHtml(race.weather?.name || "")}</span><span class="${race.won ? "good" : "bad"}">${race.won ? "WIN" : "LOSS"}</span><strong>${race.player?.foul ? "FOUL" : `${number(race.player?.elapsedTime, 3)} s`}</strong></div>`).join("")}
-      </div>
-    </section>`;
+  return `<details class="collapsible-section race-history" ${rows.length <= 1 ? "open" : ""}>
+    <summary>RECENT PASSES <span>${rows.length}</span></summary>
+    <div class="race-history-list">
+      ${rows.map((race) => `<div><span><b>${escapeHtml(race.distanceLabel || race.distance || "Race")}</b>${escapeHtml(race.location?.name || "")} • ${escapeHtml(race.weather?.name || "")}</span><span class="${race.won ? "good" : "bad"}">${race.won ? "WIN" : "LOSS"}</span><strong>${race.player?.foul ? "FOUL" : `${number(race.player?.elapsedTime, 3)} s`}</strong></div>`).join("")}
+    </div>
+  </details>`;
 }

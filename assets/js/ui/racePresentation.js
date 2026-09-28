@@ -108,7 +108,7 @@ function runPresentation(ctx, activeRace) {
 
     const animate = () => {
       const now = Date.now();
-      updateTree(tree, phase, now, startedAt, greenAt, race);
+      updateTree(tree, phase, now, startedAt, greenAt, playerStart, race);
       const p = raceProgress(now, playerStart, playerFinish, progressExponent);
       const o = raceProgress(now, opponentStart, opponentFinish, progressExponent);
       setProgress(playerCar, playerBar, p);
@@ -116,7 +116,7 @@ function runPresentation(ctx, activeRace) {
 
       const simSeconds = Math.max(0, (now - greenAt) / (1000 * timeScale));
       clock.textContent = simSeconds > 0 ? simSeconds.toFixed(2) : "0.00";
-      liveStatus.textContent = liveRaceStatus(now, greenAt, playerFinish, opponentFinish, playerRun, opponentRun);
+      liveStatus.textContent = liveRaceStatus(now, greenAt, playerStart, opponentStart, playerFinish, opponentFinish, playerRun, opponentRun);
 
       if (now < finishAt) {
         frame = requestAnimationFrame(animate);
@@ -202,7 +202,7 @@ function carToken(src, label, attr) {
   return `<img class="race-strip__car" ${attr} src="${escapeHtml(src)}" alt="${escapeHtml(label)}">`;
 }
 
-function updateTree(tree, phase, now, startedAt, greenAt, race) {
+function updateTree(tree, phase, now, startedAt, greenAt, playerStart, race) {
   const span = Math.max(1, greenAt - startedAt);
   const ratio = (now - startedAt) / span;
   const pre = tree.querySelector("[data-tree-pre]");
@@ -213,18 +213,22 @@ function updateTree(tree, phase, now, startedAt, greenAt, race) {
   const green = tree.querySelector("[data-tree-green]");
   const red = tree.querySelector("[data-tree-red]");
 
+  const playerFoul = Boolean(race.player?.foul);
+  const foulShown = playerFoul && now >= playerStart;
+
   setLamp(pre, ratio >= 0.08);
   setLamp(stage, ratio >= 0.28);
-  setLamp(amber1, ratio >= 0.52 && ratio < 1);
-  setLamp(amber2, ratio >= 0.68 && ratio < 1);
+  setLamp(amber1, ratio >= 0.52 && ratio < 0.68);
+  setLamp(amber2, ratio >= 0.68 && ratio < 0.84);
   setLamp(amber3, ratio >= 0.84 && ratio < 1);
-  setLamp(green, now >= greenAt);
-  setLamp(red, now >= greenAt && Boolean(race.player?.foul));
+  setLamp(green, now >= greenAt && !playerFoul);
+  setLamp(red, foulShown);
 
-  if (now < startedAt + span * 0.28) phase.textContent = "PRE-STAGE";
+  if (foulShown) phase.textContent = "RED LIGHT";
+  else if (now < startedAt + span * 0.28) phase.textContent = "PRE-STAGE";
   else if (now < startedAt + span * 0.52) phase.textContent = "STAGED";
   else if (now < greenAt) phase.textContent = "TREE";
-  else phase.textContent = race.player?.foul ? "RED LIGHT" : "GREEN";
+  else phase.textContent = "GREEN";
 }
 
 function setLamp(node, on) {
@@ -244,8 +248,12 @@ function setProgress(car, bar, progress) {
   if (bar) bar.style.width = `${percent.toFixed(2)}%`;
 }
 
-function liveRaceStatus(now, greenAt, playerFinish, opponentFinish, playerRun, opponentRun) {
-  if (now < greenAt) return "STAGED • WAIT FOR GREEN";
+function liveRaceStatus(now, greenAt, playerStart, opponentStart, playerFinish, opponentFinish, playerRun, opponentRun) {
+  if (now < greenAt) {
+    if (playerRun.foul && now >= playerStart) return "RED LIGHT • YOU LEFT BEFORE GREEN";
+    if (opponentRun.foul && now >= opponentStart) return "OPPONENT RED-LIT • WAIT FOR GREEN";
+    return "STAGED • WAIT FOR GREEN";
+  }
   const pFinished = now >= playerFinish;
   const oFinished = now >= opponentFinish;
   if (pFinished && oFinished) return "BOTH CARS THROUGH THE TRAPS";
