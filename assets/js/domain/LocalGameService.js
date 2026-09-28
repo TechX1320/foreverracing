@@ -303,25 +303,40 @@ export class LocalGameService {
       const carIndex = this.requireOwnedCarIndex(draft, draft.selectedCarId);
       const car = draft.garage[carIndex];
       const level = Number(draft.progression?.level || 1);
-      const weather = this.raceSimulator.randomWeather();
-      const location = this.raceSimulator.randomLocation();
+      const tutorialRace = draft.tutorial?.status === 'active' && draft.tutorial?.step === 'first_race';
+      const unlockLevel = distance === '1' ? 10 : distance === '1/2' ? 5 : 1;
+      if (tutorialRace && distance !== '1/4') throw new LocalGameError('Your first race is the 1/4 mile.');
+      if (!tutorialRace && level < unlockLevel) throw new LocalGameError(`${distanceConfig.label || distance} unlocks at Level ${unlockLevel}.`);
+      const weather = tutorialRace
+        ? { name: 'Cool & Cloudy', etModifier: 0, mphModifier: 0, weight: 1 }
+        : this.raceSimulator.randomWeather(level);
+      const location = tutorialRace
+        ? { name: 'Local Test & Tune', weight: 1 }
+        : this.raceSimulator.randomLocation(level);
 
       const hp = Math.max(1, Number(car.derived?.hp || 1));
       const torque = Math.max(1, Number(car.derived?.torque || 1));
       const weight = Math.max(500, Number(car.derived?.weight || 500));
       const grip = Math.max(0.5, Number(car.derived?.grip || 1));
       const pwr = hp / weight;
-      const difficulty = 0.94 + (Math.random() * 0.14);
+      const difficulty = tutorialRace ? 0.84 + (Math.random() * 0.05) : 0.94 + (Math.random() * 0.14);
       const opponentWeight = Math.max(1200, Math.round(weight * (0.90 + (Math.random() * 0.20))));
       const opponentHp = Math.max(55, Math.round(pwr * difficulty * opponentWeight));
       const opponentTorque = Math.max(50, Math.round(torque * difficulty * (0.93 + (Math.random() * 0.14))));
       const opponentGrip = Math.max(0.65, Math.min(1.45, grip + ((Math.random() * 0.12) - 0.06)));
-      const opponentLevel = Math.max(1, level + randomInt(-3, 3));
+      const opponentLevel = tutorialRace ? 1 : Math.max(1, level + randomInt(-3, 3));
 
-      const playerRun = this.raceSimulator.simulate({ hp, torque, weight, grip, level }, distance, weather);
+      const playerRun = this.raceSimulator.simulate({ hp, torque, weight, grip, level, allowFoul: !tutorialRace }, distance, weather);
       const opponentRun = this.raceSimulator.simulate({
         hp: opponentHp, torque: opponentTorque, weight: opponentWeight, grip: opponentGrip, level: opponentLevel,
+        allowFoul: !tutorialRace, reactionOffset: tutorialRace ? 0.16 : 0,
       }, distance, weather);
+      if (tutorialRace && opponentRun.totalTime <= playerRun.totalTime) {
+        const delta = (playerRun.totalTime - opponentRun.totalTime) + 0.25;
+        opponentRun.reactionTime = round3(Number(opponentRun.reactionTime || 0) + delta);
+        opponentRun.totalTime = round3(Number(opponentRun.totalTime || 0) + delta);
+        opponentRun.foul = false;
+      }
 
       const won = playerRun.totalTime < opponentRun.totalTime;
       const creditMultiplier = Number(distanceConfig.creditMultiplier || 1);
