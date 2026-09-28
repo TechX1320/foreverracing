@@ -215,7 +215,7 @@ final class GameService
             if ((int)($car['buildStage'] ?? 1) === 1 && (int)($spec['simpleTier'] ?? 0) > 0) {
                 $currentTier = self::installedSimpleTier($player, $carId, (string)($spec['categoryKey'] ?? $slot), $catalog);
                 if ((int)$spec['simpleTier'] < $currentTier) {
-                    throw new GameException('Stage 1 upgrades cannot be downgraded.');
+                    throw new GameException('Street Car upgrades cannot be downgraded.');
                 }
             }
 
@@ -253,7 +253,7 @@ final class GameService
             if ($carId && !empty($spec['simpleTier'])) {
                 $car = self::requireOwnedCar($player, (string)$carId);
                 if ((int)($car['buildStage'] ?? 1) === 1) {
-                    throw new GameException('Stage 1 upgrades are permanent progression and cannot be downgraded.');
+                    throw new GameException('Street Car upgrades are permanent progression and cannot be downgraded.');
                 }
             }
             $player['inventory']['parts'][$partIndex]['installedOnCarId'] = null;
@@ -817,25 +817,25 @@ final class GameService
         $stage = (int)($car['buildStage'] ?? 1);
         if ($stage === 1) {
             if ((int)($spec['buildStage'] ?? 1) !== 1 || (int)($spec['simpleTier'] ?? 0) <= 0) {
-                throw new GameException('Stage 1 cars use the simple three-level upgrade path.');
+                throw new GameException('Street Cars use the simple three-level upgrade path.');
             }
             $currentTier = self::installedSimpleTier($player, (string)$car['carId'], (string)($spec['categoryKey'] ?? $spec['slot'] ?? ''), $catalog);
             if ($purchasing && (int)$spec['simpleTier'] !== $currentTier + 1) {
                 throw new GameException('Complete the previous ' . (string)$spec['category'] . ' upgrade first.');
             }
             if (!$purchasing && (int)$spec['simpleTier'] < $currentTier) {
-                throw new GameException('Stage 1 upgrades cannot be downgraded.');
+                throw new GameException('Street Car upgrades cannot be downgraded.');
             }
             return;
         }
         if (!empty($spec['simpleTier'])) {
-            throw new GameException('Simple Stage 1 parts are incorporated into the Stage 2 conversion.');
+            throw new GameException('Street Car ladder parts are incorporated when the car converts to a Street Race Car.');
         }
         if ((int)($spec['buildStage'] ?? 2) > $stage) {
-            throw new GameException('This part requires Build Stage ' . (int)$spec['buildStage'] . '.');
+            throw new GameException('This part requires a later Build Type.');
         }
         if ((int)($spec['persistentFromStage'] ?? $spec['buildStage'] ?? 2) > $stage) {
-            throw new GameException('This part is not available at the current Build Stage.');
+            throw new GameException('This part is not available for the current Build Type.');
         }
     }
 
