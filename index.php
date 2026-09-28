@@ -41,6 +41,7 @@ $storageText = $storageMode === 'local' ? 'BROWSER LOCAL' : 'PHP / JSON';
         <div><span>PLAYER</span><b id="playerName">Admin</b></div>
         <div><span>CREDITS</span><b id="statCredits">0</b></div>
         <div><span>LEVEL</span><b id="statLevel">1</b></div>
+        <div><span>EXP</span><b id="statExp">0</b></div>
         <div><span>REP</span><b id="statRep">0</b></div>
         <div class="status-strip__car"><span>CURRENT CAR</span><b id="currentCarName">None</b></div>
         <div><span>STAGE</span><b id="currentStage">-</b></div>

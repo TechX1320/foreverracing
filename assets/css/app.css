@@ -450,3 +450,48 @@ html[data-reduce-motion="true"] *,html[data-reduce-motion="true"] *::before,html
   .garage-entry__visual .vehicle-sprite-image--sideProfile,.build-shop-car .vehicle-sprite-image--sideProfile{width:min(190px,90%);max-height:105px}
   .vehicle-sprite-image--topDown,.vehicle-sprite-image--racePreview{height:108px}
 }
+
+
+/* V0.3B race-core presentation */
+.race-distance-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.race-distance-tabs .button{display:flex;align-items:center;gap:8px;min-width:120px;justify-content:center}
+.race-distance-tabs .button span{font-size:8px;color:var(--muted);font-weight:700}
+.race-record-strip,.race-result-foot{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--border);background:#101214;margin-top:10px}
+.race-record-strip>span,.race-result-foot>span{padding:9px 10px;border-right:1px solid var(--border)}
+.race-record-strip>span:last-child,.race-result-foot>span:last-child{border-right:0}
+.race-record-strip small,.race-result-foot small{display:block;color:var(--faint);font-size:8px;letter-spacing:.08em;font-weight:800}
+.race-record-strip b,.race-result-foot b{display:block;margin-top:3px;font-size:13px}
+.race-result-card{border:1px solid var(--border-strong);background:#111416;margin-bottom:12px}
+.race-result-card--win{border-color:#315640}
+.race-result-card--loss{border-color:#5d3437}
+.race-result-head{display:flex;justify-content:space-between;gap:14px;padding:12px;border-bottom:1px solid var(--border)}
+.race-result-head h3{margin:3px 0 0;font-size:18px}
+.race-environment{display:grid;grid-template-columns:repeat(2,minmax(120px,1fr));gap:6px;min-width:min(420px,50%)}
+.race-environment span{border:1px solid var(--border);padding:7px 9px;color:var(--faint);font-size:8px;letter-spacing:.07em;font-weight:800}
+.race-environment b{display:block;color:var(--text);font-size:11px;letter-spacing:0;margin-top:3px}
+.race-timeboard{display:grid}
+.race-timeboard__row{display:grid;grid-template-columns:minmax(90px,.7fr) repeat(2,minmax(120px,1fr));align-items:center;border-bottom:1px solid var(--border)}
+.race-timeboard__row:last-child{border-bottom:0}
+.race-timeboard__row>*{padding:9px 12px;border-right:1px solid var(--border)}
+.race-timeboard__row>*:last-child{border-right:0}
+.race-timeboard__row>span{color:var(--muted);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.race-timeboard__row>b{text-align:right;font-size:13px}
+.race-timeboard__row--head{background:#171a1d}
+.race-history{margin-top:14px;border-top:1px solid var(--border);padding-top:12px}
+.race-history-list{border:1px solid var(--border)}
+.race-history-list>div{display:grid;grid-template-columns:1fr auto 90px;gap:12px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--border)}
+.race-history-list>div:last-child{border-bottom:0}
+.race-history-list span:first-child{color:var(--muted);font-size:10px}
+.race-history-list span:first-child b{display:block;color:var(--text);font-size:11px}
+.race-history-list strong{text-align:right}
+@media(max-width:760px){
+  .race-result-head{display:block}
+  .race-environment{min-width:0;margin-top:9px;grid-template-columns:1fr}
+  .race-record-strip,.race-result-foot{grid-template-columns:repeat(2,1fr)}
+  .race-record-strip>span:nth-child(2),.race-result-foot>span:nth-child(2){border-right:0}
+  .race-record-strip>span:nth-child(-n+2),.race-result-foot>span:nth-child(-n+2){border-bottom:1px solid var(--border)}
+  .race-timeboard__row{grid-template-columns:72px 1fr 1fr}
+  .race-timeboard__row>*{padding:8px 7px}
+  .race-history-list>div{grid-template-columns:1fr auto}
+  .race-history-list strong{grid-column:2}
+}
