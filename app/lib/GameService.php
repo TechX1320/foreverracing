@@ -24,7 +24,7 @@ final class GameService
             'schemaVersion' => (int)$config['schema_version'],
             'user' => ['id' => 1, 'username' => 'Admin', 'createdAt' => $now],
             'wallet' => ['credits' => (int)$config['starting_credits']],
-            'progression' => ['level' => 1, 'rep' => 0],
+            'progression' => ['level' => 1, 'exp' => 0, 'rep' => 0],
             'tutorial' => [
                 'version' => (int)$config['tutorial_version'],
                 'status' => 'active',
@@ -39,6 +39,7 @@ final class GameService
             'garage' => [],
             'inventory' => ['parts' => []],
             'roguelike' => ['activeRun' => null, 'bestStage' => 0, 'runsStarted' => 0, 'runsCompleted' => 0],
+            'raceHistory' => [],
             'transactions' => [],
             'meta' => ['createdAt' => $now, 'updatedAt' => $now],
         ];
@@ -70,12 +71,14 @@ final class GameService
         $player['inventory'] = is_array($player['inventory'] ?? null) ? $player['inventory'] : $default['inventory'];
         $player['inventory']['parts'] = array_values(is_array($player['inventory']['parts'] ?? null) ? $player['inventory']['parts'] : []);
         $player['roguelike'] = array_replace($default['roguelike'], is_array($player['roguelike'] ?? null) ? $player['roguelike'] : []);
+        $player['raceHistory'] = array_values(is_array($player['raceHistory'] ?? null) ? $player['raceHistory'] : []);
         $player['transactions'] = array_values(is_array($player['transactions'] ?? null) ? $player['transactions'] : []);
         $player['meta'] = array_replace($default['meta'], is_array($player['meta'] ?? null) ? $player['meta'] : []);
         $player['selectedCarId'] = $player['selectedCarId'] ?? null;
         $player['stats']['carsOwned'] = count($player['garage']);
         $player['progression']['rep'] = (int)($player['progression']['rep'] ?? 0);
-        $player['progression']['level'] = max(1, 1 + (int)floor($player['progression']['rep'] / 100));
+        $player['progression']['exp'] = (int)($player['progression']['exp'] ?? $player['progression']['rep'] ?? 0);
+        $player['progression']['level'] = self::levelFromExp((int)$player['progression']['exp']);
         return $player;
     }
 
@@ -89,6 +92,12 @@ final class GameService
     {
         $data = JsonStore::read(FR_DATA . '/catalog/parts.json', []);
         return is_array($data) ? array_values($data) : [];
+    }
+
+    public static function racingConfig(): array
+    {
+        $data = JsonStore::read(FR_DATA . '/config/racing.json', []);
+        return is_array($data) ? $data : [];
     }
 
     public static function purchaseNewCar(int $stockId): array
@@ -371,39 +380,70 @@ final class GameService
         return $player;
     }
 
-    public static function quickRace(): array
+    public static function quickRace(string $distance = '1/4'): array
     {
         $result = null;
-        $player = self::mutatePlayer(function (array $player) use (&$result): array {
-            $car = self::selectedCar($player);
-            if (!$car) {
-                throw new GameException('Select a car before racing.');
-            }
+        $racingConfig = self::racingConfig();
+        $simulator = new RaceSimulator($racingConfig);
+        $distanceConfig = $simulator->distance($distance);
 
-            $hp = max(1.0, (float)$car['derived']['hp']);
-            $weight = max(500.0, (float)$car['derived']['weight']);
-            $grip = max(0.5, (float)($car['derived']['grip'] ?? 1.0));
-            $playerPwr = $hp / $weight;
-            $difficulty = mt_rand(92, 108) / 100;
-            $oppPwr = $playerPwr * $difficulty;
-            $oppWeight = (int)round($weight * (mt_rand(92, 108) / 100));
-            $oppHp = (int)round($oppPwr * $oppWeight);
-            $reaction = mt_rand(80, 420) / 1000;
-            $oppReaction = mt_rand(100, 450) / 1000;
-            $playerEt = max(6.2, round(17.6 - ($playerPwr * 38.0) - (($grip - 1.0) * 0.45) + $reaction + (mt_rand(-12, 12) / 100), 3));
-            $oppEt = max(6.2, round(17.6 - ($oppPwr * 38.0) + $oppReaction + (mt_rand(-12, 12) / 100), 3));
-            $won = $playerEt < $oppEt;
-            $reward = $won ? mt_rand(450, 850) : mt_rand(90, 220);
+        $player = self::mutatePlayer(function (array $player) use (&$result, $distance, $distanceConfig, $racingConfig, $simulator): array {
+            $carIndex = self::requireOwnedCarIndex($player, (string)($player['selectedCarId'] ?? ''));
+            $car = $player['garage'][$carIndex];
+            $level = max(1, (int)($player['progression']['level'] ?? 1));
+            $weather = $simulator->randomWeather();
+            $location = $simulator->randomLocation();
+
+            $hp = max(1.0, (float)($car['derived']['hp'] ?? 1));
+            $torque = max(1.0, (float)($car['derived']['torque'] ?? 1));
+            $weight = max(500.0, (float)($car['derived']['weight'] ?? 500));
+            $grip = max(0.5, (float)($car['derived']['grip'] ?? 1));
+            $pwr = $hp / $weight;
+            $difficulty = self::randomFloat(0.94, 1.08);
+            $opponentWeight = max(1200, (int)round($weight * self::randomFloat(0.90, 1.10)));
+            $opponentHp = max(55, (int)round($pwr * $difficulty * $opponentWeight));
+            $opponentTorque = max(50, (int)round($torque * $difficulty * self::randomFloat(0.93, 1.07)));
+            $opponentGrip = max(0.65, min(1.45, $grip + self::randomFloat(-0.06, 0.06)));
+            $opponentLevel = max(1, $level + mt_rand(-3, 3));
+
+            $playerRun = $simulator->simulate(['hp' => $hp, 'torque' => $torque, 'weight' => $weight, 'grip' => $grip, 'level' => $level], $distance, $weather);
+            $opponentRun = $simulator->simulate([
+                'hp' => $opponentHp, 'torque' => $opponentTorque, 'weight' => $opponentWeight, 'grip' => $opponentGrip, 'level' => $opponentLevel,
+            ], $distance, $weather);
+
+            $won = (float)$playerRun['totalTime'] < (float)$opponentRun['totalTime'];
+            $creditMultiplier = (float)($distanceConfig['creditMultiplier'] ?? 1);
+            $reward = $won
+                ? (int)round(mt_rand(450, 850) * $creditMultiplier)
+                : (int)round(mt_rand(90, 220) * $creditMultiplier);
+            $expReward = self::raceExpReward($level, $opponentLevel, $won);
+            $repReward = $won ? 5 : 2;
 
             $player['wallet']['credits'] += $reward;
-            $player['progression']['rep'] = (int)($player['progression']['rep'] ?? 0) + ($won ? 5 : 2);
-            $player['stats']['races'] = (int)$player['stats']['races'] + 1;
-            $player['stats'][$won ? 'wins' : 'losses'] = (int)$player['stats'][$won ? 'wins' : 'losses'] + 1;
-            $bestReaction = $player['stats']['bestReaction'];
-            if ($bestReaction === null || $reaction < (float)$bestReaction) {
-                $player['stats']['bestReaction'] = $reaction;
+            $player['progression']['exp'] = (int)($player['progression']['exp'] ?? 0) + $expReward;
+            $player['progression']['rep'] = (int)($player['progression']['rep'] ?? 0) + $repReward;
+            $player['progression']['level'] = self::levelFromExp((int)$player['progression']['exp']);
+            $player['stats']['races'] = (int)($player['stats']['races'] ?? 0) + 1;
+            $player['stats'][$won ? 'wins' : 'losses'] = (int)($player['stats'][$won ? 'wins' : 'losses'] ?? 0) + 1;
+            if (empty($playerRun['foul']) && (($player['stats']['bestReaction'] ?? null) === null || (float)$playerRun['reactionTime'] < (float)$player['stats']['bestReaction'])) {
+                $player['stats']['bestReaction'] = (float)$playerRun['reactionTime'];
             }
-            self::addTransaction($player, 'race_reward', $reward, $won ? 'Quick Race win' : 'Quick Race participation');
+
+            $records = is_array($car['raceRecords'] ?? null) ? $car['raceRecords'] : self::emptyRaceRecords();
+            $record = is_array($records[$distance] ?? null) ? $records[$distance] : ['races' => 0, 'bestEt' => null, 'bestTrap' => null];
+            $record['races'] = (int)($record['races'] ?? 0) + 1;
+            $newBest = false;
+            if (empty($playerRun['foul']) && (($record['bestEt'] ?? null) === null || (float)$playerRun['elapsedTime'] < (float)$record['bestEt'])) {
+                $record['bestEt'] = (float)$playerRun['elapsedTime'];
+                $newBest = true;
+            }
+            if (($record['bestTrap'] ?? null) === null || (float)$playerRun['trapSpeed'] > (float)$record['bestTrap']) {
+                $record['bestTrap'] = (float)$playerRun['trapSpeed'];
+            }
+            $records[$distance] = $record;
+            $player['garage'][$carIndex]['raceRecords'] = $records;
+
+            self::addTransaction($player, 'race_reward', $reward, (string)($distanceConfig['label'] ?? $distance) . ($won ? ' win' : ' participation'));
 
             if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'first_race') {
                 $tutorialCredits = (int)app_config()['tutorial_completion_credits'];
@@ -417,14 +457,38 @@ final class GameService
             }
 
             $result = [
+                'raceId' => self::id('race'),
                 'won' => $won,
-                'reaction' => $reaction,
-                'playerEt' => $playerEt,
-                'opponentEt' => $oppEt,
-                'opponent' => ['name' => self::opponentName(), 'hp' => $oppHp, 'weight' => $oppWeight],
+                'distance' => $distance,
+                'distanceLabel' => (string)($distanceConfig['label'] ?? $distance),
+                'location' => $location,
+                'weather' => $weather,
+                'margin' => round(abs((float)$playerRun['totalTime'] - (float)$opponentRun['totalTime']), 3),
                 'reward' => $reward,
+                'expReward' => $expReward,
+                'repReward' => $repReward,
+                'newBest' => $newBest,
                 'carName' => self::carName($car),
+                'player' => $playerRun,
+                'opponent' => [
+                    'name' => self::opponentName(),
+                    'hp' => $opponentHp,
+                    'torque' => $opponentTorque,
+                    'weight' => $opponentWeight,
+                    'grip' => round($opponentGrip, 3),
+                    'level' => $opponentLevel,
+                ] + $opponentRun,
+                'reaction' => (float)$playerRun['reactionTime'],
+                'playerEt' => (float)$playerRun['elapsedTime'],
+                'opponentEt' => (float)$opponentRun['elapsedTime'],
             ];
+
+            $player['raceHistory'][] = $result + ['createdAt' => time()];
+            $historyLimit = max(5, (int)($racingConfig['historyLimit'] ?? 25));
+            if (count($player['raceHistory']) > $historyLimit) {
+                $player['raceHistory'] = array_slice($player['raceHistory'], -$historyLimit);
+            }
+
             return $player;
         });
 
@@ -561,6 +625,7 @@ final class GameService
             is_array($catalogVisual['sprites'] ?? null) ? $catalogVisual['sprites'] : [],
             is_array($savedVisual['sprites'] ?? null) ? $savedVisual['sprites'] : []
         );
+        $car['raceRecords'] = array_replace(self::emptyRaceRecords(), is_array($car['raceRecords'] ?? null) ? $car['raceRecords'] : []);
         return $car;
     }
 
@@ -589,6 +654,7 @@ final class GameService
             'derived' => [
                 'hp' => (int)$base['hp'], 'torque' => (int)$base['torque'], 'weight' => (int)$base['weight'], 'grip' => (float)($base['grip'] ?? 1.0),
             ],
+            'raceRecords' => self::emptyRaceRecords(),
             'createdAt' => time(),
         ];
     }
@@ -785,6 +851,47 @@ final class GameService
     private static function id(string $prefix): string
     {
         return $prefix . '_' . dechex(time()) . '_' . bin2hex(random_bytes(4));
+    }
+
+    private static function expToReachLevel(int $level): int
+    {
+        return (int)floor(100 * pow(max(1, $level), 1.75));
+    }
+
+    private static function levelFromExp(int $exp): int
+    {
+        $level = 1;
+        $exp = max(0, $exp);
+        while ($level < 200 && $exp >= self::expToReachLevel($level + 1)) {
+            $level++;
+        }
+        return $level;
+    }
+
+    private static function raceExpReward(int $playerLevel, int $opponentLevel, bool $won): int
+    {
+        $base = $won ? mt_rand(25, 74) : mt_rand(9, 19);
+        $difference = $opponentLevel - $playerLevel;
+        if ($won && $difference > 0) {
+            $base = (int)round($base * (1.0 + min(0.5, $difference * 0.02)));
+        } elseif ($won && $difference < 0) {
+            $base = (int)round($base * max(0.5, 1.0 + ($difference * 0.015)));
+        }
+        return max(1, $base);
+    }
+
+    private static function emptyRaceRecords(): array
+    {
+        return [
+            '1/4' => ['races' => 0, 'bestEt' => null, 'bestTrap' => null],
+            '1/2' => ['races' => 0, 'bestEt' => null, 'bestTrap' => null],
+            '1' => ['races' => 0, 'bestEt' => null, 'bestTrap' => null],
+        ];
+    }
+
+    private static function randomFloat(float $min, float $max): float
+    {
+        return $min + ((mt_rand() / mt_getrandmax()) * ($max - $min));
     }
 
     private static function opponentName(): string

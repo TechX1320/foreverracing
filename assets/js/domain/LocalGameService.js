@@ -1,3 +1,4 @@
+import { RaceSimulator } from './RaceSimulator.js';
 const clone = (value) => value == null ? value : structuredClone(value);
 const now = () => Math.floor(Date.now() / 1000);
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -12,10 +13,12 @@ export class LocalGameError extends Error {
 }
 
 export class LocalGameService {
-  constructor({ cars, parts, config, buildStages = [] }) {
+  constructor({ cars, parts, config, buildStages = [], racingConfig = {} }) {
     this.cars = clone(cars || []);
     this.parts = clone(parts || []);
     this.buildStages = clone(buildStages || []);
+    this.racingConfig = clone(racingConfig || {});
+    this.raceSimulator = new RaceSimulator(this.racingConfig);
     this.config = {
       schemaVersion: Number(config?.schemaVersion || 3),
       tutorialVersion: Number(config?.tutorialVersion || 1),
@@ -32,13 +35,14 @@ export class LocalGameService {
       schemaVersion: this.config.schemaVersion,
       user: { id: 1, username: 'Admin', createdAt: timestamp },
       wallet: { credits: this.config.startingCredits },
-      progression: { level: 1, rep: 0 },
+      progression: { level: 1, exp: 0, rep: 0 },
       tutorial: { version: this.config.tutorialVersion, status: 'active', step: 'welcome', completedSteps: [] },
       stats: { races: 0, wins: 0, losses: 0, bestReaction: null, showroomPurchases: 0, usedPurchases: 0, partsPurchased: 0 },
       selectedCarId: null,
       garage: [],
       inventory: { parts: [] },
       roguelike: { activeRun: null, bestStage: 0, runsStarted: 0, runsCompleted: 0 },
+      raceHistory: [],
       transactions: [],
       meta: { createdAt: timestamp, updatedAt: timestamp },
     };
@@ -58,12 +62,14 @@ export class LocalGameService {
     player.inventory = player.inventory && typeof player.inventory === 'object' ? player.inventory : clone(defaults.inventory);
     player.inventory.parts = Array.isArray(player.inventory.parts) ? player.inventory.parts : [];
     player.roguelike = { ...defaults.roguelike, ...(player.roguelike || {}) };
+    player.raceHistory = Array.isArray(player.raceHistory) ? player.raceHistory : [];
     player.transactions = Array.isArray(player.transactions) ? player.transactions : [];
     player.meta = { ...defaults.meta, ...(player.meta || {}) };
     player.selectedCarId = player.selectedCarId || null;
     player.stats.carsOwned = player.garage.length;
     player.progression.rep = Number(player.progression.rep || 0);
-    player.progression.level = Math.max(1, 1 + Math.floor(player.progression.rep / 100));
+    player.progression.exp = Number(player.progression.exp ?? player.progression.rep ?? 0);
+    player.progression.level = this.levelFromExp(player.progression.exp);
     return player;
   }
 
@@ -252,31 +258,65 @@ export class LocalGameService {
     return { player, lot: nextLot };
   }
 
-  quickRace(inputPlayer) {
+  quickRace(inputPlayer, distance = '1/4') {
+    const distanceConfig = this.raceSimulator.distance(distance);
     let race = null;
     const player = this.mutate(inputPlayer, (draft) => {
-      const car = this.selectedCar(draft);
-      if (!car) throw new LocalGameError('Select a car before racing.');
+      const carIndex = this.requireOwnedCarIndex(draft, draft.selectedCarId);
+      const car = draft.garage[carIndex];
+      const level = Number(draft.progression?.level || 1);
+      const weather = this.raceSimulator.randomWeather();
+      const location = this.raceSimulator.randomLocation();
+
       const hp = Math.max(1, Number(car.derived?.hp || 1));
+      const torque = Math.max(1, Number(car.derived?.torque || 1));
       const weight = Math.max(500, Number(car.derived?.weight || 500));
       const grip = Math.max(0.5, Number(car.derived?.grip || 1));
-      const playerPwr = hp / weight;
-      const difficulty = randomInt(92, 108) / 100;
-      const oppPwr = playerPwr * difficulty;
-      const oppWeight = Math.round(weight * (randomInt(92, 108) / 100));
-      const oppHp = Math.round(oppPwr * oppWeight);
-      const reaction = randomInt(80, 420) / 1000;
-      const oppReaction = randomInt(100, 450) / 1000;
-      const playerEt = Math.max(6.2, round3(17.6 - (playerPwr * 38) - ((grip - 1) * 0.45) + reaction + (randomInt(-12, 12) / 100)));
-      const opponentEt = Math.max(6.2, round3(17.6 - (oppPwr * 38) + oppReaction + (randomInt(-12, 12) / 100)));
-      const won = playerEt < opponentEt;
-      const reward = won ? randomInt(450, 850) : randomInt(90, 220);
+      const pwr = hp / weight;
+      const difficulty = 0.94 + (Math.random() * 0.14);
+      const opponentWeight = Math.max(1200, Math.round(weight * (0.90 + (Math.random() * 0.20))));
+      const opponentHp = Math.max(55, Math.round(pwr * difficulty * opponentWeight));
+      const opponentTorque = Math.max(50, Math.round(torque * difficulty * (0.93 + (Math.random() * 0.14))));
+      const opponentGrip = Math.max(0.65, Math.min(1.45, grip + ((Math.random() * 0.12) - 0.06)));
+      const opponentLevel = Math.max(1, level + randomInt(-3, 3));
+
+      const playerRun = this.raceSimulator.simulate({ hp, torque, weight, grip, level }, distance, weather);
+      const opponentRun = this.raceSimulator.simulate({
+        hp: opponentHp, torque: opponentTorque, weight: opponentWeight, grip: opponentGrip, level: opponentLevel,
+      }, distance, weather);
+
+      const won = playerRun.totalTime < opponentRun.totalTime;
+      const creditMultiplier = Number(distanceConfig.creditMultiplier || 1);
+      const reward = won
+        ? Math.round(randomInt(450, 850) * creditMultiplier)
+        : Math.round(randomInt(90, 220) * creditMultiplier);
+      const expReward = this.raceExpReward(level, opponentLevel, won);
+      const repReward = won ? 5 : 2;
+
       draft.wallet.credits += reward;
-      draft.progression.rep = Number(draft.progression.rep || 0) + (won ? 5 : 2);
+      draft.progression.exp = Number(draft.progression.exp || 0) + expReward;
+      draft.progression.rep = Number(draft.progression.rep || 0) + repReward;
+      draft.progression.level = this.levelFromExp(draft.progression.exp);
       draft.stats.races = Number(draft.stats.races || 0) + 1;
       draft.stats[won ? 'wins' : 'losses'] = Number(draft.stats[won ? 'wins' : 'losses'] || 0) + 1;
-      if (draft.stats.bestReaction == null || reaction < Number(draft.stats.bestReaction)) draft.stats.bestReaction = reaction;
-      this.addTransaction(draft, 'race_reward', reward, won ? 'Quick Race win' : 'Quick Race participation');
+      if (!playerRun.foul && (draft.stats.bestReaction == null || playerRun.reactionTime < Number(draft.stats.bestReaction))) {
+        draft.stats.bestReaction = playerRun.reactionTime;
+      }
+
+      const records = car.raceRecords || this.emptyRaceRecords();
+      const record = records[distance] || { races: 0, bestEt: null, bestTrap: null };
+      record.races = Number(record.races || 0) + 1;
+      let newBest = false;
+      if (!playerRun.foul && (record.bestEt == null || playerRun.elapsedTime < Number(record.bestEt))) {
+        record.bestEt = playerRun.elapsedTime;
+        newBest = true;
+      }
+      if (record.bestTrap == null || playerRun.trapSpeed > Number(record.bestTrap)) record.bestTrap = playerRun.trapSpeed;
+      records[distance] = record;
+      draft.garage[carIndex].raceRecords = records;
+
+      this.addTransaction(draft, 'race_reward', reward, `${distanceConfig.label} ${won ? 'win' : 'participation'}`);
+
       if (draft.tutorial?.status === 'active' && draft.tutorial?.step === 'first_race') {
         draft.wallet.credits += this.config.tutorialCompletionCredits;
         draft.progression.rep += this.config.tutorialCompletionRep;
@@ -285,7 +325,38 @@ export class LocalGameService {
         draft.tutorial.status = 'complete';
         draft.tutorial.step = 'complete';
       }
-      race = { won, reaction, playerEt, opponentEt, opponent: { name: this.opponentName(), hp: oppHp, weight: oppWeight }, reward, carName: this.carName(car) };
+
+      race = {
+        raceId: this.id('race'),
+        won,
+        distance,
+        distanceLabel: String(distanceConfig.label || distance),
+        location,
+        weather,
+        margin: round3(Math.abs(playerRun.totalTime - opponentRun.totalTime)),
+        reward,
+        expReward,
+        repReward,
+        newBest,
+        carName: this.carName(car),
+        player: playerRun,
+        opponent: {
+          name: this.opponentName(),
+          hp: opponentHp,
+          torque: opponentTorque,
+          weight: opponentWeight,
+          grip: Math.round(opponentGrip * 1000) / 1000,
+          level: opponentLevel,
+          ...opponentRun,
+        },
+        reaction: playerRun.reactionTime,
+        playerEt: playerRun.elapsedTime,
+        opponentEt: opponentRun.elapsedTime,
+      };
+
+      draft.raceHistory.push({ ...race, createdAt: now() });
+      const historyLimit = Math.max(5, Number(this.racingConfig.historyLimit || 25));
+      if (draft.raceHistory.length > historyLimit) draft.raceHistory = draft.raceHistory.slice(-historyLimit);
     });
     return { player, race };
   }
@@ -378,6 +449,7 @@ export class LocalGameService {
         ...(savedVisual.sprites || {}),
       },
     };
+    car.raceRecords = { ...this.emptyRaceRecords(), ...(car.raceRecords || {}) };
     return car;
   }
 
@@ -391,6 +463,7 @@ export class LocalGameService {
       factoryEngineId: spec.factoryEngineId || null, engineId: spec.factoryEngineId || null, engineBay: clone(spec.engineBay || null), visual: clone(spec.visual || { profile: 'sedan', color: '#78838d' }),
       base: { hp: Number(base.hp), torque: Number(base.torque), weight: Number(base.weight), grip: Number(base.grip || 1), drivetrain: String(base.drivetrain || 'FWD') },
       derived: { hp: Number(base.hp), torque: Number(base.torque), weight: Number(base.weight), grip: Number(base.grip || 1) },
+      raceRecords: this.emptyRaceRecords(),
       createdAt: now(),
     };
   }
@@ -489,6 +562,33 @@ export class LocalGameService {
   carName(car) {
     const nickname = String(car.nickname || '').trim();
     return nickname || String(car.displayName || 'Unknown Car');
+  }
+
+  expToReachLevel(level) {
+    return Math.floor(100 * (Math.max(1, Number(level)) ** 1.75));
+  }
+
+  levelFromExp(exp) {
+    let level = 1;
+    const total = Math.max(0, Number(exp || 0));
+    while (level < 200 && total >= this.expToReachLevel(level + 1)) level += 1;
+    return level;
+  }
+
+  raceExpReward(playerLevel, opponentLevel, won) {
+    let base = won ? randomInt(25, 74) : randomInt(9, 19);
+    const difference = Number(opponentLevel) - Number(playerLevel);
+    if (won && difference > 0) base = Math.round(base * (1 + Math.min(0.5, difference * 0.02)));
+    if (won && difference < 0) base = Math.round(base * Math.max(0.5, 1 + (difference * 0.015)));
+    return Math.max(1, base);
+  }
+
+  emptyRaceRecords() {
+    return {
+      '1/4': { races: 0, bestEt: null, bestTrap: null },
+      '1/2': { races: 0, bestEt: null, bestTrap: null },
+      '1': { races: 0, bestEt: null, bestTrap: null },
+    };
   }
 
   opponentName() {
