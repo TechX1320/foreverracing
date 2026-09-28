@@ -1,5 +1,15 @@
 # Changelog
 
+## V0.2.0-dev.3 — first pixel car assets
+
+- Added the first authored pixel car sprite sheet to the real game build.
+- Replaced procedural placeholders for the 1998 Civic DX, 2003 350Z, 2004 WRX STI and 2005 Mustang GT with top-down pixel sprites.
+- Added view-aware vehicle asset metadata so cars can later define separate `topDown`, `showroom`, `racePreview` and stage-specific artwork without changing screen logic.
+- Updated the shared vehicle renderer to prefer authored sprites and retain procedural SVG only as a fallback for cars without finished art.
+- Added automatic visual metadata migration so cars already owned in browser/server saves pick up newly-authored artwork after an update.
+- Added pixel-art rendering/scaling rules for Home, Showroom, Garage, Parts and race previews.
+- Added the sprite sheet to offline/static caching and static-build validation.
+
 ## V0.2.0-dev.2 — game identity, FTUE and Build Stages
 
 - Replaced the glass-card/AI-dashboard presentation with a denser browser-game layout: persistent player/current-car status, compact navigation, flatter panels, thin separators and table/list-heavy screens.
