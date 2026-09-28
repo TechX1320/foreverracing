@@ -21,6 +21,7 @@ const required = [
   'assets/js/domain/LocalGameService.js',
   'assets/js/domain/RaceSimulator.js',
   'assets/js/ui/vehicleRenderer.js',
+  'assets/js/ui/racePresentation.js',
   'data/catalog/cars.json',
   'data/catalog/parts.json',
   'data/catalog/engines.json',
@@ -37,7 +38,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.3.0-b"')) throw new Error('Static index is missing the V0.3B build marker.');
+if (!html.includes('data-build="0.4.0-a"')) throw new Error('Static index is missing the V0.4A build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -71,18 +72,26 @@ if (!appSource.includes("clearForeverRacingCaches({ unregister: true })")) throw
 
 const runtimeConfig = JSON.parse(await fs.readFile(new URL('data/config/game.json', docs), 'utf8'));
 if (runtimeConfig.defaultVehicleRendering !== 'authored') throw new Error('Authored vehicle rendering must be the default.');
-if (runtimeConfig.schemaVersion < 4) throw new Error('V0.3B player schema version must be at least 4.');
+if (runtimeConfig.schemaVersion < 5) throw new Error('V0.4A player schema version must be at least 5.');
 
 const raceConfig = JSON.parse(await fs.readFile(new URL('data/config/racing.json', docs), 'utf8'));
 if (!raceConfig.distances?.['1/4'] || !raceConfig.distances?.['1/2'] || !raceConfig.distances?.['1']) throw new Error('All three race distances must be configured.');
 if ((raceConfig.weather || []).length < 10 || (raceConfig.locations || []).length < 20) throw new Error('TextTuned weather/location pools are incomplete.');
+if (raceConfig.version < 2 || !raceConfig.presentation?.stagingMs || raceConfig.presentation?.timeScale !== 1) throw new Error('V0.4A real-time race presentation config is incomplete.');
 
 const localProviderSource = await fs.readFile(new URL('assets/js/storage/LocalStorageProvider.js', root), 'utf8');
 if (!localProviderSource.includes('localStorage.removeItem(PLAYER_KEY)')) throw new Error('Admin local logout must erase player data.');
 if (!localProviderSource.includes('already logged in in this browser')) throw new Error('Local duplicate-login guard is missing.');
+if (!localProviderSource.includes('startQuickRace') || !localProviderSource.includes('finishQuickRace')) throw new Error('Local two-phase race storage lifecycle is missing.');
+
+const localGameSource = await fs.readFile(new URL('assets/js/domain/LocalGameService.js', root), 'utf8');
+if (!localGameSource.includes('activeRace') || !localGameSource.includes('finishQuickRace')) throw new Error('Persistent active race lifecycle is missing.');
+
+const racePresentationSource = await fs.readFile(new URL('assets/js/ui/racePresentation.js', root), 'utf8');
+if (!racePresentationSource.includes('showModal()') || !racePresentationSource.includes('data-race-player-progress') || !racePresentationSource.includes('RETURN TO PITS')) throw new Error('Blocking race playback UI is incomplete.');
 
 const quickRaceSource = await fs.readFile(new URL('assets/js/screens/quickRace.js', root), 'utf8');
-if (!quickRaceSource.includes('TEXTTUNED RACE CORE') || !quickRaceSource.includes('data-race-distance')) throw new Error('V0.3B race screen is missing.');
+if (!quickRaceSource.includes('V0.4A RACE PRESENTATION') || !quickRaceSource.includes('playRacePresentation') || !quickRaceSource.includes('data-race-distance')) throw new Error('V0.4A race presentation screen is missing.');
 
 if (!appSource.includes('scheduleWelcomeTutorial')) throw new Error('Fresh-login FTUE welcome retry guard is missing.');
 
@@ -90,6 +99,7 @@ const modules = [
   'assets/js/app.js',
   'assets/js/domain/LocalGameService.js',
   'assets/js/ui/vehicleRenderer.js',
+  'assets/js/ui/racePresentation.js',
   'assets/js/storage/StorageProvider.js',
   'assets/js/storage/ApiStorageProvider.js',
   'assets/js/storage/LocalStorageProvider.js',
@@ -106,4 +116,4 @@ for (const file of modules) {
   new vm.SourceTextModule(source, { identifier: file });
 }
 
-console.log('Static identity build smoke test passed.');
+console.log('Static identity + V0.4A race presentation build smoke test passed.');
