@@ -33,12 +33,27 @@ document.addEventListener('error', (event) => {
 
 const TUTORIAL_ROUTES = {
   welcome: ['home', 'settings'],
-  buy_first_car: ['home', 'showroom', 'settings'],
+  buy_first_car: ['home', 'usedlot', 'settings'],
   visit_garage: ['home', 'garage', 'settings'],
   buy_first_upgrade: ['home', 'garage', 'parts', 'settings'],
-  install_first_upgrade: ['home', 'garage', 'parts', 'settings'],
-  build_stages: ['home', 'garage', 'parts', 'quick-race', 'settings'],
-  first_race: ['home', 'garage', 'parts', 'quick-race', 'settings']
+  install_first_upgrade: ['home', 'garage', 'settings'],
+  build_stages: ['home', 'quick-race', 'settings'],
+  first_race: ['home', 'quick-race', 'settings']
+};
+
+const ROUTE_UNLOCK_LEVELS = {
+  home: 1,
+  garage: 1,
+  parts: 1,
+  'quick-race': 1,
+  usedlot: 1,
+  roguelike: 1,
+  leaderboards: 3,
+  showroom: 5,
+  teams: 5,
+  events: 7,
+  multiplayer: 10,
+  settings: 1
 };
 
 const ctx = { storage, store, screenRoot, router: null, toast };
@@ -176,14 +191,14 @@ function showWelcomeTutorial() {
   const dialog = showDialog(`
     <div class="dialog-body ftue-welcome">
       <span class="section-label">FIRST TIME IN FOREVER RACING</span>
-      <h2>Build cars. Move them forward.</h2>
-      <p>Buy cars, develop them through increasingly serious Build Types, race them, collect them, and eventually compete through events, teams and longer PvE runs.</p>
+      <h2>Start at the bottom. Build your way up.</h2>
+      <p>Your first goal is simple: find a cheap D Class car, make one upgrade, and take it down the 1/4 mile.</p>
       <div class="ftue-points">
-        <div><b>1</b><span><strong>Get a car</strong>Choose a platform you actually want to build.</span></div>
-        <div><b>2</b><span><strong>Modify it</strong>Your Street Car teaches the upgrade system with clear, permanent progression.</span></div>
-        <div><b>3</b><span><strong>Race it</strong>Your build changes the numbers that drive the race simulation.</span></div>
+        <div><b>1</b><span><strong>Find a beater</strong>Your first car comes from the Classifieds, not a new-car showroom.</span></div>
+        <div><b>2</b><span><strong>Make it yours</strong>Buy and install one guided Intake upgrade.</span></div>
+        <div><b>3</b><span><strong>Run the quarter</strong>Your first pass is a clean local test-and-tune race.</span></div>
       </div>
-      <div class="dialog-actions"><button class="button button--primary" data-start-ftue>START WITH A CAR</button></div>
+      <div class="dialog-actions"><button class="button button--primary button--wide ftue-primary-action" data-start-ftue>SELECT FIRST CAR</button></div>
     </div>`, { locked: true });
 
   dialog.querySelector('[data-start-ftue]')?.addEventListener('click', async (event) => {
@@ -192,7 +207,7 @@ function showWelcomeTutorial() {
       const data = await storage.tutorialAdvance('welcome_complete');
       store.setPlayer(data.player);
       closeDialog(dialog);
-      router.navigate(data.player?.tutorial?.step === 'visit_garage' ? 'garage' : 'showroom');
+      router.navigate(data.player?.tutorial?.step === 'visit_garage' ? 'garage' : 'usedlot');
     } catch (err) {
       toast('Tutorial error', err.message);
       event.currentTarget.disabled = false;
@@ -263,7 +278,7 @@ function renderHomeOverview(player) {
 
   if (visual) visual.innerHTML = current ? renderVehicle(current, { stage: Number(current.buildStage || 1), view: 'showroom' }) : '<div class="no-car-visual">NO CURRENT CAR</div>';
   if (name) name.textContent = current ? carLabel(current) : 'No current car';
-  if (factory) factory.textContent = current ? current.displayName : 'Choose a starter car to begin your first build.';
+  if (factory) factory.textContent = current ? current.displayName : 'Find a D Class starter in Classifieds to begin your first build.';
   if (stats) stats.innerHTML = current
     ? `<span><b>${current.derived?.hp || 0}</b> HP</span><span><b>${current.derived?.torque || 0}</b> LB-FT</span><span><b>${current.derived?.weight || 0}</b> LB</span><span><b>${current.base?.drivetrain || '-'}</b> DRIVE</span>`
     : '<span><b>-</b> HP</span><span><b>-</b> LB-FT</span><span><b>-</b> LB</span><span><b>-</b> DRIVE</span>';
@@ -284,7 +299,7 @@ function renderObjectiveRail(player) {
   if (!node) return;
   const tutorial = player?.tutorial || {};
   if (tutorial.status !== 'active') {
-    node.innerHTML = '<span class="rail-state rail-state--done">BASICS COMPLETE</span><p>Build what you want. The tutorial no longer restricts navigation.</p>';
+    node.innerHTML = '<span class="rail-state rail-state--done">BASICS COMPLETE</span><strong>Enter The Circuit</strong><p>Your career starts at local meets. More game systems unlock as your Level rises.</p><button class="rail-link" data-nav="roguelike">OPEN THE CIRCUIT</button>';
     return;
   }
   const info = objectiveInfo(tutorial.step);
@@ -294,35 +309,51 @@ function renderObjectiveRail(player) {
 function routeAllowed(player, route) {
   if (player?.activeRace && route !== 'quick-race') return false;
   const tutorial = player?.tutorial;
-  if (tutorial?.status !== 'active') return true;
-  const allowed = TUTORIAL_ROUTES[tutorial.step] || ['home', 'settings'];
-  return allowed.includes(route);
+  if (tutorial?.status === 'active') {
+    const allowed = TUTORIAL_ROUTES[tutorial.step] || ['home', 'settings'];
+    return allowed.includes(route);
+  }
+  const requiredLevel = Number(ROUTE_UNLOCK_LEVELS[route] || 1);
+  return Number(player?.progression?.level || 1) >= requiredLevel;
 }
 
 function applyTutorialNavigation(player) {
+  const tutorialActive = player?.tutorial?.status === 'active';
+  const level = Number(player?.progression?.level || 1);
   document.querySelectorAll('button[data-nav]').forEach((button) => {
-    const locked = !routeAllowed(player, button.dataset.nav || 'home');
+    const route = button.dataset.nav || 'home';
+    const locked = !routeAllowed(player, route);
     button.disabled = locked;
     button.classList.toggle('is-locked', locked);
+
+    const subtitle = button.querySelector('span');
+    if (subtitle && !button.dataset.defaultSubtitle) button.dataset.defaultSubtitle = subtitle.textContent || '';
+    const requiredLevel = Number(ROUTE_UNLOCK_LEVELS[route] || 1);
+    if (!tutorialActive && locked && requiredLevel > level && subtitle) {
+      subtitle.textContent = `Unlocks Lv ${requiredLevel}`;
+      button.title = `Unlocks at Level ${requiredLevel}`;
+    } else if (subtitle && button.dataset.defaultSubtitle) {
+      subtitle.textContent = button.dataset.defaultSubtitle;
+      button.title = '';
+    }
   });
 }
 
 function applyNavigationVisibility(player) {
   const showroom = document.querySelector('.nav-rail button[data-nav="showroom"]');
   if (!showroom) return;
-  const tutorialNeedsShowroom = player?.tutorial?.status === 'active' && player?.tutorial?.step === 'buy_first_car';
-  showroom.hidden = !tutorialNeedsShowroom;
+  showroom.hidden = player?.tutorial?.status === 'active';
 }
 
 function objectiveInfo(step) {
   const map = {
     welcome: { code: 'FTUE 1/6', title: 'Start the tutorial', copy: 'A short introduction will explain the core loop.', action: '', route: '' },
-    buy_first_car: { code: 'FTUE 2/6', title: 'Choose your first car', copy: 'Pick one of the three starter platforms in the Showroom.', action: 'OPEN SHOWROOM', route: 'showroom' },
+    buy_first_car: { code: 'FTUE 2/6', title: 'Choose your first car', copy: 'Pick a highlighted D Class starter from the Classifieds.', action: 'OPEN CLASSIFIEDS', route: 'usedlot' },
     visit_garage: { code: 'FTUE 3/6', title: 'Read your car', copy: 'Visit the Garage and learn the car stats and Build Type.', action: 'OPEN GARAGE', route: 'garage' },
-    buy_first_upgrade: { code: 'FTUE 4/6', title: 'Buy an upgrade', copy: 'Open a Parts category and buy the first Street Car upgrade.', action: 'OPEN PARTS', route: 'parts' },
-    install_first_upgrade: { code: 'FTUE 5/6', title: 'Install the part', copy: 'Open Garage Inventory and install the part you just bought.', action: 'OPEN GARAGE', route: 'garage' },
+    buy_first_upgrade: { code: 'FTUE 4/6', title: 'Buy the Intake', copy: 'The tutorial locks you to Intake. Buy the Stage 1 Intake to continue.', action: 'OPEN PARTS', route: 'parts' },
+    install_first_upgrade: { code: 'FTUE 5/6', title: 'Install the Intake', copy: 'Open Garage Inventory and install the Intake you just bought.', action: 'OPEN GARAGE', route: 'garage' },
     build_stages: { code: 'FTUE 6/6', title: 'Run your first race', copy: 'Build-type conversion will be introduced later when the Street Car is actually complete.', action: 'QUICK RACE', route: 'quick-race' },
-    first_race: { code: 'FTUE 6/6', title: 'Run your first race', copy: 'Stage the car, watch the tree, and let the first animated pass run to the finish.', action: 'QUICK RACE', route: 'quick-race' }
+    first_race: { code: 'FTUE 6/6', title: 'Run the 1/4 mile', copy: 'Quick Race is now the only route. Start the highlighted 1/4-mile pass.', action: 'START FIRST RACE', route: 'quick-race' }
   };
   return map[step] || { code: 'FTUE', title: 'Continue', copy: 'Follow the highlighted game action.', action: '', route: '' };
 }
