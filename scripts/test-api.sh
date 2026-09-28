@@ -109,10 +109,14 @@ echo "$PLAYER" | jq -e --arg carId "$CAR_ID" '.player.tutorial.step == "install_
 PLAYER="$(post parts/install.php "{\"inventoryId\":\"$PART_ID\",\"carId\":\"$CAR_ID\"}")"
 echo "$PLAYER" | jq -e '.player.garage[0].derived.hp == 109 and .player.tutorial.step == "first_race"' >/dev/null
 
+PREVIEW="$(curl -sS -b "$COOKIE" "http://127.0.0.1:$PORT/api/race/preview.php")"
+echo "$PREVIEW" | jq -e '.preview.opponent.name == "Test Mule" and .preview.opponent.hp > 0 and .preview.opponent.weight > 0 and (.preview.opponent.visualSrc | length) > 0' >/dev/null
+
 PLAYER="$(post race/start.php '{"distance":"1/4"}')"
 RACE_ID="$(echo "$PLAYER" | jq -r '.activeRace.raceId')"
 echo "$PLAYER" | jq -e '.player.tutorial.step == "first_race" and .player.stats.races == 0 and .player.progression.exp == 0 and (.player.raceHistory | length) == 0' >/dev/null
 echo "$PLAYER" | jq -e '.activeRace.distance == "1/4" and .activeRace.race.player.trapSpeed > 0 and .activeRace.race.location.name == "Local Test & Tune" and .activeRace.race.weather.name == "Cool & Cloudy" and .activeRace.race.player.foul == false and .activeRace.race.opponent.foul == false and .activeRace.race.won == true' >/dev/null
+echo "$PLAYER" | jq -e --argjson preview "$PREVIEW" '.activeRace.race.opponent.name == $preview.preview.opponent.name and .activeRace.race.opponent.carName == $preview.preview.opponent.carName and .activeRace.race.opponent.hp == $preview.preview.opponent.hp and .activeRace.race.opponent.weight == $preview.preview.opponent.weight' >/dev/null
 
 DUP_RACE="$(post race/start.php '{"distance":"1/2"}')"
 echo "$DUP_RACE" | jq -e --arg raceId "$RACE_ID" '.activeRace.raceId == $raceId and .activeRace.distance == "1/4" and .player.stats.races == 0' >/dev/null
@@ -153,4 +157,4 @@ if [[ "$FRESH_STATUS" != "200" ]]; then
 fi
 jq -e '.authenticated == true and .player.tutorial.step == "welcome" and ((.player.garage | length) == 0) and .player.progression.exp == 0' "$LOGIN2" >/dev/null
 
-echo "Authenticated PHP API V0.4D guided FTUE + progression gate smoke test passed."
+echo "Authenticated PHP API V0.4E tutorial + deterministic race preview smoke test passed."
