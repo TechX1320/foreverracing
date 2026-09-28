@@ -1,5 +1,25 @@
 # Changelog
 
+## V0.4.0-d — guided FTUE and progression
+
+- Rebuilt the FTUE as a forced action path instead of a collection of small instructional panels.
+- Moved first-car selection from Showroom to three guaranteed D Class starter listings in Classifieds.
+- Starter progression now begins with a used Civic / RSX / Miata-style beater instead of C Class Mustang/350Z options.
+- Rebuilt Showroom around the same image-first card language as Classifieds and limited it to newer dealer inventory.
+- Added Suspension as the eighth Street Car category, completing a clean 4x2 category grid.
+- Forced the first upgrade to Stage 1 Intake and automatically routes purchase -> Garage Inventory -> install -> Quick Race.
+- Forced the first race to the 1/4 mile, guarantees no red light and a beginner-friendly first win in normal weather.
+- Added distance progression: 1/2 mile at Level 5 and 1 mile at Level 10.
+- Added level-based navigation gates so FTUE completion no longer unlocks the entire game at once.
+- Renamed the player-facing RogueLike prototype to The Circuit and established it as the future single-player career shell.
+- Raised normal desktop metadata/supporting text again; V0.4C's 10px floor was still too small.
+- Reworked Parts and Garage Inventory dialogs around large actions and clearer information hierarchy.
+- Collapsed secondary Quick Race information to reduce page scrolling.
+- Tiered Quick Race weather and excluded nightmare/extreme scenarios from early normal races.
+- Fixed drag-tree timing so ambers count down distinctly and a red light appears immediately on an early launch.
+- Preserved the two-phase/idempotent race transaction and LocalStorage/PHP parity.
+- Deferred vehicle tire/pixel-art replacement to a dedicated art-direction pass using future supplied references.
+
 ## V0.4.0-c — readability hardening
 
 - Made the compact game header actually 50px tall instead of only lowering its minimum height.
