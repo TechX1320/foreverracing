@@ -48,6 +48,13 @@ for (const file of [
   JSON.parse(await fs.readFile(new URL(file, docs), 'utf8'));
 }
 
+const rendererSource = await fs.readFile(new URL('assets/js/ui/vehicleRenderer.js', root), 'utf8');
+if (!rendererSource.includes('ART MISSING')) throw new Error('Vehicle renderer must expose an explicit missing-art placeholder.');
+if (rendererSource.includes('renderProcedural(')) throw new Error('Generic procedural car fallback must not return.');
+
+const runtimeConfig = JSON.parse(await fs.readFile(new URL('data/config/game.json', docs), 'utf8'));
+if (runtimeConfig.defaultVehicleRendering !== 'authored') throw new Error('Authored vehicle rendering must be the default.');
+
 const modules = [
   'assets/js/app.js',
   'assets/js/domain/LocalGameService.js',

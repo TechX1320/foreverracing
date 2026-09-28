@@ -23,6 +23,14 @@ const screenRoot = document.getElementById('screenRoot');
 
 loadSettings();
 
+document.addEventListener('error', (event) => {
+  const image = event.target;
+  if (!(image instanceof HTMLImageElement) || !image.matches('[data-vehicle-image]')) return;
+  image.hidden = true;
+  const fallback = image.parentElement?.querySelector('[data-vehicle-missing]');
+  if (fallback) fallback.hidden = false;
+}, true);
+
 const TUTORIAL_ROUTES = {
   welcome: ['home', 'settings'],
   buy_first_car: ['home', 'showroom', 'settings'],

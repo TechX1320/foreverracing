@@ -1,5 +1,15 @@
 # Changelog
 
+## V0.2.0-dev.5 — honest art fallback + TextTuned roadmap
+
+- Removed the generic procedural-car fallback from normal vehicle rendering.
+- Cars with no authored art now display an explicit boxed `? / ART MISSING` placeholder.
+- Broken direct image assets automatically reveal the same missing-art marker instead of leaving a blank row.
+- Added the long-term vehicle view contract: side profile for showroom/garage presentation, top-down for racing, with dedicated view overrides supported.
+- Added an eight-car art queue covering every current catalog car without authored art.
+- Audited the surviving private TextTuned server source and added a feature-by-feature migration roadmap for bringing its MMORPG systems into Forever Racing.
+- Set V0.3 direction to a cleaned-up TextTuned-derived automated race core before deeper visual polish.
+
 ## V0.2.0-dev.4 — pixel car rendering hotfix
 
 - Fixed authored car sprites rendering as tiny/incomplete CSS sprite-sheet slices in the Showroom.

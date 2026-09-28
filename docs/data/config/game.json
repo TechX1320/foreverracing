@@ -5,7 +5,7 @@
   "localDevUsername": "Admin",
   "localDevPassword": "12345",
   "tutorialVersion": 1,
-  "defaultVehicleRendering": "procedural",
+  "defaultVehicleRendering": "authored",
   "tutorialCompletionCredits": 2500,
   "tutorialCompletionRep": 25
 }

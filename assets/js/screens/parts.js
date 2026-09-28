@@ -35,7 +35,7 @@ export async function renderParts(ctx) {
     trail: stage === 1 ? "Sequential upgrades / no downgrades" : "Choice-based parts / previous stage choices remain",
     body: `
       <div class="build-shop-header">
-        <div class="build-shop-car">${renderVehicle(current, { stage })}</div>
+        <div class="build-shop-car">${renderVehicle(current, { stage, view: 'sideProfile' })}</div>
         <div class="build-shop-stats">
           <span><b>${number(current.derived?.hp)}</b> HP</span>
           <span><b>${number(current.derived?.torque)}</b> LB-FT</span>

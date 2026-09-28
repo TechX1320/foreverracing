@@ -69,7 +69,7 @@ function carRow(player, car, catalog) {
   const progress = stage === 1 ? stageOneProgress(player, car, catalog) : null;
   return `
     <article class="garage-entry ${selected ? "is-current" : ""}">
-      <div class="garage-entry__visual">${renderVehicle(car, { stage })}</div>
+      <div class="garage-entry__visual">${renderVehicle(car, { stage, view: 'sideProfile' })}</div>
       <div class="garage-entry__main">
         <div class="garage-entry__title">
           <div><span class="stage-tag">S${stage}</span><strong>${escapeHtml(carLabel(car))}</strong><small>${escapeHtml(car.displayName)} • ${escapeHtml(car.base?.drivetrain || "")}</small></div>
@@ -119,7 +119,7 @@ function stageUp(ctx, carId) {
   const car = ctx.store.player?.garage?.find((entry) => String(entry.carId) === String(carId));
   if (!car) return;
   const dialog = showDialog(`<div class="dialog-body">
-    <div class="dialog-vehicle">${renderVehicle(car, { stage: 2 })}</div>
+    <div class="dialog-vehicle">${renderVehicle(car, { stage: 2, view: 'sideProfile' })}</div>
     <h2>Convert to Build Stage 2?</h2>
     <p>Your completed Stage 1 setup becomes the car's new baseline. The simple numbered Stage 1 parts are incorporated into the conversion, and the shop switches to named choice-based parts. Build Stage cannot go backward.</p>
     <div class="dialog-actions"><button class="button button--small" data-cancel>Cancel</button><button class="button button--primary button--small" data-confirm>CONVERT TO STAGE 2</button></div>
