@@ -585,3 +585,202 @@ pointer-events:none}
 @media(prefers-reduced-motion:reduce){
   .race-strip__car,.race-progress-board i{transition:none!important}
 }
+
+
+/* V0.4B browser-game usability */
+body{font-size:15px;line-height:1.45}
+button,input,select,textarea{font:inherit}
+.game-header{min-height:50px}
+.brand__copy strong{font-size:14px}
+.brand__copy small,.environment-tag,.storage-tag,.header-action{font-size:10px}
+.status-strip{display:none!important}
+.game-layout{grid-template-columns:184px minmax(0,1fr) 248px;min-height:calc(100dvh - 78px)}
+.game-content{padding:10px}
+.context-rail{padding:10px;gap:10px}
+.nav-rail{padding:8px 7px;gap:2px}
+.nav-rail__label{font-size:9px;padding:6px 8px 3px}
+.nav-rail button{min-height:42px;padding:5px 9px;border-left:3px solid transparent}
+.nav-rail button b{font-size:12px;letter-spacing:.025em}
+.nav-rail button span{font-size:10px;line-height:1.2;margin-top:2px}
+.nav-rail button[data-nav="home"]{border-left-color:transparent}
+.nav-rail button.is-active{background:#181b1e;color:var(--text);border-color:#282e32;border-left-color:var(--accent)}
+.nav-rail button.is-active b{color:#fff}
+.nav-rail button[hidden]{display:none!important}
+.rail-panel header{font-size:10px}
+.rule-list div,.tutorial-rail p,.rail-panel--dev p{font-size:11px;line-height:1.45}
+.player-info-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border);background:#0f1214}
+.player-info-grid>div{padding:8px 9px;border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
+.player-info-grid>div:nth-child(even){border-right:0}
+.player-info-grid>div:last-child{grid-column:1/-1;border-right:0;border-bottom:0}
+.player-info-grid>div:nth-last-child(2){border-bottom:0}
+.player-info-grid span{display:block;color:var(--faint);font-size:9px;font-weight:900;letter-spacing:.08em}
+.player-info-grid b{display:block;margin-top:3px;font-size:13px;font-variant-numeric:tabular-nums}
+.screen-toolbar{min-height:36px}
+.screen-toolbar__trail{font-size:10px}
+.section-heading{min-height:48px}
+.section-heading small,.section-label{font-size:9px}
+.section-heading h2{font-size:20px}
+.screen-copy,.objective-box p,.empty-state span{font-size:12px}
+.button{font-size:12px;min-height:34px}
+.button--small{font-size:11px;min-height:30px}
+.game-card h3{font-size:14px}
+.game-card p{font-size:11px}
+.game-card__price{font-size:12px}
+.spec span{font-size:9px}
+.spec strong{font-size:13px}
+.muted{font-size:11px}
+
+/* Compact Parts landing page: no giant scrolling upgrade table. */
+.build-shop-summary{display:grid;grid-template-columns:minmax(260px,.9fr) minmax(420px,1.1fr);border:1px solid var(--border);background:#111315;margin-bottom:10px;min-height:128px}
+.build-shop-summary__car{display:flex;align-items:center;justify-content:center;border-right:1px solid var(--border);padding:4px}
+.build-shop-summary__car .vehicle-sprite-image--sideProfile{width:min(260px,94%);height:auto;max-height:112px}
+.build-shop-summary__info{display:grid;grid-template-columns:1.45fr repeat(4,1fr)}
+.build-shop-summary__info>div{display:flex;flex-direction:column;justify-content:center;padding:10px;border-right:1px solid var(--border)}
+.build-shop-summary__info>div:last-child{border-right:0}
+.build-shop-summary__info span{font-size:9px;color:var(--faint);font-weight:900;letter-spacing:.07em}
+.build-shop-summary__info strong{margin-top:4px;font-size:14px}
+.parts-category-panel{border:1px solid var(--border);background:#131619}
+.parts-category-panel__head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:9px 10px;border-bottom:1px solid var(--border)}
+.parts-category-panel__head strong{display:block;margin-top:2px;font-size:13px}
+.parts-category-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;padding:8px}
+.parts-category-card{min-height:100px;text-align:left;border:1px solid var(--border);background:#0f1214;color:var(--text);padding:10px;display:flex;flex-direction:column;gap:4px}
+.parts-category-card:hover,.parts-category-card:focus{border-color:#596169;background:#171b1e}
+.parts-category-card.is-complete{border-color:#315640}
+.parts-category-card__name{font-size:10px;color:var(--accent-2);font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.parts-category-card strong{font-size:14px}
+.parts-category-card small{font-size:10px;color:var(--muted);line-height:1.35;min-height:27px}
+.parts-category-card>.meter{display:block;margin-top:auto;height:5px}
+.parts-category-card__count{margin-top:auto;font-size:9px;color:var(--faint);font-style:normal}
+.parts-shop-dialog{width:min(820px,calc(100vw - 28px));max-height:86dvh;overflow:auto}
+.parts-shop-dialog__car,.garage-inventory-dialog__head,.classified-detail-dialog__hero{display:grid;grid-template-columns:230px 1fr;gap:14px;align-items:center;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:10px}
+.parts-shop-dialog__car .dialog-vehicle,.garage-inventory-dialog__head .dialog-vehicle,.classified-detail-dialog__hero .dialog-vehicle{height:118px}
+.parts-shop-dialog__car h2,.garage-inventory-dialog__head h2,.classified-detail-dialog__hero h2{margin:3px 0;font-size:20px}
+.parts-shop-dialog__car p,.garage-inventory-dialog__head p,.classified-detail-dialog__hero p{font-size:11px;color:var(--muted)}
+.parts-shop-list,.garage-inventory-list{display:grid;gap:6px}
+.parts-shop-row{display:grid;grid-template-columns:minmax(210px,1.35fr) minmax(240px,1fr) 180px;align-items:center;border:1px solid var(--border);background:#111416}
+.parts-shop-row.is-complete{border-color:#315640}
+.parts-shop-row>div{padding:9px 10px}
+.parts-shop-row__title span,.garage-inventory-row__category{display:block;color:var(--accent-2);font-size:9px;font-weight:900;letter-spacing:.07em}
+.parts-shop-row__title strong{display:block;font-size:13px}
+.parts-shop-row__title small{display:block;margin-top:2px;color:var(--muted);font-size:10px}
+.parts-shop-row__delta{display:flex;gap:8px;flex-wrap:wrap;border-inline:1px solid var(--border)}
+.parts-shop-row__delta span{font-size:9px;color:var(--faint)}
+.parts-shop-row__delta b{display:block;color:var(--text);font-size:11px}
+.parts-shop-row__action{text-align:right}
+.parts-shop-dialog__note{margin-top:8px;padding:8px 10px;border:1px solid #3e3427;background:#17130f;color:var(--muted);font-size:10px}
+.stage-ready--reactive{margin-top:9px}
+.stage-ready--reactive p{font-size:11px}
+
+/* Garage inventory owns install/remove/swap actions. */
+.stage-name-tag{display:inline-flex;align-items:center;min-height:22px;padding:2px 7px;border:1px solid #5b462f;background:#1a1510;color:var(--accent-2);font-size:9px;font-weight:900;letter-spacing:.05em}
+.garage-entry__title strong{font-size:15px}
+.garage-entry__title small{font-size:10px}
+.stat-line span{font-size:10px}
+.stage-progress__label{font-size:10px}
+.garage-inventory-dialog{width:min(840px,calc(100vw - 28px));max-height:86dvh;overflow:auto}
+.garage-inventory-row{display:grid;grid-template-columns:minmax(260px,1.5fr) minmax(220px,1fr) 145px;align-items:center;border:1px solid var(--border);background:#111416}
+.garage-inventory-row.is-installed{border-color:#315640}
+.garage-inventory-row>div{padding:9px 10px}
+.garage-inventory-row strong{display:block;font-size:13px}
+.garage-inventory-row small{display:block;margin-top:2px;color:var(--muted);font-size:10px}
+.garage-inventory-row__effects{display:flex;gap:6px;flex-wrap:wrap;border-inline:1px solid var(--border)}
+.garage-inventory-row__effects span{font-size:10px;color:var(--muted)}
+.garage-inventory-row__action{text-align:right}
+
+/* Classifieds: image first, details/purchase in modal. */
+.classifieds-intro{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:9px;padding:8px 10px;border:1px solid var(--border);background:#111315}
+.classifieds-intro p{margin:0;font-size:11px;color:var(--muted)}
+.classifieds-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.classified-card{border:1px solid var(--border);background:#14171a;min-width:0}
+.classified-card__visual{height:120px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--border);background:#101214;padding:4px}
+.classified-card__visual .vehicle-sprite-image--sideProfile{width:min(220px,94%);height:auto;max-height:102px}
+.classified-card__body{padding:9px}
+.classified-card__title{display:flex;justify-content:space-between;gap:8px}
+.classified-card__title strong{display:block;font-size:13px}
+.classified-card__title small{display:block;margin-top:2px;color:var(--muted);font-size:10px}
+.condition-badge{align-self:flex-start;padding:3px 5px;border:1px solid var(--border);font-size:10px;font-weight:900}
+.condition-badge.is-excellent{color:#7bdc93;border-color:#315640}
+.condition-badge.is-good{color:#d9c878;border-color:#5d5734}
+.condition-badge.is-rough{color:#e38a8f;border-color:#5d3437}
+.classified-card__meta{display:flex;align-items:center;justify-content:space-between;margin:8px 0;font-size:10px;color:var(--muted)}
+.classified-card__meta b{font-size:13px;color:var(--accent-2)}
+.classified-detail-dialog{width:min(860px,calc(100vw - 28px));max-height:88dvh;overflow:auto}
+.classified-detail-price{display:block;margin-top:5px;color:var(--accent-2);font-size:20px}
+.classified-detail-specs{display:grid;grid-template-columns:repeat(6,1fr);border:1px solid var(--border);margin-bottom:9px}
+.classified-detail-specs>div{padding:8px;border-right:1px solid var(--border)}
+.classified-detail-specs>div:last-child{border-right:0}
+.classified-detail-specs span{display:block;color:var(--faint);font-size:8px;font-weight:900}
+.classified-detail-specs b{display:block;margin-top:3px;font-size:11px}
+.classified-price-breakdown{border:1px solid var(--border);background:#101214;padding:8px 10px}
+.classified-price-breakdown>div{display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:11px}
+.classified-price-breakdown__final{margin-top:4px;padding-top:7px!important;border-top:1px solid var(--border);color:var(--accent-2)}
+.classified-price-breakdown p,.classified-detail-note{margin:7px 0 0;color:var(--muted);font-size:10px;line-height:1.45}
+.classified-detail-balance{display:flex;justify-content:space-between;gap:10px;margin-top:8px;font-size:11px}
+
+/* Race dialog fits a 1080p desktop without becoming a second scrolling page. */
+dialog.race-playback-dialog{width:min(900px,calc(100vw - 24px));max-height:92dvh}
+.race-playback__head{padding:8px 11px}
+.race-playback__head h2{font-size:18px}
+.race-playback__status{min-height:28px}
+.race-stage{padding:7px 10px 8px}
+.race-strip{height:330px}
+.race-strip__start,.race-strip__finish{z-index:1}
+.race-strip__lane{z-index:4}
+.race-strip__car{z-index:8;width:66px;height:98px}
+.race-strip__tree{z-index:9}
+.race-strip__finish{top:9%}
+.race-playback__final{padding:0 10px 8px}
+.race-playback-result__grid span,.race-playback-result__grid b{padding:6px 8px}
+.race-playback-result__rewards span{padding:6px 8px}
+.race-playback__footer{padding:8px 10px}
+
+/* Readability without returning to giant, scroll-heavy pages. */
+.activity-list div,.stage-mini-list div{font-size:11px}
+.stage-mini-list--named b{min-width:148px;font-size:9px}
+.screen-panel{font-size:13px}
+.dialog-body{font-size:13px}
+.field label{font-size:11px}
+.field input{font-size:14px}
+.form-error{font-size:11px}
+
+@media(min-width:1200px) and (min-height:900px){
+  .game-footer{min-height:25px;padding-block:4px}
+  .screen-toolbar{margin-bottom:6px}
+  .screen-panel{margin-bottom:0}
+}
+
+@media(max-width:1180px){
+  .game-layout{grid-template-columns:168px minmax(0,1fr)}
+  .context-rail{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr)}
+  .parts-category-grid{grid-template-columns:repeat(3,1fr)}
+  .classifieds-grid{grid-template-columns:repeat(3,1fr)}
+}
+
+@media(max-width:760px){
+  body{font-size:14px}
+  .nav-rail button b{font-size:10px}
+  .nav-rail button span{font-size:9px}
+  .context-rail{grid-template-columns:1fr 1fr}
+  .context-rail .rail-panel:nth-child(2){display:block}
+  .build-shop-summary{grid-template-columns:1fr}
+  .build-shop-summary__car{border-right:0;border-bottom:1px solid var(--border);height:120px}
+  .build-shop-summary__info{grid-template-columns:repeat(2,1fr)}
+  .build-shop-summary__info>div:first-child{grid-column:1/-1}
+  .parts-category-grid{grid-template-columns:repeat(2,1fr)}
+  .parts-shop-dialog__car,.garage-inventory-dialog__head,.classified-detail-dialog__hero{grid-template-columns:1fr}
+  .parts-shop-row,.garage-inventory-row{grid-template-columns:1fr}
+  .parts-shop-row__delta,.garage-inventory-row__effects{border-inline:0;border-block:1px solid var(--border)}
+  .parts-shop-row__action,.garage-inventory-row__action{text-align:left}
+  .classifieds-grid{grid-template-columns:repeat(2,1fr)}
+  .classified-detail-specs{grid-template-columns:repeat(2,1fr)}
+  .classified-detail-specs>div{border-bottom:1px solid var(--border)}
+  .race-strip{height:310px}
+}
+
+@media(max-width:480px){
+  .parts-category-grid,.classifieds-grid{grid-template-columns:1fr}
+  .context-rail{grid-template-columns:1fr}
+  .player-info-grid{grid-template-columns:1fr 1fr}
+  .classified-detail-balance{flex-direction:column}
+  .race-strip{height:290px}
+}
