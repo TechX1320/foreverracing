@@ -80,8 +80,8 @@ export class LocalGameService {
     const spec = this.findBy(this.cars, 'stockId', Number(stockId));
     if (!spec) throw new LocalGameError('That showroom car does not exist.', 404);
     return this.mutate(inputPlayer, (player) => {
-      if (player.tutorial?.status === 'active' && player.tutorial?.step === 'buy_first_car' && !spec.starter) {
-        throw new LocalGameError('Choose one of the highlighted starter cars for your first build.');
+      if (player.tutorial?.status === 'active' && player.tutorial?.step === 'buy_first_car') {
+        throw new LocalGameError('Your first car comes from the Classifieds. Start with a D Class used car and work your way up.');
       }
       const price = Number(spec.price || 0);
       this.requireCredits(player, price);
@@ -120,6 +120,9 @@ export class LocalGameService {
       const car = this.selectedCar(player);
       if (!car) throw new LocalGameError('Select a car before buying build parts.');
       this.requirePartCompatible(player, car, spec, { purchasing: true });
+      if (player.tutorial?.status === 'active' && player.tutorial?.step === 'buy_first_upgrade' && String(spec.catalogId) !== 's1_intake_1') {
+        throw new LocalGameError('For the tutorial, start with the Stage 1 Intake.');
+      }
       const price = Number(spec.price || 0);
       this.requireCredits(player, price);
       player.wallet.credits -= price;
@@ -141,6 +144,9 @@ export class LocalGameService {
       const spec = this.findBy(this.parts, 'catalogId', String(instance.catalogId || ''));
       if (!spec) throw new LocalGameError('Part catalog entry is missing.', 500);
       const car = player.garage[carIndex];
+      if (player.tutorial?.status === 'active' && player.tutorial?.step === 'install_first_upgrade' && String(spec.catalogId) !== 's1_intake_1') {
+        throw new LocalGameError('Install the Stage 1 Intake to continue the tutorial.');
+      }
       this.requirePartCompatible(player, car, spec, { purchasing: false });
 
       const slot = String(spec.slot || '');
@@ -189,7 +195,7 @@ export class LocalGameService {
       const index = this.requireOwnedCarIndex(player, carId);
       const car = player.garage[index];
       if (Number(car.buildStage || 1) !== 1) throw new LocalGameError('Only Street Car to Street Race Car conversion is enabled in this build.');
-      const required = this.buildStages?.[0]?.requiredCategories || ['intake','exhaust','ecu','fuel','drivetrain','tires','weight'];
+      const required = this.buildStages?.[0]?.requiredCategories || ['intake','exhaust','ecu','fuel','drivetrain','suspension','tires','weight'];
       const incomplete = required.filter((key) => this.installedSimpleTier(player, carId, key) < 3);
       if (incomplete.length) throw new LocalGameError('Max every Street Car upgrade category before converting to a Street Race Car.');
       car.stageBaseline = clone(car.derived);
