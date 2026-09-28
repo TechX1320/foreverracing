@@ -3,7 +3,7 @@ import { bindHome, pageShell } from "../ui/components.js";
 const KEY = "forever-racing-settings-v1";
 
 export function loadSettings() {
-  let settings = { reduceMotion: false, compactMenu: true, vehicleRendering: "procedural" };
+  let settings = { reduceMotion: false, compactMenu: true, vehicleRendering: "authored" };
   try { settings = { ...settings, ...JSON.parse(localStorage.getItem(KEY) || "{}") }; } catch {}
   applySettings(settings);
   return settings;
@@ -17,7 +17,7 @@ function saveSettings(settings) {
 function applySettings(settings) {
   document.documentElement.dataset.reduceMotion = settings.reduceMotion ? "true" : "false";
   document.documentElement.dataset.compactMenu = settings.compactMenu ? "true" : "false";
-  document.documentElement.dataset.vehicleRendering = settings.vehicleRendering || "procedural";
+  document.documentElement.dataset.vehicleRendering = settings.vehicleRendering || "authored";
 }
 
 export async function renderSettings(ctx) {
@@ -39,7 +39,7 @@ export async function renderSettings(ctx) {
           <input type="checkbox" data-setting="reduceMotion" ${settings.reduceMotion ? "checked" : ""}>
         </label>
         <div class="game-card">
-          <div class="split"><div><h3>Vehicle Rendering</h3><p>Procedural SVG is the active renderer. Pixel-art skins can be layered in later without making the game depend on image assets.</p></div><span class="pill pill--accent">PROCEDURAL</span></div>
+          <div class="split"><div><h3>Vehicle Rendering</h3><p>Authored vehicle art is used whenever it exists. Missing artwork is shown as an explicit ? placeholder so the art backlog is visible during development.</p></div><span class="pill pill--accent">AUTHORED / FALLBACK</span></div>
         </div>
         <div class="game-card">
           <h3>FTUE Development Tools</h3>

@@ -425,3 +425,15 @@ html[data-reduce-motion="true"] *,html[data-reduce-motion="true"] *::before,html
   .home-vehicle-visual .vehicle-sprite-image--full{height:125px}
   .garage-entry__visual .vehicle-sprite-image--full,.build-shop-car .vehicle-sprite-image--full,.race-car-panel__visual .vehicle-sprite-image--full,.dialog-vehicle .vehicle-sprite-image--full{height:108px}
 }
+
+
+/* Missing vehicle art must be obvious. Never substitute a fake/generic car. */
+.vehicle-missing-art{display:grid;place-items:center;align-content:center;gap:2px;border:1px dashed #596169;background:#101214;color:#c7ccd0;text-align:center;font-style:normal;image-rendering:pixelated}
+.vehicle-missing-art b{display:grid;place-items:center;width:34px;height:34px;border:2px solid #7b858c;background:#171a1d;color:#eceff1;font-size:23px;line-height:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.vehicle-missing-art small{font-size:7px;font-weight:900;letter-spacing:.12em;color:var(--accent-2)}
+.vehicle-missing-art em{font-size:7px;font-style:normal;color:var(--faint);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vehicle-missing-art--compact{width:68px;height:68px}
+.vehicle-missing-art--compact b{width:27px;height:27px;font-size:18px}
+.vehicle-missing-art--compact em{display:none}
+.vehicle-missing-art--full{width:150px;height:120px}
+@media(max-width:760px){.vehicle-missing-art--compact{width:54px;height:54px}.vehicle-missing-art--full{width:112px;height:96px}}
