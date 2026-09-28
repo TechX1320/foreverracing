@@ -240,7 +240,7 @@ function raceProgress(now, startAt, finishAt, exponent) {
 
 function setProgress(car, bar, progress) {
   const percent = Math.max(0, Math.min(100, progress * 100));
-  if (car) car.style.setProperty("--race-progress", String(percent));
+  if (car) car.style.bottom = `${(6 + (percent * 0.86)).toFixed(3)}%`;
   if (bar) bar.style.width = `${percent.toFixed(2)}%`;
 }
 
