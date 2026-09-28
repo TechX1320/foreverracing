@@ -123,6 +123,9 @@ final class GameService
             if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'buy_first_car') {
                 throw new GameException('Your first car comes from the Classifieds. Start with a D Class used car and work your way up.');
             }
+            if (($player['tutorial']['status'] ?? '') !== 'active' && (int)($player['progression']['level'] ?? 1) < 5) {
+                throw new GameException('The Showroom unlocks at Level 5. Keep building through Classifieds first.');
+            }
             $price = (int)$spec['price'];
             self::requireCredits($player, $price);
             $player['wallet']['credits'] -= $price;
