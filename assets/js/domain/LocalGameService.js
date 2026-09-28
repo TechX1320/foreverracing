@@ -232,20 +232,19 @@ export class LocalGameService {
   generateUsedLot() {
     const timestamp = now();
     const currentYear = new Date().getFullYear();
-    const candidates = this.cars.filter((spec) => Number(spec.year || 0) <= currentYear - 3);
-    const pool = candidates.length ? candidates : this.cars;
+    const olderCars = this.cars.filter((spec) => Number(spec.year || 0) <= currentYear - 3);
+    const pool = olderCars.length ? olderCars : this.cars;
     if (!pool.length) return { generatedAt: timestamp, expiresAt: timestamp + this.config.usedLotRefreshSeconds, listings: [] };
-    const listings = [];
-    const count = Math.min(8, Math.max(4, pool.length));
-    for (let i = 0; i < count; i += 1) {
-      const spec = randomChoice(pool);
-      const mileage = randomInt(2800, 195000);
-      const condition = randomInt(58, 98);
+
+    const makeListing = (spec, starterListing = false) => {
+      const mileage = starterListing ? randomInt(105000, 190000) : randomInt(2800, 195000);
+      const condition = starterListing ? randomInt(62, 79) : randomInt(58, 98);
       const mileageFactor = Math.max(0.46, 1 - (mileage / 330000));
       const conditionFactor = 0.42 + (0.58 * Math.pow(condition / 100, 1.7));
       let price = Math.round((Number(spec.price || 0) * mileageFactor * conditionFactor) / 50) * 50;
+      if (starterListing) price = Math.min(8500, Math.max(2500, Math.round(price * 0.82 / 50) * 50));
       price = Math.max(1200, price);
-      listings.push({
+      return {
         listingId: this.id('used'),
         stockId: Number(spec.stockId),
         price,
@@ -254,8 +253,16 @@ export class LocalGameService {
         basePrice: Number(spec.price || 0),
         mileageFactor: Math.round(mileageFactor * 1000) / 1000,
         conditionFactor: Math.round(conditionFactor * 1000) / 1000,
-      });
-    }
+        starterListing,
+      };
+    };
+
+    const starters = pool
+      .filter((spec) => Boolean(spec.starter) && String(spec.class || '').toUpperCase() === 'D')
+      .slice(0, 3);
+    const listings = starters.map((spec) => makeListing(spec, true));
+    while (listings.length < 8) listings.push(makeListing(randomChoice(pool), false));
+
     return { generatedAt: timestamp, expiresAt: timestamp + this.config.usedLotRefreshSeconds, listings };
   }
 
@@ -265,6 +272,10 @@ export class LocalGameService {
     const spec = this.findBy(this.cars, 'stockId', Number(listing.stockId));
     if (!spec) throw new LocalGameError('Vehicle catalog entry is missing.', 500);
     const player = this.mutate(inputPlayer, (draft) => {
+      const tutorialStarter = draft.tutorial?.status === 'active' && draft.tutorial?.step === 'buy_first_car';
+      if (tutorialStarter && (!spec.starter || String(spec.class || '').toUpperCase() !== 'D')) {
+        throw new LocalGameError('Your first car must be one of the highlighted D Class starter listings.');
+      }
       const price = Number(listing.price || 0);
       this.requireCredits(draft, price);
       draft.wallet.credits -= price;
@@ -273,6 +284,7 @@ export class LocalGameService {
       draft.stats.usedPurchases = Number(draft.stats.usedPurchases || 0) + 1;
       if (!draft.selectedCarId) draft.selectedCarId = car.carId;
       this.addTransaction(draft, 'used_purchase', -price, car.displayName);
+      if (tutorialStarter) this.completeTutorialStep(draft, 'buy_first_car', 'visit_garage');
     });
     const nextLot = clone(lot);
     nextLot.listings = (nextLot.listings || []).filter((row) => String(row.listingId) !== String(listingId));
