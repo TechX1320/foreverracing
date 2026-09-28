@@ -38,7 +38,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.4.0-b"')) throw new Error('Static index is missing the V0.4B build marker.');
+if (!html.includes('data-build="0.4.0-c"')) throw new Error('Static index is missing the V0.4B build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -138,3 +138,18 @@ if (html.includes('class="status-strip"')) throw new Error('The old top player/s
 if (!html.includes('PLAYER INFO') || !html.includes('CLASSIFIEDS')) throw new Error('V0.4B shell Player Info/Classifieds labels are missing.');
 
 console.log('V0.4B browser-game usability checks passed.');
+
+if (!cssV04b.includes('V0.4C readability hardening') || !cssV04b.includes('.game-header{height:50px;min-height:50px}') || !cssV04b.includes('.home-car-stats span')) {
+  throw new Error('V0.4C readability hardening CSS is incomplete.');
+}
+const showroomSourceV04c = await fs.readFile(new URL('assets/js/screens/showroom.js', root), 'utf8');
+const serverGameSourceV04c = await fs.readFile(new URL('app/lib/GameService.php', root), 'utf8');
+const terminologySurface = [appSource, showroomSourceV04c, localGameSource, serverGameSourceV04c, html].join('\n');
+for (const legacyCopy of ['Build Stage 1', 'Build Stages', 'Stage 1 teaches', 'Stage 1 upgrades', 'Stage 1 cars', 'Stage 2 conversion', 'current Build Stage']) {
+  if (terminologySurface.includes(legacyCopy)) throw new Error(`Legacy player-facing build-stage copy remains: ${legacyCopy}`);
+}
+if (!appSource.includes('Build Types') || !showroomSourceV04c.includes('as a Street Car') || !html.includes('Build Types only move forward.')) {
+  throw new Error('Named Build Type terminology is incomplete.');
+}
+console.log('V0.4C readability and terminology checks passed.');
+
