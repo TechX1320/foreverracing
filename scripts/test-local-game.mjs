@@ -25,7 +25,8 @@ assert.equal(player.garage.length, 1);
 assert.equal(player.garage[0].buildStage, 1);
 assert.equal(player.garage[0].visual.sprites.topDown.sheet, 'assets/art/cars/cars-top-down-v1.png');
 assert.equal(player.garage[0].visual.sprites.topDown.index, 0);
-assert.equal(player.garage[0].visual.sprites.topDown.src, 'assets/art/cars/vehicles/1998-honda-civic-dx-top-down.png');
+assert.equal(player.garage[0].visual.sprites.sideProfile.src, 'assets/art/cars/vehicles/1998-honda-civic-dx-side-profile.png');
+assert.equal(player.garage[0].visual.sprites.topDown.src, 'assets/art/cars/vehicles/1998-honda-civic-dx-top-down-v03a.png');
 assert.equal(player.selectedCarId, player.garage[0].carId);
 assert.equal(player.wallet.credits, 65500);
 assert.equal(player.tutorial.step, 'visit_garage');
@@ -34,7 +35,7 @@ const legacyPlayer = structuredClone(player);
 legacyPlayer.garage[0].visual = { profile: 'compact', color: '#6d9bb8' };
 const migratedLegacy = game.normalizePlayer(legacyPlayer);
 assert.equal(migratedLegacy.garage[0].visual.sprites.topDown.index, 0);
-assert.equal(migratedLegacy.garage[0].visual.sprites.topDown.src, 'assets/art/cars/vehicles/1998-honda-civic-dx-top-down.png');
+assert.equal(migratedLegacy.garage[0].visual.sprites.topDown.src, 'assets/art/cars/vehicles/1998-honda-civic-dx-top-down-v03a.png');
 
 player = game.tutorialAdvance(player, 'garage_explained');
 assert.equal(player.tutorial.step, 'buy_first_upgrade');
