@@ -37,18 +37,6 @@ $storageText = $storageMode === 'local' ? 'BROWSER LOCAL' : 'PHP / JSON';
         </div>
       </header>
 
-      <section class="status-strip" aria-label="Player status">
-        <div><span>PLAYER</span><b id="playerName">Admin</b></div>
-        <div><span>CREDITS</span><b id="statCredits">0</b></div>
-        <div><span>LEVEL</span><b id="statLevel">1</b></div>
-        <div><span>EXP</span><b id="statExp">0</b></div>
-        <div><span>REP</span><b id="statRep">0</b></div>
-        <div class="status-strip__car"><span>CURRENT CAR</span><b id="currentCarName">None</b></div>
-        <div><span>STAGE</span><b id="currentStage">-</b></div>
-        <div><span>HP</span><b id="statusHp">-</b></div>
-        <div><span>WEIGHT</span><b id="statusWeight">-</b></div>
-      </section>
-
       <div class="game-layout">
         <nav class="nav-rail" aria-label="Game navigation">
           <div class="nav-rail__label">MAIN</div>
@@ -57,7 +45,7 @@ $storageText = $storageMode === 'local' ? 'BROWSER LOCAL' : 'PHP / JSON';
           <button type="button" data-nav="showroom"><b>SHOWROOM</b><span>Buy new</span></button>
           <button type="button" data-nav="parts"><b>PARTS</b><span>Build car</span></button>
           <button type="button" data-nav="quick-race"><b>QUICK RACE</b><span>Run car</span></button>
-          <button type="button" data-nav="usedlot"><b>USED LOT</b><span>Rotating stock</span></button>
+          <button type="button" data-nav="usedlot"><b>CLASSIFIEDS</b><span>Older cars</span></button>
           <button type="button" data-nav="roguelike"><b>ROGUELIKE</b><span>PvE run</span></button>
           <button type="button" data-nav="events"><b>EVENTS</b><span>Coming online</span></button>
           <button type="button" data-nav="teams"><b>TEAMS</b><span>Social</span></button>
@@ -72,7 +60,7 @@ $storageText = $storageMode === 'local' ? 'BROWSER LOCAL' : 'PHP / JSON';
             <section class="current-build-panel">
               <header class="panel-heading">
                 <div><span>CURRENT BUILD</span><h1 id="homeCarName">No current car</h1><p id="homeCarFactory">Visit the Showroom to start a build.</p></div>
-                <div id="homeBuildSummary" class="build-summary"><b>BUILD STAGE -</b><span>No active build.</span></div>
+                <div id="homeBuildSummary" class="build-summary"><b>BUILD TYPE</b><span>No active build.</span></div>
               </header>
               <div id="homeVehicleVisual" class="home-vehicle-visual"><div class="no-car-visual">NO CURRENT CAR</div></div>
               <div id="homeCarStats" class="home-car-stats">
@@ -91,12 +79,12 @@ $storageText = $storageMode === 'local' ? 'BROWSER LOCAL' : 'PHP / JSON';
                 <div id="homeActivity" class="activity-list"><div><span>No activity yet.</span><b>-</b></div></div>
               </section>
               <section class="home-section">
-                <header><span>BUILD STAGES</span><button type="button" data-nav="parts">PARTS</button></header>
-                <div class="stage-mini-list">
-                  <div><b>S1</b><span>Street / stock chassis</span></div>
-                  <div><b>S2</b><span>Street race / gutted + caged</span></div>
-                  <div><b>S3</b><span>Front-half / engine swaps</span></div>
-                  <div><b>S4</b><span>Full race car</span></div>
+                <header><span>BUILD TYPES</span><button type="button" data-nav="parts">PARTS</button></header>
+                <div class="stage-mini-list stage-mini-list--named">
+                  <div><b>STREET CAR</b><span>Stock body / sequential basics</span></div>
+                  <div><b>STREET RACE CAR</b><span>Gutted, caged / named choices</span></div>
+                  <div><b>FRONT-HALF RACE CAR</b><span>Tube chassis / engine swaps</span></div>
+                  <div><b>FULL RACE CAR</b><span>Maximum build freedom</span></div>
                 </div>
               </section>
             </section>
@@ -117,6 +105,16 @@ $storageText = $storageMode === 'local' ? 'BROWSER LOCAL' : 'PHP / JSON';
               <div><b>PARTS</b><span>Stats are shown before purchase.</span></div>
               <div><b>SWAPS</b><span>Physical compatibility matters.</span></div>
               <div><b>DATA</b><span>Local dev save stays in this browser.</span></div>
+            </div>
+          </section>
+          <section class="rail-panel rail-panel--player">
+            <header>PLAYER INFO</header>
+            <div class="player-info-grid">
+              <div><span>PLAYER</span><b id="railPlayerName">Admin</b></div>
+              <div><span>CREDITS</span><b id="railCredits">0</b></div>
+              <div><span>LEVEL</span><b id="railLevel">1</b></div>
+              <div><span>EXP</span><b id="railExp">0</b></div>
+              <div><span>REP</span><b id="railRep">0</b></div>
             </div>
           </section>
           <section class="rail-panel rail-panel--dev">
