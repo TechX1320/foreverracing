@@ -25,7 +25,15 @@
     },
     "visual": {
       "profile": "compact",
-      "color": "#6d9bb8"
+      "color": "#6d9bb8",
+      "sprites": {
+        "topDown": {
+          "sheet": "assets/art/cars/cars-top-down-v1.png",
+          "index": 0,
+          "columns": 4,
+          "rows": 1
+        }
+      }
     }
   },
   {
@@ -75,7 +83,15 @@
     },
     "visual": {
       "profile": "muscle",
-      "color": "#b84b43"
+      "color": "#b84b43",
+      "sprites": {
+        "topDown": {
+          "sheet": "assets/art/cars/cars-top-down-v1.png",
+          "index": 3,
+          "columns": 4,
+          "rows": 1
+        }
+      }
     }
   },
   {
@@ -104,7 +120,15 @@
     },
     "visual": {
       "profile": "sports",
-      "color": "#c59b3d"
+      "color": "#c59b3d",
+      "sprites": {
+        "topDown": {
+          "sheet": "assets/art/cars/cars-top-down-v1.png",
+          "index": 1,
+          "columns": 4,
+          "rows": 1
+        }
+      }
     }
   },
   {
@@ -146,7 +170,15 @@
     "factoryEngineId": null,
     "visual": {
       "profile": "sedan",
-      "color": "#406a8c"
+      "color": "#406a8c",
+      "sprites": {
+        "topDown": {
+          "sheet": "assets/art/cars/cars-top-down-v1.png",
+          "index": 2,
+          "columns": 4,
+          "rows": 1
+        }
+      }
     }
   },
   {

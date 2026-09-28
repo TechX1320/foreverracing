@@ -23,9 +23,16 @@ assert.throws(() => game.purchaseNewCar(player, 10), /starter cars/i);
 player = game.purchaseNewCar(player, 1);
 assert.equal(player.garage.length, 1);
 assert.equal(player.garage[0].buildStage, 1);
+assert.equal(player.garage[0].visual.sprites.topDown.sheet, 'assets/art/cars/cars-top-down-v1.png');
+assert.equal(player.garage[0].visual.sprites.topDown.index, 0);
 assert.equal(player.selectedCarId, player.garage[0].carId);
 assert.equal(player.wallet.credits, 65500);
 assert.equal(player.tutorial.step, 'visit_garage');
+
+const legacyPlayer = structuredClone(player);
+legacyPlayer.garage[0].visual = { profile: 'compact', color: '#6d9bb8' };
+const migratedLegacy = game.normalizePlayer(legacyPlayer);
+assert.equal(migratedLegacy.garage[0].visual.sprites.topDown.index, 0);
 
 player = game.tutorialAdvance(player, 'garage_explained');
 assert.equal(player.tutorial.step, 'buy_first_upgrade');

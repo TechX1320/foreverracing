@@ -388,3 +388,17 @@ dialog.fr-dialog::backdrop{background:#050607d9}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
 html[data-reduce-motion="true"] *,html[data-reduce-motion="true"] *::before,html[data-reduce-motion="true"] *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+
+
+/* Pixel vehicle assets. Procedural SVG remains the fallback for cars without authored sprites. */
+.vehicle-visual--sprite{min-width:0;min-height:0}
+.vehicle-sprite{display:block;flex:0 0 auto;aspect-ratio:1;background-repeat:no-repeat;image-rendering:pixelated;image-rendering:crisp-edges;filter:drop-shadow(0 8px 6px #0009)}
+.vehicle-sprite--full{width:min(210px,88%)}
+.vehicle-sprite--compact{width:62px}
+.home-vehicle-visual .vehicle-sprite--full{width:min(220px,82%)}
+.garage-entry__visual .vehicle-sprite--full,.build-shop-car .vehicle-sprite--full,.race-car-panel__visual .vehicle-sprite--full,.dialog-vehicle .vehicle-sprite--full{width:min(190px,82%)}
+.vehicle-row__identity .vehicle-sprite--compact{width:58px}
+@media(max-width:760px){
+  .vehicle-sprite--full{width:min(165px,78%)}
+  .home-vehicle-visual .vehicle-sprite--full{width:min(150px,72%)}
+}

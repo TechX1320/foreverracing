@@ -8,10 +8,55 @@ const PROFILES = {
   roadster:{ rear: 62, tailTop: 92, roofRear: 189, roofTopX: 239, roofTopY: 68, roofFront: 291, hoodY: 86, nose: 449, noseY: 102, frontWheel: 363, rearWheel: 145, wheel: 34 }
 };
 
-export function renderVehicle(car, { stage = null, compact = false } = {}) {
+export function renderVehicle(car, { stage = null, compact = false, view = 'topDown' } = {}) {
   const visual = car?.visual || {};
-  const profile = PROFILES[visual.profile] || PROFILES.sedan;
   const buildStage = Number(stage || car?.buildStage || 1);
+  const sprite = resolveSprite(visual.sprites, view, buildStage);
+
+  if (sprite) {
+    return renderSprite(car, sprite, { compact, view });
+  }
+
+  return renderProcedural(car, visual, buildStage, compact);
+}
+
+function resolveSprite(sprites, view, stage) {
+  if (!sprites || typeof sprites !== 'object') return null;
+
+  let candidate = sprites[view] || sprites.topDown || null;
+  if (!candidate || typeof candidate !== 'object') return null;
+
+  if (candidate.sheet) return candidate;
+
+  return candidate[`stage${stage}`]
+    || candidate.base
+    || candidate.stage1
+    || null;
+}
+
+function renderSprite(car, sprite, { compact, view }) {
+  const columns = Math.max(1, Number(sprite.columns || 1));
+  const rows = Math.max(1, Number(sprite.rows || 1));
+  const index = Math.max(0, Number(sprite.index || 0));
+  const x = index % columns;
+  const y = Math.floor(index / columns) % rows;
+  const positionX = columns <= 1 ? 0 : (x / (columns - 1)) * 100;
+  const positionY = rows <= 1 ? 0 : (y / (rows - 1)) * 100;
+  const sheet = String(sprite.sheet || '').trim();
+  const style = [
+    `background-image:url(${sheet})`,
+    `background-size:${columns * 100}% ${rows * 100}%`,
+    `background-position:${positionX}% ${positionY}%`
+  ].join(';');
+
+  return `
+    <div class="vehicle-visual vehicle-visual--sprite" role="img" aria-label="${escapeAttr(car?.displayName || 'Vehicle')} ${escapeAttr(view)} preview">
+      <span class="vehicle-sprite ${compact ? 'vehicle-sprite--compact' : 'vehicle-sprite--full'}" style="${escapeAttr(style)}" aria-hidden="true"></span>
+    </div>`;
+}
+
+function renderProcedural(car, visual, buildStage, compact) {
+  const profile = PROFILES[visual.profile] || PROFILES.sedan;
   const body = visual.color || '#7c8792';
   const width = compact ? 420 : 520;
   const height = compact ? 138 : 172;
@@ -33,7 +78,7 @@ export function renderVehicle(car, { stage = null, compact = false } = {}) {
   const glass = `M ${profile.roofRear + 18} 80 Q ${profile.roofRear + 38} ${profile.roofTopY + 8} ${profile.roofTopX} ${profile.roofTopY + 8} Q ${profile.roofFront - 18} ${profile.roofTopY + 8} ${profile.roofFront - 8} 79 Z`;
 
   return `
-    <div class="vehicle-visual" role="img" aria-label="${escapeAttr(car?.displayName || 'Vehicle')} side profile">
+    <div class="vehicle-visual vehicle-visual--procedural" role="img" aria-label="${escapeAttr(car?.displayName || 'Vehicle')} placeholder side profile">
       <svg viewBox="0 0 520 172" width="${width}" height="${height}" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
         <g transform="translate(0 ${y}) scale(${scale})">
           <line x1="34" y1="142" x2="488" y2="142" class="vehicle-ground"/>
