@@ -102,7 +102,8 @@ DUP_RACE="$(post race/start.php '{"distance":"1/2"}')"
 echo "$DUP_RACE" | jq -e --arg raceId "$RACE_ID" '.activeRace.raceId == $raceId and .activeRace.distance == "1/4" and .player.stats.races == 0' >/dev/null
 
 sleep 0.35
-PLAYER="$(post race/finish.php "{"raceId":"$RACE_ID"}")"
+RACE_BODY="$(printf '{"raceId":"%s"}' "$RACE_ID")"
+PLAYER="$(post race/finish.php "$RACE_BODY")"
 echo "$PLAYER" | jq -e '.player.activeRace == null and .player.tutorial.status == "complete" and .player.progression.rep >= 27 and .player.progression.exp > 0 and .player.stats.races == 1 and (.player.raceHistory | length) == 1' >/dev/null
 echo "$PLAYER" | jq -e '.race.distance == "1/4" and .race.player.trapSpeed > 0' >/dev/null
 
@@ -110,7 +111,8 @@ PLAYER="$(post race/start.php '{"distance":"1/2"}')"
 RACE_ID="$(echo "$PLAYER" | jq -r '.activeRace.raceId')"
 echo "$PLAYER" | jq -e '.activeRace.distance == "1/2" and .player.stats.races == 1' >/dev/null
 sleep 0.65
-PLAYER="$(post race/finish.php "{"raceId":"$RACE_ID"}")"
+RACE_BODY="$(printf '{"raceId":"%s"}' "$RACE_ID")"
+PLAYER="$(post race/finish.php "$RACE_BODY")"
 echo "$PLAYER" | jq -e '.race.distance == "1/2" and .player.stats.races == 2 and ((.player.raceHistory | length) == 2)' >/dev/null
 
 LOGOUT="$(post auth/logout.php '{}')"
