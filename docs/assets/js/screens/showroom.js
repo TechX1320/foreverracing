@@ -10,26 +10,27 @@ export async function renderShowroom(ctx) {
   const data = await ctx.storage.carCatalog();
   catalogCache = data.cars || [];
 
-  const tutorialStarterStep = player?.tutorial?.status === "active" && player?.tutorial?.step === "buy_first_car";
-  const available = tutorialStarterStep ? catalogCache.filter((car) => car.starter) : catalogCache;
+  const newestYear = new Date().getFullYear() - 10;
+  const available = catalogCache.filter((car) => Number(car.year || 0) >= newestYear);
   const classes = ["All", ...new Set(available.map((car) => car.class).filter(Boolean))];
   if (!classes.includes(activeClass)) activeClass = "All";
   const cars = activeClass === "All" ? available : available.filter((car) => car.class === activeClass);
 
   ctx.screenRoot.innerHTML = pageShell({
     title: "Showroom",
-    eyebrow: "NEW CARS",
+    eyebrow: "NEWER / DEALER CARS",
     hint: `${money(player?.wallet?.credits)} CR`,
-    trail: tutorialStarterStep ? "FTUE: choose your first build" : "Factory inventory",
+    trail: "Newer inventory • older cars belong in Classifieds",
     body: `
-      ${tutorialStarterStep ? tutorialBox() : ""}
+      <div class="classifieds-intro showroom-intro">
+        <p>The Showroom is for newer dealer inventory. Older platforms and bargain builds belong in Classifieds.</p>
+      </div>
       <div class="filter-row compact-filters">
         ${classes.map((name) => `<button class="filter-chip ${name === activeClass ? "is-active" : ""}" type="button" data-showroom-class="${escapeHtml(name)}">${name === "All" ? "ALL" : `CLASS ${escapeHtml(name)}`}</button>`).join("")}
       </div>
-      <div class="data-list showroom-list">
-        <div class="data-list__head"><span>Vehicle</span><span>Output</span><span>Weight</span><span>Drive</span><span>Price</span><span></span></div>
-        ${cars.map((car) => showroomRow(car, player, tutorialStarterStep)).join("")}
-      </div>`
+      ${cars.length
+        ? `<div class="classifieds-grid showroom-grid">${cars.map((car) => showroomCard(car, player)).join("")}</div>`
+        : '<div class="empty-state"><strong>No modern dealer inventory yet.</strong><span>Use Classifieds for older cars while the new-car catalog grows.</span></div>'}`
   });
 
   bindHome(ctx.screenRoot, ctx.router);
@@ -44,27 +45,24 @@ export async function renderShowroom(ctx) {
   });
 }
 
-function showroomRow(car, player, tutorialStarterStep) {
+function showroomCard(car, player) {
   const canBuy = Number(player?.wallet?.credits || 0) >= Number(car.price || 0);
   return `
-    <article class="data-row vehicle-row ${tutorialStarterStep ? "tutorial-target" : ""}">
-      <div class="vehicle-row__identity">
-        ${renderVehicle({ ...car, displayName: `${car.year} ${car.make} ${car.model}` }, { compact: true, view: "showroom" })}
-        <div><strong>${car.year} ${escapeHtml(car.make)} ${escapeHtml(car.model)}</strong><small>Class ${escapeHtml(car.class)}${car.starter ? " • Starter eligible" : ""}</small></div>
+    <article class="classified-card showroom-card">
+      <div class="classified-card__visual">${renderVehicle({ ...car, displayName: `${car.year} ${car.make} ${car.model}` }, { view: "showroom" })}</div>
+      <div class="classified-card__body">
+        <div class="classified-card__title">
+          <div><strong>${car.year} ${escapeHtml(car.make)} ${escapeHtml(car.model)}</strong><small>Class ${escapeHtml(car.class)} • ${escapeHtml(car.base?.drivetrain || "")}</small></div>
+          <span class="condition-badge is-excellent">NEW</span>
+        </div>
+        <div class="showroom-card__specs">
+          <span><small>POWER</small><b>${number(car.base?.hp)} hp</b></span>
+          <span><small>WEIGHT</small><b>${number(car.base?.weight)} lb</b></span>
+          <span><small>PRICE</small><b>${money(car.price)} cr</b></span>
+        </div>
+        <button class="button button--primary button--wide" type="button" data-buy-car="${car.stockId}" ${canBuy ? "" : "disabled"}>${canBuy ? "VIEW & BUY" : "NOT ENOUGH CREDITS"}</button>
       </div>
-      <div><strong>${number(car.base.hp)} hp</strong><small>${number(car.base.torque)} lb-ft</small></div>
-      <div><strong>${number(car.base.weight)} lb</strong><small>stock</small></div>
-      <div><strong>${escapeHtml(car.base.drivetrain)}</strong><small>factory</small></div>
-      <div><strong>${money(car.price)} cr</strong><small>new</small></div>
-      <div><button class="button button--primary button--small" type="button" data-buy-car="${car.stockId}" ${canBuy ? "" : "disabled"}>${canBuy ? "BUY" : "SHORT"}</button></div>
     </article>`;
-}
-
-function tutorialBox() {
-  return `<div class="objective-box objective-box--active">
-    <div><span class="objective-kicker">FTUE • STEP 2</span><strong>Choose your first car</strong></div>
-    <p>These three cars teach different build styles: light FWD, RWD muscle, and RWD import. Pick the one you actually want to build.</p>
-  </div>`;
 }
 
 function confirmPurchase(ctx, stockId) {
