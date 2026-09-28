@@ -80,21 +80,7 @@ final class Auth
         $ttl = max(300, (int)($config['session_active_ttl_seconds'] ?? 7200));
         $now = time();
 
-        JsonStore::mutate(self::activeSessionPath(), [], function ($current) use ($key, $ttl, $now): array {
-            $rows = self::pruneSessions(is_array($current) ? $current : [], $ttl, $now);
-            if (isset($rows[$key])) {
-                throw new AuthSessionException('This account is already logged in. Sign out of the active session before logging in again.');
-            }
-            return $rows;
-        });
-
-        session_regenerate_id(true);
         $token = bin2hex(random_bytes(24));
-        $_SESSION['fr_user'] = ['id' => 1, 'username' => $canonical];
-        $_SESSION['fr_csrf'] = bin2hex(random_bytes(32));
-        $_SESSION['fr_login_at'] = $now;
-        $_SESSION['fr_session_token'] = $token;
-
         JsonStore::mutate(self::activeSessionPath(), [], function ($current) use ($key, $canonical, $token, $now, $ttl): array {
             $rows = self::pruneSessions(is_array($current) ? $current : [], $ttl, $now);
             if (isset($rows[$key])) {
@@ -108,6 +94,12 @@ final class Auth
             ];
             return $rows;
         });
+
+        session_regenerate_id(true);
+        $_SESSION['fr_user'] = ['id' => 1, 'username' => $canonical];
+        $_SESSION['fr_csrf'] = bin2hex(random_bytes(32));
+        $_SESSION['fr_login_at'] = $now;
+        $_SESSION['fr_session_token'] = $token;
 
         return true;
     }
