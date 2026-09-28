@@ -157,7 +157,7 @@ const terminologySurface = [appSource, showroomSourceV04c, localGameSource, serv
 for (const legacyCopy of ['Build Stage 1', 'Build Stages', 'Stage 1 teaches', 'Stage 1 upgrades', 'Stage 1 cars', 'Stage 2 conversion', 'current Build Stage']) {
   if (terminologySurface.includes(legacyCopy)) throw new Error(`Legacy player-facing build-stage copy remains: ${legacyCopy}`);
 }
-if (!appSource.includes('Build Types') || !showroomSourceV04c.includes('as a Street Car') || !html.includes('Build Types only move forward.')) {
+if (!html.includes('BUILD TYPES') || !showroomSourceV04c.includes('Street Car') || !html.includes('Build Types only move forward.')) {
   throw new Error('Named Build Type terminology is incomplete.');
 }
 console.log('V0.4C readability and terminology checks passed.');
