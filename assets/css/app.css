@@ -594,7 +594,7 @@ button,input,select,textarea{font:inherit}
 .brand__copy strong{font-size:14px}
 .brand__copy small,.environment-tag,.storage-tag,.header-action{font-size:10px}
 .status-strip{display:none!important}
-.game-layout{grid-template-columns:184px minmax(0,1fr) 248px;min-height:calc(100dvh - 78px)}
+.game-layout{grid-template-columns:184px minmax(0,1fr) 248px;min-height:calc(100dvh - 90px)}
 .game-content{padding:10px}
 .context-rail{padding:10px;gap:10px}
 .nav-rail{padding:8px 7px;gap:2px}
@@ -733,6 +733,21 @@ dialog.race-playback-dialog{width:min(900px,calc(100vw - 24px));max-height:92dvh
 .race-playback-result__grid span,.race-playback-result__grid b{padding:6px 8px}
 .race-playback-result__rewards span{padding:6px 8px}
 .race-playback__footer{padding:8px 10px}
+
+.race-playback__meta span{font-size:10px}
+.race-playback__meta b{font-size:12px}
+.race-playback__status{font-size:10px}
+.race-stage__labels{font-size:9px}
+.race-strip__start span,.race-strip__finish span{font-size:9px}
+.race-progress-board span{font-size:9px}
+.race-playback-result__title span{font-size:9px}
+.race-playback-result__title strong{font-size:14px}
+.race-playback-result__grid span{font-size:9px}
+.race-playback-result__grid b{font-size:12px}
+.race-playback-result__rewards small{font-size:9px}
+.race-playback-result__rewards b{font-size:12px}
+.race-playback__footer span{font-size:10px}
+.rule-list b{font-size:9px}
 
 /* Readability without returning to giant, scroll-heavy pages. */
 .activity-list div,.stage-mini-list div{font-size:11px}
