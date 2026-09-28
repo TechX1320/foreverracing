@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.2.0-dev.4 playable direction
+## V0.2.0-dev.5 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -92,7 +92,7 @@ Stage 3 is intended to unlock front-half/tube-chassis construction and engine sw
 
 ### Vehicle art pipeline
 
-The vehicle renderer now uses authored pixel art first and the procedural SVG system only as a fallback for cars whose artwork has not been completed yet.
+The vehicle renderer uses authored art when it exists. Cars without finished artwork now show an explicit boxed `? / ART MISSING` marker instead of a generic fake car.
 
 The first in-game sprite sheet contains top-down assets for:
 
@@ -101,9 +101,15 @@ The first in-game sprite sheet contains top-down assets for:
 - 2004 Subaru Impreza WRX STI
 - 2005 Ford Mustang GT
 
-Vehicle metadata is view-aware. The renderer can request a `topDown`, `showroom`, or `racePreview` view and falls back to the available top-down asset until a dedicated angle exists. The same structure can later contain stage-specific frames, so Build Stage visual changes do not require changes to game screens.
+Vehicle metadata is view-aware. Showroom/Garage presentation can prefer `sideProfile`; racing can prefer `topDown`; dedicated `showroom` and `racePreview` overrides remain supported. The same structure can later contain stage-specific frames.
 
-`assets/js/ui/vehicleRenderer.js` still draws the existing procedural side-profile placeholder for catalog cars without authored sprite art. This lets the vehicle catalog grow independently from the art backlog.
+Missing artwork is deliberately obvious so unfinished catalog cars are easy to find during development. See `assets/art/cars/README.md` for the art contract and current queue.
+
+## TextTuned migration
+
+Forever Racing is explicitly the browser successor to the TextTuned Discord MMORPG. The surviving `TechX1320/TextTuned-Server` repository has been inventoried and mapped into the browser project.
+
+See `TEXTTUNED_MIGRATION.md` for the feature-by-feature migration plan and implementation order.
 
 ## Runtime modes
 
