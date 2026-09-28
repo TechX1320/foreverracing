@@ -479,6 +479,8 @@ final class GameService
                 'greenAt' => $greenAt,
                 'finishAt' => $finishAt,
                 'timeScale' => $timeScale,
+                'revealDelayMs' => max(0, (int)($racingConfig['presentation']['revealDelayMs'] ?? 650)),
+                'progressExponent' => max(1.0, (float)($racingConfig['presentation']['progressExponent'] ?? 1.38)),
                 'distance' => $distance,
                 'race' => $race,
             ];
