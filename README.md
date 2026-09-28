@@ -14,13 +14,13 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.4.0-b playable direction
+## V0.4.0-c playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
 ### Game UI
 
-- Readability is now a first-class constraint: the base type and navigation/card text are materially larger than V0.4A.
+- Readability is now a first-class constraint: V0.4C keeps compact browser-MMO density while enforcing a 10px floor for compact metadata and larger supporting copy.
 - Desktop removes the oversized top player/current-car strip. Player Info lives in the right context rail under Build Rules.
 - The active navigation item owns the orange indicator; it follows the current route instead of remaining on Home.
 - Desktop screens are designed around a no-page-scroll target at 1080p+ for normal gameplay surfaces.
