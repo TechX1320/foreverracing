@@ -104,7 +104,7 @@ async function enterGame(session) {
   router.start();
   if (!location.hash) router.navigate('home', { replace: true });
   if (session.player?.tutorial?.status === 'active' && session.player?.tutorial?.step === 'welcome') {
-    setTimeout(showWelcomeTutorial, 80);
+    scheduleWelcomeTutorial();
   }
 }
 
@@ -149,6 +149,18 @@ function showLogin() {
       submit.disabled = false;
     }
   });
+}
+
+function scheduleWelcomeTutorial(attempt = 0) {
+  setTimeout(() => {
+    const tutorial = store.player?.tutorial;
+    if (tutorial?.status !== 'active' || tutorial?.step !== 'welcome') return;
+    if (document.querySelector('dialog[open]')) {
+      if (attempt < 40) scheduleWelcomeTutorial(attempt + 1);
+      return;
+    }
+    showWelcomeTutorial();
+  }, attempt === 0 ? 80 : 50);
 }
 
 function showWelcomeTutorial() {
