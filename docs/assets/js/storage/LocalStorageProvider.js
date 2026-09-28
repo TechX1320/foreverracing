@@ -18,14 +18,15 @@ export class LocalStorageProvider extends StorageProvider {
 
   async #ready() {
     if (this.#service) return;
-    const [cars, parts, config, buildStages] = await Promise.all([
+    const [cars, parts, config, buildStages, racingConfig] = await Promise.all([
       fetchJson('data/catalog/cars.json'),
       fetchJson('data/catalog/parts.json'),
       fetchJson('data/config/game.json'),
       fetchJson('data/config/build-stages.json'),
+      fetchJson('data/config/racing.json'),
     ]);
     this.#config = config;
-    this.#service = new LocalGameService({ cars, parts, config, buildStages: buildStages.stages || buildStages });
+    this.#service = new LocalGameService({ cars, parts, config, buildStages: buildStages.stages || buildStages, racingConfig });
   }
 
   async session() {
@@ -36,6 +37,9 @@ export class LocalStorageProvider extends StorageProvider {
 
   async login(username, password) {
     await this.#ready();
+    if (localStorage.getItem(SESSION_KEY) === 'authenticated') {
+      throw providerError('This account is already logged in in this browser.', 409);
+    }
     if (String(username).trim().toLowerCase() !== String(this.#config.localDevUsername || 'Admin').toLowerCase() || String(password) !== String(this.#config.localDevPassword || '12345')) {
       throw providerError('Invalid username or password.', 401);
     }
@@ -45,7 +49,8 @@ export class LocalStorageProvider extends StorageProvider {
 
   async logout() {
     localStorage.removeItem(SESSION_KEY);
-    return { ok: true };
+    localStorage.removeItem(PLAYER_KEY);
+    return { ok: true, reset: true };
   }
 
   async player() {
@@ -147,9 +152,9 @@ export class LocalStorageProvider extends StorageProvider {
     return { ok: true, player: result.player };
   }
 
-  async quickRace() {
+  async quickRace(distance = '1/4') {
     await this.#ready();
-    const result = this.#service.quickRace(this.#loadPlayer());
+    const result = this.#service.quickRace(this.#loadPlayer(), distance);
     this.#savePlayer(result.player);
     return { ok: true, ...result };
   }

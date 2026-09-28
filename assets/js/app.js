@@ -124,7 +124,7 @@ function showLogin() {
     <form class="dialog-body login-panel" data-login-form>
       <span class="section-label">FOREVER RACING / DEVELOPMENT ACCESS</span>
       <h2>Sign in</h2>
-      <p>${storage.mode === 'local' ? 'GitHub Pages uses a simulated local identity and browser-local save. Usernames are case-insensitive.' : 'Player state is tied to an authenticated server session. Usernames are case-insensitive.'}</p>
+      <p>${storage.mode === 'local' ? 'GitHub Pages uses a simulated local identity and browser-local save. Admin is a disposable FTUE test account: signing out wipes its player save.' : 'Player state is tied to an authenticated server session. Only one active session per account is allowed; Admin is reset when it signs out.'}</p>
       <div class="field"><label for="loginUsername">Username</label><input id="loginUsername" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required></div>
       <div class="field"><label for="loginPassword">Password</label><input id="loginPassword" name="password" type="password" autocomplete="current-password" required></div>
       <div class="form-error" data-login-error></div>
@@ -188,8 +188,10 @@ function showFatal(message) {
 async function logout() {
   const button = document.getElementById('logoutButton');
   if (button) button.disabled = true;
+  let reset = false;
   try {
-    await storage.logout();
+    const result = await storage.logout();
+    reset = Boolean(result?.reset);
   } catch (error) {
     toast('Sign out warning', error.message);
   } finally {
@@ -198,6 +200,7 @@ async function logout() {
     lockApp();
     history.replaceState(null, '', location.pathname + location.search);
     showLogin();
+    if (reset) toast('Admin reset', 'Player data was erased. The next login starts at FTUE.');
     if (button) button.disabled = false;
   }
 }
@@ -223,6 +226,7 @@ function renderChrome(player) {
   setText('playerName', player.user?.username || 'Admin');
   setText('statCredits', money(player.wallet?.credits || 0));
   setText('statLevel', player.progression?.level || 1);
+  setText('statExp', player.progression?.exp || 0);
   setText('statRep', player.progression?.rep || 0);
   setText('currentCarName', current ? carLabel(current) : 'None');
   setText('currentStage', current ? `S${Number(current.buildStage || 1)}` : '-');

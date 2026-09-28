@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-storage-mode="local" data-build="0.3.0-a">
+<html lang="en" data-storage-mode="local" data-build="0.3.0-b">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -8,7 +8,7 @@
   <meta name="description" content="Forever Racing - a browser-based garage and drag racing game.">
   <title>Forever Racing</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="assets/css/app.css?v=0.3.0-a">
+  <link rel="stylesheet" href="assets/css/app.css?v=0.3.0-b">
 </head>
 <body>
   <div id="bootScreen" class="boot-screen">
@@ -21,7 +21,7 @@
       <header class="game-header">
         <button class="brand" type="button" data-nav="home" aria-label="Forever Racing home">
           <span class="brand__mark">FR</span>
-          <span class="brand__copy"><strong>FOREVER RACING</strong><small>BUILD 0.3.0-a</small></span>
+          <span class="brand__copy"><strong>FOREVER RACING</strong><small>BUILD 0.3.0-b</small></span>
         </button>
         <div class="game-header__meta">
           <span class="environment-tag">LOCAL DEV</span>
@@ -34,6 +34,7 @@
         <div><span>PLAYER</span><b id="playerName">Admin</b></div>
         <div><span>CREDITS</span><b id="statCredits">0</b></div>
         <div><span>LEVEL</span><b id="statLevel">1</b></div>
+        <div><span>EXP</span><b id="statExp">0</b></div>
         <div><span>REP</span><b id="statRep">0</b></div>
         <div class="status-strip__car"><span>CURRENT CAR</span><b id="currentCarName">None</b></div>
         <div><span>STAGE</span><b id="currentStage">-</b></div>
@@ -125,6 +126,6 @@
   <div id="dialogRoot"></div>
   <div id="toastRoot" class="toast-root" aria-live="polite" aria-atomic="true"></div>
   <noscript><div class="noscript">Forever Racing requires JavaScript.</div></noscript>
-  <script type="module" src="assets/js/app.js?v=0.3.0-a"></script>
+  <script type="module" src="assets/js/app.js?v=0.3.0-b"></script>
 </body>
 </html>

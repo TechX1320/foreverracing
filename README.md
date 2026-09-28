@@ -2,7 +2,7 @@
 
 Forever Racing is a systems-first browser drag-racing / garage-management game inspired by the earlier TextTuned Discord game.
 
-V0.2 uses one shared frontend with two interchangeable runtime/persistence modes: a browser-local GitHub Pages development build and a PHP-backed server build for eventual hosted accounts/player data.
+Forever Racing uses one shared frontend with two interchangeable runtime/persistence modes: a browser-local GitHub Pages development build and a PHP-backed server build for eventual hosted accounts/player data.
 
 ## Live development build
 
@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.3.0-a playable direction
+## V0.3.0-b playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -90,6 +90,33 @@ The vehicle/engine model now has groundwork for:
 
 Stage 3 is intended to unlock front-half/tube-chassis construction and engine swaps. Stage 4 is intended to widen powertrain/chassis freedom substantially.
 
+### V0.3B — TextTuned race core
+
+V0.3B replaces the placeholder Quick Race calculation with the first cleaned-up browser port of TextTuned's automated drag-racing model.
+
+- Select 1/4 mile, 1/2 mile or 1 mile.
+- Each race generates a shared weighted location and weather condition.
+- Results include reaction time, elapsed time, trap speed, total time and red-light fouls.
+- The simulation uses power-to-weight, torque/weight launch behavior, grip, shift loss, engine variability and weather.
+- Opponents are generated near the current car's performance rather than being a fixed dummy.
+- Each car stores pass count, best ET and best trap for every distance.
+- Recent race history is stored on the player.
+- Race rewards now include EXP in addition to credits and REP.
+- Player level uses TextTuned's `floor(100 * level^1.75)` EXP threshold curve.
+- The race simulator is isolated from the screen so future player-input racing can provide launch/shift/NOS decisions without replacing the automated race core.
+
+The approved V0.3A visual reference remains the UI target; the new Quick Race timing board is the first gameplay screen moving toward that race presentation.
+
+### Disposable Admin development account
+
+`Admin` / `12345` is intentionally a fresh-start development identity.
+
+- **SIGN OUT erases the Admin player save.** The next login begins at the Welcome FTUE with an empty Garage.
+- GitHub Pages prevents another login attempt while that browser already has an authenticated local Admin session.
+- PHP/server mode keeps a short-lived active-session registry and rejects a second active login for the same account.
+- Server session locks expire if abandoned so development cannot be permanently locked out.
+- These reset semantics are specific to the development Admin identity; normal future player accounts must preserve their saves on logout.
+
 ### V0.3A starter art contract
 
 All three starter cars now have both a side-profile presentation asset and top-down race asset. Showroom/Garage/Parts never borrow top-down race art; missing side art shows the explicit missing-art marker. Quick Race/race contexts never borrow side-profile art.
@@ -126,6 +153,7 @@ The committed playable build lives in `/docs` and contains static HTML/CSS/JavaS
 - Storage provider: `LocalStorageProvider`
 - Save data: browser `localStorage`
 - Simulated local development identity
+- Admin save is intentionally erased on sign-out for repeatable FTUE testing
 - No shared accounts/player state
 - Intended for gameplay, UI and system testing
 
@@ -140,7 +168,7 @@ php scripts/build-static.php
 The repository root remains the PHP/server build.
 
 - Storage provider: `ApiStorageProvider`
-- PHP sessions/authentication
+- PHP sessions/authentication with one active session per account
 - CSRF-protected write API
 - Atomic JSON player/runtime persistence
 - SQL/database migration planned later
@@ -192,8 +220,8 @@ PRs run the `Validate Forever Racing` workflow. It checks:
 PHP syntax
 JavaScript syntax
 case-insensitive server login
-browser-local FTUE + Build Stage flow
-authenticated PHP API FTUE flow
+browser-local FTUE + Build Stage + multi-distance race flow
+authenticated PHP API FTUE + duplicate-session + Admin-reset flow
 GitHub Pages static build generation
 static-build/module smoke tests
 ```

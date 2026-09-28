@@ -1,5 +1,20 @@
 # Changelog
 
+## V0.3.0-b — TextTuned race core + disposable Admin sessions
+
+- Replaced the placeholder Quick Race formula with dedicated browser/PHP race simulator modules derived from surviving TextTuned race logic.
+- Added automated 1/4-mile, 1/2-mile and 1-mile racing.
+- Added reaction time, red-light fouls, elapsed time, total time and trap speed.
+- Added launch consistency, level-based shifting loss, engine variability, grip influence and slippery-weather behavior.
+- Ported TextTuned's weighted world locations, normal/severe weather and rare nightmare conditions.
+- Added generated opponents matched around the player's current power-to-weight.
+- Added per-car pass counts, best ETs and best trap speeds for all three distances.
+- Added recent race history and a dense timing-board result UI.
+- Added EXP race rewards and TextTuned's level threshold curve while retaining Forever Racing REP.
+- Made Admin a disposable FTUE development account: signing out wipes its player save so the next login starts fresh.
+- Added local duplicate-login prevention and a server-side active-session registry that rejects a second active login.
+- Added regression coverage for race distances, EXP/records/history, duplicate sessions and Admin reset behavior.
+
 ## V0.3.0-a — starter dual-view art + cache cleanup
 
 - Added side-profile pixel art for all three FTUE starters: 1998 Civic DX, 2005 Mustang GT and 2003 350Z.

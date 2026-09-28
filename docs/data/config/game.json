@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "startingCredits": 75000,
   "usedLotRefreshSeconds": 1800,
   "localDevUsername": "Admin",
@@ -7,5 +7,6 @@
   "tutorialVersion": 1,
   "defaultVehicleRendering": "authored",
   "tutorialCompletionCredits": 2500,
-  "tutorialCompletionRep": 25
+  "tutorialCompletionRep": 25,
+  "sessionActiveTtlSeconds": 7200
 }
