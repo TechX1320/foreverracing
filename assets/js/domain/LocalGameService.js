@@ -294,6 +294,19 @@ export class LocalGameService {
     return { player, lot: nextLot };
   }
 
+  quickRacePreview(inputPlayer) {
+    const player = this.normalizePlayer(inputPlayer);
+    const carIndex = this.requireOwnedCarIndex(player, player.selectedCarId);
+    const car = player.garage[carIndex];
+    const tutorialRace = player.tutorial?.status === 'active' && player.tutorial?.step === 'first_race';
+    return {
+      carId: car.carId,
+      carName: this.carName(car),
+      opponent: this.nextOpponentProfile(player, car, tutorialRace),
+    };
+  }
+
+
   startQuickRace(inputPlayer, distance = '1/4', timestampMs = Date.now()) {
     const distanceConfig = this.raceSimulator.distance(distance);
     let activeRace = null;
@@ -321,13 +334,12 @@ export class LocalGameService {
       const torque = Math.max(1, Number(car.derived?.torque || 1));
       const weight = Math.max(500, Number(car.derived?.weight || 500));
       const grip = Math.max(0.5, Number(car.derived?.grip || 1));
-      const pwr = hp / weight;
-      const difficulty = tutorialRace ? 0.84 + (Math.random() * 0.05) : 0.94 + (Math.random() * 0.14);
-      const opponentWeight = Math.max(1200, Math.round(weight * (0.90 + (Math.random() * 0.20))));
-      const opponentHp = Math.max(55, Math.round(pwr * difficulty * opponentWeight));
-      const opponentTorque = Math.max(50, Math.round(torque * difficulty * (0.93 + (Math.random() * 0.14))));
-      const opponentGrip = Math.max(0.65, Math.min(1.45, grip + ((Math.random() * 0.12) - 0.06)));
-      const opponentLevel = tutorialRace ? 1 : Math.max(1, level + randomInt(-3, 3));
+      const opponentProfile = this.nextOpponentProfile(draft, car, tutorialRace);
+      const opponentWeight = Number(opponentProfile.weight);
+      const opponentHp = Number(opponentProfile.hp);
+      const opponentTorque = Number(opponentProfile.torque);
+      const opponentGrip = Number(opponentProfile.grip);
+      const opponentLevel = Number(opponentProfile.level);
 
       const playerRun = this.raceSimulator.simulate({ hp, torque, weight, grip, level, allowFoul: !tutorialRace }, distance, weather);
       const opponentRun = this.raceSimulator.simulate({
@@ -348,7 +360,7 @@ export class LocalGameService {
         : Math.round(randomInt(90, 220) * creditMultiplier);
       const expReward = this.raceExpReward(level, opponentLevel, won);
       const repReward = won ? 5 : 2;
-      const opponentVisual = this.opponentRaceVisual(opponentHp / Math.max(1, opponentWeight));
+      const opponentVisual = { name: opponentProfile.carName, src: opponentProfile.visualSrc };
       const timeScale = Math.max(0.01, Number(this.racingConfig?.presentation?.timeScale || 1));
       const stagingMs = Math.max(1800, Number(this.racingConfig?.presentation?.stagingMs || 2800)) * timeScale;
       const greenAt = Number(timestampMs) + stagingMs;
@@ -373,7 +385,7 @@ export class LocalGameService {
         playerVisualSrc: this.raceVisualSrc(car),
         player: playerRun,
         opponent: {
-          name: this.opponentName(),
+          name: opponentProfile.name,
           carName: opponentVisual.name,
           visualSrc: opponentVisual.src,
           hp: opponentHp,
@@ -712,6 +724,47 @@ export class LocalGameService {
     return String(sprites?.racePreview?.src || sprites?.topDown?.src || '').trim();
   }
 
+  nextOpponentProfile(player, car, tutorialRace = false) {
+    const hp = Math.max(1, Number(car?.derived?.hp || 1));
+    const torque = Math.max(1, Number(car?.derived?.torque || 1));
+    const weight = Math.max(500, Number(car?.derived?.weight || 500));
+    const grip = Math.max(0.5, Number(car?.derived?.grip || 1));
+    const level = Math.max(1, Number(player?.progression?.level || 1));
+    const raceIndex = Math.max(0, Number(player?.stats?.races || 0));
+    const seedText = [
+      player?.user?.id || 1,
+      car?.carId || 'car',
+      raceIndex,
+      Math.round(hp),
+      Math.round(weight),
+      tutorialRace ? 'tutorial' : 'normal',
+    ].join('|');
+    const rng = seededRandom(stableSeed(seedText));
+    const between = (min, max) => min + (rng() * (max - min));
+    const pwr = hp / weight;
+    const difficulty = tutorialRace ? between(0.84, 0.89) : between(0.94, 1.08);
+    const opponentWeight = Math.max(1200, Math.round(weight * between(0.90, 1.10)));
+    const opponentHp = Math.max(55, Math.round(pwr * difficulty * opponentWeight));
+    const opponentTorque = Math.max(50, Math.round(torque * between(0.93, 1.07)));
+    const opponentGrip = Math.max(0.65, Math.min(1.45, grip + between(-0.06, 0.06)));
+    const opponentLevel = tutorialRace ? 1 : Math.max(1, level + Math.floor(between(-3, 4)));
+    const visual = this.opponentRaceVisual(opponentHp / Math.max(1, opponentWeight));
+    const names = ['Night Shift', 'Redline', 'The Commuter', 'Left Lane', 'Cut Light', 'Sleeper', 'Boost Leak', 'Test Mule'];
+    const name = tutorialRace ? 'Test Mule' : names[Math.min(names.length - 1, Math.floor(rng() * names.length))];
+
+    return {
+      name,
+      carName: visual.name,
+      visualSrc: visual.src,
+      hp: opponentHp,
+      torque: opponentTorque,
+      weight: opponentWeight,
+      grip: Math.round(opponentGrip * 1000) / 1000,
+      level: opponentLevel,
+    };
+  }
+
+
   opponentRaceVisual(targetRating) {
     const candidates = (this.cars || [])
       .map((spec) => {
@@ -734,6 +787,23 @@ export class LocalGameService {
   opponentName() {
     return randomChoice(['Night Shift', 'Redline', 'The Commuter', 'Left Lane', 'Cut Light', 'Sleeper', 'Boost Leak', 'Test Mule']);
   }
+}
+
+function stableSeed(value) {
+  let hash = 2166136261;
+  for (let i = 0; i < String(value).length; i += 1) {
+    hash ^= String(value).charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function seededRandom(seed) {
+  let state = Number(seed) >>> 0;
+  return () => {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    return state / 4294967296;
+  };
 }
 
 function round3(value) {
