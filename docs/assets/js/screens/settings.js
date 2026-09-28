@@ -42,7 +42,7 @@ export async function renderSettings(ctx) {
           <div class="split"><div><h3>Vehicle Rendering</h3><p>Authored vehicle art is used whenever it exists. Missing artwork is shown as an explicit ? placeholder so the art backlog is visible during development.</p></div><span class="pill pill--accent">AUTHORED / FALLBACK</span></div>
         </div>
         <div class="game-card">
-          <div class="split"><div><h3>Build & Cached Assets</h3><p>Current build: <strong>${document.documentElement.dataset.build || "unknown"}</strong>. GitHub Pages development mode disables the offline service-worker cache so refreshes pull current assets.</p></div><span class="pill pill--accent">V0.4B</span></div>
+          <div class="split"><div><h3>Build & Cached Assets</h3><p>Current build: <strong>${document.documentElement.dataset.build || "unknown"}</strong>. GitHub Pages development mode disables the offline service-worker cache so refreshes pull current assets.</p></div><span class="pill pill--accent">V0.4C</span></div>
           <div class="game-card__actions"><button class="button button--small" type="button" data-clear-assets>CLEAR CACHED ASSETS</button></div>
         </div>
         <div class="game-card">
