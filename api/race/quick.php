@@ -6,4 +6,4 @@ Api::requireAuth();
 Api::requireCsrf();
 $body = Api::body();
 $distance = (string)($body['distance'] ?? '1/4');
-api_game(fn() => GameService::quickRace($distance));
+api_game(fn() => GameService::startQuickRace($distance));
