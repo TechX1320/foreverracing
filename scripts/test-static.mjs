@@ -38,14 +38,17 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.4.0-c"')) throw new Error('Static index is missing the V0.4B build marker.');
+if (!html.includes('data-build="0.4.0-d"')) throw new Error('Static index is missing the V0.4D build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
 const starters = carCatalog.filter((car) => car.starter);
 if (starters.length !== 3) throw new Error('Expected three starter cars.');
-if (!starters.every((car) => String(car?.visual?.sprites?.sideProfile?.src || '').includes('-side-profile.png'))) throw new Error('Starter cars must define side-profile art.');
-if (!starters.every((car) => String(car?.visual?.sprites?.topDown?.src || '').includes('-top-down'))) throw new Error('Starter cars must define top-down race art.');
+if (!starters.every((car) => String(car.class || '').toUpperCase() === 'D')) throw new Error('Every FTUE starter must be D Class.');
+if (starters.some((car) => ['Mustang GT', '350Z'].includes(String(car.model)))) throw new Error('C Class cars must not remain in the FTUE starter pool.');
+const civicStarter = starters.find((car) => Number(car.stockId) === 1);
+if (!String(civicStarter?.visual?.sprites?.sideProfile?.src || '').includes('-side-profile.png')) throw new Error('The Civic starter art mapping is missing.');
+// Starters without authored art intentionally use the explicit ART MISSING renderer until the dedicated art pass.
 
 const spriteCars = carCatalog.filter((car) => car?.visual?.sprites?.topDown?.sheet === 'assets/art/cars/cars-top-down-v1.png');
 if (spriteCars.length < 4) throw new Error('Expected at least four cars wired to the V1 pixel sprite sheet.');
@@ -75,12 +78,16 @@ if (runtimeConfig.defaultVehicleRendering !== 'authored') throw new Error('Autho
 if (runtimeConfig.schemaVersion < 6) throw new Error('V0.4B player schema version must be at least 6.');
 
 const buildStages = JSON.parse(await fs.readFile(new URL('data/config/build-stages.json', docs), 'utf8'));
-if (buildStages.stages?.[0]?.name !== 'Street Car' || buildStages.stages?.[1]?.name !== 'Street Race Car') throw new Error('Named V0.4B build types are missing.');
+if (buildStages.stages?.[0]?.name !== 'Street Car' || buildStages.stages?.[1]?.name !== 'Street Race Car') throw new Error('Named build types are missing.');
+if (!buildStages.stages?.[0]?.requiredCategories?.includes('suspension') || buildStages.stages[0].requiredCategories.length !== 8) throw new Error('Street Car must have eight required categories including Suspension.');
 
 const raceConfig = JSON.parse(await fs.readFile(new URL('data/config/racing.json', docs), 'utf8'));
 if (!raceConfig.distances?.['1/4'] || !raceConfig.distances?.['1/2'] || !raceConfig.distances?.['1']) throw new Error('All three race distances must be configured.');
 if ((raceConfig.weather || []).length < 10 || (raceConfig.locations || []).length < 20) throw new Error('TextTuned weather/location pools are incomplete.');
-if (raceConfig.version < 2 || !raceConfig.presentation?.stagingMs || raceConfig.presentation?.timeScale !== 1) throw new Error('V0.4A real-time race presentation config is incomplete.');
+if (raceConfig.version < 3 || !raceConfig.presentation?.stagingMs || raceConfig.presentation?.timeScale !== 1) throw new Error('V0.4D race configuration is incomplete.');
+if ((raceConfig.weather || []).some((row) => row.nightmare && row.quickRace !== false)) throw new Error('Nightmare weather must be excluded from normal Quick Race.');
+if ((raceConfig.weather || []).find((row) => row.name === 'Snow')?.minLevel !== 7) throw new Error('Snow should be a later-game Quick Race condition.');
+if ((raceConfig.weather || []).find((row) => row.name === 'Ice')?.minLevel !== 10) throw new Error('Ice should be a later-game Quick Race condition.');
 
 const localProviderSource = await fs.readFile(new URL('assets/js/storage/LocalStorageProvider.js', root), 'utf8');
 if (!localProviderSource.includes('localStorage.removeItem(PLAYER_KEY)')) throw new Error('Admin local logout must erase player data.');
@@ -94,7 +101,7 @@ const racePresentationSource = await fs.readFile(new URL('assets/js/ui/racePrese
 if (!racePresentationSource.includes('showModal()') || !racePresentationSource.includes('data-race-player-progress') || !racePresentationSource.includes('RETURN TO PITS')) throw new Error('Blocking race playback UI is incomplete.');
 
 const quickRaceSource = await fs.readFile(new URL('assets/js/screens/quickRace.js', root), 'utf8');
-if (!quickRaceSource.includes('V0.4A RACE PRESENTATION') || !quickRaceSource.includes('playRacePresentation') || !quickRaceSource.includes('data-race-distance')) throw new Error('V0.4A race presentation screen is missing.');
+if (!quickRaceSource.includes('playRacePresentation') || !quickRaceSource.includes('START 1/4 MI RACE') || !quickRaceSource.includes('unlockLevel: 5') || !quickRaceSource.includes('data-race-distance')) throw new Error('V0.4D Quick Race progression UI is incomplete.');
 
 if (!appSource.includes('scheduleWelcomeTutorial')) throw new Error('Fresh-login FTUE welcome retry guard is missing.');
 
@@ -111,6 +118,8 @@ const modules = [
   'assets/js/screens/garage.js',
   'assets/js/screens/parts.js',
   'assets/js/screens/quickRace.js',
+  'assets/js/screens/usedlot.js',
+  'assets/js/screens/roguelike.js',
   'assets/js/screens/settings.js',
 ];
 
@@ -126,7 +135,7 @@ const garageSource = await fs.readFile(new URL('assets/js/screens/garage.js', ro
 if (!garageSource.includes('garage-inventory-dialog') || !garageSource.includes('data-inventory-car')) throw new Error('Garage Inventory UI is missing.');
 
 const partsSourceV04b = await fs.readFile(new URL('assets/js/screens/parts.js', root), 'utf8');
-if (!partsSourceV04b.includes('parts-category-grid') || !partsSourceV04b.includes('Purchasing puts the part')) throw new Error('Category-based Parts UI is missing.');
+if (!partsSourceV04b.includes('parts-category-grid') || !partsSourceV04b.includes('BUY THE STAGE 1 INTAKE') || !partsSourceV04b.includes('"suspension"')) throw new Error('V0.4D guided Parts UI is missing.');
 
 const classifiedsSource = await fs.readFile(new URL('assets/js/screens/usedlot.js', root), 'utf8');
 if (!classifiedsSource.includes('Classifieds') || !classifiedsSource.includes('MORE DETAILS') || classifiedsSource.includes('Buy Used')) throw new Error('Classifieds UI did not replace the old Used Lot purchase cards.');
@@ -152,4 +161,30 @@ if (!appSource.includes('Build Types') || !showroomSourceV04c.includes('as a Str
   throw new Error('Named Build Type terminology is incomplete.');
 }
 console.log('V0.4C readability and terminology checks passed.');
+
+const usedLotSourceV04d = await fs.readFile(new URL('assets/js/screens/usedlot.js', root), 'utf8');
+const raceSimulatorSourceV04d = await fs.readFile(new URL('assets/js/domain/RaceSimulator.js', root), 'utf8');
+const racePresentationSourceV04d = await fs.readFile(new URL('assets/js/ui/racePresentation.js', root), 'utf8');
+if (!cssV04b.includes('V0.4D FTUE and readable-game pass') || !cssV04b.includes('body{font-size:16px;line-height:1.5}') || !cssV04b.includes('.ftue-focus-panel')) {
+  throw new Error('V0.4D readability / FTUE visual pass is missing.');
+}
+if (!appSource.includes('ROUTE_UNLOCK_LEVELS') || !appSource.includes("'showroom': 5") && !appSource.includes('showroom: 5')) {
+  throw new Error('Post-FTUE level-based feature gates are missing.');
+}
+if (!usedLotSourceV04d.includes('D CLASS STARTERS') || !usedLotSourceV04d.includes('SELECT THIS CAR')) {
+  throw new Error('Classifieds starter selection flow is missing.');
+}
+if (!localGameSource.includes("'s1_intake_1'") || !localGameSource.includes('Local Test & Tune') || !localGameSource.includes('unlockLevel')) {
+  throw new Error('Local V0.4D FTUE enforcement is incomplete.');
+}
+if (!serverGameSourceV04c.includes("'s1_intake_1'") || !serverGameSourceV04c.includes('Local Test & Tune') || !serverGameSourceV04c.includes('$unlockLevel')) {
+  throw new Error('Server V0.4D FTUE enforcement is incomplete.');
+}
+if (!raceSimulatorSourceV04d.includes('allowFoul') || !raceSimulatorSourceV04d.includes('quickRace !== false')) {
+  throw new Error('V0.4D tutorial foul/weather gates are missing.');
+}
+if (!racePresentationSourceV04d.includes('ratio >= 0.52 && ratio < 0.68') || !racePresentationSourceV04d.includes('RED LIGHT • YOU LEFT BEFORE GREEN')) {
+  throw new Error('Drag-tree timing fix is missing.');
+}
+console.log('V0.4D guided FTUE, unlock progression and race-gating checks passed.');
 
