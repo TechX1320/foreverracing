@@ -630,10 +630,10 @@ final class GameService
     {
         return self::mutatePlayer(function (array $player): array {
             if (!self::selectedCar($player)) {
-                throw new GameException('Select a car before starting a RogueLike run.');
+                throw new GameException('Select a car before starting a The Circuit run.');
             }
             if (is_array($player['roguelike']['activeRun'] ?? null)) {
-                throw new GameException('A RogueLike run is already active.');
+                throw new GameException('A The Circuit run is already active.');
             }
             $player['roguelike']['runsStarted'] = (int)$player['roguelike']['runsStarted'] + 1;
             $player['roguelike']['activeRun'] = [
@@ -659,7 +659,7 @@ final class GameService
         $player = self::mutatePlayer(function (array $player) use ($choice, &$step): array {
             $run = $player['roguelike']['activeRun'] ?? null;
             if (!is_array($run)) {
-                throw new GameException('No active RogueLike run.');
+                throw new GameException('No active The Circuit run.');
             }
             $car = self::selectedCar($player);
             if (!$car) {
@@ -678,7 +678,7 @@ final class GameService
             if (!$won) {
                 $banked = (int)floor(((int)$run['runCredits']) * 0.35);
                 $player['wallet']['credits'] += $banked;
-                self::addTransaction($player, 'roguelike_cashout', $banked, 'RogueLike consolation');
+                self::addTransaction($player, 'roguelike_cashout', $banked, 'The Circuit consolation');
                 $player['roguelike']['bestStage'] = max((int)$player['roguelike']['bestStage'], $stage);
                 $player['roguelike']['activeRun'] = null;
                 $step = ['won' => false, 'stage' => $stage, 'banked' => $banked, 'finished' => true];
@@ -691,7 +691,7 @@ final class GameService
             if ($finished) {
                 $banked = (int)$run['runCredits'];
                 $player['wallet']['credits'] += $banked;
-                self::addTransaction($player, 'roguelike_cashout', $banked, 'RogueLike complete');
+                self::addTransaction($player, 'roguelike_cashout', $banked, 'The Circuit complete');
                 $player['roguelike']['runsCompleted'] = (int)$player['roguelike']['runsCompleted'] + 1;
                 $player['roguelike']['bestStage'] = max((int)$player['roguelike']['bestStage'], $stage);
                 $player['roguelike']['activeRun'] = null;
