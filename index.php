@@ -96,7 +96,7 @@ $storageText = $storageMode === 'local' ? 'BROWSER LOCAL' : 'PHP / JSON';
         <aside class="context-rail">
           <section class="rail-panel">
             <header>OBJECTIVE</header>
-            <div id="tutorialRail" class="tutorial-rail"><span class="rail-state">FTUE</span><strong>Loading...</strong></div>
+            <div id="tutorialRail" class="tutorial-rail"><span class="rail-state">STEP</span><strong>Loading...</strong></div>
           </section>
           <section class="rail-panel">
             <header>BUILD RULES</header>
