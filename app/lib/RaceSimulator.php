@@ -16,14 +16,25 @@ final class RaceSimulator
         return $row;
     }
 
-    public function randomWeather(): array
+    public function randomWeather(int $level = 1): array
     {
-        return $this->weighted(is_array($this->config['weather'] ?? null) ? $this->config['weather'] : []);
+        $rows = array_values(array_filter(
+            is_array($this->config['weather'] ?? null) ? $this->config['weather'] : [],
+            fn(array $row): bool => ($row['quickRace'] ?? true) !== false
+                && empty($row['nightmare'])
+                && (int)($row['minLevel'] ?? 1) <= max(1, $level)
+        ));
+        return $this->weighted($rows ?: [['name' => 'Cool & Cloudy', 'weight' => 1, 'etModifier' => 0, 'mphModifier' => 0]]);
     }
 
-    public function randomLocation(): array
+    public function randomLocation(int $level = 1): array
     {
-        return $this->weighted(is_array($this->config['locations'] ?? null) ? $this->config['locations'] : []);
+        $rows = array_values(array_filter(
+            is_array($this->config['locations'] ?? null) ? $this->config['locations'] : [],
+            fn(array $row): bool => empty($row['nightmare'])
+                && (int)($row['minLevel'] ?? 1) <= max(1, $level)
+        ));
+        return $this->weighted($rows ?: [['name' => 'Local Test & Tune', 'weight' => 1]]);
     }
 
     public function simulate(array $context, string $distanceKey, ?array $weather = null): array
@@ -36,7 +47,13 @@ final class RaceSimulator
         $grip = self::clamp((float)($context['grip'] ?? 1.0), 0.5, 2.0);
         $level = max(1, (int)($context['level'] ?? 1));
 
-        $reaction = $this->reaction($level, $torque, $weight, (float)($context['reactionOffset'] ?? 0));
+        $reaction = $this->reaction(
+            $level,
+            $torque,
+            $weight,
+            (float)($context['reactionOffset'] ?? 0),
+            ($context['allowFoul'] ?? true) !== false
+        );
         $et = (float)$distance['etFactor'] * pow($weight / $hp, 1.0 / 3.0);
         $et += (float)($condition['etModifier'] ?? 0) + $this->random(-(float)($distance['etRandom'] ?? 0), (float)($distance['etRandom'] ?? 0));
         $et = self::clamp($et, (float)($distance['minEt'] ?? 1), (float)($distance['maxEt'] ?? 999));
@@ -88,7 +105,7 @@ final class RaceSimulator
         ];
     }
 
-    private function reaction(int $level, float $torque, float $weight, float $offset): float
+    private function reaction(int $level, float $torque, float $weight, float $offset, bool $allowFoul = true): float
     {
         $skillBias = self::clamp($level / 100.0, 0.0, 1.0);
         $skewed = pow($this->random(0, 1), 2.0 - $skillBias);
@@ -96,7 +113,7 @@ final class RaceSimulator
         $rt += ($torque > 300 && $weight < 2500) ? $this->random(0, 0.035) : $this->random(0, 0.010);
         $rt += $offset;
         $foulChance = max(0.02, 0.10 - ($level * 0.001));
-        if ($this->random(0, 1) < $foulChance) {
+        if ($allowFoul && $this->random(0, 1) < $foulChance) {
             $rt = -$this->random(0.015, 0.050);
         }
         return $rt;
