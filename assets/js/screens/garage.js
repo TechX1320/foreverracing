@@ -84,7 +84,7 @@ function carRow(player, car, catalog, tutorialStep) {
   const selected = String(player?.selectedCarId || "") === String(car.carId);
   const stage = Number(car.buildStage || 1);
   const progress = stage === 1 ? streetCarProgress(player, car, catalog) : null;
-  const inventoryCount = inventoryForCar(player, car.carId).length;
+  const inventoryCount = inventoryForCar(player, car).length;
   const inventoryHighlight = tutorialStep === "install_first_upgrade";
 
   return `
@@ -138,7 +138,7 @@ function openInventory(ctx, carId) {
   const car = player?.garage?.find((entry) => String(entry.carId) === String(carId));
   if (!car) return;
 
-  const items = inventoryForCar(player, carId)
+  const items = inventoryForCar(player, car)
     .map((item) => ({ item, spec: partsCache.find((part) => part.catalogId === item.catalogId) }))
     .filter((row) => row.spec)
     .sort((a, b) => String(a.spec.category).localeCompare(String(b.spec.category)) || Number(a.spec.simpleTier || 0) - Number(b.spec.simpleTier || 0));
@@ -253,11 +253,17 @@ function installedSimpleTier(player, carId, key, catalog = partsCache) {
   return tier;
 }
 
-function inventoryForCar(player, carId) {
-  return (player?.inventory?.parts || []).filter((item) =>
-    String(item.purchasedForCarId || "") === String(carId)
-    || String(item.installedOnCarId || "") === String(carId)
-  );
+function inventoryForCar(player, car) {
+  const carId = car?.carId;
+  const stage = Number(car?.buildStage || 1);
+  return (player?.inventory?.parts || []).filter((item) => {
+    const belongs = String(item.purchasedForCarId || "") === String(carId)
+      || String(item.installedOnCarId || "") === String(carId);
+    if (!belongs) return false;
+    const spec = partsCache.find((part) => part.catalogId === item.catalogId);
+    if (stage >= 2 && Number(spec?.simpleTier || 0) > 0) return false;
+    return true;
+  });
 }
 
 function stageUp(ctx, carId) {
