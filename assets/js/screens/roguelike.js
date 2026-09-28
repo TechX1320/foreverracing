@@ -9,14 +9,14 @@ export async function renderRoguelike(ctx) {
   const run = rogue.activeRun;
 
   ctx.screenRoot.innerHTML = pageShell({
-    title: "RogueLike",
-    eyebrow: "PVE RUN PROTOTYPE",
+    title: "The Circuit",
+    eyebrow: "SINGLE-PLAYER CAREER PROTOTYPE",
     hint: run ? `Stage ${run.stage}/${run.maxStages}` : `Best stage ${rogue.bestStage || 0}`,
-    trail: "Risk • rewards • temporary run boost",
+    trail: "Local meets • rivals • bigger events",
     body: `
       ${lastStep ? stepBanner(lastStep) : ""}
-      ${!current ? `<div class="empty-state"><strong>Select a car first.</strong><span>RogueLike runs use your Current Car as the base vehicle.</span><div style="margin-top:14px"><button class="button button--primary button--small" data-go-garage>Open Garage</button></div></div>` : run ? activeRun(current, run) : startRun(current, rogue)}
-      <p class="screen-copy" style="margin-top:14px;margin-bottom:0">This is intentionally a small playable proof of concept. Run upgrades are temporary, risk increases as stages climb, and your run credits are only fully banked if you finish all seven stages.</p>
+      ${!current ? `<div class="empty-state"><strong>Select a car first.</strong><span>The Circuit uses your Current Car as the base vehicle.</span><div style="margin-top:14px"><button class="button button--primary button--small" data-go-garage>Open Garage</button></div></div>` : run ? activeRun(current, run) : startRun(current, rogue)}
+      <p class="screen-copy" style="margin-top:14px;margin-bottom:0">This is still a mechanical prototype. The Circuit is becoming Forever Racing’s single-player career: local meets, recurring NPCs, crews, rivals and increasingly serious events. The current seven-stage run is temporary scaffolding for that larger design.</p>
     `,
   });
 
@@ -54,7 +54,7 @@ export async function renderRoguelike(ctx) {
 }
 
 function startRun(car, rogue) {
-  return `<div class="game-card is-selected"><div class="game-card__top"><div><h3>${carLabel(car)}</h3><p>${car.displayName}</p></div><span class="pill pill--accent">READY</span></div><div class="spec-grid"><div class="spec"><span>Best Stage</span><strong>${rogue.bestStage || 0}</strong></div><div class="spec"><span>Completed Runs</span><strong>${rogue.runsCompleted || 0}</strong></div><div class="spec"><span>Power</span><strong>${number(car.derived?.hp)} hp</strong></div><div class="spec"><span>Weight</span><strong>${number(car.derived?.weight)} lb</strong></div></div><div class="game-card__actions"><button class="button button--primary" type="button" data-start-run>Start New Run</button></div></div>`;
+  return `<div class="game-card is-selected"><div class="game-card__top"><div><h3>${carLabel(car)}</h3><p>${car.displayName}</p></div><span class="pill pill--accent">READY</span></div><div class="spec-grid"><div class="spec"><span>Best Stage</span><strong>${rogue.bestStage || 0}</strong></div><div class="spec"><span>Completed Runs</span><strong>${rogue.runsCompleted || 0}</strong></div><div class="spec"><span>Power</span><strong>${number(car.derived?.hp)} hp</strong></div><div class="spec"><span>Weight</span><strong>${number(car.derived?.weight)} lb</strong></div></div><div class="game-card__actions"><button class="button button--primary" type="button" data-start-run>ENTER THE CIRCUIT</button></div></div>`;
 }
 
 function activeRun(car, run) {
