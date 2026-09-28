@@ -84,6 +84,8 @@ if (!localProviderSource.includes('already logged in in this browser')) throw ne
 const quickRaceSource = await fs.readFile(new URL('assets/js/screens/quickRace.js', root), 'utf8');
 if (!quickRaceSource.includes('TEXTTUNED RACE CORE') || !quickRaceSource.includes('data-race-distance')) throw new Error('V0.3B race screen is missing.');
 
+if (!appSource.includes('scheduleWelcomeTutorial')) throw new Error('Fresh-login FTUE welcome retry guard is missing.');
+
 const modules = [
   'assets/js/app.js',
   'assets/js/domain/LocalGameService.js',
