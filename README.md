@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.2.0-dev.2 playable direction
+## V0.2.0-dev.3 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -90,20 +90,20 @@ The vehicle/engine model now has groundwork for:
 
 Stage 3 is intended to unlock front-half/tube-chassis construction and engine swaps. Stage 4 is intended to widen powertrain/chassis freedom substantially.
 
-### Procedural vehicle visuals
+### Vehicle art pipeline
 
-Forever Racing no longer requires every car to have a hand-authored image asset just to exist in the game.
+The vehicle renderer now uses authored pixel art first and the procedural SVG system only as a fallback for cars whose artwork has not been completed yet.
 
-`assets/js/ui/vehicleRenderer.js` draws side-profile SVG vehicles from small profile definitions.
+The first in-game sprite sheet contains top-down assets for:
 
-Current visual progression includes:
+- 1998 Honda Civic DX
+- 2003 Nissan 350Z
+- 2004 Subaru Impreza WRX STI
+- 2005 Ford Mustang GT
 
-- Stage 1: stock-style side profile.
-- Stage 2: cage/race-prep cues.
-- Stage 3: additional front/race hardware.
-- Stage 4: drag-race details such as wing/chute/race stance cues.
+Vehicle metadata is view-aware. The renderer can request a `topDown`, `showroom`, or `racePreview` view and falls back to the available top-down asset until a dedicated angle exists. The same structure can later contain stage-specific frames, so Build Stage visual changes do not require changes to game screens.
 
-This is intentionally a base renderer. Pixel-art or higher-detail skins can be layered on later without changing game logic.
+`assets/js/ui/vehicleRenderer.js` still draws the existing procedural side-profile placeholder for catalog cars without authored sprite art. This lets the vehicle catalog grow independently from the art backlog.
 
 ## Runtime modes
 
