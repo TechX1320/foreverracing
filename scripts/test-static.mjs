@@ -7,6 +7,11 @@ const required = [
   'index.html',
   'assets/css/app.css',
   'assets/art/cars/cars-top-down-v1.png',
+  'assets/art/cars/vehicles/2005-ford-mustang-gt-top-down-v03a.png',
+  'assets/art/cars/vehicles/1998-honda-civic-dx-top-down-v03a.png',
+  'assets/art/cars/vehicles/2003-nissan-350z-side-profile.png',
+  'assets/art/cars/vehicles/2005-ford-mustang-gt-side-profile.png',
+  'assets/art/cars/vehicles/1998-honda-civic-dx-side-profile.png',
   'assets/art/cars/vehicles/1998-honda-civic-dx-top-down.png',
   'assets/art/cars/vehicles/2003-nissan-350z-top-down.png',
   'assets/art/cars/vehicles/2004-subaru-impreza-wrx-sti-top-down.png',
@@ -29,10 +34,16 @@ for (const file of required) {
 
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
-if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense V0.2 game shell.');
+if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
+if (!html.includes('data-build="0.3.0-a"')) throw new Error('Static index is missing the V0.3A build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
+const starters = carCatalog.filter((car) => car.starter);
+if (starters.length !== 3) throw new Error('Expected three starter cars.');
+if (!starters.every((car) => String(car?.visual?.sprites?.sideProfile?.src || '').includes('-side-profile.png'))) throw new Error('Starter cars must define side-profile art.');
+if (!starters.every((car) => String(car?.visual?.sprites?.topDown?.src || '').includes('-top-down'))) throw new Error('Starter cars must define top-down race art.');
+
 const spriteCars = carCatalog.filter((car) => car?.visual?.sprites?.topDown?.sheet === 'assets/art/cars/cars-top-down-v1.png');
 if (spriteCars.length < 4) throw new Error('Expected at least four cars wired to the V1 pixel sprite sheet.');
 if (!spriteCars.every((car) => Number.isInteger(car.visual.sprites.topDown.index))) throw new Error('Sprite-backed cars must define a frame index.');
@@ -51,6 +62,10 @@ for (const file of [
 const rendererSource = await fs.readFile(new URL('assets/js/ui/vehicleRenderer.js', root), 'utf8');
 if (!rendererSource.includes('ART MISSING')) throw new Error('Vehicle renderer must expose an explicit missing-art placeholder.');
 if (rendererSource.includes('renderProcedural(')) throw new Error('Generic procedural car fallback must not return.');
+const showroomResolve = rendererSource.match(/if \(view === 'showroom'\) \{([\s\S]*?)\} else if/);
+if (!showroomResolve || showroomResolve[1].includes('topDown')) throw new Error('Showroom must not fall back to top-down art.');
+const appSource = await fs.readFile(new URL('assets/js/app.js', root), 'utf8');
+if (!appSource.includes("clearForeverRacingCaches({ unregister: true })")) throw new Error('Static dev cache cleanup is missing.');
 
 const runtimeConfig = JSON.parse(await fs.readFile(new URL('data/config/game.json', docs), 'utf8'));
 if (runtimeConfig.defaultVehicleRendering !== 'authored') throw new Error('Authored vehicle rendering must be the default.');

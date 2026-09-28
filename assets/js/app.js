@@ -315,5 +315,26 @@ function escapeText(value) {
 }
 
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-  addEventListener('load', () => navigator.serviceWorker.register('service-worker.js').catch(() => {}));
+  addEventListener('load', async () => {
+    const localDev = document.documentElement.dataset.storageMode === 'local';
+    if (localDev) {
+      await clearForeverRacingCaches({ unregister: true });
+      return;
+    }
+    const build = document.documentElement.dataset.build || '';
+    navigator.serviceWorker.register(`service-worker.js?v=${encodeURIComponent(build)}`, { updateViaCache: 'none' })
+      .then((registration) => registration.update())
+      .catch(() => {});
+  });
+}
+
+async function clearForeverRacingCaches({ unregister = false } = {}) {
+  if (unregister && 'serviceWorker' in navigator) {
+    const registrations = await navigator.serviceWorker.getRegistrations().catch(() => []);
+    await Promise.all(registrations.map((registration) => registration.unregister().catch(() => false)));
+  }
+  if ('caches' in window) {
+    const keys = await caches.keys().catch(() => []);
+    await Promise.all(keys.filter((key) => key.startsWith('forever-racing-shell-')).map((key) => caches.delete(key)));
+  }
 }

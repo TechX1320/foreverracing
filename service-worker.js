@@ -1,9 +1,14 @@
-const CACHE = 'forever-racing-shell-v0.2.0-dev.5';
+const CACHE = 'forever-racing-shell-v0.3.0-a';
 const SHELL = [
   './',
   './manifest.webmanifest',
   './assets/css/app.css',
   './assets/art/cars/cars-top-down-v1.png',
+  './assets/art/cars/vehicles/2005-ford-mustang-gt-top-down-v03a.png',
+  './assets/art/cars/vehicles/1998-honda-civic-dx-top-down-v03a.png',
+  './assets/art/cars/vehicles/2003-nissan-350z-side-profile.png',
+  './assets/art/cars/vehicles/2005-ford-mustang-gt-side-profile.png',
+  './assets/art/cars/vehicles/1998-honda-civic-dx-side-profile.png',
   './assets/art/cars/vehicles/1998-honda-civic-dx-top-down.png',
   './assets/art/cars/vehicles/2003-nissan-350z-top-down.png',
   './assets/art/cars/vehicles/2004-subaru-impreza-wrx-sti-top-down.png',
@@ -50,7 +55,7 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET' || url.origin !== self.location.origin || url.pathname.includes('/api/')) return;
 
   event.respondWith(
-    fetch(request).then((response) => {
+    fetch(request, { cache: 'no-store' }).then((response) => {
       const copy = response.clone();
       caches.open(CACHE).then((cache) => cache.put(request, copy));
       return response;

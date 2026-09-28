@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.2.0-dev.5 playable direction
+## V0.3.0-a playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -89,6 +89,12 @@ The vehicle/engine model now has groundwork for:
 - smaller-engine-in-larger-bay builds without automatically permitting physically absurd large-engine swaps.
 
 Stage 3 is intended to unlock front-half/tube-chassis construction and engine swaps. Stage 4 is intended to widen powertrain/chassis freedom substantially.
+
+### V0.3A starter art contract
+
+All three starter cars now have both a side-profile presentation asset and top-down race asset. Showroom/Garage/Parts never borrow top-down race art; missing side art shows the explicit missing-art marker. Quick Race/race contexts never borrow side-profile art.
+
+Static GitHub Pages development mode also disables/unregisters the offline service worker cache and version-tags authored image URLs, so a normal reload should pull the current build instead of requiring a sign-out/sign-in cycle.
 
 ### Vehicle art pipeline
 

@@ -32,7 +32,10 @@
           "index": 0,
           "columns": 4,
           "rows": 1,
-          "src": "assets/art/cars/vehicles/1998-honda-civic-dx-top-down.png"
+          "src": "assets/art/cars/vehicles/1998-honda-civic-dx-top-down-v03a.png"
+        },
+        "sideProfile": {
+          "src": "assets/art/cars/vehicles/1998-honda-civic-dx-side-profile.png"
         }
       }
     }
@@ -91,7 +94,10 @@
           "index": 3,
           "columns": 4,
           "rows": 1,
-          "src": "assets/art/cars/vehicles/2005-ford-mustang-gt-top-down.png"
+          "src": "assets/art/cars/vehicles/2005-ford-mustang-gt-top-down-v03a.png"
+        },
+        "sideProfile": {
+          "src": "assets/art/cars/vehicles/2005-ford-mustang-gt-side-profile.png"
         }
       }
     }
@@ -130,6 +136,9 @@
           "columns": 4,
           "rows": 1,
           "src": "assets/art/cars/vehicles/2003-nissan-350z-top-down.png"
+        },
+        "sideProfile": {
+          "src": "assets/art/cars/vehicles/2003-nissan-350z-side-profile.png"
         }
       }
     }

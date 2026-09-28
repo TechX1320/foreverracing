@@ -6,7 +6,7 @@ $statusText = $storageMode === 'local' ? 'LOCAL DEV' : 'SERVER';
 $storageText = $storageMode === 'local' ? 'BROWSER LOCAL' : 'PHP / JSON';
 ?>
 <!doctype html>
-<html lang="en" data-storage-mode="<?= $storageMode ?>">
+<html lang="en" data-storage-mode="<?= $storageMode ?>" data-build="<?= $build ?>">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">

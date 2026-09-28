@@ -437,3 +437,16 @@ html[data-reduce-motion="true"] *,html[data-reduce-motion="true"] *::before,html
 .vehicle-missing-art--compact em{display:none}
 .vehicle-missing-art--full{width:150px;height:120px}
 @media(max-width:760px){.vehicle-missing-art--compact{width:54px;height:54px}.vehicle-missing-art--full{width:112px;height:96px}}
+
+
+/* V0.3A strict vehicle view sizing. */
+.vehicle-sprite-image--sideProfile,.vehicle-sprite-image--showroom{width:min(210px,92%);height:auto;max-height:90%;object-fit:contain}
+.vehicle-row__identity .vehicle-sprite-image--sideProfile,.vehicle-row__identity .vehicle-sprite-image--showroom{width:145px;height:auto;max-width:145px}
+.dialog-vehicle .vehicle-sprite-image--showroom{width:min(360px,92%);height:auto;max-height:145px}
+.garage-entry__visual .vehicle-sprite-image--sideProfile,.build-shop-car .vehicle-sprite-image--sideProfile{width:min(245px,92%);height:auto;max-height:125px}
+.vehicle-sprite-image--topDown,.vehicle-sprite-image--racePreview{width:auto;height:145px;max-width:88%}
+@media(max-width:760px){
+  .vehicle-row__identity .vehicle-sprite-image--sideProfile,.vehicle-row__identity .vehicle-sprite-image--showroom{width:115px;max-width:115px}
+  .garage-entry__visual .vehicle-sprite-image--sideProfile,.build-shop-car .vehicle-sprite-image--sideProfile{width:min(190px,90%);max-height:105px}
+  .vehicle-sprite-image--topDown,.vehicle-sprite-image--racePreview{height:108px}
+}

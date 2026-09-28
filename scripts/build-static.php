@@ -5,6 +5,8 @@ const FR_STATIC_BUILD = true;
 
 $root = dirname(__DIR__);
 $docs = $root . '/docs';
+$appConfig = require $root . '/app/config/app.php';
+$build = (string)($appConfig['build'] ?? 'unknown');
 
 function rrmdir(string $path): void
 {
@@ -76,7 +78,9 @@ file_put_contents($docs . '/index.html', $html);
 file_put_contents($docs . '/.nojekyll', "
 ");
 file_put_contents($docs . '/BUILD_INFO.txt', "Generated from shared source for GitHub Pages.
+Build: {$build}
 Storage mode: local
+Offline service worker: disabled in static development mode
 Do not edit docs/ by hand; run php scripts/build-static.php.
 ");
 
