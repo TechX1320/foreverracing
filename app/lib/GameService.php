@@ -409,6 +409,21 @@ final class GameService
         return $player;
     }
 
+    public static function quickRacePreview(): array
+    {
+        $player = self::getPlayer();
+        $carIndex = self::requireOwnedCarIndex($player, (string)($player['selectedCarId'] ?? ''));
+        $car = $player['garage'][$carIndex];
+        $tutorialRace = ($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'first_race';
+
+        return [
+            'carId' => (string)$car['carId'],
+            'carName' => self::carName($car),
+            'opponent' => self::nextOpponentProfile($player, $car, $tutorialRace),
+        ];
+    }
+
+
     public static function startQuickRace(string $distance = '1/4', ?int $timestampMs = null): array
     {
         $activeRace = null;
@@ -445,13 +460,12 @@ final class GameService
             $torque = max(1.0, (float)($car['derived']['torque'] ?? 1));
             $weight = max(500.0, (float)($car['derived']['weight'] ?? 500));
             $grip = max(0.5, (float)($car['derived']['grip'] ?? 1));
-            $pwr = $hp / $weight;
-            $difficulty = $tutorialRace ? self::randomFloat(0.84, 0.89) : self::randomFloat(0.94, 1.08);
-            $opponentWeight = max(1200, (int)round($weight * self::randomFloat(0.90, 1.10)));
-            $opponentHp = max(55, (int)round($pwr * $difficulty * $opponentWeight));
-            $opponentTorque = max(50, (int)round($torque * $difficulty * self::randomFloat(0.93, 1.07)));
-            $opponentGrip = max(0.65, min(1.45, $grip + self::randomFloat(-0.06, 0.06)));
-            $opponentLevel = $tutorialRace ? 1 : max(1, $level + mt_rand(-3, 3));
+            $opponentProfile = self::nextOpponentProfile($player, $car, $tutorialRace);
+            $opponentWeight = (float)$opponentProfile['weight'];
+            $opponentHp = (float)$opponentProfile['hp'];
+            $opponentTorque = (float)$opponentProfile['torque'];
+            $opponentGrip = (float)$opponentProfile['grip'];
+            $opponentLevel = (int)$opponentProfile['level'];
 
             $playerRun = $simulator->simulate([
                 'hp' => $hp, 'torque' => $torque, 'weight' => $weight, 'grip' => $grip, 'level' => $level,
@@ -475,7 +489,7 @@ final class GameService
                 : (int)round(mt_rand(90, 220) * $creditMultiplier);
             $expReward = self::raceExpReward($level, $opponentLevel, $won);
             $repReward = $won ? 5 : 2;
-            $opponentVisual = self::opponentRaceVisual($opponentHp / max(1, $opponentWeight));
+            $opponentVisual = ['name' => (string)$opponentProfile['carName'], 'src' => (string)$opponentProfile['visualSrc']];
             $timeScale = self::raceTimeScale($racingConfig);
             $stagingMs = max(1800.0, (float)($racingConfig['presentation']['stagingMs'] ?? 2800)) * $timeScale;
             $greenAt = $timestampMs + $stagingMs;
@@ -500,7 +514,7 @@ final class GameService
                 'playerVisualSrc' => self::raceVisualSrc($car),
                 'player' => $playerRun,
                 'opponent' => [
-                    'name' => self::opponentName(),
+                    'name' => (string)$opponentProfile['name'],
                     'carName' => $opponentVisual['name'],
                     'visualSrc' => $opponentVisual['src'],
                     'hp' => $opponentHp,
@@ -1054,6 +1068,53 @@ final class GameService
         $sprites = is_array($car['visual']['sprites'] ?? null) ? $car['visual']['sprites'] : [];
         return trim((string)($sprites['racePreview']['src'] ?? $sprites['topDown']['src'] ?? ''));
     }
+
+    private static function nextOpponentProfile(array $player, array $car, bool $tutorialRace = false): array
+    {
+        $hp = max(1.0, (float)($car['derived']['hp'] ?? 1));
+        $torque = max(1.0, (float)($car['derived']['torque'] ?? 1));
+        $weight = max(500.0, (float)($car['derived']['weight'] ?? 500));
+        $grip = max(0.5, (float)($car['derived']['grip'] ?? 1));
+        $level = max(1, (int)($player['progression']['level'] ?? 1));
+        $raceIndex = max(0, (int)($player['stats']['races'] ?? 0));
+        $seedText = implode('|', [
+            (string)($player['user']['id'] ?? 1),
+            (string)($car['carId'] ?? 'car'),
+            (string)$raceIndex,
+            (string)round($hp),
+            (string)round($weight),
+            $tutorialRace ? 'tutorial' : 'normal',
+        ]);
+        $state = (int)sprintf('%u', crc32($seedText));
+        $rand = static function () use (&$state): float {
+            $state = (int)((($state * 1664525) + 1013904223) & 0xFFFFFFFF);
+            return $state / 4294967296.0;
+        };
+        $between = static fn(float $min, float $max): float => $min + ($rand() * ($max - $min));
+
+        $pwr = $hp / $weight;
+        $difficulty = $tutorialRace ? $between(0.84, 0.89) : $between(0.94, 1.08);
+        $opponentWeight = max(1200, (int)round($weight * $between(0.90, 1.10)));
+        $opponentHp = max(55, (int)round($pwr * $difficulty * $opponentWeight));
+        $opponentTorque = max(50, (int)round($torque * $between(0.93, 1.07)));
+        $opponentGrip = max(0.65, min(1.45, $grip + $between(-0.06, 0.06)));
+        $opponentLevel = $tutorialRace ? 1 : max(1, $level + (int)floor($between(-3, 4)));
+        $visual = self::opponentRaceVisual($opponentHp / max(1, $opponentWeight));
+        $names = ['Night Shift', 'Redline', 'The Commuter', 'Left Lane', 'Cut Light', 'Sleeper', 'Boost Leak', 'Test Mule'];
+        $name = $tutorialRace ? 'Test Mule' : $names[min(count($names) - 1, (int)floor($rand() * count($names)))];
+
+        return [
+            'name' => $name,
+            'carName' => (string)$visual['name'],
+            'visualSrc' => (string)$visual['src'],
+            'hp' => $opponentHp,
+            'torque' => $opponentTorque,
+            'weight' => $opponentWeight,
+            'grip' => round($opponentGrip, 3),
+            'level' => $opponentLevel,
+        ];
+    }
+
 
     private static function opponentRaceVisual(float $targetRating): array
     {

@@ -42,11 +42,11 @@ export async function renderSettings(ctx) {
           <div class="split"><div><h3>Vehicle Rendering</h3><p>Authored vehicle art is used whenever it exists. Missing artwork is shown as an explicit ? placeholder so the art backlog is visible during development.</p></div><span class="pill pill--accent">AUTHORED / FALLBACK</span></div>
         </div>
         <div class="game-card">
-          <div class="split"><div><h3>Build & Cached Assets</h3><p>Current build: <strong>${document.documentElement.dataset.build || "unknown"}</strong>. GitHub Pages development mode disables the offline service-worker cache so refreshes pull current assets.</p></div><span class="pill pill--accent">V0.4D</span></div>
+          <div class="split"><div><h3>Build & Cached Assets</h3><p>Current build: <strong>${document.documentElement.dataset.build || "unknown"}</strong>. GitHub Pages development mode disables the offline service-worker cache so refreshes pull current assets.</p></div><span class="pill pill--accent">V0.4E</span></div>
           <div class="game-card__actions"><button class="button button--small" type="button" data-clear-assets>CLEAR CACHED ASSETS</button></div>
         </div>
         <div class="game-card">
-          <h3>Admin / FTUE Development Account</h3>
+          <h3>Admin / Tutorial Development Account</h3>
           <p>Admin is intentionally disposable. SIGN OUT erases the Admin player save so the next login always starts from the beginning. Reset Tutorial remains useful when you want to replay only onboarding without wiping the current garage.</p>
           <div class="game-card__actions"><button class="button button--small" type="button" data-reset-tutorial>RESET TUTORIAL</button></div>
         </div>
@@ -90,7 +90,7 @@ export async function renderSettings(ctx) {
     try {
       const data = await ctx.storage.tutorialReset();
       ctx.store.setPlayer(data.player);
-      ctx.toast("Tutorial reset", "Reloading the FTUE from the Welcome step.");
+      ctx.toast("Tutorial reset", "Reloading the tutorial from the Welcome step.");
       location.hash = "#/home";
       location.reload();
     } catch (err) {

@@ -31,6 +31,7 @@ export class StorageProvider {
   async usedLot() { throw new Error('usedLot() is not implemented.'); }
   async refreshUsedLot() { throw new Error('refreshUsedLot() is not implemented.'); }
   async buyUsedCar(_listingId) { throw new Error('buyUsedCar() is not implemented.'); }
+  async quickRacePreview() { throw new Error('quickRacePreview() is not implemented.'); }
   async startQuickRace(_distance = '1/4') { throw new Error('startQuickRace() is not implemented.'); }
   async finishQuickRace(_raceId) { throw new Error('finishQuickRace() is not implemented.'); }
   async quickRace(_distance = '1/4') { throw new Error('quickRace() is not implemented.'); }

@@ -1,5 +1,18 @@
 # Changelog
 
+## V0.4.0-e — Race Preview and dialog cleanup
+
+- Replaced player-facing FTUE jargon with plain Step / tutorial language.
+- Fixed the shared dialog-shell width mismatch that made Classifieds purchase, Parts purchase and Garage Inventory appear as tiny scrollable windows.
+- Kept wide desktop dialogs fully visible inside the viewport while preserving mobile scrolling when genuinely needed.
+- Added a deterministic next-opponent preview shared by browser-local and PHP runtimes.
+- Quick Race now shows a compact You vs Next Opponent Race Preview instead of a large duplicate current-car panel.
+- The opponent shown before the race is the same generated opponent used when the race starts.
+- Converted the distance controls into the actual Start Race actions and removed the redundant lower race button.
+- Next-race actions therefore remain visible at the top even after a result card is shown.
+- Kept the tutorial first race as a guaranteed clean win; automated tests explicitly verify the win and preview-to-race opponent match.
+- Recent passes remain collapsed by default so race results do not continually grow the page.
+
 ## V0.4.0-d — guided FTUE and progression
 
 - Rebuilt the FTUE as a forced action path instead of a collection of small instructional panels.

@@ -160,7 +160,7 @@ function openCategory(ctx, carId, key) {
     <div class="dialog-body parts-shop-dialog">
       <div class="parts-shop-dialog__titlebar">
         <div>
-          <span class="section-label">${tutorialStep === "buy_first_upgrade" ? "FTUE • BUY THIS PART" : escapeHtml(buildName(Number(car.buildStage || 1)))}</span>
+          <span class="section-label">${tutorialStep === "buy_first_upgrade" ? "STEP 4/6 • BUY THIS PART" : escapeHtml(buildName(Number(car.buildStage || 1)))}</span>
           <h2>${escapeHtml(specs[0]?.category || key)}</h2>
           <p>${escapeHtml(carLabel(car))}</p>
         </div>
@@ -293,13 +293,13 @@ function promptStageConversion(ctx, carId) {
 function tutorialObjective(step, carId) {
   if (step === "buy_first_upgrade") {
     return `<section class="ftue-focus-panel ftue-focus-panel--compact">
-      <div class="ftue-focus-panel__step">FTUE 4/6</div>
+      <div class="ftue-focus-panel__step">STEP 4/6</div>
       <div class="ftue-focus-panel__copy"><span>FIRST MOD</span><strong>Click INTAKE.</strong><p>Everything else is locked. Buy the Stage 1 Intake, then the game will take you directly back to your Garage.</p></div>
       <div class="ftue-focus-panel__arrow">↓ INTAKE IS HIGHLIGHTED</div>
     </section>`;
   }
   if (step === "install_first_upgrade") {
-    return `<div class="objective-box objective-box--active"><div><span class="objective-kicker">FTUE • INSTALL YOUR PART</span><strong>Your new part is in Garage Inventory</strong></div><p>The shop is for buying. Installation and swapping happen on the car itself in the Garage.</p><button class="button button--primary button--small" data-go-install data-car-id="${escapeHtml(carId)}">OPEN GARAGE INVENTORY</button></div>`;
+    return `<div class="objective-box objective-box--active"><div><span class="objective-kicker">STEP 5/6 • INSTALL YOUR PART</span><strong>Your new part is in Garage Inventory</strong></div><p>The shop is for buying. Installation and swapping happen on the car itself in the Garage.</p><button class="button button--primary button--small" data-go-install data-car-id="${escapeHtml(carId)}">OPEN GARAGE INVENTORY</button></div>`;
   }
   return "";
 }

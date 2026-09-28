@@ -67,6 +67,12 @@ player = game.installPart(player, intake1.inventoryId, player.selectedCarId);
 assert.equal(player.garage[0].derived.hp, 109);
 assert.equal(player.tutorial.step, 'first_race');
 
+const firstPreview = game.quickRacePreview(player);
+assert.equal(firstPreview.opponent.name, 'Test Mule');
+assert.ok(firstPreview.opponent.visualSrc);
+assert.ok(firstPreview.opponent.hp > 0);
+assert.ok(firstPreview.opponent.weight > 0);
+
 const firstStart = game.startQuickRace(player, '1/4', 1_000_000);
 player = firstStart.player;
 assert.ok(player.activeRace);
@@ -78,6 +84,12 @@ assert.ok(firstStart.activeRace.race.player?.trapSpeed > 0);
 assert.equal(firstStart.activeRace.race.player?.foul, false);
 assert.equal(firstStart.activeRace.race.opponent?.foul, false);
 assert.equal(firstStart.activeRace.race.won, true);
+assert.equal(firstStart.activeRace.race.opponent?.name, firstPreview.opponent.name);
+assert.equal(firstStart.activeRace.race.opponent?.carName, firstPreview.opponent.carName);
+assert.equal(firstStart.activeRace.race.opponent?.hp, firstPreview.opponent.hp);
+assert.equal(firstStart.activeRace.race.opponent?.torque, firstPreview.opponent.torque);
+assert.equal(firstStart.activeRace.race.opponent?.weight, firstPreview.opponent.weight);
+assert.equal(firstStart.activeRace.race.opponent?.grip, firstPreview.opponent.grip);
 assert.ok(firstStart.activeRace.race.playerVisualSrc);
 assert.ok(firstStart.activeRace.race.opponent?.visualSrc);
 assert.equal(player.stats.races, 0);
@@ -194,4 +206,4 @@ assert.ok(player.roguelike.activeRun);
 const step = game.roguelikeStep(player, 'safe');
 assert.ok(step.step && typeof step.step.won === 'boolean');
 
-console.log('V0.4D guided FTUE + progression gates + Garage Inventory + Classifieds local game flow test passed.');
+console.log('V0.4E guided tutorial + deterministic race preview + progression local game flow test passed.');
