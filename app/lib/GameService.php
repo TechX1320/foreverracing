@@ -554,7 +554,13 @@ final class GameService
         $car['factoryEngineId'] = $car['factoryEngineId'] ?? ($spec['factoryEngineId'] ?? null);
         $car['engineId'] = $car['engineId'] ?? $car['factoryEngineId'];
         $car['engineBay'] = $car['engineBay'] ?? ($spec['engineBay'] ?? null);
-        $car['visual'] = $car['visual'] ?? ($spec['visual'] ?? ['profile' => 'sedan', 'color' => '#78838d']);
+        $catalogVisual = is_array($spec['visual'] ?? null) ? $spec['visual'] : ['profile' => 'sedan', 'color' => '#78838d'];
+        $savedVisual = is_array($car['visual'] ?? null) ? $car['visual'] : [];
+        $car['visual'] = array_replace($catalogVisual, $savedVisual);
+        $car['visual']['sprites'] = array_replace(
+            is_array($catalogVisual['sprites'] ?? null) ? $catalogVisual['sprites'] : [],
+            is_array($savedVisual['sprites'] ?? null) ? $savedVisual['sprites'] : []
+        );
         return $car;
     }
 
