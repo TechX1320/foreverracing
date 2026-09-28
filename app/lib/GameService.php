@@ -369,6 +369,10 @@ final class GameService
         }
 
         $player = self::mutatePlayer(function (array $player) use ($listing, $spec): array {
+            $tutorialStarter = ($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'buy_first_car';
+            if ($tutorialStarter && (empty($spec['starter']) || strtoupper((string)($spec['class'] ?? '')) !== 'D')) {
+                throw new GameException('Your first car must be one of the highlighted D Class starter listings.');
+            }
             $price = (int)$listing['price'];
             self::requireCredits($player, $price);
             $player['wallet']['credits'] -= $price;
@@ -385,6 +389,9 @@ final class GameService
                 $player['selectedCarId'] = $car['carId'];
             }
             self::addTransaction($player, 'used_purchase', -$price, $car['displayName']);
+            if ($tutorialStarter) {
+                self::completeTutorialStep($player, 'buy_first_car', 'visit_garage');
+            }
             return $player;
         });
 
@@ -872,17 +879,18 @@ final class GameService
             return ['generatedAt' => $now, 'expiresAt' => $now + $refresh, 'listings' => []];
         }
 
-        $listings = [];
-        $count = min(8, max(4, count($candidates)));
-        for ($i = 0; $i < $count; $i++) {
-            $spec = $candidates[array_rand($candidates)];
-            $mileage = mt_rand(2800, 195000);
-            $condition = mt_rand(58, 98);
+        $makeListing = function (array $spec, bool $starterListing = false): array {
+            $mileage = $starterListing ? mt_rand(105000, 190000) : mt_rand(2800, 195000);
+            $condition = $starterListing ? mt_rand(62, 79) : mt_rand(58, 98);
             $mileageFactor = max(0.46, 1.0 - ($mileage / 330000));
             $conditionFactor = 0.42 + (0.58 * pow($condition / 100.0, 1.7));
             $price = (int)round(((int)$spec['price']) * $mileageFactor * $conditionFactor / 50) * 50;
+            if ($starterListing) {
+                $price = min(8500, max(2500, (int)round(($price * 0.82) / 50) * 50));
+            }
             $price = max(1200, $price);
-            $listings[] = [
+
+            return [
                 'listingId' => self::id('used'),
                 'stockId' => (int)$spec['stockId'],
                 'price' => $price,
@@ -891,7 +899,19 @@ final class GameService
                 'basePrice' => (int)$spec['price'],
                 'mileageFactor' => round($mileageFactor, 3),
                 'conditionFactor' => round($conditionFactor, 3),
+                'starterListing' => $starterListing,
             ];
+        };
+
+        $starters = array_slice(array_values(array_filter(
+            $candidates,
+            fn(array $spec): bool => !empty($spec['starter']) && strtoupper((string)($spec['class'] ?? '')) === 'D'
+        )), 0, 3);
+
+        $listings = array_map(fn(array $spec): array => $makeListing($spec, true), $starters);
+        while (count($listings) < 8) {
+            $spec = $candidates[array_rand($candidates)];
+            $listings[] = $makeListing($spec, false);
         }
 
         return ['generatedAt' => $now, 'expiresAt' => $now + $refresh, 'listings' => $listings];
