@@ -1026,3 +1026,162 @@ dialog.fr-dialog:has(.garage-inventory-dialog){
   .classified-price-breakdown{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
+/* Quick Race matchup preview: distance controls are the race actions. */
+.race-distance-tabs--actions{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin-bottom:10px;
+}
+.race-distance-tabs--actions .race-distance-button{
+  width:100%;
+  min-width:0;
+  min-height:58px;
+}
+.race-distance-button--start b{font-size:15px}
+.race-distance-button--start span{font-size:11px!important}
+.race-preview-card{
+  border:1px solid var(--border);
+  background:#111416;
+  margin-top:10px;
+}
+.race-preview-card__heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:9px 12px;
+  border-bottom:1px solid var(--border);
+}
+.race-preview-card__heading h3{margin:2px 0 0;font-size:18px}
+.race-preview-card__level{
+  color:var(--faint);
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.06em;
+}
+.race-preview-matchup{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 52px minmax(0,1fr);
+  align-items:stretch;
+}
+.race-preview-vs{
+  display:grid;
+  place-items:center;
+  border-inline:1px solid var(--border);
+  color:var(--accent-2);
+  font-size:17px;
+  font-weight:950;
+  letter-spacing:.08em;
+  background:#0d0f11;
+}
+.race-preview-driver{
+  display:grid;
+  grid-template-columns:132px minmax(0,1fr);
+  grid-template-rows:auto auto;
+  gap:0 12px;
+  padding:10px 12px;
+  min-height:150px;
+}
+.race-preview-driver__visual{
+  grid-row:1/3;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+  overflow:visible;
+}
+.race-preview-driver__visual .vehicle-visual{height:126px;overflow:visible}
+.race-preview-driver__visual .vehicle-sprite-image--racePreview,
+.race-preview-driver__visual .vehicle-sprite-image--topDown{
+  height:122px;
+  width:auto;
+  max-width:110px;
+}
+.race-preview-opponent-image{
+  display:block;
+  height:122px;
+  width:auto;
+  max-width:110px;
+  object-fit:contain;
+  image-rendering:auto;
+}
+.race-preview-opponent-placeholder{
+  display:grid;
+  place-items:center;
+  width:84px;
+  height:112px;
+  border:1px dashed #46505a;
+  color:var(--faint);
+  font-size:28px;
+}
+.race-preview-driver__identity{
+  align-self:end;
+  min-width:0;
+  padding-bottom:7px;
+}
+.race-preview-driver__identity>span{
+  display:block;
+  color:var(--accent-2);
+  font-size:11px;
+  font-weight:950;
+  letter-spacing:.08em;
+}
+.race-preview-driver__identity>strong{
+  display:block;
+  margin-top:2px;
+  font-size:17px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.race-preview-driver__identity>small{
+  display:block;
+  margin-top:2px;
+  color:var(--muted);
+  font-size:11px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.race-preview-driver__stats{
+  align-self:start;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  border-top:1px solid var(--border);
+}
+.race-preview-driver__stats>span{
+  min-width:0;
+  padding:7px 6px 0 0;
+}
+.race-preview-driver__stats small{
+  display:block;
+  color:var(--faint);
+  font-size:10px;
+  font-weight:900;
+}
+.race-preview-driver__stats b{
+  display:block;
+  margin-top:1px;
+  font-size:12px;
+  white-space:nowrap;
+}
+.race-preview-loading{
+  grid-column:1/-1;
+  color:var(--faint);
+  font-size:11px;
+  font-weight:900;
+}
+.race-result-card{margin-top:0;margin-bottom:10px}
+
+@media(max-width:900px){
+  .race-preview-matchup{grid-template-columns:1fr}
+  .race-preview-vs{border-inline:0;border-block:1px solid var(--border);min-height:34px}
+}
+@media(max-width:760px){
+  .race-distance-tabs--actions{grid-template-columns:1fr}
+  .race-preview-driver{grid-template-columns:110px minmax(0,1fr)}
+  .race-preview-driver__stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .race-preview-card__heading{align-items:flex-start}
+}
+
