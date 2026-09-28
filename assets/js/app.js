@@ -70,7 +70,11 @@ document.addEventListener('click', (event) => {
   const route = nav.dataset.nav || 'home';
   if (!routeAllowed(store.player, route)) {
     event.preventDefault();
-    toast('Tutorial objective first', 'Finish the highlighted FTUE step before opening that section.');
+    if (store.player?.activeRace) {
+      toast('Race in progress', 'Finish the active pass before leaving the track.');
+    } else {
+      toast('Tutorial objective first', 'Finish the highlighted FTUE step before opening that section.');
+    }
     return;
   }
   if (!nav.disabled) router.navigate(route);
@@ -101,8 +105,12 @@ async function enterGame(session) {
   storage.setCsrf(session.csrf);
   store.setPlayer(session.player);
   appRoot.hidden = false;
+  if (session.player?.activeRace && router.current() !== 'quick-race') {
+    history.replaceState(null, '', '#/quick-race');
+  } else if (!location.hash) {
+    history.replaceState(null, '', '#/home');
+  }
   router.start();
-  if (!location.hash) router.navigate('home', { replace: true });
   if (session.player?.tutorial?.status === 'active' && session.player?.tutorial?.step === 'welcome') {
     scheduleWelcomeTutorial();
   }
@@ -288,6 +296,7 @@ function renderObjectiveRail(player) {
 }
 
 function routeAllowed(player, route) {
+  if (player?.activeRace && route !== 'quick-race') return false;
   const tutorial = player?.tutorial;
   if (tutorial?.status !== 'active') return true;
   const allowed = TUTORIAL_ROUTES[tutorial.step] || ['home', 'settings'];
@@ -310,7 +319,7 @@ function objectiveInfo(step) {
     buy_first_upgrade: { code: 'FTUE 4/7', title: 'Buy an upgrade', copy: 'The Parts screen shows exactly what the upgrade will change.', action: 'OPEN PARTS', route: 'parts' },
     install_first_upgrade: { code: 'FTUE 5/7', title: 'Install the part', copy: 'Purchased parts do not affect the car until installed.', action: 'OPEN PARTS', route: 'parts' },
     build_stages: { code: 'FTUE 6/7', title: 'Understand Build Stages', copy: 'See how Stage 1 grows into street-race and full-race builds.', action: 'OPEN PARTS', route: 'parts' },
-    first_race: { code: 'FTUE 7/7', title: 'Run your first race', copy: 'Put the build into the current text race simulation.', action: 'QUICK RACE', route: 'quick-race' }
+    first_race: { code: 'FTUE 7/7', title: 'Run your first race', copy: 'Stage the car, watch the tree, and let the first animated pass run to the finish.', action: 'QUICK RACE', route: 'quick-race' }
   };
   return map[step] || { code: 'FTUE', title: 'Continue', copy: 'Follow the highlighted game action.', action: '', route: '' };
 }

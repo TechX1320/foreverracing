@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.3.0-b playable direction
+## V0.4.0-a playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -89,6 +89,22 @@ The vehicle/engine model now has groundwork for:
 - smaller-engine-in-larger-bay builds without automatically permitting physically absurd large-engine swaps.
 
 Stage 3 is intended to unlock front-half/tube-chassis construction and engine swaps. Stage 4 is intended to widen powertrain/chassis freedom substantially.
+
+### V0.4A — real-time race presentation
+
+V0.4A makes automated racing feel like an actual event instead of an instant API result.
+
+- Starting a race creates one persistent `activeRace` instead of immediately granting rewards.
+- A blocking race dialog takes over the game while the pass is running.
+- The presentation includes pre-stage/stage, a drag tree, green/red-light state, two top-down cars moving down the strip, live progress bars and a race clock.
+- The animation runs for the simulated race duration at 1× time by default; a quarter-mile pass therefore takes roughly the amount of time represented by its reaction time + ET, plus staging.
+- Credits, EXP, REP, race history and per-car records are committed only after the stored finish timestamp.
+- Repeated clicks cannot create multiple races. Starting again while a pass is active returns the same race.
+- Refreshing or reopening the game during a pass resumes the stored race rather than generating a new result.
+- While an active race exists, routing is locked to Quick Race so the race cannot be bypassed by changing screens.
+- The timing slip is revealed only after both cars reach the finish, then the player explicitly returns to the pits.
+
+The presentation is deliberately separate from the simulation. Future launch/shift/NOS input can drive the same race state without replacing the persistence or results model.
 
 ### V0.3B — TextTuned race core
 
@@ -220,8 +236,8 @@ PRs run the `Validate Forever Racing` workflow. It checks:
 PHP syntax
 JavaScript syntax
 case-insensitive server login
-browser-local FTUE + Build Stage + multi-distance race flow
-authenticated PHP API FTUE + duplicate-session + Admin-reset flow
+browser-local FTUE + Build Stage + two-phase animated race lifecycle
+authenticated PHP API FTUE + duplicate-session + delayed race finish + Admin-reset flow
 GitHub Pages static build generation
 static-build/module smoke tests
 ```

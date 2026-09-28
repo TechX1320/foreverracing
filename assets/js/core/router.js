@@ -30,6 +30,12 @@ export class Router {
 
   async render(name = this.current()) {
     const route = this.#routes.has(name) ? name : "home";
+    const activeRace = this.#context?.store?.player?.activeRace;
+    if (activeRace && route !== "quick-race" && this.#routes.has("quick-race")) {
+      const hash = "#/quick-race";
+      if (location.hash !== hash) history.replaceState(null, "", hash);
+      return this.render("quick-race");
+    }
     const renderer = this.#routes.get(route);
     if (!renderer) return;
 
