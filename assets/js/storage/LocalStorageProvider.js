@@ -152,6 +152,11 @@ export class LocalStorageProvider extends StorageProvider {
     return { ok: true, player: result.player };
   }
 
+  async quickRacePreview() {
+    await this.#ready();
+    return { ok: true, preview: this.#service.quickRacePreview(this.#loadPlayer()) };
+  }
+
   async startQuickRace(distance = '1/4') {
     await this.#ready();
     const result = this.#service.startQuickRace(this.#loadPlayer(), distance, Date.now());
