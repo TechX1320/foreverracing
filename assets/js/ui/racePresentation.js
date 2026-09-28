@@ -14,124 +14,125 @@ export function playRacePresentation(ctx, activeRace) {
   return promise;
 }
 
-async function runPresentation(ctx, activeRace) {
-  const race = activeRace.race || {};
-  const dialog = document.createElement("dialog");
-  dialog.className = "race-playback-dialog";
-  dialog.setAttribute("aria-label", "Race in progress");
-  dialog.innerHTML = playbackMarkup(activeRace);
-  document.body.appendChild(dialog);
+function runPresentation(ctx, activeRace) {
+  return new Promise((resolve, reject) => {
+    const race = activeRace.race || {};
+    const dialog = document.createElement("dialog");
+    dialog.className = "race-playback-dialog";
+    dialog.setAttribute("aria-label", "Race in progress");
+    dialog.innerHTML = playbackMarkup(activeRace);
+    document.body.appendChild(dialog);
 
-  const closeGuard = (event) => event.preventDefault();
-  dialog.addEventListener("cancel", closeGuard);
-  dialog.showModal();
+    const closeGuard = (event) => event.preventDefault();
+    dialog.addEventListener("cancel", closeGuard);
+    dialog.showModal();
 
-  const playerCar = dialog.querySelector("[data-race-player-car]");
-  const opponentCar = dialog.querySelector("[data-race-opponent-car]");
-  const playerBar = dialog.querySelector("[data-race-player-progress]");
-  const opponentBar = dialog.querySelector("[data-race-opponent-progress]");
-  const clock = dialog.querySelector("[data-race-clock]");
-  const phase = dialog.querySelector("[data-race-phase]");
-  const liveStatus = dialog.querySelector("[data-race-live-status]");
-  const tree = dialog.querySelector("[data-race-tree]");
-  const resultWrap = dialog.querySelector("[data-race-final]");
-  const trackWrap = dialog.querySelector("[data-race-track-wrap]");
-  const continueButton = dialog.querySelector("[data-race-continue]");
+    const playerCar = dialog.querySelector("[data-race-player-car]");
+    const opponentCar = dialog.querySelector("[data-race-opponent-car]");
+    const playerBar = dialog.querySelector("[data-race-player-progress]");
+    const opponentBar = dialog.querySelector("[data-race-opponent-progress]");
+    const clock = dialog.querySelector("[data-race-clock]");
+    const phase = dialog.querySelector("[data-race-phase]");
+    const liveStatus = dialog.querySelector("[data-race-live-status]");
+    const tree = dialog.querySelector("[data-race-tree]");
+    const resultWrap = dialog.querySelector("[data-race-final]");
+    const trackWrap = dialog.querySelector("[data-race-track-wrap]");
+    const continueButton = dialog.querySelector("[data-race-continue]");
 
-  const timeScale = Math.max(0.01, Number(activeRace.timeScale || 1));
-  const startedAt = Number(activeRace.startedAt || Date.now());
-  const greenAt = Number(activeRace.greenAt || startedAt);
-  const finishAt = Number(activeRace.finishAt || greenAt);
-  const playerRun = race.player || {};
-  const opponentRun = race.opponent || {};
-  const playerStart = greenAt + (Number(playerRun.reactionTime || 0) * 1000 * timeScale);
-  const opponentStart = greenAt + (Number(opponentRun.reactionTime || 0) * 1000 * timeScale);
-  const playerFinish = playerStart + (Math.max(0.1, Number(playerRun.elapsedTime || 0)) * 1000 * timeScale);
-  const opponentFinish = opponentStart + (Math.max(0.1, Number(opponentRun.elapsedTime || 0)) * 1000 * timeScale);
-  const progressExponent = Math.max(1, Number(ctx.store?.racingPresentation?.progressExponent || 1.38));
-
-  let frame = 0;
-  let settled = false;
-
-  const animate = () => {
-    const now = Date.now();
-    updateTree(tree, phase, now, startedAt, greenAt, race);
-    const p = raceProgress(now, playerStart, playerFinish, progressExponent);
-    const o = raceProgress(now, opponentStart, opponentFinish, progressExponent);
-    setProgress(playerCar, playerBar, p);
-    setProgress(opponentCar, opponentBar, o);
-
-    const simSeconds = Math.max(0, (now - greenAt) / (1000 * timeScale));
-    clock.textContent = simSeconds > 0 ? simSeconds.toFixed(2) : "0.00";
-    liveStatus.textContent = liveRaceStatus(now, greenAt, playerFinish, opponentFinish, playerRun, opponentRun);
-
-    if (now < finishAt) {
-      frame = requestAnimationFrame(animate);
-      return;
-    }
-    setProgress(playerCar, playerBar, 1);
-    setProgress(opponentCar, opponentBar, 1);
-    phase.textContent = "FINISH";
-    liveStatus.textContent = "PASS COMPLETE • VERIFYING TIMING SLIP";
-    trackWrap.classList.add("is-finished");
-    settleRace();
-  };
-
-  const settleRace = async () => {
-    if (settled) return;
-    settled = true;
+    const timeScale = Math.max(0.01, Number(activeRace.timeScale || 1));
+    const startedAt = Number(activeRace.startedAt || Date.now());
+    const greenAt = Number(activeRace.greenAt || startedAt);
+    const finishAt = Number(activeRace.finishAt || greenAt);
+    const playerRun = race.player || {};
+    const opponentRun = race.opponent || {};
+    const playerStart = greenAt + (Number(playerRun.reactionTime || 0) * 1000 * timeScale);
+    const opponentStart = greenAt + (Number(opponentRun.reactionTime || 0) * 1000 * timeScale);
+    const playerFinish = playerStart + (Math.max(0.1, Number(playerRun.elapsedTime || 0)) * 1000 * timeScale);
+    const opponentFinish = opponentStart + (Math.max(0.1, Number(opponentRun.elapsedTime || 0)) * 1000 * timeScale);
+    const progressExponent = Math.max(1, Number(activeRace.progressExponent || 1.38));
     const revealDelay = Math.max(0, Number(activeRace.revealDelayMs || 650)) * timeScale;
-    if (revealDelay > 0) await sleep(revealDelay);
 
-    let finalized;
-    for (let attempt = 0; attempt < 12; attempt += 1) {
-      try {
-        finalized = await ctx.storage.finishQuickRace(activeRace.raceId);
-        break;
-      } catch (error) {
-        if (Number(error?.status) !== 409 || attempt === 11) throw error;
-        await sleep(125);
-      }
-    }
+    let frame = 0;
+    let settling = false;
+    let closed = false;
 
-    ctx.store.setPlayer(finalized.player);
-    resultWrap.innerHTML = finalResultMarkup(finalized.race);
-    resultWrap.hidden = false;
-    trackWrap.classList.add("has-results");
-    liveStatus.textContent = finalized.race?.won ? "WIN • TIMING SLIP READY" : "LOSS • TIMING SLIP READY";
-    continueButton.hidden = false;
-    continueButton.focus();
-
-    await new Promise((resolve) => continueButton.addEventListener("click", resolve, { once: true }));
-    dialog.close();
-    dialog.removeEventListener("cancel", closeGuard);
-    dialog.remove();
-    return finalized;
-  };
-
-  const playbackPromise = new Promise((resolve, reject) => {
-    const originalSettle = settleRace;
-    settleRace = async () => {
-      try {
-        const result = await originalSettle();
-        resolve(result);
-      } catch (error) {
-        reject(error);
+    const cleanup = () => {
+      if (closed) return;
+      closed = true;
+      if (frame) cancelAnimationFrame(frame);
+      dialog.removeEventListener("cancel", closeGuard);
+      if (dialog.isConnected) {
+        try { dialog.close(); } catch {}
+        dialog.remove();
       }
     };
+
+    const fail = (error) => {
+      cleanup();
+      reject(error);
+    };
+
+    const settleRace = async () => {
+      if (settling) return;
+      settling = true;
+      try {
+        if (revealDelay > 0) await sleep(revealDelay);
+
+        let finalized;
+        for (let attempt = 0; attempt < 12; attempt += 1) {
+          try {
+            finalized = await ctx.storage.finishQuickRace(activeRace.raceId);
+            break;
+          } catch (error) {
+            if (Number(error?.status) !== 409 || attempt === 11) throw error;
+            await sleep(125);
+          }
+        }
+
+        ctx.store.setPlayer(finalized.player);
+        resultWrap.innerHTML = finalResultMarkup(finalized.race);
+        resultWrap.hidden = false;
+        trackWrap.classList.add("has-results");
+        liveStatus.textContent = finalized.race?.won ? "WIN • TIMING SLIP READY" : "LOSS • TIMING SLIP READY";
+        continueButton.hidden = false;
+        continueButton.focus();
+
+        continueButton.addEventListener("click", () => {
+          cleanup();
+          resolve(finalized);
+        }, { once: true });
+      } catch (error) {
+        fail(error);
+      }
+    };
+
+    const animate = () => {
+      const now = Date.now();
+      updateTree(tree, phase, now, startedAt, greenAt, race);
+      const p = raceProgress(now, playerStart, playerFinish, progressExponent);
+      const o = raceProgress(now, opponentStart, opponentFinish, progressExponent);
+      setProgress(playerCar, playerBar, p);
+      setProgress(opponentCar, opponentBar, o);
+
+      const simSeconds = Math.max(0, (now - greenAt) / (1000 * timeScale));
+      clock.textContent = simSeconds > 0 ? simSeconds.toFixed(2) : "0.00";
+      liveStatus.textContent = liveRaceStatus(now, greenAt, playerFinish, opponentFinish, playerRun, opponentRun);
+
+      if (now < finishAt) {
+        frame = requestAnimationFrame(animate);
+        return;
+      }
+
+      setProgress(playerCar, playerBar, 1);
+      setProgress(opponentCar, opponentBar, 1);
+      phase.textContent = "FINISH";
+      liveStatus.textContent = "PASS COMPLETE • VERIFYING TIMING SLIP";
+      trackWrap.classList.add("is-finished");
+      void settleRace();
+    };
+
+    frame = requestAnimationFrame(animate);
   });
-
-  frame = requestAnimationFrame(animate);
-
-  try {
-    return await playbackPromise;
-  } finally {
-    if (frame) cancelAnimationFrame(frame);
-    if (dialog.isConnected) {
-      try { dialog.close(); } catch {}
-      dialog.remove();
-    }
-  }
 }
 
 function playbackMarkup(activeRace) {
