@@ -37,7 +37,7 @@ const TUTORIAL_ROUTES = {
   visit_garage: ['home', 'garage', 'settings'],
   buy_first_upgrade: ['home', 'garage', 'parts', 'settings'],
   install_first_upgrade: ['home', 'garage', 'parts', 'settings'],
-  build_stages: ['home', 'garage', 'parts', 'settings'],
+  build_stages: ['home', 'garage', 'parts', 'quick-race', 'settings'],
   first_race: ['home', 'garage', 'parts', 'quick-race', 'settings']
 };
 
@@ -242,18 +242,14 @@ function feature(renderer) {
 
 function renderChrome(player) {
   if (!player) return;
-  const current = selectedCar(player);
-  setText('playerName', player.user?.username || 'Admin');
-  setText('statCredits', money(player.wallet?.credits || 0));
-  setText('statLevel', player.progression?.level || 1);
-  setText('statExp', player.progression?.exp || 0);
-  setText('statRep', player.progression?.rep || 0);
-  setText('currentCarName', current ? carLabel(current) : 'None');
-  setText('currentStage', current ? `S${Number(current.buildStage || 1)}` : '-');
-  setText('statusHp', current ? current.derived?.hp || 0 : '-');
-  setText('statusWeight', current ? current.derived?.weight || 0 : '-');
+  setText('railPlayerName', player.user?.username || 'Admin');
+  setText('railCredits', money(player.wallet?.credits || 0));
+  setText('railLevel', player.progression?.level || 1);
+  setText('railExp', player.progression?.exp || 0);
+  setText('railRep', player.progression?.rep || 0);
   renderObjectiveRail(player);
   applyTutorialNavigation(player);
+  applyNavigationVisibility(player);
 }
 
 function renderHomeOverview(player) {
@@ -267,13 +263,13 @@ function renderHomeOverview(player) {
 
   if (visual) visual.innerHTML = current ? renderVehicle(current, { stage: Number(current.buildStage || 1), view: 'showroom' }) : '<div class="no-car-visual">NO CURRENT CAR</div>';
   if (name) name.textContent = current ? carLabel(current) : 'No current car';
-  if (factory) factory.textContent = current ? current.displayName : 'Visit the Showroom to start a build.';
+  if (factory) factory.textContent = current ? current.displayName : 'Choose a starter car to begin your first build.';
   if (stats) stats.innerHTML = current
     ? `<span><b>${current.derived?.hp || 0}</b> HP</span><span><b>${current.derived?.torque || 0}</b> LB-FT</span><span><b>${current.derived?.weight || 0}</b> LB</span><span><b>${current.base?.drivetrain || '-'}</b> DRIVE</span>`
     : '<span><b>-</b> HP</span><span><b>-</b> LB-FT</span><span><b>-</b> LB</span><span><b>-</b> DRIVE</span>';
   if (build) build.innerHTML = current
-    ? `<b>BUILD STAGE ${Number(current.buildStage || 1)}</b><span>${stageName(Number(current.buildStage || 1))}</span>`
-    : '<b>BUILD STAGE -</b><span>No active build.</span>';
+    ? `<b>BUILD TYPE</b><span>${stageName(Number(current.buildStage || 1))}</span>`
+    : '<b>BUILD TYPE</b><span>No active build.</span>';
 
   if (activity) {
     const rows = [...(player.transactions || [])].slice(-6).reverse();
@@ -311,21 +307,28 @@ function applyTutorialNavigation(player) {
   });
 }
 
+function applyNavigationVisibility(player) {
+  const showroom = document.querySelector('.nav-rail button[data-nav="showroom"]');
+  if (!showroom) return;
+  const tutorialNeedsShowroom = player?.tutorial?.status === 'active' && player?.tutorial?.step === 'buy_first_car';
+  showroom.hidden = !tutorialNeedsShowroom;
+}
+
 function objectiveInfo(step) {
   const map = {
-    welcome: { code: 'FTUE 1/7', title: 'Start the tutorial', copy: 'A short introduction will explain the core loop.', action: '', route: '' },
-    buy_first_car: { code: 'FTUE 2/7', title: 'Choose your first car', copy: 'Pick one of the three starter platforms in the Showroom.', action: 'OPEN SHOWROOM', route: 'showroom' },
-    visit_garage: { code: 'FTUE 3/7', title: 'Read your car', copy: 'Visit the Garage and learn the stats and Build Stage.', action: 'OPEN GARAGE', route: 'garage' },
-    buy_first_upgrade: { code: 'FTUE 4/7', title: 'Buy an upgrade', copy: 'The Parts screen shows exactly what the upgrade will change.', action: 'OPEN PARTS', route: 'parts' },
-    install_first_upgrade: { code: 'FTUE 5/7', title: 'Install the part', copy: 'Purchased parts do not affect the car until installed.', action: 'OPEN PARTS', route: 'parts' },
-    build_stages: { code: 'FTUE 6/7', title: 'Understand Build Stages', copy: 'See how Stage 1 grows into street-race and full-race builds.', action: 'OPEN PARTS', route: 'parts' },
-    first_race: { code: 'FTUE 7/7', title: 'Run your first race', copy: 'Stage the car, watch the tree, and let the first animated pass run to the finish.', action: 'QUICK RACE', route: 'quick-race' }
+    welcome: { code: 'FTUE 1/6', title: 'Start the tutorial', copy: 'A short introduction will explain the core loop.', action: '', route: '' },
+    buy_first_car: { code: 'FTUE 2/6', title: 'Choose your first car', copy: 'Pick one of the three starter platforms in the Showroom.', action: 'OPEN SHOWROOM', route: 'showroom' },
+    visit_garage: { code: 'FTUE 3/6', title: 'Read your car', copy: 'Visit the Garage and learn the car stats and Build Type.', action: 'OPEN GARAGE', route: 'garage' },
+    buy_first_upgrade: { code: 'FTUE 4/6', title: 'Buy an upgrade', copy: 'Open a Parts category and buy the first Street Car upgrade.', action: 'OPEN PARTS', route: 'parts' },
+    install_first_upgrade: { code: 'FTUE 5/6', title: 'Install the part', copy: 'Open Garage Inventory and install the part you just bought.', action: 'OPEN GARAGE', route: 'garage' },
+    build_stages: { code: 'FTUE 6/6', title: 'Run your first race', copy: 'Build-type conversion will be introduced later when the Street Car is actually complete.', action: 'QUICK RACE', route: 'quick-race' },
+    first_race: { code: 'FTUE 6/6', title: 'Run your first race', copy: 'Stage the car, watch the tree, and let the first animated pass run to the finish.', action: 'QUICK RACE', route: 'quick-race' }
   };
   return map[step] || { code: 'FTUE', title: 'Continue', copy: 'Follow the highlighted game action.', action: '', route: '' };
 }
 
 function stageName(stage) {
-  return ({ 1: 'Street / Stock Chassis', 2: 'Street Race', 3: 'Front-Half / Tube Chassis', 4: 'Full Race Car' })[stage] || 'Unknown';
+  return ({ 1: 'Street Car', 2: 'Street Race Car', 3: 'Front-Half Race Car', 4: 'Full Race Car' })[stage] || 'Unknown';
 }
 
 function setText(id, value) {
