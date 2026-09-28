@@ -78,7 +78,7 @@ echo "$PLAYER" | jq -e '.player.tutorial.step == "buy_first_car"' >/dev/null
 
 LOT="$(curl -sS -b "$COOKIE" "http://127.0.0.1:$PORT/api/usedlot/listings.php")"
 echo "$LOT" | jq -e '[.lot.listings[] | select(.starterListing == true)] | length == 3' >/dev/null
-echo "$LOT" | jq -e '[.lot.listings[] | select(.starterListing == true) as $listing | .cars[] | select(.stockId == $listing.stockId) | select(.starter == true and .class == "D")] | length == 3' >/dev/null
+echo "$LOT" | jq -e '. as $root | [.lot.listings[] | select(.starterListing == true) as $listing | $root.cars[] | select(.stockId == $listing.stockId) | select(.starter == true and .class == "D")] | length == 3' >/dev/null
 STARTER_LISTING_ID="$(echo "$LOT" | jq -r '.lot.listings[] | select(.starterListing == true and .stockId == 1) | .listingId' | head -n1)"
 if [[ -z "$STARTER_LISTING_ID" || "$STARTER_LISTING_ID" == "null" ]]; then
   echo "Civic starter listing was not generated." >&2
