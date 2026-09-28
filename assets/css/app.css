@@ -978,3 +978,51 @@ body{font-size:16px;line-height:1.5}
   .race-car-panel .spec-grid{grid-template-columns:repeat(2,1fr)}
 }
 
+/* V0.4E dialog shell and race preview
+   Content bodies no longer exceed the shared 560px dialog shell. */
+.dialog-body{box-sizing:border-box;width:100%}
+dialog.fr-dialog:has(.classified-detail-dialog){
+  width:min(860px,calc(100vw - 32px));
+  max-height:calc(100dvh - 32px);
+  overflow:hidden;
+}
+dialog.fr-dialog:has(.parts-shop-dialog){
+  width:min(800px,calc(100vw - 32px));
+  max-height:calc(100dvh - 32px);
+  overflow:hidden;
+}
+dialog.fr-dialog:has(.garage-inventory-dialog){
+  width:min(780px,calc(100vw - 32px));
+  max-height:calc(100dvh - 32px);
+  overflow:hidden;
+}
+.classified-detail-dialog,.parts-shop-dialog,.garage-inventory-dialog{
+  width:100%;
+  max-width:none;
+  max-height:none;
+  overflow:visible;
+}
+.classified-detail-dialog__hero{grid-template-columns:260px 1fr}
+.classified-detail-dialog__hero .dialog-vehicle{height:126px}
+.classified-detail-price{font-size:20px}
+.classified-price-breakdown{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0}
+.classified-price-breakdown>div{min-height:58px}
+.classified-price-breakdown>p{grid-column:1/-1;margin:8px 0 0}
+.classified-detail-balance{margin-top:8px}
+.classified-detail-note{margin:8px 0}
+.parts-shop-dialog__note{margin-top:7px}
+.garage-inventory-dialog__titlebar{min-height:116px}
+
+@media(max-width:760px){
+  dialog.fr-dialog:has(.classified-detail-dialog),
+  dialog.fr-dialog:has(.parts-shop-dialog),
+  dialog.fr-dialog:has(.garage-inventory-dialog){
+    width:calc(100vw - 10px);
+    max-height:calc(100dvh - 10px);
+    overflow:auto;
+  }
+  .classified-detail-dialog,.parts-shop-dialog,.garage-inventory-dialog{overflow:visible}
+  .classified-detail-dialog__hero{grid-template-columns:1fr}
+  .classified-price-breakdown{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
