@@ -1,8 +1,10 @@
 import { bindHome, carLabel, escapeHtml, money, number, pageShell, selectedCar } from "../ui/components.js";
+import { playRacePresentation } from "../ui/racePresentation.js";
 import { renderVehicle } from "../ui/vehicleRenderer.js";
 
 let lastRace = null;
 let selectedDistance = "1/4";
+let playbackRaceId = null;
 
 const DISTANCES = [
   { key: "1/4", label: "1/4 MILE", short: "1320 FT" },
@@ -12,19 +14,23 @@ const DISTANCES = [
 
 export async function renderQuickRace(ctx) {
   const player = ctx.store.player;
+  const activeRace = player?.activeRace || null;
+  if (activeRace?.distance) selectedDistance = activeRace.distance;
+
   const current = selectedCar(player);
   const result = lastRace;
   const record = current?.raceRecords?.[selectedDistance] || null;
+  const distanceRow = DISTANCES.find((row) => row.key === selectedDistance) || DISTANCES[0];
 
   ctx.screenRoot.innerHTML = pageShell({
     title: "Quick Race",
-    eyebrow: "TEXTTUNED RACE CORE",
+    eyebrow: "V0.4A RACE PRESENTATION",
     hint: current ? carLabel(current) : "No current car",
-    trail: "Automated drag simulation / player input comes later",
+    trail: activeRace ? "Race in progress / presentation locked" : "Automated simulation / real-time playback",
     body: `
-      ${player?.tutorial?.status === "active" && player?.tutorial?.step === "first_race" ? '<div class="objective-box objective-box--active"><div><span class="objective-kicker">FTUE / FINAL STEP</span><strong>Run your first race</strong></div><p>Choose a distance and make a pass. The same race engine will later accept player launch, shift and NOS inputs.</p></div>' : ""}
+      ${player?.tutorial?.status === "active" && player?.tutorial?.step === "first_race" ? '<div class="objective-box objective-box--active"><div><span class="objective-kicker">FTUE / FINAL STEP</span><strong>Run your first race</strong></div><p>Choose a distance and stage. Once the tree starts, the race presentation blocks the rest of the game until both cars reach the finish.</p></div>' : ""}
       <div class="race-distance-tabs" role="group" aria-label="Race distance">
-        ${DISTANCES.map((row) => `<button type="button" class="button button--small ${row.key === selectedDistance ? "button--primary" : ""}" data-race-distance="${row.key}"><b>${row.label}</b><span>${row.short}</span></button>`).join("")}
+        ${DISTANCES.map((row) => `<button type="button" class="button button--small ${row.key === selectedDistance ? "button--primary" : ""}" data-race-distance="${row.key}" ${activeRace ? "disabled" : ""}><b>${row.label}</b><span>${row.short}</span></button>`).join("")}
       </div>
       ${result ? raceResult(result) : ""}
       ${current ? `
@@ -38,16 +44,20 @@ export async function renderQuickRace(ctx) {
             <div class="spec"><span>Grip</span><strong>${number(current.derived?.grip, 3)}</strong></div>
           </div>
           <div class="race-record-strip">
-            <span><small>${DISTANCES.find((row) => row.key === selectedDistance)?.label || selectedDistance} BEST</small><b>${record?.bestEt == null ? "—" : `${number(record.bestEt, 3)} s`}</b></span>
+            <span><small>${distanceRow.label} BEST</small><b>${record?.bestEt == null ? "—" : `${number(record.bestEt, 3)} s`}</b></span>
             <span><small>BEST TRAP</small><b>${record?.bestTrap == null ? "—" : `${number(record.bestTrap, 2)} mph`}</b></span>
             <span><small>PASSES</small><b>${number(record?.races || 0)}</b></span>
             <span><small>EXP</small><b>${number(player.progression?.exp || 0)}</b></span>
           </div>
-          <div class="game-card__actions"><button class="button button--primary" type="button" data-run-race>STAGE & RUN ${DISTANCES.find((row) => row.key === selectedDistance)?.label || ""}</button></div>
+          <div class="game-card__actions">
+            <button class="button button--primary" type="button" data-run-race>
+              ${activeRace ? "RESUME ACTIVE RACE" : `STAGE & RUN ${distanceRow.label}`}
+            </button>
+          </div>
         </div>` : `
         <div class="empty-state"><strong>You need a Current Car.</strong><span>Buy a car and select it in the Garage first.</span><div class="cluster" style="justify-content:center;margin-top:14px"><button class="button button--primary button--small" data-go-garage>Open Garage</button><button class="button button--small" data-go-showroom>Showroom</button></div></div>`}
       ${raceHistory(player)}
-      <p class="screen-copy" style="margin-bottom:0;margin-top:14px">V0.3B derives the automated race model from TextTuned: reaction time, power-to-weight ET, launch consistency, shifting loss, weather, trap speed and weighted locations. Forever Racing also keeps grip relevant and treats a red light as an actual foul instead of a faster total time.</p>
+      <p class="screen-copy" style="margin-bottom:0;margin-top:14px">The result is still calculated by the TextTuned-derived simulator, but V0.4A separates simulation from presentation. Starting a race creates one persistent active pass; money, EXP and records are awarded only after its real-time playback reaches the finish.</p>
     `,
   });
 
@@ -56,32 +66,67 @@ export async function renderQuickRace(ctx) {
   ctx.screenRoot.querySelector("[data-go-showroom]")?.addEventListener("click", () => ctx.router.navigate("showroom"));
   ctx.screenRoot.querySelectorAll("[data-race-distance]").forEach((button) => {
     button.addEventListener("click", async () => {
+      if (ctx.store.player?.activeRace) return;
       selectedDistance = button.dataset.raceDistance || "1/4";
       await renderQuickRace(ctx);
     });
   });
+
   ctx.screenRoot.querySelector("[data-run-race]")?.addEventListener("click", async (event) => {
     const button = event.currentTarget;
+    const existing = ctx.store.player?.activeRace;
+    if (existing) {
+      await completeActiveRace(ctx, existing);
+      return;
+    }
+
     button.disabled = true;
     button.textContent = "STAGING…";
     try {
       const wasTutorialRace = ctx.store.player?.tutorial?.status === "active" && ctx.store.player?.tutorial?.step === "first_race";
-      const data = await ctx.storage.quickRace(selectedDistance);
-      lastRace = data.race;
-      selectedDistance = data.race.distance || selectedDistance;
+      const data = await ctx.storage.startQuickRace(selectedDistance);
       ctx.store.setPlayer(data.player);
-      ctx.toast(data.race.won ? "Win" : "Loss", `+${money(data.race.reward)} cr • +${number(data.race.expReward)} EXP`);
-      if (data.race.newBest) ctx.toast("New best ET", `${number(data.race.player?.elapsedTime, 3)}s / ${data.race.distanceLabel}`);
-      if (wasTutorialRace && data.player?.tutorial?.status === "complete") {
-        ctx.toast("Tutorial complete", "FTUE reward added. The rest of Forever Racing is now open.");
-      }
-      await renderQuickRace(ctx);
+      await completeActiveRace(ctx, data.activeRace, wasTutorialRace);
     } catch (err) {
       ctx.toast("Race failed", err.message);
       button.disabled = false;
-      button.textContent = "Stage & Run";
+      button.textContent = `STAGE & RUN ${distanceRow.label}`;
     }
   });
+
+  if (activeRace) {
+    queueMicrotask(() => {
+      void completeActiveRace(ctx, activeRace);
+    });
+  }
+}
+
+async function completeActiveRace(ctx, activeRace, tutorialBeforeStart = null) {
+  if (!activeRace?.raceId) return;
+  if (playbackRaceId === String(activeRace.raceId)) return;
+  playbackRaceId = String(activeRace.raceId);
+
+  const wasTutorialRace = tutorialBeforeStart ?? (
+    ctx.store.player?.tutorial?.status === "active" &&
+    ctx.store.player?.tutorial?.step === "first_race"
+  );
+
+  try {
+    const data = await playRacePresentation(ctx, activeRace);
+    lastRace = data.race;
+    selectedDistance = data.race?.distance || selectedDistance;
+    ctx.store.setPlayer(data.player);
+    ctx.toast(data.race?.won ? "Win" : "Loss", `+${money(data.race?.reward || 0)} cr • +${number(data.race?.expReward || 0)} EXP`);
+    if (data.race?.newBest) ctx.toast("New best ET", `${number(data.race.player?.elapsedTime, 3)}s / ${data.race.distanceLabel}`);
+    if (wasTutorialRace && data.player?.tutorial?.status === "complete") {
+      ctx.toast("Tutorial complete", "FTUE reward added. The rest of Forever Racing is now open.");
+    }
+    await renderQuickRace(ctx);
+  } catch (err) {
+    ctx.toast("Race presentation interrupted", err.message);
+  } finally {
+    playbackRaceId = null;
+  }
 }
 
 function raceResult(race) {
