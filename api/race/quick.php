@@ -4,4 +4,6 @@ require_once __DIR__ . '/../_bootstrap.php';
 Api::requireMethod('POST');
 Api::requireAuth();
 Api::requireCsrf();
-api_game(fn() => GameService::quickRace());
+$body = Api::body();
+$distance = (string)($body['distance'] ?? '1/4');
+api_game(fn() => GameService::quickRace($distance));
