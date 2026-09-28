@@ -6,6 +6,7 @@ const docs = new URL('../docs/', import.meta.url);
 const required = [
   'index.html',
   'assets/css/app.css',
+  'assets/art/cars/cars-top-down-v1.png',
   'assets/js/app.js',
   'assets/js/storage/LocalStorageProvider.js',
   'assets/js/domain/LocalGameService.js',
@@ -26,6 +27,11 @@ const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense V0.2 game shell.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
+
+const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
+const spriteCars = carCatalog.filter((car) => car?.visual?.sprites?.topDown?.sheet === 'assets/art/cars/cars-top-down-v1.png');
+if (spriteCars.length < 4) throw new Error('Expected at least four cars wired to the V1 pixel sprite sheet.');
+if (!spriteCars.every((car) => Number.isInteger(car.visual.sprites.topDown.index))) throw new Error('Sprite-backed cars must define a frame index.');
 
 for (const file of [
   'data/catalog/cars.json',
