@@ -33,12 +33,15 @@ Example:
 
 If no authored asset exists—or an image fails to load—the UI must show the boxed `? / ART MISSING` marker. Do not substitute a generic car silhouette. This makes unfinished vehicles obvious during development.
 
-## Current authored top-down cars
+## Current authored dual-view starters
 
-- 1998 Honda Civic DX
-- 2003 Nissan 350Z
-- 2004 Subaru Impreza WRX STI
-- 2005 Ford Mustang GT
+- 1998 Honda Civic DX — side profile + top down
+- 2003 Nissan 350Z — side profile + top down
+- 2005 Ford Mustang GT — side profile + top down
+
+## Other authored race art
+
+- 2004 Subaru Impreza WRX STI — top down only
 
 ## Next art batch
 

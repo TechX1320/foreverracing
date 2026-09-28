@@ -7,10 +7,8 @@ let activeClass = "All";
 
 export async function renderShowroom(ctx) {
   const player = ctx.store.player;
-  if (!catalogCache) {
-    const data = await ctx.storage.carCatalog();
-    catalogCache = data.cars || [];
-  }
+  const data = await ctx.storage.carCatalog();
+  catalogCache = data.cars || [];
 
   const tutorialStarterStep = player?.tutorial?.status === "active" && player?.tutorial?.step === "buy_first_car";
   const available = tutorialStarterStep ? catalogCache.filter((car) => car.starter) : catalogCache;
