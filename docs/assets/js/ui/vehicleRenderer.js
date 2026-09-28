@@ -35,6 +35,14 @@ function resolveSprite(sprites, view, stage) {
 }
 
 function renderSprite(car, sprite, { compact, view }) {
+  const src = String(sprite.src || '').trim();
+  if (src) {
+    return `
+      <div class="vehicle-visual vehicle-visual--sprite" role="img" aria-label="${escapeAttr(car?.displayName || 'Vehicle')} ${escapeAttr(view)} preview">
+        <img class="vehicle-sprite-image ${compact ? 'vehicle-sprite-image--compact' : 'vehicle-sprite-image--full'}" src="${escapeAttr(src)}" alt="" aria-hidden="true">
+      </div>`;
+  }
+
   const columns = Math.max(1, Number(sprite.columns || 1));
   const rows = Math.max(1, Number(sprite.rows || 1));
   const index = Math.max(0, Number(sprite.index || 0));

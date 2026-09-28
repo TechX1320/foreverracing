@@ -402,3 +402,26 @@ html[data-reduce-motion="true"] *,html[data-reduce-motion="true"] *::before,html
   .vehicle-sprite--full{width:min(165px,78%)}
   .home-vehicle-visual .vehicle-sprite--full{width:min(150px,72%)}
 }
+
+
+/* Direct per-car PNGs are the preferred authored asset path. */
+.vehicle-sprite-image{display:block;object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges;filter:drop-shadow(0 5px 5px #0009)}
+.vehicle-sprite-image--compact{height:68px;width:auto;max-width:80px}
+.vehicle-sprite-image--full{height:min(205px,88%);width:auto;max-width:88%}
+.vehicle-row__identity .vehicle-sprite-image--compact{height:68px}
+.home-vehicle-visual .vehicle-sprite-image--full{height:min(210px,88%)}
+.garage-entry__visual .vehicle-sprite-image--full,.build-shop-car .vehicle-sprite-image--full,.race-car-panel__visual .vehicle-sprite-image--full,.dialog-vehicle .vehicle-sprite-image--full{height:min(175px,84%)}
+@media(max-width:760px){.vehicle-row__identity .vehicle-sprite-image--compact{height:54px}.vehicle-sprite-image--full{height:min(145px,76%)}}
+
+
+/* Stable full-size authored sprite sizing after browser QA. */
+.vehicle-sprite-image--full{height:160px;width:auto;max-width:90%}
+.home-vehicle-visual .vehicle-sprite-image--full{height:185px;max-height:88%}
+.garage-entry__visual .vehicle-sprite-image--full,.build-shop-car .vehicle-sprite-image--full{height:135px;max-height:86%}
+.race-car-panel__visual .vehicle-sprite-image--full{height:145px;max-height:86%}
+.dialog-vehicle .vehicle-sprite-image--full{height:132px;max-height:86%}
+@media(max-width:760px){
+  .vehicle-sprite-image--full{height:118px}
+  .home-vehicle-visual .vehicle-sprite-image--full{height:125px}
+  .garage-entry__visual .vehicle-sprite-image--full,.build-shop-car .vehicle-sprite-image--full,.race-car-panel__visual .vehicle-sprite-image--full,.dialog-vehicle .vehicle-sprite-image--full{height:108px}
+}

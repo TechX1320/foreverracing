@@ -31,7 +31,8 @@
           "sheet": "assets/art/cars/cars-top-down-v1.png",
           "index": 0,
           "columns": 4,
-          "rows": 1
+          "rows": 1,
+          "src": "assets/art/cars/vehicles/1998-honda-civic-dx-top-down.png"
         }
       }
     }
@@ -89,7 +90,8 @@
           "sheet": "assets/art/cars/cars-top-down-v1.png",
           "index": 3,
           "columns": 4,
-          "rows": 1
+          "rows": 1,
+          "src": "assets/art/cars/vehicles/2005-ford-mustang-gt-top-down.png"
         }
       }
     }
@@ -126,7 +128,8 @@
           "sheet": "assets/art/cars/cars-top-down-v1.png",
           "index": 1,
           "columns": 4,
-          "rows": 1
+          "rows": 1,
+          "src": "assets/art/cars/vehicles/2003-nissan-350z-top-down.png"
         }
       }
     }
@@ -176,7 +179,8 @@
           "sheet": "assets/art/cars/cars-top-down-v1.png",
           "index": 2,
           "columns": 4,
-          "rows": 1
+          "rows": 1,
+          "src": "assets/art/cars/vehicles/2004-subaru-impreza-wrx-sti-top-down.png"
         }
       }
     }
