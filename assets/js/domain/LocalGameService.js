@@ -479,8 +479,8 @@ export class LocalGameService {
 
   roguelikeStart(inputPlayer) {
     return this.mutate(inputPlayer, (player) => {
-      if (!this.selectedCar(player)) throw new LocalGameError('Select a car before starting a RogueLike run.');
-      if (player.roguelike.activeRun && typeof player.roguelike.activeRun === 'object') throw new LocalGameError('A RogueLike run is already active.');
+      if (!this.selectedCar(player)) throw new LocalGameError('Select a car before starting a The Circuit run.');
+      if (player.roguelike.activeRun && typeof player.roguelike.activeRun === 'object') throw new LocalGameError('A The Circuit run is already active.');
       player.roguelike.runsStarted = Number(player.roguelike.runsStarted || 0) + 1;
       player.roguelike.activeRun = {
         runId: this.id('run'), stage: 1, maxStages: 7, runCredits: 0, boost: 0, startedAt: now(), lastResult: null,
@@ -493,7 +493,7 @@ export class LocalGameService {
     let step = null;
     const player = this.mutate(inputPlayer, (draft) => {
       const run = draft.roguelike.activeRun;
-      if (!run || typeof run !== 'object') throw new LocalGameError('No active RogueLike run.');
+      if (!run || typeof run !== 'object') throw new LocalGameError('No active The Circuit run.');
       const car = this.selectedCar(draft);
       if (!car) throw new LocalGameError('Your selected car is missing.');
       const stage = Number(run.stage || 1);
@@ -507,7 +507,7 @@ export class LocalGameService {
       if (!won) {
         const banked = Math.floor(Number(run.runCredits || 0) * 0.35);
         draft.wallet.credits += banked;
-        this.addTransaction(draft, 'roguelike_cashout', banked, 'RogueLike consolation');
+        this.addTransaction(draft, 'roguelike_cashout', banked, 'The Circuit consolation');
         draft.roguelike.bestStage = Math.max(Number(draft.roguelike.bestStage || 0), stage);
         draft.roguelike.activeRun = null;
         step = { won: false, stage, banked, finished: true };
@@ -519,7 +519,7 @@ export class LocalGameService {
       if (finished) {
         const banked = Number(run.runCredits || 0);
         draft.wallet.credits += banked;
-        this.addTransaction(draft, 'roguelike_cashout', banked, 'RogueLike complete');
+        this.addTransaction(draft, 'roguelike_cashout', banked, 'The Circuit complete');
         draft.roguelike.runsCompleted = Number(draft.roguelike.runsCompleted || 0) + 1;
         draft.roguelike.bestStage = Math.max(Number(draft.roguelike.bestStage || 0), stage);
         draft.roguelike.activeRun = null;
