@@ -1,9 +1,13 @@
-const CACHE = 'forever-racing-shell-v0.2.0-dev.3';
+const CACHE = 'forever-racing-shell-v0.2.0-dev.4';
 const SHELL = [
   './',
   './manifest.webmanifest',
   './assets/css/app.css',
   './assets/art/cars/cars-top-down-v1.png',
+  './assets/art/cars/vehicles/1998-honda-civic-dx-top-down.png',
+  './assets/art/cars/vehicles/2003-nissan-350z-top-down.png',
+  './assets/art/cars/vehicles/2004-subaru-impreza-wrx-sti-top-down.png',
+  './assets/art/cars/vehicles/2005-ford-mustang-gt-top-down.png',
   './assets/js/app.js',
   './assets/js/core/api.js',
   './assets/js/core/store.js',

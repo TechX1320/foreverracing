@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.2.0-dev.3 playable direction
+## V0.2.0-dev.4 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -167,6 +167,10 @@ data/
 docs/                  generated GitHub Pages build
 scripts/               build and smoke/integration tests
 ```
+
+## Visual QA workflow
+
+CI now uploads the generated static `/docs` build as a PR preview artifact. Before visually significant changes are merged, that exact artifact can be downloaded and run in Chromium at desktop/mobile viewport sizes for a real click-through check rather than relying only on syntax/game-logic tests.
 
 ## Validation
 

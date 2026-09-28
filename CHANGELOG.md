@@ -1,5 +1,13 @@
 # Changelog
 
+## V0.2.0-dev.4 — pixel car rendering hotfix
+
+- Fixed authored car sprites rendering as tiny/incomplete CSS sprite-sheet slices in the Showroom.
+- Added one transparent PNG per authored vehicle and made direct image files the preferred rendering path.
+- Preserved the contact sprite sheet as an asset-management/fallback format instead of the primary UI renderer.
+- Browser-tested the FTUE Showroom at desktop and mobile widths before merge.
+- Added a PR preview artifact to CI so future UI/gameplay changes can be downloaded and visually played in Chromium before approval.
+
 ## V0.2.0-dev.3 — first pixel car assets
 
 - Added the first authored pixel car sprite sheet to the real game build.

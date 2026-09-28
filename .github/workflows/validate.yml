@@ -46,6 +46,15 @@ jobs:
       - name: Static build smoke test
         run: node --experimental-vm-modules scripts/test-static.mjs
 
+      - name: Upload static preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: forever-racing-preview-${{ github.sha }}
+          path: docs/
+          if-no-files-found: error
+          retention-days: 2
+
       - name: Verify generated docs are static
         run: |
           ! grep -R "<?php" docs

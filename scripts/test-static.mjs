@@ -7,6 +7,10 @@ const required = [
   'index.html',
   'assets/css/app.css',
   'assets/art/cars/cars-top-down-v1.png',
+  'assets/art/cars/vehicles/1998-honda-civic-dx-top-down.png',
+  'assets/art/cars/vehicles/2003-nissan-350z-top-down.png',
+  'assets/art/cars/vehicles/2004-subaru-impreza-wrx-sti-top-down.png',
+  'assets/art/cars/vehicles/2005-ford-mustang-gt-top-down.png',
   'assets/js/app.js',
   'assets/js/storage/LocalStorageProvider.js',
   'assets/js/domain/LocalGameService.js',
@@ -32,6 +36,7 @@ const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json'
 const spriteCars = carCatalog.filter((car) => car?.visual?.sprites?.topDown?.sheet === 'assets/art/cars/cars-top-down-v1.png');
 if (spriteCars.length < 4) throw new Error('Expected at least four cars wired to the V1 pixel sprite sheet.');
 if (!spriteCars.every((car) => Number.isInteger(car.visual.sprites.topDown.index))) throw new Error('Sprite-backed cars must define a frame index.');
+if (!spriteCars.every((car) => String(car.visual.sprites.topDown.src || '').startsWith('assets/art/cars/vehicles/'))) throw new Error('Authored sprite cars must use direct per-car PNG sources.');
 
 for (const file of [
   'data/catalog/cars.json',
