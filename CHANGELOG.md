@@ -1,5 +1,16 @@
 # Changelog
 
+## V0.4.0-c — readability hardening
+
+- Made the compact game header actually 50px tall instead of only lowering its minimum height.
+- Reclaimed the corresponding desktop gameplay height while preserving the no-scroll browser-MMO target.
+- Established a 10px floor for compact metadata and raised supporting text where V0.4B still left 7–9px labels.
+- Increased tiny race, home, data-list, vehicle-art and navigation metadata without turning the UI into oversized cards.
+- Replaced remaining player-facing Build Stage / Stage 1 language with Street Car, Street Race Car and Build Type terminology.
+- Kept drag-racing staging language (PRE-STAGE / STAGED) intact because it describes the race process, not vehicle build progression.
+- Added static regression checks for the compact header, readability hardening and named build terminology.
+- Preserved the V0.4B Garage Inventory, category Parts, Classifieds, reactive build conversion and two-phase race systems unchanged.
+
 ## V0.4.0-b — browser-game usability pass
 
 - Increased global text sizing and control readability.
