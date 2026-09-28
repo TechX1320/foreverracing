@@ -58,6 +58,7 @@ export class LocalGameService {
     player.progression = { ...defaults.progression, ...(player.progression || {}) };
     player.tutorial = { ...defaults.tutorial, ...(player.tutorial || {}) };
     player.tutorial.completedSteps = Array.isArray(player.tutorial.completedSteps) ? player.tutorial.completedSteps : [];
+    if (player.tutorial.status === 'active' && player.tutorial.step === 'build_stages') player.tutorial.step = 'first_race';
     player.stats = { ...defaults.stats, ...(player.stats || {}) };
     player.garage = Array.isArray(player.garage) ? player.garage.map((car) => this.normalizeCar(car)) : [];
     player.inventory = player.inventory && typeof player.inventory === 'object' ? player.inventory : clone(defaults.inventory);
@@ -122,7 +123,7 @@ export class LocalGameService {
       const price = Number(spec.price || 0);
       this.requireCredits(player, price);
       player.wallet.credits -= price;
-      player.inventory.parts.push({ inventoryId: this.id('part'), catalogId: String(spec.catalogId), installedOnCarId: null, purchasedAt: now() });
+      player.inventory.parts.push({ inventoryId: this.id('part'), catalogId: String(spec.catalogId), purchasedForCarId: car.carId, installedOnCarId: null, purchasedAt: now() });
       player.stats.partsPurchased = Number(player.stats.partsPurchased || 0) + 1;
       this.addTransaction(player, 'part_purchase', -price, String(spec.name || 'Part'));
       if (player.tutorial?.status === 'active' && player.tutorial?.step === 'buy_first_upgrade') {
@@ -161,7 +162,7 @@ export class LocalGameService {
         player.garage[previousIndex] = this.recalculateCar(player.garage[previousIndex], player.inventory.parts);
       }
       if (player.tutorial?.status === 'active' && player.tutorial?.step === 'install_first_upgrade') {
-        this.completeTutorialStep(player, 'install_first_upgrade', 'build_stages');
+        this.completeTutorialStep(player, 'install_first_upgrade', 'first_race');
       }
     });
   }
@@ -187,10 +188,10 @@ export class LocalGameService {
     return this.mutate(inputPlayer, (player) => {
       const index = this.requireOwnedCarIndex(player, carId);
       const car = player.garage[index];
-      if (Number(car.buildStage || 1) !== 1) throw new LocalGameError('Only the Stage 1 to Stage 2 conversion is enabled in this build.');
+      if (Number(car.buildStage || 1) !== 1) throw new LocalGameError('Only Street Car to Street Race Car conversion is enabled in this build.');
       const required = this.buildStages?.[0]?.requiredCategories || ['intake','exhaust','ecu','fuel','drivetrain','tires','weight'];
       const incomplete = required.filter((key) => this.installedSimpleTier(player, carId, key) < 3);
-      if (incomplete.length) throw new LocalGameError('Max every Stage 1 category before converting to Stage 2.');
+      if (incomplete.length) throw new LocalGameError('Max every Street Car upgrade category before converting to a Street Race Car.');
       car.stageBaseline = clone(car.derived);
       car.buildStage = 2;
       for (const ownedPart of player.inventory.parts) {
@@ -199,7 +200,7 @@ export class LocalGameService {
         if (partSpec?.simpleTier) ownedPart.installedOnCarId = null;
       }
       player.garage[index] = this.recalculateCar(car, player.inventory.parts);
-      this.addTransaction(player, 'stage_conversion', 0, `${this.carName(car)} converted to Build Stage 2`);
+      this.addTransaction(player, 'stage_conversion', 0, `${this.carName(car)} converted to Street Race Car`);
     });
   }
 
@@ -224,18 +225,30 @@ export class LocalGameService {
 
   generateUsedLot() {
     const timestamp = now();
-    if (!this.cars.length) return { generatedAt: timestamp, expiresAt: timestamp + this.config.usedLotRefreshSeconds, listings: [] };
+    const currentYear = new Date().getFullYear();
+    const candidates = this.cars.filter((spec) => Number(spec.year || 0) <= currentYear - 3);
+    const pool = candidates.length ? candidates : this.cars;
+    if (!pool.length) return { generatedAt: timestamp, expiresAt: timestamp + this.config.usedLotRefreshSeconds, listings: [] };
     const listings = [];
-    const count = Math.min(8, Math.max(4, this.cars.length));
+    const count = Math.min(8, Math.max(4, pool.length));
     for (let i = 0; i < count; i += 1) {
-      const spec = randomChoice(this.cars);
+      const spec = randomChoice(pool);
       const mileage = randomInt(2800, 195000);
-      const condition = randomInt(62, 96);
-      const ageDiscount = Math.min(0.55, mileage / 360000);
-      const conditionFactor = 0.55 + (condition / 220);
-      let price = Math.round((Number(spec.price || 0) * (1 - ageDiscount) * conditionFactor) / 50) * 50;
+      const condition = randomInt(58, 98);
+      const mileageFactor = Math.max(0.46, 1 - (mileage / 330000));
+      const conditionFactor = 0.42 + (0.58 * Math.pow(condition / 100, 1.7));
+      let price = Math.round((Number(spec.price || 0) * mileageFactor * conditionFactor) / 50) * 50;
       price = Math.max(1200, price);
-      listings.push({ listingId: this.id('used'), stockId: Number(spec.stockId), price, mileage, condition });
+      listings.push({
+        listingId: this.id('used'),
+        stockId: Number(spec.stockId),
+        price,
+        mileage,
+        condition,
+        basePrice: Number(spec.price || 0),
+        mileageFactor: Math.round(mileageFactor * 1000) / 1000,
+        conditionFactor: Math.round(conditionFactor * 1000) / 1000,
+      });
     }
     return { generatedAt: timestamp, expiresAt: timestamp + this.config.usedLotRefreshSeconds, listings };
   }
