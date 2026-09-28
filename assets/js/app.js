@@ -233,7 +233,7 @@ function renderHomeOverview(player) {
   const build = document.getElementById('homeBuildSummary');
   const activity = document.getElementById('homeActivity');
 
-  if (visual) visual.innerHTML = current ? renderVehicle(current, { stage: Number(current.buildStage || 1) }) : '<div class="no-car-visual">NO CURRENT CAR</div>';
+  if (visual) visual.innerHTML = current ? renderVehicle(current, { stage: Number(current.buildStage || 1), view: 'showroom' }) : '<div class="no-car-visual">NO CURRENT CAR</div>';
   if (name) name.textContent = current ? carLabel(current) : 'No current car';
   if (factory) factory.textContent = current ? current.displayName : 'Visit the Showroom to start a build.';
   if (stats) stats.innerHTML = current
