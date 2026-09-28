@@ -56,7 +56,8 @@ export async function renderQuickRace(ctx) {
         <summary>HOW QUICK RACE WORKS</summary>
         <p>Choose an unlocked distance above to stage immediately. The opponent shown in Race Preview is the matchup the simulator will use. Rewards, EXP and records are committed only after the cars reach the finish.</p>
       </details>
-    `  });
+    `,
+  });
 
   bindHome(ctx.screenRoot, ctx.router);
   ctx.screenRoot.querySelector("[data-go-garage]")?.addEventListener("click", () => ctx.router.navigate("garage"));
