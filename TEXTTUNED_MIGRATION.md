@@ -113,6 +113,21 @@ Do **not** undo these when porting:
 7. Add race history/result detail UI.
 8. Keep races automated; design the simulation API so future player input can supply reaction/shift decisions.
 
+### V0.3B implementation status
+
+The first race-core migration is now implemented:
+
+- cleaned-up TextTuned-derived automated simulation;
+- 1/4, 1/2 and 1-mile distances;
+- RT / red lights / ET / trap / total time;
+- weighted weather and locations, including rare nightmare entries;
+- per-car pass counts, best ET and best trap;
+- EXP rewards and TextTuned-style level curve;
+- race-history/result UI;
+- shared browser-local and PHP/server behavior.
+
+Player-input racing remains a later layer on the same simulation/result contract rather than a replacement.
+
 ### V0.4 — Economy / daily loop
 
 1. Rotating dealership stock.
