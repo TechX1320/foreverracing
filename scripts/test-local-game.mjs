@@ -2,14 +2,15 @@ import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { LocalGameService } from '../assets/js/domain/LocalGameService.js';
 
-const [cars, parts, config, buildStageConfig] = await Promise.all([
+const [cars, parts, config, buildStageConfig, racingConfig] = await Promise.all([
   fs.readFile(new URL('../data/catalog/cars.json', import.meta.url), 'utf8').then(JSON.parse),
   fs.readFile(new URL('../data/catalog/parts.json', import.meta.url), 'utf8').then(JSON.parse),
   fs.readFile(new URL('../data/config/game.json', import.meta.url), 'utf8').then(JSON.parse),
   fs.readFile(new URL('../data/config/build-stages.json', import.meta.url), 'utf8').then(JSON.parse),
+  fs.readFile(new URL('../data/config/racing.json', import.meta.url), 'utf8').then(JSON.parse),
 ]);
 
-const game = new LocalGameService({ cars, parts, config, buildStages: buildStageConfig.stages });
+const game = new LocalGameService({ cars, parts, config, buildStages: buildStageConfig.stages, racingConfig });
 let player = game.defaultPlayer();
 
 assert.equal(player.wallet.credits, 75000);
@@ -50,13 +51,34 @@ assert.equal(player.tutorial.step, 'build_stages');
 player = game.tutorialAdvance(player, 'build_stages_explained');
 assert.equal(player.tutorial.step, 'first_race');
 
-const firstRace = game.quickRace(player);
+const firstRace = game.quickRace(player, '1/4');
 player = firstRace.player;
 assert.equal(player.stats.races, 1);
 assert.equal(player.tutorial.status, 'complete');
 assert.equal(player.tutorial.step, 'complete');
 assert.ok(player.progression.rep >= 27);
+assert.ok(player.progression.exp > 0);
 assert.ok(firstRace.race.reward > 0);
+assert.equal(firstRace.race.distance, '1/4');
+assert.equal(firstRace.race.distanceLabel, '1/4 Mile');
+assert.ok(firstRace.race.location?.name);
+assert.ok(firstRace.race.weather?.name);
+assert.ok(firstRace.race.player?.trapSpeed > 0);
+assert.ok(typeof firstRace.race.player?.foul === 'boolean');
+assert.equal(player.raceHistory.length, 1);
+
+const halfRace = game.quickRace(player, '1/2');
+player = halfRace.player;
+assert.equal(halfRace.race.distance, '1/2');
+assert.ok(halfRace.race.player.elapsedTime >= Number(racingConfig.distances['1/2'].minEt));
+const mileRace = game.quickRace(player, '1');
+player = mileRace.player;
+assert.equal(mileRace.race.distance, '1');
+assert.ok(mileRace.race.player.elapsedTime >= Number(racingConfig.distances['1'].minEt));
+assert.equal(player.raceHistory.length, 3);
+assert.equal(player.garage[0].raceRecords['1/4'].races, 1);
+assert.equal(player.garage[0].raceRecords['1/2'].races, 1);
+assert.equal(player.garage[0].raceRecords['1'].races, 1);
 
 player = game.purchasePart(player, 's1_intake_2');
 let intake2 = player.inventory.parts.find((row) => row.catalogId === 's1_intake_2');
@@ -102,4 +124,4 @@ assert.ok(player.roguelike.activeRun);
 const step = game.roguelikeStep(player, 'safe');
 assert.ok(step.step && typeof step.step.won === 'boolean');
 
-console.log('FTUE + Build Stage local game flow test passed.');
+console.log('FTUE + Build Stage + V0.3B race core local game flow test passed.');

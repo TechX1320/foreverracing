@@ -19,12 +19,14 @@ const required = [
   'assets/js/app.js',
   'assets/js/storage/LocalStorageProvider.js',
   'assets/js/domain/LocalGameService.js',
+  'assets/js/domain/RaceSimulator.js',
   'assets/js/ui/vehicleRenderer.js',
   'data/catalog/cars.json',
   'data/catalog/parts.json',
   'data/catalog/engines.json',
   'data/config/game.json',
   'data/config/build-stages.json',
+  'data/config/racing.json',
   '.nojekyll',
 ];
 
@@ -35,7 +37,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.3.0-a"')) throw new Error('Static index is missing the V0.3A build marker.');
+if (!html.includes('data-build="0.3.0-b"')) throw new Error('Static index is missing the V0.3B build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -69,6 +71,18 @@ if (!appSource.includes("clearForeverRacingCaches({ unregister: true })")) throw
 
 const runtimeConfig = JSON.parse(await fs.readFile(new URL('data/config/game.json', docs), 'utf8'));
 if (runtimeConfig.defaultVehicleRendering !== 'authored') throw new Error('Authored vehicle rendering must be the default.');
+if (runtimeConfig.schemaVersion < 4) throw new Error('V0.3B player schema version must be at least 4.');
+
+const raceConfig = JSON.parse(await fs.readFile(new URL('data/config/racing.json', docs), 'utf8'));
+if (!raceConfig.distances?.['1/4'] || !raceConfig.distances?.['1/2'] || !raceConfig.distances?.['1']) throw new Error('All three race distances must be configured.');
+if ((raceConfig.weather || []).length < 10 || (raceConfig.locations || []).length < 20) throw new Error('TextTuned weather/location pools are incomplete.');
+
+const localProviderSource = await fs.readFile(new URL('assets/js/storage/LocalStorageProvider.js', root), 'utf8');
+if (!localProviderSource.includes('localStorage.removeItem(PLAYER_KEY)')) throw new Error('Admin local logout must erase player data.');
+if (!localProviderSource.includes('already logged in in this browser')) throw new Error('Local duplicate-login guard is missing.');
+
+const quickRaceSource = await fs.readFile(new URL('assets/js/screens/quickRace.js', root), 'utf8');
+if (!quickRaceSource.includes('TEXTTUNED RACE CORE') || !quickRaceSource.includes('data-race-distance')) throw new Error('V0.3B race screen is missing.');
 
 const modules = [
   'assets/js/app.js',

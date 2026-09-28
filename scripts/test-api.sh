@@ -4,16 +4,18 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 COOKIE="$(mktemp)"
+COOKIE2="$(mktemp)"
 LOGIN="$(mktemp)"
+LOGIN2="$(mktemp)"
 PORT=18080
 
 cleanup() {
   if [[ -n "${SERVER_PID:-}" ]]; then kill "$SERVER_PID" 2>/dev/null || true; fi
-  rm -f "$COOKIE" "$LOGIN" data/players/admin.json data/players/admin.json.lock data/runtime/used-lot.json data/runtime/used-lot.json.lock
+  rm -f "$COOKIE" "$COOKIE2" "$LOGIN" "$LOGIN2" data/players/admin.json data/players/admin.json.lock data/runtime/used-lot.json data/runtime/used-lot.json.lock data/runtime/active-sessions.json data/runtime/active-sessions.json.lock
 }
 trap cleanup EXIT
 
-rm -f data/players/admin.json data/players/admin.json.lock data/runtime/used-lot.json data/runtime/used-lot.json.lock
+rm -f data/players/admin.json data/players/admin.json.lock data/runtime/used-lot.json data/runtime/used-lot.json.lock data/runtime/active-sessions.json data/runtime/active-sessions.json.lock
 php -S 127.0.0.1:$PORT -t . >/tmp/forever-racing-api-test.log 2>&1 &
 SERVER_PID=$!
 
@@ -41,6 +43,14 @@ fi
 
 jq -e '.authenticated == true and .player.tutorial.step == "welcome"' "$LOGIN" >/dev/null
 CSRF="$(jq -r '.csrf' "$LOGIN")"
+
+DUP_STATUS="$(curl -sS -o "$LOGIN2" -w '%{http_code}' -c "$COOKIE2" -H 'Content-Type: application/json'   -d '{"username":"ADMIN","password":"12345"}'   "http://127.0.0.1:$PORT/api/auth/login.php")"
+if [[ "$DUP_STATUS" != "409" ]]; then
+  echo "Expected duplicate login to return 409, got $DUP_STATUS" >&2
+  cat "$LOGIN2" >&2 || true
+  exit 1
+fi
+jq -e '.code == "ACCOUNT_ALREADY_ACTIVE"' "$LOGIN2" >/dev/null
 
 post() {
   local path="$1"
@@ -83,7 +93,26 @@ echo "$PLAYER" | jq -e '.player.garage[0].derived.hp == 109 and .player.tutorial
 PLAYER="$(post tutorial/advance.php '{"action":"build_stages_explained"}')"
 echo "$PLAYER" | jq -e '.player.tutorial.step == "first_race"' >/dev/null
 
-PLAYER="$(post race/quick.php '{}')"
-echo "$PLAYER" | jq -e '.player.tutorial.status == "complete" and .player.progression.rep >= 27' >/dev/null
+PLAYER="$(post race/quick.php '{"distance":"1/4"}')"
+echo "$PLAYER" | jq -e '.player.tutorial.status == "complete" and .player.progression.rep >= 27 and .player.progression.exp > 0' >/dev/null
+echo "$PLAYER" | jq -e '.race.distance == "1/4" and .race.player.trapSpeed > 0 and (.race.location.name | length) > 0 and (.race.weather.name | length) > 0' >/dev/null
 
-echo "Authenticated PHP API FTUE smoke test passed."
+PLAYER="$(post race/quick.php '{"distance":"1/2"}')"
+echo "$PLAYER" | jq -e '.race.distance == "1/2" and ((.player.raceHistory | length) >= 2)' >/dev/null
+
+LOGOUT="$(post auth/logout.php '{}')"
+echo "$LOGOUT" | jq -e '.reset == true' >/dev/null
+if [[ -f data/players/admin.json ]]; then
+  echo "Admin player save still exists after logout reset." >&2
+  exit 1
+fi
+
+FRESH_STATUS="$(curl -sS -o "$LOGIN2" -w '%{http_code}' -c "$COOKIE2" -H 'Content-Type: application/json'   -d '{"username":"admin","password":"12345"}'   "http://127.0.0.1:$PORT/api/auth/login.php")"
+if [[ "$FRESH_STATUS" != "200" ]]; then
+  echo "Fresh login after Admin reset failed: $FRESH_STATUS" >&2
+  cat "$LOGIN2" >&2 || true
+  exit 1
+fi
+jq -e '.authenticated == true and .player.tutorial.step == "welcome" and ((.player.garage | length) == 0) and .player.progression.exp == 0' "$LOGIN2" >/dev/null
+
+echo "Authenticated PHP API FTUE + session/reset + V0.3B race core smoke test passed."
