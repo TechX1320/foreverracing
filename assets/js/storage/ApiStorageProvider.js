@@ -29,6 +29,7 @@ export class ApiStorageProvider extends StorageProvider {
   usedLot() { return this.#api.usedLot(); }
   refreshUsedLot() { return this.#api.refreshUsedLot(); }
   buyUsedCar(listingId) { return this.#api.buyUsedCar(listingId); }
+  quickRacePreview() { return this.#api.quickRacePreview(); }
   startQuickRace(distance = '1/4') { return this.#api.startQuickRace(distance); }
   finishQuickRace(raceId) { return this.#api.finishQuickRace(raceId); }
   quickRace(distance = '1/4') { return this.#api.startQuickRace(distance); }
