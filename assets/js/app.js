@@ -88,7 +88,7 @@ document.addEventListener('click', (event) => {
     if (store.player?.activeRace) {
       toast('Race in progress', 'Finish the active pass before leaving the track.');
     } else {
-      toast('Tutorial objective first', 'Finish the highlighted FTUE step before opening that section.');
+      toast('Tutorial objective first', 'Finish the highlighted tutorial step before opening that section.');
     }
     return;
   }
@@ -147,7 +147,7 @@ function showLogin() {
     <form class="dialog-body login-panel" data-login-form>
       <span class="section-label">FOREVER RACING / DEVELOPMENT ACCESS</span>
       <h2>Sign in</h2>
-      <p>${storage.mode === 'local' ? 'GitHub Pages uses a simulated local identity and browser-local save. Admin is a disposable FTUE test account: signing out wipes its player save.' : 'Player state is tied to an authenticated server session. Only one active session per account is allowed; Admin is reset when it signs out.'}</p>
+      <p>${storage.mode === 'local' ? 'GitHub Pages uses a simulated local identity and browser-local save. Admin is a disposable tutorial test account: signing out wipes its player save.' : 'Player state is tied to an authenticated server session. Only one active session per account is allowed; Admin is reset when it signs out.'}</p>
       <div class="field"><label for="loginUsername">Username</label><input id="loginUsername" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required></div>
       <div class="field"><label for="loginPassword">Password</label><input id="loginPassword" name="password" type="password" autocomplete="current-password" required></div>
       <div class="form-error" data-login-error></div>
@@ -235,7 +235,7 @@ async function logout() {
     lockApp();
     history.replaceState(null, '', location.pathname + location.search);
     showLogin();
-    if (reset) toast('Admin reset', 'Player data was erased. The next login starts at FTUE.');
+    if (reset) toast('Admin reset', 'Player data was erased. The next login starts at the tutorial.');
     if (button) button.disabled = false;
   }
 }
@@ -347,15 +347,15 @@ function applyNavigationVisibility(player) {
 
 function objectiveInfo(step) {
   const map = {
-    welcome: { code: 'FTUE 1/6', title: 'Start the tutorial', copy: 'A short introduction will explain the core loop.', action: '', route: '' },
-    buy_first_car: { code: 'FTUE 2/6', title: 'Choose your first car', copy: 'Pick a highlighted D Class starter from the Classifieds.', action: 'OPEN CLASSIFIEDS', route: 'usedlot' },
-    visit_garage: { code: 'FTUE 3/6', title: 'Read your car', copy: 'Visit the Garage and learn the car stats and Build Type.', action: 'OPEN GARAGE', route: 'garage' },
-    buy_first_upgrade: { code: 'FTUE 4/6', title: 'Buy the Intake', copy: 'The tutorial locks you to Intake. Buy the Stage 1 Intake to continue.', action: 'OPEN PARTS', route: 'parts' },
-    install_first_upgrade: { code: 'FTUE 5/6', title: 'Install the Intake', copy: 'Open Garage Inventory and install the Intake you just bought.', action: 'OPEN GARAGE', route: 'garage' },
-    build_stages: { code: 'FTUE 6/6', title: 'Run your first race', copy: 'Build-type conversion will be introduced later when the Street Car is actually complete.', action: 'QUICK RACE', route: 'quick-race' },
-    first_race: { code: 'FTUE 6/6', title: 'Run the 1/4 mile', copy: 'Quick Race is now the only route. Start the highlighted 1/4-mile pass.', action: 'START FIRST RACE', route: 'quick-race' }
+    welcome: { code: 'STEP 1/6', title: 'Start the tutorial', copy: 'A short introduction will explain the core loop.', action: '', route: '' },
+    buy_first_car: { code: 'STEP 2/6', title: 'Choose your first car', copy: 'Pick a highlighted D Class starter from the Classifieds.', action: 'OPEN CLASSIFIEDS', route: 'usedlot' },
+    visit_garage: { code: 'STEP 3/6', title: 'Read your car', copy: 'Visit the Garage and learn the car stats and Build Type.', action: 'OPEN GARAGE', route: 'garage' },
+    buy_first_upgrade: { code: 'STEP 4/6', title: 'Buy the Intake', copy: 'The tutorial locks you to Intake. Buy the Stage 1 Intake to continue.', action: 'OPEN PARTS', route: 'parts' },
+    install_first_upgrade: { code: 'STEP 5/6', title: 'Install the Intake', copy: 'Open Garage Inventory and install the Intake you just bought.', action: 'OPEN GARAGE', route: 'garage' },
+    build_stages: { code: 'STEP 6/6', title: 'Run your first race', copy: 'Build-type conversion will be introduced later when the Street Car is actually complete.', action: 'QUICK RACE', route: 'quick-race' },
+    first_race: { code: 'STEP 6/6', title: 'Run the 1/4 mile', copy: 'Quick Race is now the only route. Start the highlighted 1/4-mile pass.', action: 'START FIRST RACE', route: 'quick-race' }
   };
-  return map[step] || { code: 'FTUE', title: 'Continue', copy: 'Follow the highlighted game action.', action: '', route: '' };
+  return map[step] || { code: 'STEP', title: 'Continue', copy: 'Follow the highlighted game action.', action: '', route: '' };
 }
 
 function stageName(stage) {
