@@ -120,8 +120,8 @@ final class GameService
         }
 
         return self::mutatePlayer(function (array $player) use ($spec): array {
-            if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'buy_first_car' && empty($spec['starter'])) {
-                throw new GameException('Choose one of the highlighted starter cars for your first build.');
+            if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'buy_first_car') {
+                throw new GameException('Your first car comes from the Classifieds. Start with a D Class used car and work your way up.');
             }
             $price = (int)$spec['price'];
             self::requireCredits($player, $price);
@@ -177,6 +177,9 @@ final class GameService
                 throw new GameException('Select a car before buying build parts.');
             }
             self::requirePartCompatible($player, $car, $spec, $catalog, true);
+            if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'buy_first_upgrade' && (string)$spec['catalogId'] !== 's1_intake_1') {
+                throw new GameException('For the tutorial, start with the Stage 1 Intake.');
+            }
             $price = (int)$spec['price'];
             self::requireCredits($player, $price);
             $player['wallet']['credits'] -= $price;
@@ -209,6 +212,9 @@ final class GameService
                 throw new GameException('Part catalog entry is missing.', 500);
             }
             $car = $player['garage'][$carIndex];
+            if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'install_first_upgrade' && (string)$spec['catalogId'] !== 's1_intake_1') {
+                throw new GameException('Install the Stage 1 Intake to continue the tutorial.');
+            }
             self::requirePartCompatible($player, $car, $spec, $catalog, false);
 
             $slot = (string)$spec['slot'];
@@ -269,7 +275,7 @@ final class GameService
     {
         $catalog = self::partsCatalog();
         $stageConfig = JsonStore::read(FR_DATA . '/config/build-stages.json', []);
-        $required = $stageConfig['stages'][0]['requiredCategories'] ?? ['intake','exhaust','ecu','fuel','drivetrain','tires','weight'];
+        $required = $stageConfig['stages'][0]['requiredCategories'] ?? ['intake','exhaust','ecu','fuel','drivetrain','suspension','tires','weight'];
 
         return self::mutatePlayer(function (array $player) use ($carId, $catalog, $required): array {
             $index = self::requireOwnedCarIndex($player, $carId);
