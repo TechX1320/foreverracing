@@ -85,13 +85,10 @@ echo "$PLAYER" | jq -e '.player.tutorial.step == "buy_first_upgrade"' >/dev/null
 
 PLAYER="$(post parts/purchase.php '{"catalogId":"s1_intake_1"}')"
 PART_ID="$(echo "$PLAYER" | jq -r '.player.inventory.parts[] | select(.catalogId=="s1_intake_1") | .inventoryId')"
-echo "$PLAYER" | jq -e '.player.tutorial.step == "install_first_upgrade"' >/dev/null
+echo "$PLAYER" | jq -e --arg carId "$CAR_ID" '.player.tutorial.step == "install_first_upgrade" and (.player.inventory.parts[] | select(.catalogId=="s1_intake_1") | .purchasedForCarId) == $carId' >/dev/null
 
 PLAYER="$(post parts/install.php "{\"inventoryId\":\"$PART_ID\",\"carId\":\"$CAR_ID\"}")"
-echo "$PLAYER" | jq -e '.player.garage[0].derived.hp == 109 and .player.tutorial.step == "build_stages"' >/dev/null
-
-PLAYER="$(post tutorial/advance.php '{"action":"build_stages_explained"}')"
-echo "$PLAYER" | jq -e '.player.tutorial.step == "first_race"' >/dev/null
+echo "$PLAYER" | jq -e '.player.garage[0].derived.hp == 109 and .player.tutorial.step == "first_race"' >/dev/null
 
 PLAYER="$(post race/start.php '{"distance":"1/4"}')"
 RACE_ID="$(echo "$PLAYER" | jq -r '.activeRace.raceId')"
@@ -115,6 +112,10 @@ RACE_BODY="$(printf '{"raceId":"%s"}' "$RACE_ID")"
 PLAYER="$(post race/finish.php "$RACE_BODY")"
 echo "$PLAYER" | jq -e '.race.distance == "1/2" and .player.stats.races == 2 and ((.player.raceHistory | length) == 2)' >/dev/null
 
+LOT="$(curl -sS -b "$COOKIE" "http://127.0.0.1:$PORT/api/usedlot/listings.php")"
+echo "$LOT" | jq -e '.lot.listings | length >= 4' >/dev/null
+echo "$LOT" | jq -e '.lot.listings | all(.price <= .basePrice and .conditionFactor > 0 and .mileageFactor > 0)' >/dev/null
+
 LOGOUT="$(post auth/logout.php '{}')"
 echo "$LOGOUT" | jq -e '.reset == true' >/dev/null
 if [[ -f data/players/admin.json ]]; then
@@ -130,4 +131,4 @@ if [[ "$FRESH_STATUS" != "200" ]]; then
 fi
 jq -e '.authenticated == true and .player.tutorial.step == "welcome" and ((.player.garage | length) == 0) and .player.progression.exp == 0' "$LOGIN2" >/dev/null
 
-echo "Authenticated PHP API FTUE + session/reset + V0.4A two-phase race smoke test passed."
+echo "Authenticated PHP API FTUE + Garage Inventory data + V0.4B race smoke test passed."
