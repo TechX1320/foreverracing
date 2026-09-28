@@ -16,12 +16,16 @@ export class RaceSimulator {
     return row;
   }
 
-  randomWeather() {
-    return structuredClone(this.#weighted(this.config.weather || [{ name: 'Cool & Cloudy', weight: 1, etModifier: 0, mphModifier: 0 }]));
+  randomWeather(level = 1) {
+    const rows = (this.config.weather || [{ name: 'Cool & Cloudy', weight: 1, etModifier: 0, mphModifier: 0 }])
+      .filter((row) => row.quickRace !== false && !row.nightmare && Number(row.minLevel || 1) <= Number(level || 1));
+    return structuredClone(this.#weighted(rows.length ? rows : [{ name: 'Cool & Cloudy', weight: 1, etModifier: 0, mphModifier: 0 }]));
   }
 
-  randomLocation() {
-    return structuredClone(this.#weighted(this.config.locations || [{ name: 'Test Strip', weight: 1 }]));
+  randomLocation(level = 1) {
+    const rows = (this.config.locations || [{ name: 'Test Strip', weight: 1 }])
+      .filter((row) => !row.nightmare && Number(row.minLevel || 1) <= Number(level || 1));
+    return structuredClone(this.#weighted(rows.length ? rows : [{ name: 'Local Test & Tune', weight: 1 }]));
   }
 
   simulate(context, distanceKey = '1/4', weather = null) {
@@ -33,7 +37,7 @@ export class RaceSimulator {
     const grip = clamp(Number(context.grip || 1), 0.5, 2);
     const level = Math.max(1, Number(context.level || 1));
 
-    const reaction = this.#reaction(level, torque, weight, Number(context.reactionOffset || 0));
+    const reaction = this.#reaction(level, torque, weight, Number(context.reactionOffset || 0), context.allowFoul !== false);
     let et = Number(distance.etFactor) * Math.cbrt(weight / hp);
     et += Number(condition.etModifier || 0) + this.#random(-Number(distance.etRandom || 0), Number(distance.etRandom || 0));
     et = clamp(et, Number(distance.minEt || 1), Number(distance.maxEt || 999));
@@ -79,7 +83,7 @@ export class RaceSimulator {
     };
   }
 
-  #reaction(level, torque, weight, offset) {
+  #reaction(level, torque, weight, offset, allowFoul = true) {
     const skillBias = clamp(level / 100, 0, 1);
     const skewed = Math.pow(this.rng(), 2 - skillBias);
     let rt = 0.050 + (0.450 * skewed);
@@ -87,7 +91,7 @@ export class RaceSimulator {
     else rt += this.#random(0, 0.010);
     rt += offset;
     const foulChance = Math.max(0.02, 0.10 - (level * 0.001));
-    if (this.rng() < foulChance) rt = -this.#random(0.015, 0.050);
+    if (allowFoul && this.rng() < foulChance) rt = -this.#random(0.015, 0.050);
     return rt;
   }
 
