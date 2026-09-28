@@ -84,7 +84,8 @@ if [[ -z "$STARTER_LISTING_ID" || "$STARTER_LISTING_ID" == "null" ]]; then
   echo "Civic starter listing was not generated." >&2
   exit 1
 fi
-PLAYER="$(post usedlot/purchase.php "{"listingId":"$STARTER_LISTING_ID"}")"
+STARTER_BODY="$(jq -nc --arg listingId "$STARTER_LISTING_ID" '{listingId:$listingId}')"
+PLAYER="$(post usedlot/purchase.php "$STARTER_BODY")"
 CAR_ID="$(echo "$PLAYER" | jq -r '.player.selectedCarId')"
 echo "$PLAYER" | jq -e '.player.garage[0].buildStage == 1 and .player.garage[0].source == "used" and .player.garage[0].mileage >= 105000 and .player.tutorial.step == "visit_garage"' >/dev/null
 
