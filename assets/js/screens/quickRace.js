@@ -32,7 +32,7 @@ export async function renderQuickRace(ctx) {
     trail: activeRace ? "Race in progress" : "Choose an unlocked distance",
     body: `
       ${tutorialRace ? `<section class="ftue-focus-panel ftue-focus-panel--race">
-        <div class="ftue-focus-panel__step">FTUE 6/6</div>
+        <div class="ftue-focus-panel__step">STEP 6/6</div>
         <div class="ftue-focus-panel__copy"><span>FIRST PASS</span><strong>Run the 1/4 mile.</strong><p>Your first race uses clear conditions, you cannot red-light, and the opponent is intentionally beginner-friendly.</p></div>
         <div class="ftue-focus-panel__arrow">↓ CLICK START RACE</div>
       </section>` : ""}
