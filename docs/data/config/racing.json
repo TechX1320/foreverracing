@@ -1,0 +1,308 @@
+{
+  "version": 1,
+  "historyLimit": 25,
+  "distances": {
+    "1": {
+      "label": "1 Mile",
+      "feet": 5280,
+      "etFactor": 16.2,
+      "etRandom": 0.12,
+      "minEt": 20,
+      "maxEt": 65,
+      "trapMultiplier": 1.45,
+      "minTrap": 70,
+      "maxTrap": 265,
+      "creditMultiplier": 1.9
+    },
+    "1/4": {
+      "label": "1/4 Mile",
+      "feet": 1320,
+      "etFactor": 6.29,
+      "etRandom": 0.05,
+      "minEt": 6.5,
+      "maxEt": 20,
+      "trapMultiplier": 1,
+      "minTrap": 40,
+      "maxTrap": 180,
+      "creditMultiplier": 1
+    },
+    "1/2": {
+      "label": "1/2 Mile",
+      "feet": 2640,
+      "etFactor": 11,
+      "etRandom": 0.1,
+      "minEt": 15,
+      "maxEt": 50,
+      "trapMultiplier": 1.25,
+      "minTrap": 55,
+      "maxTrap": 225,
+      "creditMultiplier": 1.45
+    }
+  },
+  "weather": [
+    {
+      "name": "Hot & Dry",
+      "etModifier": -0.05,
+      "mphModifier": 1.5,
+      "weight": 35
+    },
+    {
+      "name": "Cool & Cloudy",
+      "etModifier": 0,
+      "mphModifier": 0,
+      "weight": 30
+    },
+    {
+      "name": "Rainy",
+      "etModifier": 0.15,
+      "mphModifier": -2.5,
+      "weight": 15,
+      "slippery": true
+    },
+    {
+      "name": "Snow",
+      "etModifier": 0.3,
+      "mphModifier": -6,
+      "weight": 8,
+      "slippery": true
+    },
+    {
+      "name": "Ice",
+      "etModifier": 0.5,
+      "mphModifier": -9,
+      "weight": 4,
+      "slippery": true
+    },
+    {
+      "name": "Hurricane",
+      "etModifier": 1.5,
+      "mphModifier": -20,
+      "weight": 1.5
+    },
+    {
+      "name": "Tornado",
+      "etModifier": 1,
+      "mphModifier": -15,
+      "weight": 1.5
+    },
+    {
+      "name": "Humid & Sticky",
+      "etModifier": 0.05,
+      "mphModifier": -0.5,
+      "weight": 12
+    },
+    {
+      "name": "Cold & Dry",
+      "etModifier": 0.02,
+      "mphModifier": 1,
+      "weight": 10
+    },
+    {
+      "name": "Windy",
+      "etModifier": 0.1,
+      "mphModifier": -2,
+      "weight": 7
+    },
+    {
+      "name": "Foggy",
+      "etModifier": 0.12,
+      "mphModifier": -1.5,
+      "weight": 6
+    },
+    {
+      "name": "Misty",
+      "etModifier": 0.07,
+      "mphModifier": -0.8,
+      "weight": 8,
+      "slippery": true
+    },
+    {
+      "name": "Drizzle",
+      "etModifier": 0.09,
+      "mphModifier": -1.2,
+      "weight": 9,
+      "slippery": true
+    },
+    {
+      "name": "Ash Storm",
+      "etModifier": 1.75,
+      "mphModifier": -18,
+      "weight": 0.42,
+      "nightmare": true
+    },
+    {
+      "name": "Solar Flare Surge",
+      "etModifier": 2,
+      "mphModifier": -10,
+      "weight": 0.3,
+      "nightmare": true
+    },
+    {
+      "name": "Oil Spill",
+      "etModifier": 2.69,
+      "mphModifier": -14,
+      "weight": 0.2,
+      "slippery": true,
+      "nightmare": true
+    },
+    {
+      "name": "Microburst Winds",
+      "etModifier": 1.3,
+      "mphModifier": -22,
+      "weight": 0.3,
+      "nightmare": true
+    },
+    {
+      "name": "Gravity Fluctuation",
+      "etModifier": 3,
+      "mphModifier": -25,
+      "weight": 0.15,
+      "nightmare": true
+    },
+    {
+      "name": "Dinosaur Killer Meteor Strike",
+      "etModifier": 7,
+      "mphModifier": -50,
+      "weight": 0.025,
+      "nightmare": true
+    }
+  ],
+  "locations": [
+    {
+      "name": "Desert Strip",
+      "weight": 20
+    },
+    {
+      "name": "Tokyo Underground",
+      "weight": 10
+    },
+    {
+      "name": "Nürburgring Dragway",
+      "weight": 8
+    },
+    {
+      "name": "Miami Coastline",
+      "weight": 12
+    },
+    {
+      "name": "LA Industrial Docks",
+      "weight": 14
+    },
+    {
+      "name": "Monaco Street Circuit",
+      "weight": 6
+    },
+    {
+      "name": "Abu Dhabi Midnight",
+      "weight": 7
+    },
+    {
+      "name": "London Rainy Alley",
+      "weight": 9
+    },
+    {
+      "name": "Seoul Neon Run",
+      "weight": 10
+    },
+    {
+      "name": "Vegas Strip Sprint",
+      "weight": 11
+    },
+    {
+      "name": "Chicago Elevated",
+      "weight": 7
+    },
+    {
+      "name": "Brooklyn Shipyards",
+      "weight": 8
+    },
+    {
+      "name": "Berlin Wall Drag",
+      "weight": 5
+    },
+    {
+      "name": "Cape Town Circuit",
+      "weight": 5
+    },
+    {
+      "name": "Sydney Harbour Run",
+      "weight": 6
+    },
+    {
+      "name": "São Paulo Slalom",
+      "weight": 5
+    },
+    {
+      "name": "Moscow Night Ice",
+      "weight": 3
+    },
+    {
+      "name": "Dubai Palm Circuit",
+      "weight": 7
+    },
+    {
+      "name": "Johannesburg Strip",
+      "weight": 4
+    },
+    {
+      "name": "Detroit Muscle Mile",
+      "weight": 9
+    },
+    {
+      "name": "Paris Lights Sprint",
+      "weight": 6
+    },
+    {
+      "name": "Rio Favela Run",
+      "weight": 4
+    },
+    {
+      "name": "Istanbul Old City",
+      "weight": 5
+    },
+    {
+      "name": "Osaka Docklands",
+      "weight": 7
+    },
+    {
+      "name": "Chernobyl Reactor Run",
+      "weight": 0.15,
+      "nightmare": true
+    },
+    {
+      "name": "Area 51 Test Track",
+      "weight": 0.2,
+      "nightmare": true
+    },
+    {
+      "name": "The Backrooms",
+      "weight": 0.1,
+      "nightmare": true
+    },
+    {
+      "name": "Neon Void Highway",
+      "weight": 0.12,
+      "nightmare": true
+    },
+    {
+      "name": "Event Horizon Loop",
+      "weight": 0.05,
+      "nightmare": true
+    },
+    {
+      "name": "AI Core Circuit",
+      "weight": 0.07,
+      "nightmare": true
+    },
+    {
+      "name": "Warped Time Trial",
+      "weight": 0.03,
+      "nightmare": true
+    },
+    {
+      "name": "Dinosaur Ruins Drag",
+      "weight": 0.025,
+      "nightmare": true
+    }
+  ]
+}

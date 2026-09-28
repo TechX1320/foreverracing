@@ -29,7 +29,7 @@ export class ApiStorageProvider extends StorageProvider {
   usedLot() { return this.#api.usedLot(); }
   refreshUsedLot() { return this.#api.refreshUsedLot(); }
   buyUsedCar(listingId) { return this.#api.buyUsedCar(listingId); }
-  quickRace() { return this.#api.quickRace(); }
+  quickRace(distance = '1/4') { return this.#api.quickRace(distance); }
   roguelikeStart() { return this.#api.roguelikeStart(); }
   roguelikeStep(choice) { return this.#api.roguelikeStep(choice); }
 }
