@@ -423,25 +423,47 @@ final class GameService
             $carIndex = self::requireOwnedCarIndex($player, (string)($player['selectedCarId'] ?? ''));
             $car = $player['garage'][$carIndex];
             $level = max(1, (int)($player['progression']['level'] ?? 1));
-            $weather = $simulator->randomWeather();
-            $location = $simulator->randomLocation();
+            $tutorialRace = ($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'first_race';
+            $unlockLevel = $distance === '1' ? 10 : ($distance === '1/2' ? 5 : 1);
+            if ($tutorialRace && $distance !== '1/4') {
+                throw new GameException('Your first race is the 1/4 mile.');
+            }
+            if (!$tutorialRace && $level < $unlockLevel) {
+                throw new GameException((string)($distanceConfig['label'] ?? $distance) . ' unlocks at Level ' . $unlockLevel . '.');
+            }
+            $weather = $tutorialRace
+                ? ['name' => 'Cool & Cloudy', 'etModifier' => 0, 'mphModifier' => 0, 'weight' => 1]
+                : $simulator->randomWeather($level);
+            $location = $tutorialRace
+                ? ['name' => 'Local Test & Tune', 'weight' => 1]
+                : $simulator->randomLocation($level);
 
             $hp = max(1.0, (float)($car['derived']['hp'] ?? 1));
             $torque = max(1.0, (float)($car['derived']['torque'] ?? 1));
             $weight = max(500.0, (float)($car['derived']['weight'] ?? 500));
             $grip = max(0.5, (float)($car['derived']['grip'] ?? 1));
             $pwr = $hp / $weight;
-            $difficulty = self::randomFloat(0.94, 1.08);
+            $difficulty = $tutorialRace ? self::randomFloat(0.84, 0.89) : self::randomFloat(0.94, 1.08);
             $opponentWeight = max(1200, (int)round($weight * self::randomFloat(0.90, 1.10)));
             $opponentHp = max(55, (int)round($pwr * $difficulty * $opponentWeight));
             $opponentTorque = max(50, (int)round($torque * $difficulty * self::randomFloat(0.93, 1.07)));
             $opponentGrip = max(0.65, min(1.45, $grip + self::randomFloat(-0.06, 0.06)));
-            $opponentLevel = max(1, $level + mt_rand(-3, 3));
+            $opponentLevel = $tutorialRace ? 1 : max(1, $level + mt_rand(-3, 3));
 
-            $playerRun = $simulator->simulate(['hp' => $hp, 'torque' => $torque, 'weight' => $weight, 'grip' => $grip, 'level' => $level], $distance, $weather);
+            $playerRun = $simulator->simulate([
+                'hp' => $hp, 'torque' => $torque, 'weight' => $weight, 'grip' => $grip, 'level' => $level,
+                'allowFoul' => !$tutorialRace,
+            ], $distance, $weather);
             $opponentRun = $simulator->simulate([
                 'hp' => $opponentHp, 'torque' => $opponentTorque, 'weight' => $opponentWeight, 'grip' => $opponentGrip, 'level' => $opponentLevel,
+                'allowFoul' => !$tutorialRace, 'reactionOffset' => $tutorialRace ? 0.16 : 0,
             ], $distance, $weather);
+            if ($tutorialRace && (float)$opponentRun['totalTime'] <= (float)$playerRun['totalTime']) {
+                $delta = ((float)$playerRun['totalTime'] - (float)$opponentRun['totalTime']) + 0.25;
+                $opponentRun['reactionTime'] = round((float)$opponentRun['reactionTime'] + $delta, 3);
+                $opponentRun['totalTime'] = round((float)$opponentRun['totalTime'] + $delta, 3);
+                $opponentRun['foul'] = false;
+            }
 
             $won = (float)$playerRun['totalTime'] < (float)$opponentRun['totalTime'];
             $creditMultiplier = (float)($distanceConfig['creditMultiplier'] ?? 1);
