@@ -54,7 +54,7 @@
       "grip": 0.96,
       "drivetrain": "FWD"
     },
-    "starter": false,
+    "starter": true,
     "factoryEngineId": null,
     "visual": {
       "profile": "sports",
@@ -75,7 +75,7 @@
       "grip": 0.98,
       "drivetrain": "RWD"
     },
-    "starter": true,
+    "starter": false,
     "factoryEngineId": "ford_modular_46_3v",
     "engineBay": {
       "sizeClass": 5,
@@ -116,7 +116,7 @@
       "grip": 1.01,
       "drivetrain": "RWD"
     },
-    "starter": true,
+    "starter": false,
     "factoryEngineId": "nissan_vq35de_35",
     "engineBay": {
       "sizeClass": 4,
@@ -208,7 +208,7 @@
       "grip": 1.02,
       "drivetrain": "RWD"
     },
-    "starter": false,
+    "starter": true,
     "factoryEngineId": null,
     "visual": {
       "profile": "roadster",
