@@ -828,3 +828,153 @@ dialog.race-playback-dialog{width:min(900px,calc(100vw - 24px));max-height:92dvh
   .nav-rail button span{font-size:10px}
   .header-action{font-size:10px}
 }
+
+/* V0.4D FTUE and readable-game pass
+   Stop buying viewport space by shrinking text. Reorganize the UI instead. */
+body{font-size:16px;line-height:1.5}
+.nav-rail button b{font-size:13px}
+.nav-rail button span{font-size:11px;line-height:1.3}
+.nav-rail__label{font-size:11px}
+.section-label,.section-heading small,.objective-kicker,.player-info-grid span,
+.build-shop-summary__info span,.parts-category-card__name,.parts-shop-row__title span,
+.garage-inventory-row__category,.classified-detail-specs span,.race-record-strip small,
+.race-result-foot small,.race-playback__meta span,.race-playback-result__grid span,
+.race-playback-result__rewards small,.rule-list b,.pill,.filter-chip{font-size:12px}
+.screen-copy,.objective-box p,.classifieds-intro p,.game-card p,.muted,
+.parts-shop-dialog__note,.garage-inventory-row small,.parts-shop-row__title small,
+.classified-price-breakdown p,.classified-detail-note{font-size:13px;line-height:1.5}
+.button{font-size:13px;min-height:38px;padding-inline:12px}
+.button--small{font-size:12px;min-height:36px}
+.screen-toolbar__trail{font-size:12px}
+.section-heading h2{font-size:22px}
+.game-card h3,.classified-card__title strong{font-size:16px}
+.spec span{font-size:11px}
+.spec strong{font-size:15px}
+.data-row strong{font-size:13px}
+.data-row small{font-size:11px}
+.player-info-grid b{font-size:15px}
+.rule-list div{display:grid;grid-template-columns:74px 1fr;gap:8px;align-items:start}
+.rule-list b{display:block}
+.rule-list span{font-size:12px;line-height:1.4}
+
+/* First-time experience should dominate the screen, not whisper from a strip. */
+.fr-dialog:has(.ftue-welcome){width:min(720px,calc(100vw - 28px))}
+.ftue-welcome{padding:24px}
+.ftue-welcome .section-label{font-size:12px}
+.ftue-welcome h2{font-size:28px;margin-top:6px}
+.ftue-welcome>p{font-size:15px;max-width:62ch;margin:9px 0 18px}
+.ftue-points>div{grid-template-columns:48px 1fr;gap:12px;padding:13px}
+.ftue-points b{font-size:15px}
+.ftue-points span{font-size:13px}
+.ftue-points strong{font-size:15px;margin-bottom:2px}
+.ftue-primary-action{min-height:48px!important;font-size:15px!important;font-weight:950;padding-inline:20px!important}
+.ftue-focus-panel{display:grid;grid-template-columns:88px minmax(0,1fr) auto;gap:16px;align-items:center;margin:0 0 12px;padding:16px;border:2px solid #a95328;background:linear-gradient(90deg,#21150f,#151719)}
+.ftue-focus-panel__step{display:grid;place-items:center;min-height:58px;border:1px solid #85431f;background:#2a190f;color:var(--accent-2);font-size:13px;font-weight:950;letter-spacing:.06em}
+.ftue-focus-panel__copy>span{display:block;color:var(--accent-2);font-size:12px;font-weight:950;letter-spacing:.1em}
+.ftue-focus-panel__copy>strong{display:block;margin-top:2px;font-size:20px;color:#fff}
+.ftue-focus-panel__copy>p{margin:4px 0 0;color:#c4c8cb;font-size:13px;line-height:1.45}
+.ftue-focus-panel__arrow{color:var(--accent-2);font-size:13px;font-weight:950;white-space:nowrap}
+.ftue-focus-panel--garage{margin-top:12px}
+.ftue-focus-panel--compact{padding-block:12px}
+.ftue-inline-command{margin:0 0 10px;padding:12px 14px;border:1px solid #a95328;background:#21150f}
+.ftue-inline-command strong{display:block;color:#fff;font-size:16px}
+.ftue-inline-command span{display:block;margin-top:3px;color:#c8b7ac;font-size:12px}
+
+/* Classifieds and Showroom share one image-first card language. */
+.classifieds-grid,.showroom-grid{gap:10px}
+.classified-card{min-height:248px}
+.classified-card__visual{height:135px}
+.classified-card__body{padding:11px}
+.classified-card__title small{font-size:12px}
+.condition-badge{font-size:11px;padding:4px 7px}
+.classified-card__meta{font-size:12px}
+.classified-card__meta b{font-size:16px}
+.classifieds-grid--starter{grid-template-columns:repeat(3,minmax(0,1fr));max-width:1100px;margin-inline:auto}
+.classified-card--starter{border-width:2px}
+.showroom-card__specs{display:grid;grid-template-columns:repeat(3,1fr);border-block:1px solid var(--border);margin:10px 0}
+.showroom-card__specs span{padding:8px;border-right:1px solid var(--border)}
+.showroom-card__specs span:last-child{border-right:0}
+.showroom-card__specs small{display:block;color:var(--faint);font-size:11px;font-weight:900}
+.showroom-card__specs b{display:block;margin-top:3px;font-size:14px}
+.classified-detail-dialog__hero p{font-size:13px}
+.classified-detail-specs span{font-size:11px}
+.classified-detail-specs b{font-size:14px}
+
+/* Parts: large category text, clean modal cards and a forced first step. */
+.parts-category-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.parts-category-card{min-height:112px;padding:12px}
+.parts-category-card strong{font-size:17px}
+.parts-category-card small{font-size:12px;min-height:34px}
+.parts-category-card--ftue{border:2px solid var(--accent);box-shadow:0 0 0 2px #9b4b2422}
+.parts-category-card:disabled{opacity:.38;cursor:not-allowed}
+.parts-shop-dialog{width:min(780px,calc(100vw - 28px))}
+.parts-shop-dialog__titlebar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-bottom:12px;margin-bottom:10px;border-bottom:1px solid var(--border)}
+.parts-shop-dialog__titlebar h2{font-size:25px}
+.parts-shop-dialog__titlebar p{margin:3px 0 0;color:var(--muted);font-size:13px}
+.parts-shop-dialog__stats{display:grid;grid-template-columns:repeat(3,88px);border:1px solid var(--border)}
+.parts-shop-dialog__stats span{padding:9px;border-right:1px solid var(--border);text-align:center}
+.parts-shop-dialog__stats span:last-child{border-right:0}
+.parts-shop-dialog__stats small{display:block;color:var(--faint);font-size:11px;font-weight:900}
+.parts-shop-dialog__stats b{display:block;margin-top:3px;font-size:15px}
+.parts-shop-list{gap:8px}
+.parts-shop-row{grid-template-columns:minmax(220px,1.2fr) minmax(245px,1fr) 180px;min-height:78px}
+.parts-shop-row>div{padding:11px 12px}
+.parts-shop-row__title strong{font-size:15px}
+.parts-shop-row__delta span{font-size:11px}
+.parts-shop-row__delta b{font-size:13px}
+.parts-shop-row__action .button{width:100%}
+
+/* Garage Inventory is an ownership/action surface, not a tiny data table. */
+.garage-entry__title strong{font-size:17px}
+.garage-entry__title small{font-size:12px}
+.stat-line span,.stage-progress__label{font-size:12px}
+.stat-line b{font-size:13px}
+.garage-inventory-dialog{width:min(760px,calc(100vw - 28px))}
+.garage-inventory-dialog__titlebar{display:grid;grid-template-columns:1fr 230px;gap:16px;align-items:center;padding-bottom:12px;margin-bottom:10px;border-bottom:1px solid var(--border)}
+.garage-inventory-dialog__titlebar h2{font-size:24px}
+.garage-inventory-dialog__titlebar p{font-size:13px;color:var(--muted)}
+.garage-inventory-dialog__car{display:flex;align-items:center;justify-content:center;height:105px}
+.garage-inventory-dialog__car .vehicle-sprite-image--sideProfile{max-height:100px;max-width:220px}
+.garage-inventory-row{grid-template-columns:minmax(250px,1.3fr) minmax(190px,.8fr) 170px;min-height:84px}
+.garage-inventory-row>div{padding:12px}
+.garage-inventory-row__identity strong{font-size:16px}
+.garage-inventory-row__effects span{font-size:12px}
+.garage-inventory-row--ftue{border:2px solid var(--accent)}
+.garage-inventory-row--ftue .garage-inventory-row__action .button{width:100%;min-height:48px}
+
+/* Quick Race: primary action above secondary history/info. */
+.race-distance-tabs{gap:8px;margin-bottom:10px}
+.race-distance-button{min-width:150px;min-height:48px;display:grid!important;place-items:center;gap:0}
+.race-distance-button b{font-size:14px}
+.race-distance-button span{font-size:11px!important}
+.race-distance-button.is-locked{opacity:.45}
+.race-start-button{width:100%;min-height:50px;font-size:16px}
+.race-car-panel__visual{height:130px}
+.race-car-panel .spec-grid{grid-template-columns:repeat(4,1fr)}
+.race-record-strip{margin-top:7px}
+.race-record-strip small{font-size:11px}
+.race-record-strip b{font-size:14px}
+.collapsible-section{margin-top:9px;border:1px solid var(--border);background:#101214}
+.collapsible-section summary{cursor:pointer;padding:10px 12px;color:#d9dde0;font-size:12px;font-weight:900;letter-spacing:.06em}
+.collapsible-section summary span{float:right;color:var(--accent-2)}
+.collapsible-section>p{margin:0;padding:0 12px 12px;color:var(--muted);font-size:12px;line-height:1.5}
+.collapsible-section .race-history-list{border:0;border-top:1px solid var(--border);margin:0}
+.race-history{padding-top:0;border-top:0}
+
+/* Keep the raised type usable on smaller screens without reverting to microscopic UI. */
+@media(max-width:760px){
+  body{font-size:15px}
+  .nav-rail button b{font-size:12px}
+  .nav-rail button span{font-size:10px}
+  .ftue-focus-panel{grid-template-columns:64px 1fr;gap:10px}
+  .ftue-focus-panel__arrow,.ftue-focus-panel>.button{grid-column:1/-1;width:100%}
+  .ftue-focus-panel__copy>strong{font-size:18px}
+  .classifieds-grid--starter{grid-template-columns:1fr}
+  .parts-category-grid{grid-template-columns:repeat(2,1fr)}
+  .parts-shop-dialog__titlebar{display:block}
+  .parts-shop-dialog__stats{margin-top:10px;grid-template-columns:repeat(3,1fr)}
+  .garage-inventory-dialog__titlebar{grid-template-columns:1fr}
+  .garage-inventory-dialog__car{height:90px}
+  .race-car-panel .spec-grid{grid-template-columns:repeat(2,1fr)}
+}
+
