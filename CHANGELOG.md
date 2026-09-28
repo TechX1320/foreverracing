@@ -14,6 +14,7 @@
 - Made Admin a disposable FTUE development account: signing out wipes its player save so the next login starts fresh.
 - Added local duplicate-login prevention and a server-side active-session registry that rejects a second active login.
 - Added regression coverage for race distances, EXP/records/history, duplicate sessions and Admin reset behavior.
+- Hardened the fresh-login FTUE welcome so it retries after the login dialog closes instead of occasionally leaving a reset Admin on the Home screen without the Welcome modal.
 
 ## V0.3.0-a — starter dual-view art + cache cleanup
 
