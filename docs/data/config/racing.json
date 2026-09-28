@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "historyLimit": 25,
   "distances": {
     "1": {
@@ -304,5 +304,11 @@
       "weight": 0.025,
       "nightmare": true
     }
-  ]
+  ],
+  "presentation": {
+    "stagingMs": 2800,
+    "timeScale": 1,
+    "revealDelayMs": 650,
+    "progressExponent": 1.38
+  }
 }
