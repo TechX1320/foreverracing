@@ -10,7 +10,7 @@ if (is_file($gameConfigPath)) {
 
 return [
     'app_name' => 'Forever Racing',
-    'build' => '0.2.0-dev.5',
+    'build' => '0.3.0-a',
     'admin_username' => 'Admin',
     'admin_password' => '12345',
     'session_name' => 'forever_racing_session',

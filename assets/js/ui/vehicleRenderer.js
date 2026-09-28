@@ -1,4 +1,4 @@
-export function renderVehicle(car, { stage = null, compact = false, view = 'topDown' } = {}) {
+export function renderVehicle(car, { stage = null, compact = false, view = 'sideProfile' } = {}) {
   const visual = car?.visual || {};
   const buildStage = Number(stage || car?.buildStage || 1);
   const sprite = resolveSprite(visual.sprites, view, buildStage);
@@ -13,20 +13,19 @@ function resolveSprite(sprites, view, stage) {
   const candidates = [];
   const push = (value) => { if (value && !candidates.includes(value)) candidates.push(value); };
 
-  push(sprites[view]);
-
   if (view === 'showroom') {
+    push(sprites.showroom);
     push(sprites.sideProfile);
-    push(sprites.topDown);
   } else if (view === 'sideProfile') {
-    push(sprites.showroom);
-    push(sprites.topDown);
-  } else if (view === 'racePreview') {
-    push(sprites.topDown);
-  } else if (view !== 'topDown') {
-    push(sprites.topDown);
     push(sprites.sideProfile);
     push(sprites.showroom);
+  } else if (view === 'racePreview') {
+    push(sprites.racePreview);
+    push(sprites.topDown);
+  } else if (view === 'topDown') {
+    push(sprites.topDown);
+  } else {
+    push(sprites[view]);
   }
 
   for (const candidate of candidates) {
@@ -45,9 +44,10 @@ function resolveStageCandidate(candidate, stage) {
 function renderSprite(car, sprite, { compact, view }) {
   const src = String(sprite.src || '').trim();
   if (src) {
+    const resolvedSrc = versionedAsset(src);
     return `
       <div class="vehicle-visual vehicle-visual--sprite" role="img" aria-label="${escapeAttr(car?.displayName || 'Vehicle')} ${escapeAttr(view)} preview">
-        <img data-vehicle-image class="vehicle-sprite-image ${compact ? 'vehicle-sprite-image--compact' : 'vehicle-sprite-image--full'}" src="${escapeAttr(src)}" alt="" aria-hidden="true">
+        <img data-vehicle-image class="vehicle-sprite-image ${compact ? 'vehicle-sprite-image--compact' : 'vehicle-sprite-image--full'} vehicle-sprite-image--${escapeAttr(view)}" src="${escapeAttr(resolvedSrc)}" alt="" aria-hidden="true">
         ${missingMarkup(car, compact, true)}
       </div>`;
   }
@@ -63,7 +63,7 @@ function renderSprite(car, sprite, { compact, view }) {
   if (!sheet) return renderMissingArt(car, { compact, view });
 
   const style = [
-    `background-image:url(${sheet})`,
+    `background-image:url(${versionedAsset(sheet)})`,
     `background-size:${columns * 100}% ${rows * 100}%`,
     `background-position:${positionX}% ${positionY}%`
   ].join(';');
@@ -84,6 +84,13 @@ function renderMissingArt(car, { compact = false, view = 'unknown' } = {}) {
 function missingMarkup(car, compact, hidden) {
   const name = String(car?.displayName || 'Vehicle');
   return `<span data-vehicle-missing class="vehicle-missing-art ${compact ? 'vehicle-missing-art--compact' : 'vehicle-missing-art--full'}" ${hidden ? 'hidden' : ''} aria-hidden="true"><b>?</b><small>ART MISSING</small><em>${escapeAttr(name)}</em></span>`;
+}
+
+function versionedAsset(path) {
+  const build = String(document.documentElement?.dataset?.build || '').trim();
+  if (!build || !path) return path;
+  const separator = path.includes('?') ? '&' : '?';
+  return `${path}${separator}v=${encodeURIComponent(build)}`;
 }
 
 function escapeAttr(value) {

@@ -1,5 +1,16 @@
 # Changelog
 
+## V0.3.0-a — starter dual-view art + cache cleanup
+
+- Added side-profile pixel art for all three FTUE starters: 1998 Civic DX, 2005 Mustang GT and 2003 350Z.
+- Added fresh top-down race art for the Civic and Mustang; retained the working 350Z race sprite.
+- Showroom, Garage and Parts now strictly require side-profile/showroom art and never silently display a top-down race sprite.
+- Race previews strictly use race-preview/top-down art.
+- Vehicle asset URLs include the current build as a cache-busting query parameter.
+- GitHub Pages/local development mode automatically unregisters the old offline service worker and clears Forever Racing shell caches.
+- Settings now includes a manual Clear Cached Assets development control and visible build identifier.
+- Showroom refreshes its catalog from the active provider each time it opens.
+
 ## V0.2.0-dev.5 — honest art fallback + TextTuned roadmap
 
 - Removed the generic procedural-car fallback from normal vehicle rendering.
