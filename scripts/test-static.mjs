@@ -38,7 +38,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.4.0-a"')) throw new Error('Static index is missing the V0.4A build marker.');
+if (!html.includes('data-build="0.4.0-b"')) throw new Error('Static index is missing the V0.4B build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -72,7 +72,10 @@ if (!appSource.includes("clearForeverRacingCaches({ unregister: true })")) throw
 
 const runtimeConfig = JSON.parse(await fs.readFile(new URL('data/config/game.json', docs), 'utf8'));
 if (runtimeConfig.defaultVehicleRendering !== 'authored') throw new Error('Authored vehicle rendering must be the default.');
-if (runtimeConfig.schemaVersion < 5) throw new Error('V0.4A player schema version must be at least 5.');
+if (runtimeConfig.schemaVersion < 6) throw new Error('V0.4B player schema version must be at least 6.');
+
+const buildStages = JSON.parse(await fs.readFile(new URL('data/config/build-stages.json', docs), 'utf8'));
+if (buildStages.stages?.[0]?.name !== 'Street Car' || buildStages.stages?.[1]?.name !== 'Street Race Car') throw new Error('Named V0.4B build types are missing.');
 
 const raceConfig = JSON.parse(await fs.readFile(new URL('data/config/racing.json', docs), 'utf8'));
 if (!raceConfig.distances?.['1/4'] || !raceConfig.distances?.['1/2'] || !raceConfig.distances?.['1']) throw new Error('All three race distances must be configured.');
@@ -116,4 +119,22 @@ for (const file of modules) {
   new vm.SourceTextModule(source, { identifier: file });
 }
 
-console.log('Static identity + V0.4A race presentation build smoke test passed.');
+console.log('Static identity + race presentation build smoke test passed.');
+
+
+const garageSource = await fs.readFile(new URL('assets/js/screens/garage.js', root), 'utf8');
+if (!garageSource.includes('garage-inventory-dialog') || !garageSource.includes('data-inventory-car')) throw new Error('Garage Inventory UI is missing.');
+
+const partsSourceV04b = await fs.readFile(new URL('assets/js/screens/parts.js', root), 'utf8');
+if (!partsSourceV04b.includes('parts-category-grid') || !partsSourceV04b.includes('Purchasing puts the part')) throw new Error('Category-based Parts UI is missing.');
+
+const classifiedsSource = await fs.readFile(new URL('assets/js/screens/usedlot.js', root), 'utf8');
+if (!classifiedsSource.includes('Classifieds') || !classifiedsSource.includes('MORE DETAILS') || classifiedsSource.includes('Buy Used')) throw new Error('Classifieds UI did not replace the old Used Lot purchase cards.');
+
+const cssV04b = await fs.readFile(new URL('assets/css/app.css', root), 'utf8');
+if (!cssV04b.includes('V0.4B browser-game usability') || !cssV04b.includes('.nav-rail button.is-active') || !cssV04b.includes('.race-strip{height:330px}')) throw new Error('V0.4B usability CSS is incomplete.');
+
+if (html.includes('class="status-strip"')) throw new Error('The old top player/status strip should be removed in V0.4B.');
+if (!html.includes('PLAYER INFO') || !html.includes('CLASSIFIEDS')) throw new Error('V0.4B shell Player Info/Classifieds labels are missing.');
+
+console.log('V0.4B browser-game usability checks passed.');

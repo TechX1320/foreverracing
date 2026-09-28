@@ -57,3 +57,15 @@ The current catalog has eight cars still needing authored art:
 8. 2003 Acura NSX
 
 Direction: create side-profile assets first for Showroom/Garage readability, then top-down race assets. Art work is a parallel track and should not block core MMORPG systems.
+
+
+## Known quality issue — tire/rubber rendering
+
+The current authored starter **side-profile** exports need another art pass around the wheels. In normal Garage/Parts sizing, the rims read as if they have little or no black tire rubber around them.
+
+This is an authored-asset defect, not a CSS/UI problem. Do not fake tires with UI circles or overlays. Regenerate/retouch the source side-profile sprites so the tire sidewall is clearly visible at native pixel-art scale, then replace the affected PNG assets.
+
+Priority:
+1. 1998 Honda Civic DX
+2. 2005 Ford Mustang GT
+3. 2003 Nissan 350Z

@@ -41,15 +41,22 @@ export class Router {
 
     const run = async () => renderer(this.#context);
     const reduceMotion = document.documentElement.dataset.reduceMotion === "true" || matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const markActive = () => {
+      document.querySelectorAll('.nav-rail [data-nav]').forEach((button) => {
+        button.classList.toggle('is-active', button.dataset.nav === route);
+      });
+    };
     if (document.startViewTransition && !reduceMotion) {
       try {
         await document.startViewTransition(run).finished;
+        markActive();
         return;
       } catch {
         // Fall through to a normal render if the browser rejects a transition.
       }
     }
     await run();
+    markActive();
   }
 
   start() {

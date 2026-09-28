@@ -4,6 +4,12 @@ import { showDialog, closeDialog } from "../ui/modal.js";
 
 let catalogCache = null;
 const REQUIRED = ["intake", "exhaust", "ecu", "fuel", "drivetrain", "tires", "weight"];
+const BUILD_NAMES = {
+  1: "Street Car",
+  2: "Street Race Car",
+  3: "Front-Half Race Car",
+  4: "Full Race Car",
+};
 
 export async function renderParts(ctx) {
   const player = ctx.store.player;
@@ -18,7 +24,7 @@ export async function renderParts(ctx) {
       title: "Parts",
       eyebrow: "BUILD SHOP",
       hint: "NO CURRENT CAR",
-      body: '<div class="empty-state"><strong>Select a car first.</strong><span>Parts are always evaluated against the Current Car.</span><div style="margin-top:12px"><button class="button button--primary button--small" data-go-garage>GARAGE</button></div></div>'
+      body: '<div class="empty-state"><strong>Select a car first.</strong><span>The shop always prices and previews parts against your Current Car.</span><div style="margin-top:12px"><button class="button button--primary button--small" data-go-garage>GARAGE</button></div></div>'
     });
     bindHome(ctx.screenRoot, ctx.router);
     ctx.screenRoot.querySelector("[data-go-garage]")?.addEventListener("click", () => ctx.router.navigate("garage"));
@@ -27,164 +33,148 @@ export async function renderParts(ctx) {
 
   const stage = Number(current.buildStage || 1);
   const tutorialStep = player?.tutorial?.status === "active" ? player.tutorial.step : null;
+  const categories = categoriesForCar(current);
 
   ctx.screenRoot.innerHTML = pageShell({
     title: "Parts",
-    eyebrow: `${carLabel(current)} / BUILD STAGE ${stage}`,
+    eyebrow: `${carLabel(current)} / ${buildName(stage)}`,
     hint: `${money(player.wallet?.credits)} CR`,
-    trail: stage === 1 ? "Sequential upgrades / no downgrades" : "Choice-based parts / previous stage choices remain",
+    trail: "Choose a category • shop in a focused window",
     body: `
-      <div class="build-shop-header">
-        <div class="build-shop-car">${renderVehicle(current, { stage, view: 'sideProfile' })}</div>
-        <div class="build-shop-stats">
-          <span><b>${number(current.derived?.hp)}</b> HP</span>
-          <span><b>${number(current.derived?.torque)}</b> LB-FT</span>
-          <span><b>${number(current.derived?.weight)}</b> LB</span>
-          <span><b>${number(current.derived?.grip, 3)}</b> GRIP</span>
+      <div class="build-shop-summary">
+        <div class="build-shop-summary__car">${renderVehicle(current, { stage, view: "sideProfile" })}</div>
+        <div class="build-shop-summary__info">
+          <div><span>BUILD TYPE</span><strong>${escapeHtml(buildName(stage))}</strong></div>
+          <div><span>POWER</span><strong>${number(current.derived?.hp)} hp</strong></div>
+          <div><span>TORQUE</span><strong>${number(current.derived?.torque)} lb-ft</strong></div>
+          <div><span>WEIGHT</span><strong>${number(current.derived?.weight)} lb</strong></div>
+          <div><span>GRIP</span><strong>${number(current.derived?.grip, 3)}</strong></div>
         </div>
       </div>
-      ${tutorialObjective(tutorialStep)}
-      ${stage === 1 ? renderStageOne(player, current) : renderChoiceParts(player, current)}
+
+      ${tutorialObjective(tutorialStep, current.carId)}
+
+      <section class="parts-category-panel">
+        <div class="parts-category-panel__head">
+          <div><span class="section-label">PART CATEGORIES</span><strong>Open a category to compare and purchase parts.</strong></div>
+          <button class="button button--small" type="button" data-open-inventory>GARAGE INVENTORY</button>
+        </div>
+        <div class="parts-category-grid">
+          ${categories.map((key) => categoryCard(player, current, key)).join("")}
+        </div>
+      </section>
+
+      ${streetCarReady(player, current)
+        ? `<div class="stage-ready stage-ready--reactive">
+            <div><span class="section-label">STREET CAR COMPLETE</span><strong>Ready to turn this into a Street Race Car?</strong><p>Every Street Car category is maxed. Conversion is permanent and unlocks the next set of named race parts.</p></div>
+            <button class="button button--primary" data-stage-up>UPGRADE TO STREET RACE CAR</button>
+          </div>`
+        : ""}
     `
   });
 
   bindHome(ctx.screenRoot, ctx.router);
-  bindPartActions(ctx, current);
 
-  ctx.screenRoot.querySelector("[data-explain-stages]")?.addEventListener("click", () => explainStages(ctx));
-  ctx.screenRoot.querySelector("[data-stage-up]")?.addEventListener("click", async (event) => {
-    event.currentTarget.disabled = true;
-    try {
-      const data = await ctx.storage.stageUp(current.carId);
-      ctx.store.setPlayer(data.player);
-      ctx.toast("Build Stage 2 unlocked", "The numbered Stage 1 path is now incorporated into the car.");
-      await renderParts(ctx);
-    } catch (err) {
-      ctx.toast("Stage conversion blocked", err.message);
-      event.currentTarget.disabled = false;
-    }
+  ctx.screenRoot.querySelectorAll("[data-parts-category]").forEach((button) => {
+    button.addEventListener("click", () => openCategory(ctx, current.carId, button.dataset.partsCategory));
   });
+
+  ctx.screenRoot.querySelector("[data-open-inventory]")?.addEventListener("click", () => {
+    sessionStorage.setItem("foreverRacing.openInventory", String(current.carId));
+    ctx.router.navigate("garage");
+  });
+
+  ctx.screenRoot.querySelector("[data-go-install]")?.addEventListener("click", () => {
+    sessionStorage.setItem("foreverRacing.openInventory", String(current.carId));
+    ctx.router.navigate("garage");
+  });
+
+  ctx.screenRoot.querySelector("[data-stage-up]")?.addEventListener("click", () => promptStageConversion(ctx, current.carId));
 }
 
-function renderStageOne(player, car) {
-  const rows = REQUIRED.map((key) => stageOneRow(player, car, key)).join("");
-  const done = REQUIRED.filter((key) => installedSimpleTier(player, car.carId, key) >= 3).length;
-  const complete = done === REQUIRED.length;
-
-  return `
-    <section class="build-stage-panel">
-      <div class="build-stage-panel__top">
-        <div><span class="section-label">STAGE 1 / STREET - STOCK CHASSIS</span><strong>Learn the car one category at a time.</strong></div>
-        <div class="stage-count">${done}/${REQUIRED.length} MAXED</div>
-      </div>
-      <div class="meter meter--large"><i style="width:${(done / REQUIRED.length) * 100}%"></i></div>
-      <div class="upgrade-table">
-        <div class="upgrade-table__head"><span>Category</span><span>Progress</span><span>Next upgrade</span><span>Projected result</span><span></span></div>
-        ${rows}
-      </div>
-      ${complete ? '<div class="stage-ready"><div><span class="section-label">STAGE 2 READY</span><strong>All required Stage 1 categories are maxed.</strong><p>Conversion is permanent. Your completed Stage 1 setup becomes the new baseline.</p></div><button class="button button--primary" data-stage-up>CONVERT TO STAGE 2</button></div>' : ""}
-    </section>`;
-}
-
-function stageOneRow(player, car, key) {
-  const currentTier = installedSimpleTier(player, car.carId, key);
-  const categoryParts = catalogCache
-    .filter((part) => part.categoryKey === key && Number(part.buildStage) === 1)
-    .sort((a, b) => Number(a.simpleTier) - Number(b.simpleTier));
-
-  const currentSpec = categoryParts.find((part) => Number(part.simpleTier) === currentTier);
-  const nextSpec = categoryParts.find((part) => Number(part.simpleTier) === currentTier + 1);
-  const pending = nextSpec ? findInventory(player, nextSpec.catalogId) : null;
-  const highlight = player?.tutorial?.status === "active"
-    && ["buy_first_upgrade", "install_first_upgrade"].includes(player.tutorial.step)
-    && key === "intake";
-  const progress = [1, 2, 3]
-    .map((tier) => `<i class="tier-dot ${tier <= currentTier ? "is-done" : ""}">${tier}</i>`)
-    .join("");
-
-  if (!nextSpec) {
-    return `<div class="upgrade-row ${highlight ? "tutorial-target" : ""}">
-      <div><strong>${escapeHtml(currentSpec?.category || key)}</strong><small>Stage 1 category</small></div>
-      <div class="tier-track">${progress}</div>
-      <div><strong>MAXED</strong><small>Stage 3 installed</small></div>
-      <div class="projected"><b>${number(car.derived?.hp)} hp</b><b>${number(car.derived?.torque)} tq</b><b>${number(car.derived?.weight)} lb</b></div>
-      <div><span class="status-text status-text--good">COMPLETE</span></div>
-    </div>`;
-  }
-
-  const projected = projectStats(player, car, nextSpec);
-  return `<div class="upgrade-row ${highlight ? "tutorial-target" : ""}">
-    <div><strong>${escapeHtml(nextSpec.category)}</strong><small>${currentTier ? `Stage ${currentTier} installed` : "Stock"}</small></div>
-    <div class="tier-track">${progress}</div>
-    <div><strong>${escapeHtml(nextSpec.name)}</strong><small>${money(nextSpec.price)} cr</small></div>
-    <div class="projected">
-      <b>${number(car.derived?.hp)} -> ${number(projected.hp)} hp</b>
-      <b>${number(car.derived?.torque)} -> ${number(projected.torque)} tq</b>
-      <b>${number(car.derived?.weight)} -> ${number(projected.weight)} lb</b>
-    </div>
-    <div>${pending
-      ? `<button class="button button--primary button--small" data-install-part="${escapeHtml(pending.inventoryId)}">INSTALL</button>`
-      : `<button class="button button--small" data-buy-part="${escapeHtml(nextSpec.catalogId)}" ${Number(player.wallet?.credits || 0) >= Number(nextSpec.price) ? "" : "disabled"}>BUY</button>`
-    }</div>
-  </div>`;
-}
-
-function renderChoiceParts(player, car) {
-  const stage = Number(car.buildStage || 2);
+function categoriesForCar(car) {
+  const stage = Number(car.buildStage || 1);
+  if (stage === 1) return REQUIRED;
   const available = catalogCache.filter((part) =>
     !part.simpleTier
     && Number(part.buildStage || 2) <= stage
     && Number(part.persistentFromStage || part.buildStage || 2) <= stage
   );
-  const categories = [...new Set(available.map((part) => part.categoryKey))];
+  return [...new Set(available.map((part) => part.categoryKey))];
+}
 
+function categoryCard(player, car, key) {
+  const stage = Number(car.buildStage || 1);
+  const specs = categorySpecs(car, key);
+  const label = specs[0]?.category || key;
+  const scopedOwned = ownedForCar(player, car.carId).filter((item) => {
+    const spec = catalogCache.find((row) => row.catalogId === item.catalogId);
+    return spec?.categoryKey === key;
+  });
+
+  if (stage === 1) {
+    const tier = installedSimpleTier(player, car.carId, key);
+    const next = specs.find((part) => Number(part.simpleTier) === tier + 1);
+    const ownedNext = next ? scopedOwned.find((item) => item.catalogId === next.catalogId) : null;
+    return `
+      <button class="parts-category-card ${tier >= 3 ? "is-complete" : ""}" type="button" data-parts-category="${escapeHtml(key)}">
+        <span class="parts-category-card__name">${escapeHtml(label)}</span>
+        <strong>${tier}/3 COMPLETE</strong>
+        <small>${tier >= 3 ? "Street Car category maxed" : ownedNext ? `${escapeHtml(next.name)} owned — install from Garage` : `Next: ${escapeHtml(next?.name || "Upgrade")}`}</small>
+        <i class="meter"><i style="width:${(tier / 3) * 100}%"></i></i>
+      </button>`;
+  }
+
+  const installed = scopedOwned.find((item) => String(item.installedOnCarId || "") === String(car.carId));
   return `
-    <section class="build-stage-panel">
-      <div class="build-stage-panel__top">
-        <div><span class="section-label">STAGE ${stage} / CHOICE-BASED BUILD</span><strong>Parts are choices now, not a ladder.</strong><p>Nothing is hidden behind mystery stats. The projected car result is shown before you buy or install.</p></div>
-      </div>
-      <div class="choice-groups">
-        ${categories.map((key) => `
-          <section class="choice-group">
-            <h3>${escapeHtml(available.find((p) => p.categoryKey === key)?.category || key)}</h3>
-            <div class="choice-list">${available.filter((part) => part.categoryKey === key).map((part) => choiceRow(player, car, part)).join("")}</div>
-          </section>
-        `).join("")}
-      </div>
-      ${stage < 3 ? '<div class="future-stage-note"><strong>Stage 3 preview:</strong> front-half / tube-chassis work, engine swaps and more parts are modeled next. Stage 2 parts remain available after advancing.</div>' : ""}
-    </section>`;
+    <button class="parts-category-card" type="button" data-parts-category="${escapeHtml(key)}">
+      <span class="parts-category-card__name">${escapeHtml(label)}</span>
+      <strong>${scopedOwned.length} OWNED</strong>
+      <small>${installed ? `Installed: ${escapeHtml(partName(installed.catalogId))}` : "Stock setup installed"}</small>
+      <i class="parts-category-card__count">${specs.length} options</i>
+    </button>`;
 }
 
-function choiceRow(player, car, part) {
-  const owned = findInventory(player, part.catalogId);
-  const installed = owned && String(owned.installedOnCarId || "") === String(car.carId);
-  const projected = projectStats(player, car, part);
+function openCategory(ctx, carId, key) {
+  const player = ctx.store.player;
+  const car = player?.garage?.find((entry) => String(entry.carId) === String(carId));
+  if (!car) return;
+  const specs = categorySpecs(car, key);
+  if (!specs.length) return;
 
-  return `<div class="choice-row ${installed ? "is-installed" : ""}">
-    <div><strong>${escapeHtml(part.name)}</strong><small>${escapeHtml(part.description || "")}</small></div>
-    <div class="projected">
-      <b>${number(car.derived?.hp)} -> ${number(projected.hp)} hp</b>
-      <b>${number(car.derived?.torque)} -> ${number(projected.torque)} tq</b>
-      <b>${number(car.derived?.weight)} -> ${number(projected.weight)} lb</b>
-    </div>
-    <div class="choice-row__price">${money(part.price)} cr</div>
-    <div>${installed
-      ? `<button class="button button--small" data-uninstall-part="${escapeHtml(owned.inventoryId)}">INSTALLED</button>`
-      : owned
-        ? `<button class="button button--primary button--small" data-install-part="${escapeHtml(owned.inventoryId)}">INSTALL</button>`
-        : `<button class="button button--small" data-buy-part="${escapeHtml(part.catalogId)}" ${Number(player.wallet?.credits || 0) >= Number(part.price) ? "" : "disabled"}>BUY</button>`
-    }</div>
-  </div>`;
-}
+  const dialog = showDialog(`
+    <div class="dialog-body parts-shop-dialog">
+      <div class="parts-shop-dialog__car">
+        <div class="dialog-vehicle">${renderVehicle(car, { stage: Number(car.buildStage || 1), view: "sideProfile" })}</div>
+        <div>
+          <span class="section-label">${escapeHtml(buildName(Number(car.buildStage || 1)))}</span>
+          <h2>${escapeHtml(specs[0]?.category || key)}</h2>
+          <p>${escapeHtml(carLabel(car))} • ${number(car.derived?.hp)} hp • ${number(car.derived?.torque)} lb-ft • ${number(car.derived?.weight)} lb</p>
+        </div>
+      </div>
+      <div class="parts-shop-list">
+        ${Number(car.buildStage || 1) === 1
+          ? streetCategoryRows(player, car, specs)
+          : choiceCategoryRows(player, car, specs)}
+      </div>
+      <div class="parts-shop-dialog__note">Purchasing puts the part in this car's Garage Inventory. Installation and part swapping happen from the Garage.</div>
+      <div class="dialog-actions"><button class="button button--small" type="button" data-close>CLOSE</button><button class="button button--primary button--small" type="button" data-inventory>GARAGE INVENTORY</button></div>
+    </div>`);
 
-function bindPartActions(ctx, car) {
-  ctx.screenRoot.querySelectorAll("[data-buy-part]").forEach((button) => {
+  dialog.querySelector("[data-close]")?.addEventListener("click", () => closeDialog(dialog));
+  dialog.querySelector("[data-inventory]")?.addEventListener("click", () => {
+    closeDialog(dialog);
+    sessionStorage.setItem("foreverRacing.openInventory", String(car.carId));
+    ctx.router.navigate("garage");
+  });
+  dialog.querySelectorAll("[data-buy-part]").forEach((button) => {
     button.addEventListener("click", async () => {
       button.disabled = true;
       try {
         const data = await ctx.storage.buyPart(button.dataset.buyPart);
         ctx.store.setPlayer(data.player);
-        ctx.toast("Part purchased", "It is ready to install.");
+        closeDialog(dialog);
+        ctx.toast("Part purchased", "Owned. Install it from this car's Garage Inventory.");
         await renderParts(ctx);
       } catch (err) {
         ctx.toast("Purchase blocked", err.message);
@@ -192,75 +182,114 @@ function bindPartActions(ctx, car) {
       }
     });
   });
+}
 
-  ctx.screenRoot.querySelectorAll("[data-install-part]").forEach((button) => {
-    button.addEventListener("click", async () => {
-      button.disabled = true;
-      try {
-        const data = await ctx.storage.installPart(button.dataset.installPart, car.carId);
-        ctx.store.setPlayer(data.player);
-        ctx.toast("Part installed", "The car's numbers were recalculated.");
-        await renderParts(ctx);
-      } catch (err) {
-        ctx.toast("Install blocked", err.message);
-        button.disabled = false;
-      }
-    });
-  });
+function streetCategoryRows(player, car, specs) {
+  const currentTier = installedSimpleTier(player, car.carId, specs[0]?.categoryKey || "");
+  return specs
+    .sort((a, b) => Number(a.simpleTier) - Number(b.simpleTier))
+    .map((part) => {
+      const tier = Number(part.simpleTier || 0);
+      const owned = findInventory(player, part.catalogId, car.carId);
+      const installed = owned && String(owned.installedOnCarId || "") === String(car.carId);
+      const next = tier === currentTier + 1;
+      const complete = tier <= currentTier;
+      const projected = projectStats(player, car, part);
+      const canBuy = next && !owned && Number(player.wallet?.credits || 0) >= Number(part.price || 0);
+      let action = '<span class="status-text">LOCKED</span>';
+      if (installed) action = '<span class="status-text status-text--good">INSTALLED</span>';
+      else if (complete) action = '<span class="status-text status-text--good">COMPLETED</span>';
+      else if (owned) action = '<span class="status-text status-text--good">OWNED</span>';
+      else if (next) action = `<button class="button button--primary button--small" data-buy-part="${escapeHtml(part.catalogId)}" ${canBuy ? "" : "disabled"}>BUY • ${money(part.price)} CR</button>`;
 
-  ctx.screenRoot.querySelectorAll("[data-uninstall-part]").forEach((button) => {
-    button.addEventListener("click", async () => {
-      button.disabled = true;
-      try {
-        const data = await ctx.storage.uninstallPart(button.dataset.uninstallPart);
-        ctx.store.setPlayer(data.player);
-        await renderParts(ctx);
-      } catch (err) {
-        ctx.toast("Cannot remove part", err.message);
-        button.disabled = false;
-      }
-    });
+      return `<article class="parts-shop-row ${complete ? "is-complete" : ""}">
+        <div class="parts-shop-row__title"><span>STEP ${tier}</span><strong>${escapeHtml(part.name)}</strong><small>${escapeHtml(part.description || "")}</small></div>
+        <div class="parts-shop-row__delta">
+          <span>HP <b>${number(car.derived?.hp)} → ${number(projected.hp)}</b></span>
+          <span>TQ <b>${number(car.derived?.torque)} → ${number(projected.torque)}</b></span>
+          <span>WT <b>${number(car.derived?.weight)} → ${number(projected.weight)}</b></span>
+        </div>
+        <div class="parts-shop-row__action">${action}</div>
+      </article>`;
+    }).join("");
+}
+
+function choiceCategoryRows(player, car, specs) {
+  return specs.map((part) => {
+    const owned = findInventory(player, part.catalogId, car.carId);
+    const installed = owned && String(owned.installedOnCarId || "") === String(car.carId);
+    const projected = projectStats(player, car, part);
+    const canBuy = !owned && Number(player.wallet?.credits || 0) >= Number(part.price || 0);
+    return `<article class="parts-shop-row ${installed ? "is-complete" : ""}">
+      <div class="parts-shop-row__title"><strong>${escapeHtml(part.name)}</strong><small>${escapeHtml(part.description || "")}</small></div>
+      <div class="parts-shop-row__delta">
+        <span>HP <b>${number(car.derived?.hp)} → ${number(projected.hp)}</b></span>
+        <span>TQ <b>${number(car.derived?.torque)} → ${number(projected.torque)}</b></span>
+        <span>WT <b>${number(car.derived?.weight)} → ${number(projected.weight)}</b></span>
+      </div>
+      <div class="parts-shop-row__action">${installed
+        ? '<span class="status-text status-text--good">INSTALLED</span>'
+        : owned
+          ? '<span class="status-text status-text--good">OWNED</span>'
+          : `<button class="button button--primary button--small" data-buy-part="${escapeHtml(part.catalogId)}" ${canBuy ? "" : "disabled"}>BUY • ${money(part.price)} CR</button>`
+      }</div>
+    </article>`;
+  }).join("");
+}
+
+function promptStageConversion(ctx, carId) {
+  const car = ctx.store.player?.garage?.find((entry) => String(entry.carId) === String(carId));
+  if (!car) return;
+  const dialog = showDialog(`<div class="dialog-body stage-conversion-dialog">
+    <div class="dialog-vehicle">${renderVehicle(car, { stage: 2, view: "sideProfile" })}</div>
+    <span class="section-label">STREET CAR COMPLETE</span>
+    <h2>Upgrade to a Street Race Car?</h2>
+    <p>Your completed Street Car setup becomes the permanent baseline. The stock body stays, but the build can become gutted, caged and much more race-focused. The numbered Street Car upgrade ladder is incorporated into the car and cannot be restored.</p>
+    <div class="dialog-actions"><button class="button button--small" data-cancel>NOT YET</button><button class="button button--primary" data-confirm>UPGRADE TO STREET RACE CAR</button></div>
+    <div class="form-error" data-error></div>
+  </div>`);
+  dialog.querySelector("[data-cancel]")?.addEventListener("click", () => closeDialog(dialog));
+  dialog.querySelector("[data-confirm]")?.addEventListener("click", async (event) => {
+    event.currentTarget.disabled = true;
+    try {
+      const data = await ctx.storage.stageUp(carId);
+      ctx.store.setPlayer(data.player);
+      closeDialog(dialog);
+      ctx.toast("Street Race Car unlocked", "Named race parts are now available by category.");
+      await renderParts(ctx);
+    } catch (err) {
+      dialog.querySelector("[data-error]").textContent = err.message;
+      event.currentTarget.disabled = false;
+    }
   });
 }
 
-function tutorialObjective(step) {
+function tutorialObjective(step, carId) {
   if (step === "buy_first_upgrade") {
-    return `<div class="objective-box objective-box--active"><div><span class="objective-kicker">FTUE / STEP 4</span><strong>Buy your first upgrade</strong></div><p>The Intake row is highlighted as a simple first example. Notice that the game shows the resulting HP, torque and weight before you spend credits.</p></div>`;
+    return `<div class="objective-box objective-box--active"><div><span class="objective-kicker">FTUE • BUY AN UPGRADE</span><strong>Open Intake and buy Step 1</strong></div><p>The category window shows the result before you spend credits. Buying does not install the part.</p></div>`;
   }
   if (step === "install_first_upgrade") {
-    return `<div class="objective-box objective-box--active"><div><span class="objective-kicker">FTUE / STEP 5</span><strong>Install the part you just bought</strong></div><p>Buying and installing are separate actions. In Stage 1, moving up a numbered category is permanent - you cannot downgrade it later.</p></div>`;
-  }
-  if (step === "build_stages") {
-    return `<div class="objective-box objective-box--active"><div><span class="objective-kicker">FTUE / STEP 6</span><strong>What are Build Stages?</strong></div><p>You have seen the Stage 1 upgrade ladder. Before your first race, see how the car changes as the build gets more serious.</p><button class="button button--primary button--small" data-explain-stages>EXPLAIN BUILD STAGES</button></div>`;
+    return `<div class="objective-box objective-box--active"><div><span class="objective-kicker">FTUE • INSTALL YOUR PART</span><strong>Your new part is in Garage Inventory</strong></div><p>The shop is for buying. Installation and swapping happen on the car itself in the Garage.</p><button class="button button--primary button--small" data-go-install data-car-id="${escapeHtml(carId)}">OPEN GARAGE INVENTORY</button></div>`;
   }
   return "";
 }
 
-function explainStages(ctx) {
-  const dialog = showDialog(`<div class="dialog-body stage-explainer">
-    <h2>Build Stages</h2>
-    <p>A car only moves forward. Each stage changes what kinds of modifications make sense.</p>
-    <div class="stage-explainer__rows">
-      <div><b>S1</b><span><strong>Street / Stock Chassis</strong>Simple Stage 1 -> 2 -> 3 upgrades in each required category.</span></div>
-      <div><b>S2</b><span><strong>Street Race</strong>Gutted, caged, questionably street legal. Named parts become choices instead of a ladder.</span></div>
-      <div><b>S3</b><span><strong>Front-Half / Tube Chassis</strong>Engine swaps unlock with engine-bay, orientation and displacement compatibility.</span></div>
-      <div><b>S4</b><span><strong>Full Race Car</strong>Much wider powertrain and chassis freedom. The original car is increasingly the body and identity.</span></div>
-    </div>
-    <div class="dialog-actions"><button class="button button--primary" data-continue>CONTINUE TO YOUR FIRST RACE</button></div>
-  </div>`, { locked: true });
+function categorySpecs(car, key) {
+  const stage = Number(car.buildStage || 1);
+  if (stage === 1) {
+    return catalogCache.filter((part) => part.categoryKey === key && Number(part.buildStage) === 1 && Number(part.simpleTier || 0) > 0);
+  }
+  return catalogCache.filter((part) =>
+    part.categoryKey === key
+    && !part.simpleTier
+    && Number(part.buildStage || 2) <= stage
+    && Number(part.persistentFromStage || part.buildStage || 2) <= stage
+  );
+}
 
-  dialog.querySelector("[data-continue]")?.addEventListener("click", async (event) => {
-    event.currentTarget.disabled = true;
-    try {
-      const data = await ctx.storage.tutorialAdvance("build_stages_explained");
-      ctx.store.setPlayer(data.player);
-      closeDialog(dialog);
-      ctx.router.navigate("quick-race");
-    } catch (err) {
-      ctx.toast("Tutorial error", err.message);
-      event.currentTarget.disabled = false;
-    }
-  });
+function streetCarReady(player, car) {
+  if (Number(car.buildStage || 1) !== 1) return false;
+  return REQUIRED.every((key) => installedSimpleTier(player, car.carId, key) >= 3);
 }
 
 function installedSimpleTier(player, carId, key) {
@@ -273,8 +302,23 @@ function installedSimpleTier(player, carId, key) {
   return tier;
 }
 
-function findInventory(player, catalogId) {
-  return (player?.inventory?.parts || []).find((item) => item.catalogId === catalogId) || null;
+function ownedForCar(player, carId) {
+  return (player?.inventory?.parts || []).filter((item) =>
+    String(item.purchasedForCarId || "") === String(carId)
+    || String(item.installedOnCarId || "") === String(carId)
+  );
+}
+
+function findInventory(player, catalogId, carId) {
+  return ownedForCar(player, carId).find((item) => item.catalogId === catalogId) || null;
+}
+
+function partName(catalogId) {
+  return catalogCache.find((part) => part.catalogId === catalogId)?.name || "Part";
+}
+
+function buildName(stage) {
+  return BUILD_NAMES[Number(stage)] || "Race Car";
 }
 
 function projectStats(player, car, candidate) {

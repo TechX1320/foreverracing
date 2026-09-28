@@ -82,6 +82,7 @@ Build: {$build}
 Storage mode: local
 Offline service worker: disabled in static development mode
 Race presentation: persistent two-phase start/finish with blocking real-time playback
+V0.4B UI: readable type, compact category Parts, Garage Inventory and Classifieds
 Do not edit docs/ by hand; run php scripts/build-static.php.
 ");
 

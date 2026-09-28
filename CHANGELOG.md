@@ -1,5 +1,22 @@
 # Changelog
 
+## V0.4.0-b — browser-game usability pass
+
+- Increased global text sizing and control readability.
+- Removed the oversized top player/current-car stat strip and moved Player Info into the right context rail.
+- Made the orange navigation indicator follow the current route.
+- Hid Showroom after starter FTUE until a meaningful new-car catalog exists.
+- Replaced the long Parts table with compact category buttons and focused category shopping dialogs.
+- Moved install/remove/swap actions out of the Parts Shop and into per-car Garage Inventory.
+- Added car-scoped part ownership metadata for newly purchased parts.
+- Reworked build progression names to Street Car, Street Race Car, Front-Half Race Car and Full Race Car.
+- Removed the premature Build Stages FTUE lecture; build conversion is now prompted reactively after the Street Car is actually complete.
+- Renamed the Used Lot presentation to Classifieds and rebuilt it around image-first listing cards + More Details purchase dialogs.
+- Added separate mileage and condition pricing factors to Classifieds listings.
+- Shortened the race presentation for 1080p layouts and corrected track-layer ordering so start/finish markings render behind cars.
+- Added V0.4B browser-local/PHP/static regression coverage.
+- Tracked the current starter side-profile tire/rubber artwork defect for the next authored-art pass.
+
 ## V0.4.0-a — blocking real-time race presentation
 
 - Replaced instant race-result delivery with a persistent two-phase start/finish lifecycle.
