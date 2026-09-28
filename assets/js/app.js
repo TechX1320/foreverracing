@@ -177,10 +177,10 @@ function showWelcomeTutorial() {
     <div class="dialog-body ftue-welcome">
       <span class="section-label">FIRST TIME IN FOREVER RACING</span>
       <h2>Build cars. Move them forward.</h2>
-      <p>Buy cars, develop them through increasingly serious Build Stages, race them, collect them, and eventually compete through events, teams and longer PvE runs.</p>
+      <p>Buy cars, develop them through increasingly serious Build Types, race them, collect them, and eventually compete through events, teams and longer PvE runs.</p>
       <div class="ftue-points">
         <div><b>1</b><span><strong>Get a car</strong>Choose a platform you actually want to build.</span></div>
-        <div><b>2</b><span><strong>Modify it</strong>Stage 1 teaches the upgrade system with clear, permanent progression.</span></div>
+        <div><b>2</b><span><strong>Modify it</strong>Your Street Car teaches the upgrade system with clear, permanent progression.</span></div>
         <div><b>3</b><span><strong>Race it</strong>Your build changes the numbers that drive the race simulation.</span></div>
       </div>
       <div class="dialog-actions"><button class="button button--primary" data-start-ftue>START WITH A CAR</button></div>

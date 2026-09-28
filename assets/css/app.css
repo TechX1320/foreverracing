@@ -799,3 +799,32 @@ dialog.race-playback-dialog{width:min(900px,calc(100vw - 24px));max-height:92dvh
   .classified-detail-balance{flex-direction:column}
   .race-strip{height:290px}
 }
+
+/* V0.4C readability hardening
+   10px is the floor for compact metadata; normal supporting copy stays 11px+. */
+.game-header{height:50px;min-height:50px}
+.game-layout{min-height:calc(100dvh - 82px)}
+.brand__copy small,.environment-tag,.storage-tag{font-size:10px}
+.header-action{font-size:11px}
+.nav-rail__label,.player-info-grid span,.section-heading small,.section-label,
+.build-shop-summary__info span,.parts-category-card__name,.parts-category-card__count,
+.parts-shop-row__title span,.parts-shop-row__delta span,.garage-inventory-row__category,
+.stage-name-tag,.classified-detail-specs span,.race-stage__labels,
+.race-strip__start span,.race-strip__finish span,.race-progress-board span,
+.race-playback-result__title span,.race-playback-result__grid span,
+.race-playback-result__rewards small,.rule-list b,.stage-mini-list--named b,
+.home-car-stats span,.home-section>header span,.home-section>header button,
+.build-summary span,.rail-state,.rail-link,.filter-chip,.pill,.objective-kicker,
+.data-list__head,.data-row small,.status-text,.vehicle-missing-art small,
+.vehicle-missing-art em,.race-distance-tabs .button span,.race-record-strip small,
+.race-result-foot small,.race-environment span,.race-timeboard__row>span,
+.race-playback__meta span,.race-strip__car--missing small,.game-footer{font-size:10px}
+.stage-mini-list span,.classified-price-breakdown p,.classified-detail-note,
+.parts-shop-dialog__note,.parts-category-card small,.parts-shop-row__title small,
+.garage-inventory-row small,.screen-toolbar__trail,.muted{font-size:11px}
+.toast{font-size:12px}
+@media(max-width:760px){
+  .nav-rail button b{font-size:11px}
+  .nav-rail button span{font-size:10px}
+  .header-action{font-size:10px}
+}

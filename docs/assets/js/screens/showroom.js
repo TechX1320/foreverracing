@@ -75,7 +75,7 @@ function confirmPurchase(ctx, stockId) {
     <div class="dialog-body">
       <div class="dialog-vehicle">${renderVehicle({ ...car, displayName: `${car.year} ${car.make} ${car.model}` }, { view: "showroom" })}</div>
       <h2>Buy ${car.year} ${escapeHtml(car.make)} ${escapeHtml(car.model)}?</h2>
-      <p>It enters your Garage at Build Stage 1. The first car you buy becomes your Current Car automatically.</p>
+      <p>It enters your Garage as a Street Car. The first car you buy becomes your Current Car automatically.</p>
       <div class="spec-grid">
         <div class="spec"><span>Price</span><strong>${money(car.price)} cr</strong></div>
         <div class="spec"><span>After purchase</span><strong>${money(Number(player?.wallet?.credits || 0) - Number(car.price || 0))} cr</strong></div>

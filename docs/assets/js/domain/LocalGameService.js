@@ -146,7 +146,7 @@ export class LocalGameService {
       const slot = String(spec.slot || '');
       if (Number(car.buildStage || 1) === 1 && Number(spec.simpleTier || 0) > 0) {
         const currentTier = this.installedSimpleTier(player, carId, String(spec.categoryKey || slot));
-        if (Number(spec.simpleTier) < currentTier) throw new LocalGameError('Stage 1 upgrades cannot be downgraded.');
+        if (Number(spec.simpleTier) < currentTier) throw new LocalGameError('Street Car upgrades cannot be downgraded.');
       }
 
       for (const ownedPart of player.inventory.parts) {
@@ -174,7 +174,7 @@ export class LocalGameService {
       const spec = this.findBy(this.parts, 'catalogId', String(player.inventory.parts[partIndex].catalogId || ''));
       if (carId && spec?.simpleTier) {
         const car = this.requireOwnedCar(player, carId);
-        if (Number(car.buildStage || 1) === 1) throw new LocalGameError('Stage 1 upgrades are permanent progression and cannot be downgraded.');
+        if (Number(car.buildStage || 1) === 1) throw new LocalGameError('Street Car upgrades are permanent progression and cannot be downgraded.');
       }
       player.inventory.parts[partIndex].installedOnCarId = null;
       if (carId) {
@@ -584,15 +584,15 @@ export class LocalGameService {
   requirePartCompatible(player, car, spec, { purchasing = false } = {}) {
     const stage = Number(car.buildStage || 1);
     if (stage === 1) {
-      if (Number(spec.buildStage || 1) !== 1 || !Number(spec.simpleTier || 0)) throw new LocalGameError('Stage 1 cars use the simple three-level upgrade path.');
+      if (Number(spec.buildStage || 1) !== 1 || !Number(spec.simpleTier || 0)) throw new LocalGameError('Street Cars use the simple three-level upgrade path.');
       const currentTier = this.installedSimpleTier(player, car.carId, String(spec.categoryKey || spec.slot || ''));
       if (purchasing && Number(spec.simpleTier) !== currentTier + 1) throw new LocalGameError(`Complete the previous ${spec.category} upgrade first.`);
-      if (!purchasing && Number(spec.simpleTier) < currentTier) throw new LocalGameError('Stage 1 upgrades cannot be downgraded.');
+      if (!purchasing && Number(spec.simpleTier) < currentTier) throw new LocalGameError('Street Car upgrades cannot be downgraded.');
       return;
     }
-    if (spec.simpleTier) throw new LocalGameError('Simple Stage 1 parts are incorporated into the Stage 2 conversion.');
-    if (Number(spec.buildStage || 2) > stage) throw new LocalGameError(`This part requires Build Stage ${spec.buildStage}.`);
-    if (Number(spec.persistentFromStage || spec.buildStage || 2) > stage) throw new LocalGameError('This part is not available at the current Build Stage.');
+    if (spec.simpleTier) throw new LocalGameError('Street Car ladder parts are incorporated when the car converts to a Street Race Car.');
+    if (Number(spec.buildStage || 2) > stage) throw new LocalGameError(`This part requires a later Build Type.`);
+    if (Number(spec.persistentFromStage || spec.buildStage || 2) > stage) throw new LocalGameError('This part is not available for the current Build Type.');
   }
 
   completeTutorialStep(player, completed, next) {

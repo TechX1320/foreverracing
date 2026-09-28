@@ -101,7 +101,7 @@ $storageText = $storageMode === 'local' ? 'BROWSER LOCAL' : 'PHP / JSON';
           <section class="rail-panel">
             <header>BUILD RULES</header>
             <div class="rule-list">
-              <div><b>STAGE</b><span>Cars only move forward.</span></div>
+              <div><b>PROGRESS</b><span>Build Types only move forward.</span></div>
               <div><b>PARTS</b><span>Stats are shown before purchase.</span></div>
               <div><b>SWAPS</b><span>Physical compatibility matters.</span></div>
               <div><b>DATA</b><span>Local dev save stays in this browser.</span></div>
