@@ -1,5 +1,20 @@
 # Changelog
 
+## V0.4.0-a — blocking real-time race presentation
+
+- Replaced instant race-result delivery with a persistent two-phase start/finish lifecycle.
+- Added a modal race presentation that blocks the rest of the game while the pass runs.
+- Added pre-stage/stage/tree/green/red-light presentation, live race clock, top-down two-lane car movement and per-lane progress bars.
+- Race playback uses the simulated reaction time and ET at real 1× time by default.
+- Credits, EXP, REP, records, statistics and race history are awarded only after the race finish timestamp.
+- Repeated race starts return the already-active pass instead of creating duplicate results or rewards.
+- Added idempotent finish behavior so retries cannot duplicate payouts.
+- Active races persist through refresh/reload and automatically resume in Quick Race.
+- Added global route locking while an active race exists.
+- Added opponent race artwork selection from the authored top-down catalog.
+- Added browser-local, PHP API and static-build regression coverage for the two-phase race lifecycle.
+- Documented the external race-presentation research used to choose the V0.4A interaction model.
+
 ## V0.3.0-b — TextTuned race core + disposable Admin sessions
 
 - Replaced the placeholder Quick Race formula with dedicated browser/PHP race simulator modules derived from surviving TextTuned race logic.

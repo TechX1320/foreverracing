@@ -51,8 +51,34 @@ assert.equal(player.tutorial.step, 'build_stages');
 player = game.tutorialAdvance(player, 'build_stages_explained');
 assert.equal(player.tutorial.step, 'first_race');
 
-const firstRace = game.quickRace(player, '1/4');
+const firstStart = game.startQuickRace(player, '1/4', 1_000_000);
+player = firstStart.player;
+assert.ok(player.activeRace);
+assert.equal(firstStart.activeRace.distance, '1/4');
+assert.equal(firstStart.activeRace.race.distanceLabel, '1/4 Mile');
+assert.ok(firstStart.activeRace.race.location?.name);
+assert.ok(firstStart.activeRace.race.weather?.name);
+assert.ok(firstStart.activeRace.race.player?.trapSpeed > 0);
+assert.ok(firstStart.activeRace.race.playerVisualSrc);
+assert.ok(firstStart.activeRace.race.opponent?.visualSrc);
+assert.equal(player.stats.races, 0);
+assert.equal(player.progression.exp, 0);
+assert.equal(player.raceHistory.length, 0);
+assert.equal(player.tutorial.step, 'first_race');
+
+const duplicateStart = game.startQuickRace(player, '1/2', 1_000_001);
+player = duplicateStart.player;
+assert.equal(duplicateStart.activeRace.raceId, firstStart.activeRace.raceId);
+assert.equal(duplicateStart.activeRace.distance, '1/4');
+assert.equal(player.stats.races, 0);
+assert.throws(
+  () => game.finishQuickRace(player, firstStart.activeRace.raceId, Math.floor(firstStart.activeRace.finishAt) - 1),
+  /still in progress/i
+);
+
+const firstRace = game.finishQuickRace(player, firstStart.activeRace.raceId, Math.ceil(firstStart.activeRace.finishAt) + 1);
 player = firstRace.player;
+assert.equal(player.activeRace, null);
 assert.equal(player.stats.races, 1);
 assert.equal(player.tutorial.status, 'complete');
 assert.equal(player.tutorial.step, 'complete');
@@ -60,18 +86,29 @@ assert.ok(player.progression.rep >= 27);
 assert.ok(player.progression.exp > 0);
 assert.ok(firstRace.race.reward > 0);
 assert.equal(firstRace.race.distance, '1/4');
-assert.equal(firstRace.race.distanceLabel, '1/4 Mile');
-assert.ok(firstRace.race.location?.name);
-assert.ok(firstRace.race.weather?.name);
-assert.ok(firstRace.race.player?.trapSpeed > 0);
 assert.ok(typeof firstRace.race.player?.foul === 'boolean');
 assert.equal(player.raceHistory.length, 1);
+assert.equal(player.garage[0].raceRecords['1/4'].races, 1);
 
-const halfRace = game.quickRace(player, '1/2');
+const firstHistoryCount = player.raceHistory.length;
+const idempotentFinish = game.finishQuickRace(player, firstStart.activeRace.raceId, Math.ceil(firstStart.activeRace.finishAt) + 2);
+player = idempotentFinish.player;
+assert.equal(player.raceHistory.length, firstHistoryCount);
+assert.equal(player.stats.races, 1);
+
+const halfStart = game.startQuickRace(player, '1/2', 2_000_000);
+player = halfStart.player;
+assert.equal(halfStart.activeRace.distance, '1/2');
+assert.equal(player.stats.races, 1);
+const halfRace = game.finishQuickRace(player, halfStart.activeRace.raceId, Math.ceil(halfStart.activeRace.finishAt) + 1);
 player = halfRace.player;
 assert.equal(halfRace.race.distance, '1/2');
 assert.ok(halfRace.race.player.elapsedTime >= Number(racingConfig.distances['1/2'].minEt));
-const mileRace = game.quickRace(player, '1');
+
+const mileStart = game.startQuickRace(player, '1', 3_000_000);
+player = mileStart.player;
+assert.equal(mileStart.activeRace.distance, '1');
+const mileRace = game.finishQuickRace(player, mileStart.activeRace.raceId, Math.ceil(mileStart.activeRace.finishAt) + 1);
 player = mileRace.player;
 assert.equal(mileRace.race.distance, '1');
 assert.ok(mileRace.race.player.elapsedTime >= Number(racingConfig.distances['1'].minEt));
@@ -124,4 +161,4 @@ assert.ok(player.roguelike.activeRun);
 const step = game.roguelikeStep(player, 'safe');
 assert.ok(step.step && typeof step.step.won === 'boolean');
 
-console.log('FTUE + Build Stage + V0.3B race core local game flow test passed.');
+console.log('FTUE + Build Stage + V0.4A two-phase race lifecycle local game flow test passed.');

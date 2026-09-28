@@ -46,6 +46,7 @@ final class GameService
             'garage' => [],
             'inventory' => ['parts' => []],
             'roguelike' => ['activeRun' => null, 'bestStage' => 0, 'runsStarted' => 0, 'runsCompleted' => 0],
+            'activeRace' => null,
             'raceHistory' => [],
             'transactions' => [],
             'meta' => ['createdAt' => $now, 'updatedAt' => $now],
@@ -78,6 +79,7 @@ final class GameService
         $player['inventory'] = is_array($player['inventory'] ?? null) ? $player['inventory'] : $default['inventory'];
         $player['inventory']['parts'] = array_values(is_array($player['inventory']['parts'] ?? null) ? $player['inventory']['parts'] : []);
         $player['roguelike'] = array_replace($default['roguelike'], is_array($player['roguelike'] ?? null) ? $player['roguelike'] : []);
+        $player['activeRace'] = is_array($player['activeRace'] ?? null) ? $player['activeRace'] : null;
         $player['raceHistory'] = array_values(is_array($player['raceHistory'] ?? null) ? $player['raceHistory'] : []);
         $player['transactions'] = array_values(is_array($player['transactions'] ?? null) ? $player['transactions'] : []);
         $player['meta'] = array_replace($default['meta'], is_array($player['meta'] ?? null) ? $player['meta'] : []);
@@ -387,14 +389,20 @@ final class GameService
         return $player;
     }
 
-    public static function quickRace(string $distance = '1/4'): array
+    public static function startQuickRace(string $distance = '1/4', ?int $timestampMs = null): array
     {
-        $result = null;
+        $activeRace = null;
         $racingConfig = self::racingConfig();
         $simulator = new RaceSimulator($racingConfig);
         $distanceConfig = $simulator->distance($distance);
+        $timestampMs ??= (int)floor(microtime(true) * 1000);
 
-        $player = self::mutatePlayer(function (array $player) use (&$result, $distance, $distanceConfig, $racingConfig, $simulator): array {
+        $player = self::mutatePlayer(function (array $player) use (&$activeRace, $distance, $distanceConfig, $racingConfig, $simulator, $timestampMs): array {
+            if (is_array($player['activeRace'] ?? null)) {
+                $activeRace = $player['activeRace'];
+                return $player;
+            }
+
             $carIndex = self::requireOwnedCarIndex($player, (string)($player['selectedCarId'] ?? ''));
             $car = $player['garage'][$carIndex];
             $level = max(1, (int)($player['progression']['level'] ?? 1));
@@ -425,6 +433,99 @@ final class GameService
                 : (int)round(mt_rand(90, 220) * $creditMultiplier);
             $expReward = self::raceExpReward($level, $opponentLevel, $won);
             $repReward = $won ? 5 : 2;
+            $opponentVisual = self::opponentRaceVisual($opponentHp / max(1, $opponentWeight));
+            $timeScale = self::raceTimeScale($racingConfig);
+            $stagingMs = max(1800.0, (float)($racingConfig['presentation']['stagingMs'] ?? 2800)) * $timeScale;
+            $greenAt = $timestampMs + $stagingMs;
+            $playerFinishSeconds = max(0.1, (float)($playerRun['reactionTime'] ?? 0) + (float)($playerRun['elapsedTime'] ?? 0));
+            $opponentFinishSeconds = max(0.1, (float)($opponentRun['reactionTime'] ?? 0) + (float)($opponentRun['elapsedTime'] ?? 0));
+            $finishAt = $greenAt + (max($playerFinishSeconds, $opponentFinishSeconds) * 1000 * $timeScale);
+
+            $race = [
+                'raceId' => self::id('race'),
+                'won' => $won,
+                'distance' => $distance,
+                'distanceLabel' => (string)($distanceConfig['label'] ?? $distance),
+                'location' => $location,
+                'weather' => $weather,
+                'margin' => round(abs((float)$playerRun['totalTime'] - (float)$opponentRun['totalTime']), 3),
+                'reward' => $reward,
+                'expReward' => $expReward,
+                'repReward' => $repReward,
+                'newBest' => false,
+                'playerCarId' => (string)$car['carId'],
+                'carName' => self::carName($car),
+                'playerVisualSrc' => self::raceVisualSrc($car),
+                'player' => $playerRun,
+                'opponent' => [
+                    'name' => self::opponentName(),
+                    'carName' => $opponentVisual['name'],
+                    'visualSrc' => $opponentVisual['src'],
+                    'hp' => $opponentHp,
+                    'torque' => $opponentTorque,
+                    'weight' => $opponentWeight,
+                    'grip' => round($opponentGrip, 3),
+                    'level' => $opponentLevel,
+                ] + $opponentRun,
+                'reaction' => (float)$playerRun['reactionTime'],
+                'playerEt' => (float)$playerRun['elapsedTime'],
+                'opponentEt' => (float)$opponentRun['elapsedTime'],
+            ];
+
+            $activeRace = [
+                'raceId' => $race['raceId'],
+                'status' => 'running',
+                'startedAt' => $timestampMs,
+                'greenAt' => $greenAt,
+                'finishAt' => $finishAt,
+                'timeScale' => $timeScale,
+                'revealDelayMs' => max(0, (int)($racingConfig['presentation']['revealDelayMs'] ?? 650)),
+                'progressExponent' => max(1.0, (float)($racingConfig['presentation']['progressExponent'] ?? 1.38)),
+                'distance' => $distance,
+                'race' => $race,
+            ];
+            $player['activeRace'] = $activeRace;
+            return $player;
+        });
+
+        return ['player' => $player, 'activeRace' => $activeRace];
+    }
+
+    public static function finishQuickRace(string $raceId, ?int $timestampMs = null): array
+    {
+        $result = null;
+        $racingConfig = self::racingConfig();
+        $timestampMs ??= (int)floor(microtime(true) * 1000);
+
+        $player = self::mutatePlayer(function (array $player) use (&$result, $raceId, $racingConfig, $timestampMs): array {
+            $active = is_array($player['activeRace'] ?? null) ? $player['activeRace'] : null;
+            if (!$active) {
+                $history = array_reverse(array_values(is_array($player['raceHistory'] ?? null) ? $player['raceHistory'] : []));
+                foreach ($history as $row) {
+                    if ((string)($row['raceId'] ?? '') === $raceId) {
+                        $result = $row;
+                        return $player;
+                    }
+                }
+                throw new GameException('No race is currently in progress.', 409);
+            }
+
+            if ((string)($active['raceId'] ?? '') !== $raceId) {
+                throw new GameException('That race is no longer active.', 409);
+            }
+            if ($timestampMs < (int)round((float)($active['finishAt'] ?? 0))) {
+                throw new GameException('The race is still in progress.', 409);
+            }
+
+            $result = is_array($active['race'] ?? null) ? $active['race'] : [];
+            $carIndex = self::requireOwnedCarIndex($player, (string)($result['playerCarId'] ?? ''));
+            $car = $player['garage'][$carIndex];
+            $distance = (string)($result['distance'] ?? '1/4');
+            $playerRun = is_array($result['player'] ?? null) ? $result['player'] : [];
+            $won = !empty($result['won']);
+            $reward = (int)($result['reward'] ?? 0);
+            $expReward = (int)($result['expReward'] ?? 0);
+            $repReward = (int)($result['repReward'] ?? 0);
 
             $player['wallet']['credits'] += $reward;
             $player['progression']['exp'] = (int)($player['progression']['exp'] ?? 0) + $expReward;
@@ -432,7 +533,8 @@ final class GameService
             $player['progression']['level'] = self::levelFromExp((int)$player['progression']['exp']);
             $player['stats']['races'] = (int)($player['stats']['races'] ?? 0) + 1;
             $player['stats'][$won ? 'wins' : 'losses'] = (int)($player['stats'][$won ? 'wins' : 'losses'] ?? 0) + 1;
-            if (empty($playerRun['foul']) && (($player['stats']['bestReaction'] ?? null) === null || (float)$playerRun['reactionTime'] < (float)$player['stats']['bestReaction'])) {
+
+            if (empty($playerRun['foul']) && (($player['stats']['bestReaction'] ?? null) === null || (float)($playerRun['reactionTime'] ?? 999) < (float)$player['stats']['bestReaction'])) {
                 $player['stats']['bestReaction'] = (float)$playerRun['reactionTime'];
             }
 
@@ -449,8 +551,9 @@ final class GameService
             }
             $records[$distance] = $record;
             $player['garage'][$carIndex]['raceRecords'] = $records;
+            $result['newBest'] = $newBest;
 
-            self::addTransaction($player, 'race_reward', $reward, (string)($distanceConfig['label'] ?? $distance) . ($won ? ' win' : ' participation'));
+            self::addTransaction($player, 'race_reward', $reward, (string)($result['distanceLabel'] ?? $distance) . ($won ? ' win' : ' participation'));
 
             if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'first_race') {
                 $tutorialCredits = (int)app_config()['tutorial_completion_credits'];
@@ -463,43 +566,22 @@ final class GameService
                 $player['tutorial']['step'] = 'complete';
             }
 
-            $result = [
-                'raceId' => self::id('race'),
-                'won' => $won,
-                'distance' => $distance,
-                'distanceLabel' => (string)($distanceConfig['label'] ?? $distance),
-                'location' => $location,
-                'weather' => $weather,
-                'margin' => round(abs((float)$playerRun['totalTime'] - (float)$opponentRun['totalTime']), 3),
-                'reward' => $reward,
-                'expReward' => $expReward,
-                'repReward' => $repReward,
-                'newBest' => $newBest,
-                'carName' => self::carName($car),
-                'player' => $playerRun,
-                'opponent' => [
-                    'name' => self::opponentName(),
-                    'hp' => $opponentHp,
-                    'torque' => $opponentTorque,
-                    'weight' => $opponentWeight,
-                    'grip' => round($opponentGrip, 3),
-                    'level' => $opponentLevel,
-                ] + $opponentRun,
-                'reaction' => (float)$playerRun['reactionTime'],
-                'playerEt' => (float)$playerRun['elapsedTime'],
-                'opponentEt' => (float)$opponentRun['elapsedTime'],
-            ];
-
-            $player['raceHistory'][] = $result + ['createdAt' => time()];
+            $result['completedAt'] = time();
+            $player['raceHistory'][] = $result;
             $historyLimit = max(5, (int)($racingConfig['historyLimit'] ?? 25));
             if (count($player['raceHistory']) > $historyLimit) {
                 $player['raceHistory'] = array_slice($player['raceHistory'], -$historyLimit);
             }
-
+            $player['activeRace'] = null;
             return $player;
         });
 
         return ['player' => $player, 'race' => $result];
+    }
+
+    public static function quickRace(string $distance = '1/4'): array
+    {
+        return self::startQuickRace($distance);
     }
 
     public static function roguelikeStart(): array
@@ -899,6 +981,41 @@ final class GameService
     private static function randomFloat(float $min, float $max): float
     {
         return $min + ((mt_rand() / mt_getrandmax()) * ($max - $min));
+    }
+
+    private static function raceVisualSrc(array $car): string
+    {
+        $sprites = is_array($car['visual']['sprites'] ?? null) ? $car['visual']['sprites'] : [];
+        return trim((string)($sprites['racePreview']['src'] ?? $sprites['topDown']['src'] ?? ''));
+    }
+
+    private static function opponentRaceVisual(float $targetRating): array
+    {
+        $candidates = [];
+        foreach (self::carCatalog() as $spec) {
+            $sprites = is_array($spec['visual']['sprites'] ?? null) ? $spec['visual']['sprites'] : [];
+            $src = trim((string)($sprites['racePreview']['src'] ?? $sprites['topDown']['src'] ?? ''));
+            $hp = (float)($spec['base']['hp'] ?? 0);
+            $weight = max(1.0, (float)($spec['base']['weight'] ?? 0));
+            if ($src === '' || $hp <= 0 || $weight <= 1) continue;
+            $candidates[] = [
+                'src' => $src,
+                'name' => trim((string)($spec['displayName'] ?? implode(' ', array_filter([$spec['year'] ?? null, $spec['make'] ?? null, $spec['model'] ?? null])))) ?: 'Opponent',
+                'delta' => abs(($hp / $weight) - $targetRating),
+            ];
+        }
+        usort($candidates, fn(array $a, array $b): int => $a['delta'] <=> $b['delta']);
+        if (!$candidates) return ['src' => '', 'name' => 'Opponent'];
+        return ['src' => (string)$candidates[0]['src'], 'name' => (string)$candidates[0]['name']];
+    }
+
+    private static function raceTimeScale(array $racingConfig): float
+    {
+        $env = getenv('FR_RACE_TIME_SCALE');
+        if ($env !== false && is_numeric($env) && (float)$env > 0) {
+            return max(0.01, (float)$env);
+        }
+        return max(0.01, (float)($racingConfig['presentation']['timeScale'] ?? 1.0));
     }
 
     private static function opponentName(): string

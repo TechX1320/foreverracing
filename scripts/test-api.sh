@@ -16,7 +16,7 @@ cleanup() {
 trap cleanup EXIT
 
 rm -f data/players/admin.json data/players/admin.json.lock data/runtime/used-lot.json data/runtime/used-lot.json.lock data/runtime/active-sessions.json data/runtime/active-sessions.json.lock
-php -S 127.0.0.1:$PORT -t . >/tmp/forever-racing-api-test.log 2>&1 &
+FR_RACE_TIME_SCALE=0.01 php -S 127.0.0.1:$PORT -t . >/tmp/forever-racing-api-test.log 2>&1 &
 SERVER_PID=$!
 
 READY=0
@@ -93,12 +93,27 @@ echo "$PLAYER" | jq -e '.player.garage[0].derived.hp == 109 and .player.tutorial
 PLAYER="$(post tutorial/advance.php '{"action":"build_stages_explained"}')"
 echo "$PLAYER" | jq -e '.player.tutorial.step == "first_race"' >/dev/null
 
-PLAYER="$(post race/quick.php '{"distance":"1/4"}')"
-echo "$PLAYER" | jq -e '.player.tutorial.status == "complete" and .player.progression.rep >= 27 and .player.progression.exp > 0' >/dev/null
-echo "$PLAYER" | jq -e '.race.distance == "1/4" and .race.player.trapSpeed > 0 and (.race.location.name | length) > 0 and (.race.weather.name | length) > 0' >/dev/null
+PLAYER="$(post race/start.php '{"distance":"1/4"}')"
+RACE_ID="$(echo "$PLAYER" | jq -r '.activeRace.raceId')"
+echo "$PLAYER" | jq -e '.player.tutorial.step == "first_race" and .player.stats.races == 0 and .player.progression.exp == 0 and (.player.raceHistory | length) == 0' >/dev/null
+echo "$PLAYER" | jq -e '.activeRace.distance == "1/4" and .activeRace.race.player.trapSpeed > 0 and (.activeRace.race.location.name | length) > 0 and (.activeRace.race.weather.name | length) > 0' >/dev/null
 
-PLAYER="$(post race/quick.php '{"distance":"1/2"}')"
-echo "$PLAYER" | jq -e '.race.distance == "1/2" and ((.player.raceHistory | length) >= 2)' >/dev/null
+DUP_RACE="$(post race/start.php '{"distance":"1/2"}')"
+echo "$DUP_RACE" | jq -e --arg raceId "$RACE_ID" '.activeRace.raceId == $raceId and .activeRace.distance == "1/4" and .player.stats.races == 0' >/dev/null
+
+sleep 0.35
+RACE_BODY="$(printf '{"raceId":"%s"}' "$RACE_ID")"
+PLAYER="$(post race/finish.php "$RACE_BODY")"
+echo "$PLAYER" | jq -e '.player.activeRace == null and .player.tutorial.status == "complete" and .player.progression.rep >= 27 and .player.progression.exp > 0 and .player.stats.races == 1 and (.player.raceHistory | length) == 1' >/dev/null
+echo "$PLAYER" | jq -e '.race.distance == "1/4" and .race.player.trapSpeed > 0' >/dev/null
+
+PLAYER="$(post race/start.php '{"distance":"1/2"}')"
+RACE_ID="$(echo "$PLAYER" | jq -r '.activeRace.raceId')"
+echo "$PLAYER" | jq -e '.activeRace.distance == "1/2" and .player.stats.races == 1' >/dev/null
+sleep 0.65
+RACE_BODY="$(printf '{"raceId":"%s"}' "$RACE_ID")"
+PLAYER="$(post race/finish.php "$RACE_BODY")"
+echo "$PLAYER" | jq -e '.race.distance == "1/2" and .player.stats.races == 2 and ((.player.raceHistory | length) == 2)' >/dev/null
 
 LOGOUT="$(post auth/logout.php '{}')"
 echo "$LOGOUT" | jq -e '.reset == true' >/dev/null
@@ -115,4 +130,4 @@ if [[ "$FRESH_STATUS" != "200" ]]; then
 fi
 jq -e '.authenticated == true and .player.tutorial.step == "welcome" and ((.player.garage | length) == 0) and .player.progression.exp == 0' "$LOGIN2" >/dev/null
 
-echo "Authenticated PHP API FTUE + session/reset + V0.3B race core smoke test passed."
+echo "Authenticated PHP API FTUE + session/reset + V0.4A two-phase race smoke test passed."

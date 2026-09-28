@@ -128,6 +128,23 @@ The first race-core migration is now implemented:
 
 Player-input racing remains a later layer on the same simulation/result contract rather than a replacement.
 
+### V0.4A — Race presentation layer
+
+The race math remains automated, but results are no longer presented instantly.
+
+Implemented direction:
+
+- race start and race finish are separate state transitions;
+- one persistent active race prevents button-spam / duplicate-pass generation;
+- top-down cars animate down a two-lane strip over the simulated elapsed time;
+- pre-stage, stage, tree, race clock and progress bars make the pass readable;
+- rewards, EXP, records and history are committed only after the finish timestamp;
+- refresh/reload resumes the same active pass;
+- navigation remains locked to the race until the pass finishes;
+- final timing slip appears after the visual race rather than before it.
+
+This is also the persistence foundation for later interactive launch/shift/NOS racing and server PvP/wagers.
+
 ### V0.4 — Economy / daily loop
 
 1. Rotating dealership stock.

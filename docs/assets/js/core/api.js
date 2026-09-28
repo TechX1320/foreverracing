@@ -55,7 +55,9 @@ export class ApiClient {
   usedLot() { return this.request("usedlot/listings.php"); }
   refreshUsedLot() { return this.request("usedlot/refresh.php", { method: "POST", body: {}, csrf: true }); }
   buyUsedCar(listingId) { return this.request("usedlot/purchase.php", { method: "POST", body: { listingId }, csrf: true }); }
-  quickRace(distance = "1/4") { return this.request("race/quick.php", { method: "POST", body: { distance }, csrf: true }); }
+  startQuickRace(distance = "1/4") { return this.request("race/start.php", { method: "POST", body: { distance }, csrf: true }); }
+  finishQuickRace(raceId) { return this.request("race/finish.php", { method: "POST", body: { raceId }, csrf: true }); }
+  quickRace(distance = "1/4") { return this.startQuickRace(distance); }
   roguelikeStart() { return this.request("roguelike/start.php", { method: "POST", body: {}, csrf: true }); }
   roguelikeStep(choice) { return this.request("roguelike/step.php", { method: "POST", body: { choice }, csrf: true }); }
 }

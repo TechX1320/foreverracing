@@ -152,11 +152,22 @@ export class LocalStorageProvider extends StorageProvider {
     return { ok: true, player: result.player };
   }
 
-  async quickRace(distance = '1/4') {
+  async startQuickRace(distance = '1/4') {
     await this.#ready();
-    const result = this.#service.quickRace(this.#loadPlayer(), distance);
+    const result = this.#service.startQuickRace(this.#loadPlayer(), distance, Date.now());
     this.#savePlayer(result.player);
     return { ok: true, ...result };
+  }
+
+  async finishQuickRace(raceId) {
+    await this.#ready();
+    const result = this.#service.finishQuickRace(this.#loadPlayer(), raceId, Date.now());
+    this.#savePlayer(result.player);
+    return { ok: true, ...result };
+  }
+
+  async quickRace(distance = '1/4') {
+    return this.startQuickRace(distance);
   }
 
   async roguelikeStart() {
