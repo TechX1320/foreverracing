@@ -18,7 +18,7 @@ export async function renderQuickRace(ctx) {
       ${result ? raceResult(result) : ""}
       ${current ? `
         <div class="race-car-panel is-selected">
-          <div class="race-car-panel__visual">${renderVehicle(current, { stage: Number(current.buildStage || 1) })}</div>
+          <div class="race-car-panel__visual">${renderVehicle(current, { stage: Number(current.buildStage || 1), view: 'racePreview' })}</div>
           <div class="game-card__top"><div><h3>${carLabel(current)}</h3><p>${current.displayName} • ${current.base?.drivetrain}</p></div><span class="pill pill--accent">CURRENT</span></div>
           <div class="spec-grid">
             <div class="spec"><span>Power</span><strong>${number(current.derived?.hp)} hp</strong></div>
