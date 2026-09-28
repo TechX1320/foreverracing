@@ -83,6 +83,9 @@ export class LocalGameService {
       if (player.tutorial?.status === 'active' && player.tutorial?.step === 'buy_first_car') {
         throw new LocalGameError('Your first car comes from the Classifieds. Start with a D Class used car and work your way up.');
       }
+      if (player.tutorial?.status !== 'active' && Number(player.progression?.level || 1) < 5) {
+        throw new LocalGameError('The Showroom unlocks at Level 5. Keep building through Classifieds first.');
+      }
       const price = Number(spec.price || 0);
       this.requireCredits(player, price);
       player.wallet.credits -= price;
