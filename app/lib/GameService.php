@@ -16,6 +16,13 @@ final class GameService
         return FR_DATA . '/players/admin.json';
     }
 
+    public static function resetPlayer(): void
+    {
+        $path = self::playerPath();
+        if (is_file($path)) @unlink($path);
+        if (is_file($path . '.lock')) @unlink($path . '.lock');
+    }
+
     public static function defaultPlayer(): array
     {
         $now = time();

@@ -6,7 +6,13 @@ $body = Api::body();
 $username = trim((string)($body['username'] ?? ''));
 $password = (string)($body['password'] ?? '');
 
-if (!Auth::login($username, $password)) {
+try {
+    $loggedIn = Auth::login($username, $password);
+} catch (AuthSessionException $e) {
+    Api::json(['ok' => false, 'error' => $e->getMessage(), 'code' => 'ACCOUNT_ALREADY_ACTIVE'], $e->status);
+}
+
+if (!$loggedIn) {
     usleep(250000);
     Api::json(['ok' => false, 'error' => 'Invalid username or password.'], 401);
 }
