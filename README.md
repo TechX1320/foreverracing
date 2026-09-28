@@ -14,13 +14,13 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.4.0-c playable direction
+## V0.4.0-d playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
 ### Game UI
 
-- Readability is now a first-class constraint: V0.4C keeps compact browser-MMO density while enforcing a 10px floor for compact metadata and larger supporting copy.
+- Readability remains a first-class constraint: V0.4D stops treating 10px as an acceptable desktop floor. Compact metadata is generally 11–12px+, supporting copy is 13px+, and viewport space is recovered by focusing/collapsing content instead of shrinking text.
 - Desktop removes the oversized top player/current-car strip. Player Info lives in the right context rail under Build Rules.
 - The active navigation item owns the orange indicator; it follows the current route instead of remaining on Home.
 - Desktop screens are designed around a no-page-scroll target at 1080p+ for normal gameplay surfaces.
@@ -29,16 +29,16 @@ This build is the first gameplay/identity pass after the dual-runtime foundation
 
 ### First-time user experience
 
-New/migrated development profiles receive a shorter persistent FTUE:
+New development profiles receive an action-first six-step FTUE:
 
-1. Welcome / core loop.
-2. Choose one of three starter platforms.
-3. Learn the Garage and current-car stats.
-4. Buy the first upgrade from a Parts category.
-5. Install it from the car's Garage Inventory.
-6. Run the first race and receive the tutorial completion reward.
+1. Welcome / choose **SELECT FIRST CAR**.
+2. Pick one of three used **D Class** starter listings in Classifieds.
+3. Inspect the first car in Garage and continue through the large FTUE action.
+4. Parts locks every category except **Intake** and forces purchase of the Stage 1 Intake.
+5. Garage Inventory opens automatically and forces installation of that Intake.
+6. Quick Race locks to the **1/4 mile**, guarantees a clean first launch in normal weather, and completes the basics.
 
-The build-conversion explanation is no longer forced after a single part. The game introduces the next build type reactively when the Street Car actually has every required category maxed.
+FTUE is intentionally restrictive: new players are shown one action at a time rather than being asked to explore menus while learning the core loop. Build conversion remains reactive later, when the Street Car actually has every required category maxed.
 
 Tutorial state is stored with the player. Settings includes a development-only Reset Tutorial action.
 
@@ -46,13 +46,14 @@ Tutorial state is stored with the player. Settings includes a development-only R
 
 #### Street Car
 
-The car retains its production shell/layout and uses a simple three-step progression in seven required categories:
+The car retains its production shell/layout and uses a simple three-step progression in eight required categories:
 
 - Intake
 - Exhaust
 - ECU
 - Fuel
 - Drivetrain
+- Suspension
 - Tires
 - Weight Reduction
 
@@ -62,7 +63,7 @@ Street Car rules:
 - The Parts category dialog shows projected HP / torque / weight before purchase.
 - Buying a part puts it in that car's Garage Inventory; installation happens in the Garage.
 - An installed Street Car ladder step cannot be downgraded.
-- Once all seven categories reach Step 3, the game reactively asks whether to upgrade the car into a Street Race Car.
+- Once all eight categories reach Step 3, the game reactively asks whether to upgrade the car into a Street Race Car.
 
 #### Street Race Car
 
@@ -87,15 +88,27 @@ The Parts screen is a compact category launcher rather than one long upgrade tab
 
 The shop only purchases parts. Owned parts are marked **OWNED**. Installation/removal/swapping happens from **Garage -> Inventory** on the car itself.
 
-### Classifieds
+### Classifieds and Showroom
 
-The former Used Lot is presented as **Classifieds**, the home for older/used vehicles and eventually player listings.
+**Classifieds** is the home for older/used vehicles and eventually player listings. It is also where a new player gets their first car.
 
-- Listing cards are image-first and open a full More Details dialog.
-- Purchase happens from the detail dialog instead of the grid.
+- FTUE guarantees three D Class starter listings and filters out higher-class starter choices.
+- Starter cars are intentionally used, high-mileage, imperfect cars: the progression fantasy starts at the bottom.
+- Listing cards are image-first and open a full details/purchase dialog.
 - Mileage and condition use separate visible price factors.
-- Poor-condition cars therefore lose materially more value than otherwise similar clean examples.
-- Showroom navigation is hidden after starter FTUE until the game has a meaningful genuinely-new vehicle catalog.
+- **Showroom** is now a separate newer/dealer-car experience using the same image-first card language and unlocks later.
+
+### Early progression gates
+
+Completing FTUE no longer opens every system at once. The initial progression map is intentionally simple and easy to rebalance:
+
+- Level 1: Garage, Parts, Classifieds, 1/4-mile Quick Race, The Circuit.
+- Level 3: Records.
+- Level 5: Showroom, Teams, 1/2-mile Quick Race.
+- Level 7: Events.
+- Level 10: Multiplayer and 1-mile Quick Race.
+
+**The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
 
 ### V0.4A — real-time race presentation
 
