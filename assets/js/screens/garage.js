@@ -120,7 +120,7 @@ function carRow(player, car, catalog, tutorialStep) {
 
 function garageTutorial() {
   return `<section class="ftue-focus-panel ftue-focus-panel--garage">
-    <div class="ftue-focus-panel__step">FTUE 3/6</div>
+    <div class="ftue-focus-panel__step">STEP 3/6</div>
     <div class="ftue-focus-panel__copy">
       <span>THIS IS YOUR CAR</span>
       <strong>Now make it faster.</strong>
@@ -132,7 +132,7 @@ function garageTutorial() {
 
 function installTutorial() {
   return `<section class="ftue-focus-panel ftue-focus-panel--compact">
-    <div class="ftue-focus-panel__step">FTUE 5/6</div>
+    <div class="ftue-focus-panel__step">STEP 5/6</div>
     <div class="ftue-focus-panel__copy"><span>PART PURCHASED</span><strong>Install the Intake.</strong><p>Your car's Inventory opens automatically. Install the highlighted part to continue.</p></div>
     <div class="ftue-focus-panel__arrow">↓ INSTALL</div>
   </section>`;
@@ -153,7 +153,7 @@ function openInventory(ctx, carId) {
     <div class="dialog-body garage-inventory-dialog ${tutorialInstall ? "garage-inventory-dialog--ftue" : ""}">
       <div class="garage-inventory-dialog__titlebar">
         <div>
-          <span class="section-label">${tutorialInstall ? "FTUE • INSTALL THIS PART" : `${escapeHtml(buildName(Number(car.buildStage || 1)))} INVENTORY`}</span>
+          <span class="section-label">${tutorialInstall ? "STEP 5/6 • INSTALL THIS PART" : `${escapeHtml(buildName(Number(car.buildStage || 1)))} INVENTORY`}</span>
           <h2>${escapeHtml(carLabel(car))}</h2>
           <p>${tutorialInstall ? "One action: install your new Stage 1 Intake." : "Owned parts live here. Install, remove and swap them without returning to the shop."}</p>
         </div>
