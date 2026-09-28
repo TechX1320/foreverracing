@@ -73,6 +73,9 @@ final class GameService
         $player['progression'] = array_replace($default['progression'], is_array($player['progression'] ?? null) ? $player['progression'] : []);
         $player['tutorial'] = array_replace($default['tutorial'], is_array($player['tutorial'] ?? null) ? $player['tutorial'] : []);
         $player['tutorial']['completedSteps'] = array_values(is_array($player['tutorial']['completedSteps'] ?? null) ? $player['tutorial']['completedSteps'] : []);
+        if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'build_stages') {
+            $player['tutorial']['step'] = 'first_race';
+        }
         $player['stats'] = array_replace($default['stats'], is_array($player['stats'] ?? null) ? $player['stats'] : []);
         $garage = array_values(is_array($player['garage'] ?? null) ? $player['garage'] : []);
         $player['garage'] = array_map(fn(array $car): array => self::normalizeCar($car), $garage);
@@ -180,6 +183,7 @@ final class GameService
             $player['inventory']['parts'][] = [
                 'inventoryId' => self::id('part'),
                 'catalogId' => (string)$spec['catalogId'],
+                'purchasedForCarId' => (string)$car['carId'],
                 'installedOnCarId' => null,
                 'purchasedAt' => time(),
             ];
@@ -233,7 +237,7 @@ final class GameService
                 $player['garage'][$previousCarIndex] = self::recalculateCar($player['garage'][$previousCarIndex], $player['inventory']['parts'], $catalog);
             }
             if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'install_first_upgrade') {
-                self::completeTutorialStep($player, 'install_first_upgrade', 'build_stages');
+                self::completeTutorialStep($player, 'install_first_upgrade', 'first_race');
             }
             return $player;
         });
@@ -271,11 +275,11 @@ final class GameService
             $index = self::requireOwnedCarIndex($player, $carId);
             $car = $player['garage'][$index];
             if ((int)($car['buildStage'] ?? 1) !== 1) {
-                throw new GameException('Only the Stage 1 to Stage 2 conversion is enabled in this build.');
+                throw new GameException('Only Street Car to Street Race Car conversion is enabled in this build.');
             }
             foreach ($required as $category) {
                 if (self::installedSimpleTier($player, $carId, (string)$category, $catalog) < 3) {
-                    throw new GameException('Max every Stage 1 category before converting to Stage 2.');
+                    throw new GameException('Max every Street Car upgrade category before converting to a Street Race Car.');
                 }
             }
             $car['stageBaseline'] = $car['derived'];
@@ -291,7 +295,7 @@ final class GameService
             }
             unset($ownedPart);
             $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'], $catalog);
-            self::addTransaction($player, 'stage_conversion', 0, self::carName($car) . ' converted to Build Stage 2');
+            self::addTransaction($player, 'stage_conversion', 0, self::carName($car) . ' converted to Street Race Car');
             return $player;
         });
     }
@@ -850,19 +854,27 @@ final class GameService
     private static function generateUsedLot(int $now, int $refresh): array
     {
         $catalog = self::carCatalog();
-        if (!$catalog) {
+        $currentYear = (int)date('Y');
+        $candidates = array_values(array_filter(
+            $catalog,
+            fn(array $spec): bool => (int)($spec['year'] ?? 0) <= $currentYear - 3
+        ));
+        if (!$candidates) {
+            $candidates = $catalog;
+        }
+        if (!$candidates) {
             return ['generatedAt' => $now, 'expiresAt' => $now + $refresh, 'listings' => []];
         }
 
         $listings = [];
-        $count = min(8, max(4, count($catalog)));
+        $count = min(8, max(4, count($candidates)));
         for ($i = 0; $i < $count; $i++) {
-            $spec = $catalog[array_rand($catalog)];
+            $spec = $candidates[array_rand($candidates)];
             $mileage = mt_rand(2800, 195000);
-            $condition = mt_rand(62, 96);
-            $ageDiscount = min(0.55, $mileage / 360000);
-            $conditionFactor = 0.55 + ($condition / 220);
-            $price = (int)round(((int)$spec['price']) * (1 - $ageDiscount) * $conditionFactor / 50) * 50;
+            $condition = mt_rand(58, 98);
+            $mileageFactor = max(0.46, 1.0 - ($mileage / 330000));
+            $conditionFactor = 0.42 + (0.58 * pow($condition / 100.0, 1.7));
+            $price = (int)round(((int)$spec['price']) * $mileageFactor * $conditionFactor / 50) * 50;
             $price = max(1200, $price);
             $listings[] = [
                 'listingId' => self::id('used'),
@@ -870,6 +882,9 @@ final class GameService
                 'price' => $price,
                 'mileage' => $mileage,
                 'condition' => $condition,
+                'basePrice' => (int)$spec['price'],
+                'mileageFactor' => round($mileageFactor, 3),
+                'conditionFactor' => round($conditionFactor, 3),
             ];
         }
 
