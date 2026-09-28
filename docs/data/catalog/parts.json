@@ -828,5 +828,67 @@
         "value": 0.01
       }
     ]
+  },
+  {
+    "catalogId": "s1_suspension_1",
+    "name": "Stage 1 Suspension",
+    "category": "Suspension",
+    "categoryKey": "suspension",
+    "slot": "suspension",
+    "buildStage": 1,
+    "simpleTier": 1,
+    "persistentFromStage": null,
+    "price": 600,
+    "description": "Basic springs and damper refresh for better launch control.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.015
+      }
+    ]
+  },
+  {
+    "catalogId": "s1_suspension_2",
+    "name": "Stage 2 Suspension",
+    "category": "Suspension",
+    "categoryKey": "suspension",
+    "slot": "suspension",
+    "buildStage": 1,
+    "simpleTier": 2,
+    "persistentFromStage": null,
+    "price": 1250,
+    "description": "Matched street/strip dampers and alignment setup.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.032
+      }
+    ]
+  },
+  {
+    "catalogId": "s1_suspension_3",
+    "name": "Stage 3 Suspension",
+    "category": "Suspension",
+    "categoryKey": "suspension",
+    "slot": "suspension",
+    "buildStage": 1,
+    "simpleTier": 3,
+    "persistentFromStage": null,
+    "price": 2350,
+    "description": "Adjustable Street Car suspension tuned for hard launches.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.055
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -3
+      }
+    ]
   }
 ]
