@@ -346,6 +346,8 @@ export class LocalGameService {
         greenAt,
         finishAt,
         timeScale,
+        revealDelayMs: Math.max(0, Number(this.racingConfig?.presentation?.revealDelayMs || 650)),
+        progressExponent: Math.max(1, Number(this.racingConfig?.presentation?.progressExponent || 1.38)),
         distance,
         race,
       };
@@ -654,6 +656,30 @@ export class LocalGameService {
       '1/2': { races: 0, bestEt: null, bestTrap: null },
       '1': { races: 0, bestEt: null, bestTrap: null },
     };
+  }
+
+  raceVisualSrc(car) {
+    const sprites = car?.visual?.sprites || {};
+    return String(sprites?.racePreview?.src || sprites?.topDown?.src || '').trim();
+  }
+
+  opponentRaceVisual(targetRating) {
+    const candidates = (this.cars || [])
+      .map((spec) => {
+        const sprites = spec?.visual?.sprites || {};
+        const src = String(sprites?.racePreview?.src || sprites?.topDown?.src || '').trim();
+        const hp = Number(spec?.base?.hp || 0);
+        const weight = Math.max(1, Number(spec?.base?.weight || 0));
+        if (!src || hp <= 0 || weight <= 1) return null;
+        return {
+          src,
+          name: String(spec.displayName || [spec.year, spec.make, spec.model].filter(Boolean).join(' ') || 'Opponent'),
+          delta: Math.abs((hp / weight) - Number(targetRating || 0)),
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.delta - b.delta);
+    return candidates[0] || { src: '', name: 'Opponent' };
   }
 
   opponentName() {
