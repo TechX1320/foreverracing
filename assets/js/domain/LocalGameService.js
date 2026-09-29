@@ -1,5 +1,6 @@
 import { RaceSimulator } from './RaceSimulator.js';
 import { benchmarkPerformance, performanceClassFromIndex } from './PerformanceIndex.js';
+import { isContentReleased } from './ContentRelease.js';
 const clone = (value) => value == null ? value : structuredClone(value);
 const now = () => Math.floor(Date.now() / 1000);
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -100,7 +101,9 @@ export class LocalGameService {
 
   purchaseNewCar(inputPlayer, stockId) {
     const spec = this.findBy(this.cars, 'stockId', Number(stockId));
-    if (!spec) throw new LocalGameError('That showroom car does not exist.', 404);
+    if (!spec || spec?.market?.showroom !== true || !isContentReleased(spec)) {
+      throw new LocalGameError('That showroom car is not currently released.', 404);
+    }
     return this.mutate(inputPlayer, (player) => {
       if (player.tutorial?.status === 'active' && player.tutorial?.step === 'buy_first_car') {
         throw new LocalGameError('Your first car comes from the Classifieds. Pick one of the starter cars and work your way up.');
@@ -256,7 +259,7 @@ export class LocalGameService {
 
   generateUsedLot() {
     const timestamp = now();
-    const pool = this.cars.filter((spec) => spec?.market?.classifieds !== false);
+    const pool = this.cars.filter((spec) => spec?.market?.classifieds !== false && isContentReleased(spec));
     if (!pool.length) return { generatedAt: timestamp, expiresAt: timestamp + this.config.usedLotRefreshSeconds, listings: [] };
 
     const makeListing = (spec, starterListing = false) => {
@@ -795,7 +798,7 @@ export class LocalGameService {
     ].join('|');
     const rng = seededRandom(stableSeed(seedText));
     const targetPi = tutorialRace ? Math.max(0, playerPi - 32) : Math.max(0, playerPi + Math.round((rng() * 48) - 24));
-    let candidates = (this.cars || []).filter((spec) => spec?.visual?.layered?.layers?.body?.src);
+    let candidates = (this.cars || []).filter((spec) => spec?.visual?.layered?.layers?.body?.src && isContentReleased(spec));
     if (!tutorialRace) {
       const alternatives = candidates.filter((spec) => Number(spec.stockId) !== Number(car.stockId));
       if (alternatives.length) candidates = alternatives;
