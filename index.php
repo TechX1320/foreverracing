@@ -52,6 +52,7 @@ $storageText = $storageMode === 'local' ? 'BROWSER LOCAL' : 'PHP / JSON';
           <button type="button" data-nav="leaderboards"><b>RECORDS</b><span>Stats</span></button>
           <button type="button" data-nav="multiplayer"><b>MULTIPLAYER</b><span>PvP</span></button>
           <div class="nav-rail__label nav-rail__label--secondary">SYSTEM</div>
+          <button type="button" data-nav="content-studio"><b>CONTENT STUDIO</b><span>Cars & tools</span></button>
           <button type="button" data-nav="settings"><b>SETTINGS</b><span>Local UI</span></button>
         </nav>
 
