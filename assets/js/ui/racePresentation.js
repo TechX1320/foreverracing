@@ -123,6 +123,8 @@ function runPresentation(ctx, activeRace) {
       const opponentProgress = raceVisualProgress(now, opponentStart, opponentFinish, visualFinishAt, progressExponent);
       setSideProgress(playerCar, playerBar, playerProgress, playerGeometry, strip, startLine, finishLine);
       setSideProgress(opponentCar, opponentBar, opponentProgress, opponentGeometry, strip, startLine, finishLine);
+      updateWheelMotion(playerCar, playerRun, race.playerDrivetrain, playerProgress, now, playerStart, race.distanceFeet, timeScale);
+      updateWheelMotion(opponentCar, opponentRun, opponent.drivetrain, opponentProgress, now, opponentStart, race.distanceFeet, timeScale);
 
       // The visible timer belongs to the player's pass. It freezes at the exact
       // instant the player's front-bumper anchor reaches the finish timing plane.
@@ -175,15 +177,23 @@ function playbackMarkup(activeRace) {
           <div class="race-strip__track-rail race-strip__track-rail--bottom" aria-hidden="true"></div>
           <div class="race-strip__timing-line race-strip__timing-line--start" data-race-start-line><span>START</span></div>
           <div class="race-strip__timing-line race-strip__timing-line--finish" data-race-finish-line><span>FINISH</span></div>
-          <div class="race-strip__tree race-strip__tree--side" data-race-tree data-tree-state="idle" aria-label="Drag racing starting tree"></div>
+          <div class="race-strip__tree race-strip__tree--side" data-race-tree aria-label="Drag racing starting tree">
+            <i class="tree-bulb tree-bulb--pre" data-tree-pre></i>
+            <i class="tree-bulb tree-bulb--stage" data-tree-stage></i>
+            <i class="tree-bulb tree-bulb--amber" data-tree-amber="1"></i>
+            <i class="tree-bulb tree-bulb--amber" data-tree-amber="2"></i>
+            <i class="tree-bulb tree-bulb--amber" data-tree-amber="3"></i>
+            <i class="tree-bulb tree-bulb--green" data-tree-green></i>
+            <i class="tree-bulb tree-bulb--red" data-tree-red></i>
+          </div>
 
           <div class="race-side-lane race-side-lane--player">
             <span class="race-side-lane__label">YOU • ${escapeHtml(race.carName || "Current Car")} • PI ${number(race.playerPerformanceIndex || 0)}</span>
-            ${raceCar({ displayName: race.carName || "Player car", visual: race.playerVisual || {} }, "data-race-player-car")}
+            ${raceCar({ displayName: race.carName || "Player car", visual: race.playerVisual || {} }, race.playerDrivetrain || "-", "data-race-player-car")}
           </div>
           <div class="race-side-lane race-side-lane--opponent">
             <span class="race-side-lane__label">${escapeHtml(opponent.name || "Opponent")} • ${escapeHtml(opponent.carName || "Race Car")} • PI ${number(opponent.performanceIndex || 0)}</span>
-            ${raceCar({ displayName: opponent.carName || "Opponent car", visual: opponent.visual || {} }, "data-race-opponent-car")}
+            ${raceCar({ displayName: opponent.carName || "Opponent car", visual: opponent.visual || {} }, opponent.drivetrain || "-", "data-race-opponent-car")}
           </div>
         </div>
 
@@ -201,8 +211,8 @@ function playbackMarkup(activeRace) {
     </section>`;
 }
 
-function raceCar(car, attr) {
-  return `<div class="race-side-car" ${attr}><span class="race-side-car__shadow" aria-hidden="true"></span>${renderVehicle(car, { view: "raceSide", className: "race-side-car__vehicle" })}</div>`;
+function raceCar(car, drivetrain, attr) {
+  return `<div class="race-side-car" ${attr} data-drivetrain="${escapeHtml(drivetrain)}"><span class="race-side-car__shadow" aria-hidden="true"></span>${renderVehicle(car, { view: "raceSide", className: "race-side-car__vehicle", animatedWheels: true })}</div>`;
 }
 
 function updateTree(tree, phase, now, startedAt, greenAt, playerStart, race) {
@@ -211,21 +221,23 @@ function updateTree(tree, phase, now, startedAt, greenAt, playerStart, race) {
   const playerFoul = Boolean(race.player?.foul);
   const foulShown = playerFoul && now >= playerStart;
 
-  let state = "idle";
-  if (foulShown) state = "red";
-  else if (now >= greenAt) state = "green";
-  else if (ratio >= 0.84) state = "amber3";
-  else if (ratio >= 0.68) state = "amber2";
-  else if (ratio >= 0.52) state = "amber1";
-  else if (ratio >= 0.28) state = "stage";
-  else if (ratio >= 0.08) state = "pre";
-  if (tree) tree.dataset.treeState = state;
+  setLamp(tree?.querySelector("[data-tree-pre]"), ratio >= 0.08);
+  setLamp(tree?.querySelector("[data-tree-stage]"), ratio >= 0.28);
+  setLamp(tree?.querySelector('[data-tree-amber="1"]'), ratio >= 0.52 && ratio < 0.68);
+  setLamp(tree?.querySelector('[data-tree-amber="2"]'), ratio >= 0.68 && ratio < 0.84);
+  setLamp(tree?.querySelector('[data-tree-amber="3"]'), ratio >= 0.84 && ratio < 1);
+  setLamp(tree?.querySelector("[data-tree-green]"), now >= greenAt && !playerFoul);
+  setLamp(tree?.querySelector("[data-tree-red]"), foulShown);
 
   if (foulShown) phase.textContent = "RED LIGHT";
   else if (now < startedAt + span * 0.28) phase.textContent = "PRE-STAGE";
   else if (now < startedAt + span * 0.52) phase.textContent = "STAGED";
   else if (now < greenAt) phase.textContent = "TREE";
   else phase.textContent = "GREEN";
+}
+
+function setLamp(node, on) {
+  node?.classList.toggle("is-on", Boolean(on));
 }
 
 export function raceVisualProgress(now, startAt, finishAt, visualFinishAt, exponent = 1.38) {
@@ -267,6 +279,43 @@ function setSideProgress(car, bar, progress, geometry, strip, startLine, finishL
     progress,
   });
   car.style.left = `${left.toFixed(2)}px`;
+}
+
+function updateWheelMotion(car, run, drivetrain, progress, now, startAt, distanceFeet, timeScale) {
+  if (!car) return;
+  const travelFeet = Math.max(0, Number(distanceFeet || 1320)) * Math.max(0, Number(progress || 0));
+  const rollingDegrees = ((travelFeet / 6.6) * 360) % 360;
+  const elapsed = Math.max(0, (now - startAt) / Math.max(1, 1000 * timeScale));
+  const slip = Math.max(0, Math.min(1, Number(run?.traction?.wheelSlip || 0)));
+  const slipWindow = Math.max(0, 1 - (elapsed / Math.max(0.45, 0.65 + (slip * 1.7))));
+  const angle = (rollingDegrees + (elapsed * 900 * slip * slipWindow)) % 360;
+
+  car.querySelectorAll(".layered-car__wheel,.layered-car__disk").forEach((node) => {
+    node.style.transform = `rotate(${angle.toFixed(2)}deg)`;
+  });
+
+  updateTireSmoke(car, run, drivetrain, elapsed, progress);
+}
+
+function updateTireSmoke(car, run, drivetrain, elapsed, progress) {
+  const gripLoss = Math.max(0, Math.min(1, Number(run?.traction?.gripLoss || 0)));
+  const smokeLevel = Math.max(0, Math.min(1, Number(run?.traction?.smokeLevel || 0)));
+  const duration = 0.45 + (gripLoss * 1.85);
+  const active = elapsed >= 0 && elapsed < duration && Number(progress || 0) < 0.28 && smokeLevel > 0.01;
+  const fade = active ? Math.max(0, 1 - (elapsed / duration)) : 0;
+  const opacity = Math.min(0.92, smokeLevel * 1.35 * fade);
+  const frame = Math.max(0, Math.min(7, Math.floor((elapsed / Math.max(0.01, duration)) * 8)));
+  const drive = String(drivetrain || "").toUpperCase();
+
+  car.querySelectorAll("[data-tire-smoke]").forEach((node) => {
+    const position = node.dataset.tireSmoke;
+    const driven = drive === "AWD"
+      || (drive === "FWD" && position === "front")
+      || ((drive === "RWD" || !drive) && position === "rear");
+    node.style.opacity = driven ? opacity.toFixed(3) : "0";
+    node.style.backgroundPosition = `center ${((frame / 7) * 100).toFixed(2)}%`;
+    node.classList.toggle("is-active", driven && opacity > 0.025);
+  });
 }
 
 function liveRaceStatus(now, greenAt, playerStart, opponentStart, playerFinish, opponentFinish, playerRun, opponentRun) {
