@@ -1222,7 +1222,7 @@ dialog.fr-dialog:has(.garage-inventory-dialog){
 }
 .layered-car__detail{z-index:5}
 .layered-car--certified{display:flex;align-items:center;justify-content:center}
-.layered-car__certified{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none}
+.layered-car__certified{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none}\n.layered-car--atlas{background-repeat:no-repeat;background-color:transparent}
 .classified-card__visual .layered-car{width:min(92%,330px)}
 .dialog-vehicle .layered-car{width:min(100%,390px)}
 .garage-entry__visual .layered-car{width:min(94%,330px)}
@@ -1370,3 +1370,12 @@ dialog.fr-dialog:has(.garage-inventory-dialog){
 .car-art-debug-card small{color:var(--muted);margin-top:2px}
 .car-art-debug-card code{margin-top:7px;color:var(--faint);font-size:10px;white-space:normal}
 @media(max-width:760px){.car-art-debug-grid{grid-template-columns:1fr}.car-art-debug-card__visual{height:125px}}
+
+
+/* V0.4G roster / performance classes */
+.performance-class-tag{display:inline-flex;align-items:center;justify-content:center;min-width:30px;padding:3px 7px;border:1px solid var(--orange);color:var(--orange);font-weight:950;font-size:11px;letter-spacing:.08em}
+.car-art-debug-grid--roster{grid-template-columns:repeat(4,minmax(0,1fr))}
+.car-art-debug-card__status{display:flex;gap:6px;align-items:center;justify-content:space-between;margin-top:6px}
+.car-art-debug-card__status .pill{font-size:9px}
+@media(max-width:980px){.car-art-debug-grid--roster{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){.car-art-debug-grid--roster{grid-template-columns:1fr}}
