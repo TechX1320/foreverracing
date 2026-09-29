@@ -6,14 +6,17 @@ const docs = new URL('../docs/', import.meta.url);
 const required = [
   'index.html',
   'assets/css/app.css',
+  'assets/art/cars/layered/golf_gti/certified.png',
   'assets/art/cars/layered/golf_gti/body.webp',
   'assets/art/cars/layered/golf_gti/wheel.webp',
   'assets/art/cars/layered/golf_gti/disk.webp',
   'assets/art/cars/layered/golf_gti/detail.webp',
+  'assets/art/cars/layered/mazda_rx8/certified.png',
   'assets/art/cars/layered/mazda_rx8/body.webp',
   'assets/art/cars/layered/mazda_rx8/wheel.webp',
   'assets/art/cars/layered/mazda_rx8/disk.webp',
   'assets/art/cars/layered/mazda_rx8/detail.webp',
+  'assets/art/cars/layered/renault_clio/certified.png',
   'assets/art/cars/layered/renault_clio/body.webp',
   'assets/art/cars/layered/renault_clio/wheel.webp',
   'assets/art/cars/layered/renault_clio/disk.webp',
@@ -42,7 +45,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.4.0-f"')) throw new Error('Static index is missing the V0.4F build marker.');
+if (!html.includes('data-build="0.4.0-f.1"')) throw new Error('Static index is missing the V0.4F.1 build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -64,7 +67,8 @@ for (const expected of expectedStarters) {
   if (car.make !== expected.make || car.model !== expected.model) throw new Error(`${expected.id} identity mismatch.`);
   if (car.base.hp !== expected.hp || car.base.torque !== expected.torque || car.base.weight !== expected.weight || car.base.drivetrain !== expected.drivetrain) throw new Error(`${expected.id} OEM base stats mismatch.`);
   if (car.engine.displacementLiters !== expected.displacement || car.engine.configuration !== expected.config || car.engine.aspiration !== expected.aspiration || car.engine.peakHpRpm !== expected.hpRpm || car.engine.peakTorqueRpm !== expected.tqRpm || car.engine.redlineRpm !== expected.redline || car.engine.revCutRpm !== expected.revCut) throw new Error(`${expected.id} engine metadata mismatch.`);
-  if (!car.visual?.layered?.layers?.body?.src || !car.visual?.layered?.layers?.wheel?.src || !car.visual?.layered?.layers?.disk?.src || !car.visual?.layered?.layers?.detail?.src) throw new Error(`${expected.id} layered art mapping is incomplete.`);
+  if (!car.visual?.layered?.certifiedSrc) throw new Error(`${expected.id} certified gameplay art is missing.`);
+  if (!car.visual?.layered?.layers?.body?.src || !car.visual?.layered?.layers?.wheel?.src || !car.visual?.layered?.layers?.disk?.src || !car.visual?.layered?.layers?.detail?.src) throw new Error(`${expected.id} layered customization metadata is incomplete.`);
   if (!(car.visual.layered.anchors.frontBumperX > car.visual.layered.anchors.frontWheelCenter.x)) throw new Error(`${expected.id} front-bumper anchor is invalid.`);
   if (!(car.visual.layered.anchors.frontWheelCenter.y + car.visual.layered.layers.wheel.height / 2 >= car.visual.layered.anchors.groundY - 2)) throw new Error(`${expected.id} wheels still sit too high in the arches.`);
   if (!(car.benchmark?.passes === 51 && car.benchmark?.performanceIndex > 0 && car.benchmark?.quarterMileEt > 0)) throw new Error(`${expected.id} benchmark / PI metadata is missing.`);
@@ -82,7 +86,7 @@ for (const file of [
 
 const rendererSource = await fs.readFile(new URL('assets/js/ui/vehicleRenderer.js', root), 'utf8');
 if (!rendererSource.includes('ART MISSING')) throw new Error('Vehicle renderer must expose an explicit missing-art placeholder.');
-if (!rendererSource.includes('renderLayeredVehicle') || !rendererSource.includes('centeredLayer') || !rendererSource.includes('frontBumperRatio') || !rendererSource.includes('frontWheelRatio')) throw new Error('Layered side-profile vehicle renderer is incomplete.');
+if (!rendererSource.includes('renderLayeredVehicle') || !rendererSource.includes('data-certified-car') || !rendererSource.includes('centeredLayer') || !rendererSource.includes('frontBumperRatio') || !rendererSource.includes('frontWheelRatio')) throw new Error('Certified/layered side-profile vehicle renderer is incomplete.');
 if (rendererSource.includes('topDown') || rendererSource.includes('renderProcedural(')) throw new Error('Old top-down/procedural vehicle rendering must not return.');
 const appSource = await fs.readFile(new URL('assets/js/app.js', root), 'utf8');
 if (!appSource.includes("clearForeverRacingCaches({ unregister: true })")) throw new Error('Static dev cache cleanup is missing.');
@@ -150,7 +154,7 @@ const garageSource = await fs.readFile(new URL('assets/js/screens/garage.js', ro
 if (!garageSource.includes('garage-inventory-dialog') || !garageSource.includes('data-inventory-car')) throw new Error('Garage Inventory UI is missing.');
 
 const partsSourceV04b = await fs.readFile(new URL('assets/js/screens/parts.js', root), 'utf8');
-if (!partsSourceV04b.includes('parts-category-grid') || !partsSourceV04b.includes('BUY THE STAGE 1 INTAKE') || !partsSourceV04b.includes('"suspension"')) throw new Error('V0.4D guided Parts UI is missing.');
+if (!partsSourceV04b.includes('parts-category-grid') || !partsSourceV04b.includes('BUY THE STAGE 1 INTAKE') || !partsSourceV04b.includes('BUY + INSTALL') || !partsSourceV04b.includes('data-buy-install-part') || !partsSourceV04b.includes('"suspension"')) throw new Error('V0.4F.1 guided Buy + Install Parts UI is missing.');
 
 const classifiedsSource = await fs.readFile(new URL('assets/js/screens/usedlot.js', root), 'utf8');
 if (!classifiedsSource.includes('Classifieds') || !classifiedsSource.includes('MORE DETAILS') || classifiedsSource.includes('Buy Used')) throw new Error('Classifieds UI did not replace the old Used Lot purchase cards.');
