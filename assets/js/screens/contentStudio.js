@@ -170,6 +170,19 @@ export async function renderContentStudio(ctx) {
       input.addEventListener("change", refreshLivePreview);
     });
 
+    host.querySelector("[data-release-mode]")?.addEventListener("change", (event) => {
+      const mode = String(event.currentTarget.value || "draft");
+      draft.release = normalizeRelease(draft.release, { legacyReleased: false });
+      draft.release.mode = mode;
+      if (mode !== "scheduled") draft.release.publishAt = null;
+      renderWorkspace();
+    });
+
+    host.querySelector("[data-release-at]")?.addEventListener("change", (event) => {
+      draft.release = normalizeRelease(draft.release, { legacyReleased: false });
+      draft.release.publishAt = String(event.currentTarget.value || "");
+      renderWorkspace();
+    });
     host.querySelector("[data-studio-paint]")?.addEventListener("input", (event) => {
       draft.visual.paintColor = String(event.currentTarget.value || "");
       draft.visual.renderMode = "layers";
@@ -323,6 +336,37 @@ function identitySection(car) {
     </section>`;
 }
 
+function releaseSection(car) {
+  const release = normalizeRelease(car?.release, { legacyReleased: false });
+  const status = releaseState({ release });
+  const scheduled = release.mode === "scheduled";
+  return `
+    <section class="content-studio__section content-studio__release">
+      <header><div><small>RELEASE</small><strong>Publishing & schedule</strong></div><span class="studio-release-status is-${escapeHtml(status.state)}">${escapeHtml(status.label)}</span></header>
+      <div class="studio-form-grid studio-form-grid--4">
+        <label class="studio-field">
+          <span>Release Mode</span>
+          <select data-release-mode>
+            <option value="draft" ${release.mode === "draft" ? "selected" : ""}>Keep as Draft</option>
+            <option value="instant" ${release.mode === "instant" ? "selected" : ""}>Release Immediately</option>
+            <option value="scheduled" ${release.mode === "scheduled" ? "selected" : ""}>Schedule Release</option>
+          </select>
+        </label>
+        <label class="studio-field">
+          <span>Release Date & Time</span>
+          <input type="datetime-local" value="${escapeHtml(toDatetimeLocalValue(release.publishAt))}" data-release-at ${scheduled ? "" : "disabled"}>
+        </label>
+      </div>
+      <div class="content-studio__release-note">
+        <b>${scheduled ? "SCHEDULED RELEASE" : release.mode === "instant" ? "INSTANT RELEASE" : "PRIVATE DRAFT"}</b>
+        <span>${scheduled
+          ? "The car stays hidden from Classifieds, Showroom and random opponents until this time. The market cache expires at the scheduled release so it becomes eligible immediately afterward."
+          : release.mode === "instant"
+            ? "Once this car is activated or committed, its selected markets are live immediately."
+            : "The car may be saved or locally activated for testing, but public game surfaces keep it hidden."}</span>
+      </div>
+    </section>`;
+}
 function physicsSection(car) {
   return `
     <section class="content-studio__section">
