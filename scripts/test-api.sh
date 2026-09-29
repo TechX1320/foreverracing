@@ -78,10 +78,10 @@ echo "$PLAYER" | jq -e '.player.tutorial.step == "buy_first_car"' >/dev/null
 
 LOT="$(curl -sS -b "$COOKIE" "http://127.0.0.1:$PORT/api/usedlot/listings.php")"
 echo "$LOT" | jq -e '[.lot.listings[] | select(.starterListing == true)] | length == 3' >/dev/null
-echo "$LOT" | jq -e '. as $root | [.lot.listings[] | select(.starterListing == true) as $listing | $root.cars[] | select(.stockId == $listing.stockId) | select(.starter == true and .class == "D")] | length == 3' >/dev/null
+echo "$LOT" | jq -e '. as $root | [.lot.listings[] | select(.starterListing == true) as $listing | $root.cars[] | select(.stockId == $listing.stockId) | select(.starter == true and .visual.layered.layers.body.src != null)] | length == 3' >/dev/null
 STARTER_LISTING_ID="$(echo "$LOT" | jq -r '.lot.listings[] | select(.starterListing == true and .stockId == 1) | .listingId' | head -n1)"
 if [[ -z "$STARTER_LISTING_ID" || "$STARTER_LISTING_ID" == "null" ]]; then
-  echo "Civic starter listing was not generated." >&2
+  echo "Golf GTI starter listing was not generated." >&2
   exit 1
 fi
 STARTER_BODY="$(jq -nc --arg listingId "$STARTER_LISTING_ID" '{listingId:$listingId}')"
@@ -95,7 +95,7 @@ echo "$PLAYER" | jq -e '.player.tutorial.step == "buy_first_upgrade"' >/dev/null
 BLOCKED_PART="$(mktemp)"
 BLOCKED_PART_STATUS="$(curl -sS -o "$BLOCKED_PART" -w '%{http_code}' -b "$COOKIE" -H "X-CSRF-Token: $CSRF" -H 'Content-Type: application/json' -d '{"catalogId":"s1_exhaust_1"}' "http://127.0.0.1:$PORT/api/parts/purchase.php")"
 if [[ "$BLOCKED_PART_STATUS" == "200" ]]; then
-  echo "FTUE incorrectly allowed a non-Intake first upgrade." >&2
+  echo "Tutorial incorrectly allowed a non-Intake first upgrade." >&2
   cat "$BLOCKED_PART" >&2 || true
   rm -f "$BLOCKED_PART"
   exit 1
@@ -107,16 +107,16 @@ PART_ID="$(echo "$PLAYER" | jq -r '.player.inventory.parts[] | select(.catalogId
 echo "$PLAYER" | jq -e --arg carId "$CAR_ID" '.player.tutorial.step == "install_first_upgrade" and (.player.inventory.parts[] | select(.catalogId=="s1_intake_1") | .purchasedForCarId) == $carId' >/dev/null
 
 PLAYER="$(post parts/install.php "{\"inventoryId\":\"$PART_ID\",\"carId\":\"$CAR_ID\"}")"
-echo "$PLAYER" | jq -e '.player.garage[0].derived.hp == 109 and .player.tutorial.step == "first_race"' >/dev/null
+echo "$PLAYER" | jq -e '.player.garage[0].derived.hp == 203 and .player.garage[0].performanceIndex > 0 and .player.tutorial.step == "first_race"' >/dev/null
 
 PREVIEW="$(curl -sS -b "$COOKIE" "http://127.0.0.1:$PORT/api/race/preview.php")"
-echo "$PREVIEW" | jq -e '.preview.opponent.name == "Test Mule" and .preview.opponent.hp > 0 and .preview.opponent.weight > 0 and (.preview.opponent.visualSrc | length) > 0' >/dev/null
+echo "$PREVIEW" | jq -e '.preview.opponent.name == "Test Mule" and .preview.performanceIndex > 0 and .preview.benchmarkEt > 0 and .preview.opponent.performanceIndex > 0 and (.preview.opponent.visual.layered.layers.body.src | length) > 0 and (.preview.opponent | has("hp") | not) and (.preview.opponent | has("torque") | not) and (.preview.opponent | has("weight") | not)' >/dev/null
 
 PLAYER="$(post race/start.php '{"distance":"1/4"}')"
 RACE_ID="$(echo "$PLAYER" | jq -r '.activeRace.raceId')"
 echo "$PLAYER" | jq -e '.player.tutorial.step == "first_race" and .player.stats.races == 0 and .player.progression.exp == 0 and (.player.raceHistory | length) == 0' >/dev/null
 echo "$PLAYER" | jq -e '.activeRace.distance == "1/4" and .activeRace.race.player.trapSpeed > 0 and .activeRace.race.location.name == "Local Test & Tune" and .activeRace.race.weather.name == "Cool & Cloudy" and .activeRace.race.player.foul == false and .activeRace.race.opponent.foul == false and .activeRace.race.won == true' >/dev/null
-echo "$PLAYER" | jq -e --argjson preview "$PREVIEW" '.activeRace.race.opponent.name == $preview.preview.opponent.name and .activeRace.race.opponent.carName == $preview.preview.opponent.carName and .activeRace.race.opponent.hp == $preview.preview.opponent.hp and .activeRace.race.opponent.weight == $preview.preview.opponent.weight' >/dev/null
+echo "$PLAYER" | jq -e --argjson preview "$PREVIEW" '.activeRace.race.opponent.name == $preview.preview.opponent.name and .activeRace.race.opponent.carName == $preview.preview.opponent.carName and .activeRace.race.opponent.performanceIndex == $preview.preview.opponent.performanceIndex and (.activeRace.race.playerVisual.layered.layers.body.src | length) > 0 and (.activeRace.race.opponent.visual.layered.layers.body.src | length) > 0 and (.activeRace.race.opponent | has("hp") | not) and (.activeRace.race.opponent | has("torque") | not) and (.activeRace.race.opponent | has("weight") | not)' >/dev/null
 
 DUP_RACE="$(post race/start.php '{"distance":"1/2"}')"
 echo "$DUP_RACE" | jq -e --arg raceId "$RACE_ID" '.activeRace.raceId == $raceId and .activeRace.distance == "1/4" and .player.stats.races == 0' >/dev/null
@@ -157,4 +157,4 @@ if [[ "$FRESH_STATUS" != "200" ]]; then
 fi
 jq -e '.authenticated == true and .player.tutorial.step == "welcome" and ((.player.garage | length) == 0) and .player.progression.exp == 0' "$LOGIN2" >/dev/null
 
-echo "Authenticated PHP API V0.4E tutorial + deterministic race preview smoke test passed."
+echo "Authenticated PHP API V0.4F layered starter + PI race smoke test passed."
