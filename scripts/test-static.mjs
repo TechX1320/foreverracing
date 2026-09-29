@@ -421,9 +421,12 @@ if (!contentStudioSource.includes('Publishing & schedule') ||
     !localGameSource.includes('nextScheduledReleaseAt') ||
     !localGameSource.includes('isContentReleased(spec)') ||
     !showroomSourceV05b.includes('isContentReleased(car)') ||
+    !contentStudioSource.includes('input.addEventListener("click", previewPaletteColor)') ||
+    !contentStudioSource.includes('studio-paint-swatch') ||
+    !cssV04b.includes('.studio-paint-swatch.is-selected') ||
     !cssV04b.includes('V0.5B release scheduler')) {
-  throw new Error('V0.5B per-car release scheduler is incomplete.');
+  throw new Error('V0.5B release scheduler / paint preview polish is incomplete.');
 }
-console.log('V0.5B release scheduler checks passed.');
+console.log('V0.5B release scheduler + clickable paint preview checks passed.');
 
 
