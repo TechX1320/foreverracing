@@ -52,6 +52,7 @@ const required = [
   'assets/js/domain/LocalGameService.js',
   'assets/js/domain/RaceSimulator.js',
   'assets/js/domain/PerformanceIndex.js',
+  'assets/js/domain/ContentRelease.js',
   'assets/js/ui/vehicleRenderer.js',
   'assets/js/ui/racePresentation.js',
   'assets/js/content/ContentStudioCatalog.js',
@@ -73,7 +74,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.5.0-a.3"')) throw new Error('Static index is missing the V0.5A.3 build marker.');
+if (!html.includes('data-build="0.5.0-b"')) throw new Error('Static index is missing the V0.5B build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -159,6 +160,7 @@ const modules = [
   'assets/js/app.js',
   'assets/js/domain/LocalGameService.js',
   'assets/js/domain/PerformanceIndex.js',
+  'assets/js/domain/ContentRelease.js',
   'assets/js/ui/vehicleRenderer.js',
   'assets/js/ui/racePresentation.js',
   'assets/js/storage/StorageProvider.js',
@@ -407,5 +409,21 @@ if (!contentStudioSource.includes('X OFFSET') ||
   throw new Error('V0.5A.3 Content Studio coordinate polish is incomplete.');
 }
 console.log('V0.5A.3 Content Studio coordinate polish checks passed.');
+
+const releaseSource = await fs.readFile(new URL('assets/js/domain/ContentRelease.js', root), 'utf8');
+const showroomSourceV05b = await fs.readFile(new URL('assets/js/screens/showroom.js', root), 'utf8');
+if (!contentStudioSource.includes('Publishing & schedule') ||
+    !contentStudioSource.includes('Release Immediately') ||
+    !contentStudioSource.includes('Schedule Release') ||
+    !contentStudioSource.includes('normalizeReleaseForSave') ||
+    !releaseSource.includes('nextScheduledReleaseAt') ||
+    !releaseSource.includes('isContentReleased') ||
+    !localGameSource.includes('nextScheduledReleaseAt') ||
+    !localGameSource.includes('isContentReleased(spec)') ||
+    !showroomSourceV05b.includes('isContentReleased(car)') ||
+    !cssV04b.includes('V0.5B release scheduler')) {
+  throw new Error('V0.5B per-car release scheduler is incomplete.');
+}
+console.log('V0.5B release scheduler checks passed.');
 
 
