@@ -215,7 +215,7 @@ if (!serverGameSourceV04c.includes("'s1_intake_1'") || !serverGameSourceV04c.inc
 if (!raceSimulatorSourceV04d.includes('allowFoul') || !raceSimulatorSourceV04d.includes('quickRace !== false')) {
   throw new Error('V0.4D tutorial foul/weather gates are missing.');
 }
-if (!racePresentationSourceV04d.includes('ratio >= 0.52') || !racePresentationSourceV04d.includes('ratio >= 0.68') || !racePresentationSourceV04d.includes('data.treeState') || !racePresentationSourceV04d.includes('RED LIGHT • YOU LEFT BEFORE GREEN')) {
+if (!racePresentationSourceV04d.includes('ratio >= 0.52') || !racePresentationSourceV04d.includes('ratio >= 0.68') || !racePresentationSourceV04d.includes('dataset.treeState') || !racePresentationSourceV04d.includes('RED LIGHT • YOU LEFT BEFORE GREEN')) {
   throw new Error('Drag-tree timing/state progression is missing.');
 }
 console.log('V0.4D guided FTUE, unlock progression and race-gating checks passed.');
