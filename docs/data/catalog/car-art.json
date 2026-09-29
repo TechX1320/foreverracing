@@ -1,0 +1,2870 @@
+{
+  "version": 1,
+  "sourceAssetCount": 57,
+  "runtimeAssetCount": 3,
+  "notes": "Wheel centers are auto-detected from transparent wheel openings, then dropped 10% of tire height to avoid an overly slammed stance. Spot-check before enabling additional cars.",
+  "cars": [
+    {
+      "assetId": "9ff_gt9",
+      "sourceName": "9ff_GT9",
+      "displayName": "9ff GT9",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 315,
+        "height": 104
+      },
+      "layers": {
+        "body": {
+          "source": "9ff_GT9.png",
+          "width": 315,
+          "height": 98
+        },
+        "wheel": {
+          "source": "9ff_GT9_Wheel.png",
+          "width": 50,
+          "height": 50
+        },
+        "disk": {
+          "source": "9ff_GT9_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "9ff_GT9_Detail.png",
+          "width": 315,
+          "height": 98
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 67.5,
+          "y": 77
+        },
+        "frontWheelCenter": {
+          "x": 252.5,
+          "y": 77
+        },
+        "frontBumperX": 314,
+        "rearBumperX": 0,
+        "groundY": 102
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "alfa_romeo_8c_competizione",
+      "sourceName": "Alfa_Romeo_8C_Competizione",
+      "displayName": "Alfa Romeo 8C Competizione",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 294,
+        "height": 111
+      },
+      "layers": {
+        "body": {
+          "source": "Alfa_Romeo_8C_Competizione.png",
+          "width": 294,
+          "height": 107
+        },
+        "wheel": {
+          "source": "Alfa_Romeo_8C_Competizione_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Alfa_Romeo_8C_Competizione_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Alfa_Romeo_8C_Competizione_Detail.png",
+          "width": 294,
+          "height": 107
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 49,
+          "y": 83
+        },
+        "frontWheelCenter": {
+          "x": 238.5,
+          "y": 83
+        },
+        "frontBumperX": 291,
+        "rearBumperX": 3,
+        "groundY": 109
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "alfa_romeo_gt",
+      "sourceName": "Alfa_Romeo_GT",
+      "displayName": "Alfa Romeo GT",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 302,
+        "height": 118
+      },
+      "layers": {
+        "body": {
+          "source": "Alfa_Romeo_GT.png",
+          "width": 302,
+          "height": 115
+        },
+        "wheel": {
+          "source": "Alfa_Romeo_GT_Wheel.png",
+          "width": 50,
+          "height": 50
+        },
+        "disk": {
+          "source": "Alfa_Romeo_GT_Disk.png",
+          "width": 40,
+          "height": 40
+        },
+        "detail": {
+          "source": "Alfa_Romeo_GT_Detail.png",
+          "width": 302,
+          "height": 115
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 57,
+          "y": 91
+        },
+        "frontWheelCenter": {
+          "x": 242.5,
+          "y": 91
+        },
+        "frontBumperX": 299,
+        "rearBumperX": 1,
+        "groundY": 116
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "aston_martin_one_77",
+      "sourceName": "Aston_Martin_One_77",
+      "displayName": "Aston Martin One 77",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 318,
+        "height": 116
+      },
+      "layers": {
+        "body": {
+          "source": "Aston_Martin_One_77.png",
+          "width": 318,
+          "height": 112
+        },
+        "wheel": {
+          "source": "Aston_Martin_One_77_Wheel.png",
+          "width": 56,
+          "height": 56
+        },
+        "disk": {
+          "source": "Aston_Martin_One_77_Disk.png",
+          "width": 42,
+          "height": 42
+        },
+        "detail": {
+          "source": "Aston_Martin_One_77_Detail.png",
+          "width": 318,
+          "height": 112
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 54,
+          "y": 86
+        },
+        "frontWheelCenter": {
+          "x": 261.5,
+          "y": 86
+        },
+        "frontBumperX": 314,
+        "rearBumperX": 1,
+        "groundY": 114
+      },
+      "calibration": {
+        "wheelDropPx": 6,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "audi_r8_v10_mtm_biturbo",
+      "sourceName": "Audi_R8_V10_MTM_Biturbo",
+      "displayName": "Audi R8 V10 MTM Biturbo",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 302,
+        "height": 114
+      },
+      "layers": {
+        "body": {
+          "source": "Audi_R8_V10_MTM_Biturbo.png",
+          "width": 302,
+          "height": 107
+        },
+        "wheel": {
+          "source": "Audi_R8_V10_MTM_Biturbo_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Audi_R8_V10_MTM_Biturbo_Disk.png",
+          "width": 40,
+          "height": 40
+        },
+        "detail": {
+          "source": "Audi_R8_V10_MTM_Biturbo_Detail.png",
+          "width": 302,
+          "height": 107
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 56,
+          "y": 86
+        },
+        "frontWheelCenter": {
+          "x": 242.5,
+          "y": 86
+        },
+        "frontBumperX": 301,
+        "rearBumperX": 0,
+        "groundY": 112
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "audi_rs6",
+      "sourceName": "Audi_RS6",
+      "displayName": "Audi RS6",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 307,
+        "height": 113
+      },
+      "layers": {
+        "body": {
+          "source": "Audi_RS6.png",
+          "width": 307,
+          "height": 107
+        },
+        "wheel": {
+          "source": "Audi_RS6_Wheel.png",
+          "width": 50,
+          "height": 50
+        },
+        "disk": {
+          "source": "Audi_RS6_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Audi_RS6_Detail.png",
+          "width": 307,
+          "height": 107
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 59.5,
+          "y": 86
+        },
+        "frontWheelCenter": {
+          "x": 249.5,
+          "y": 86
+        },
+        "frontBumperX": 306,
+        "rearBumperX": 0,
+        "groundY": 111
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "bmw_e36",
+      "sourceName": "BMW_E36",
+      "displayName": "BMW E36",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 301,
+        "height": 112
+      },
+      "layers": {
+        "body": {
+          "source": "BMW_E36.png",
+          "width": 301,
+          "height": 108
+        },
+        "wheel": {
+          "source": "BMW_E36_Wheel.png",
+          "width": 50,
+          "height": 50
+        },
+        "disk": {
+          "source": "BMW_E36_Disk.png",
+          "width": 36,
+          "height": 36
+        },
+        "detail": {
+          "source": "BMW_E36_Detail.png",
+          "width": 301,
+          "height": 108
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 64,
+          "y": 85
+        },
+        "frontWheelCenter": {
+          "x": 249.5,
+          "y": 85
+        },
+        "frontBumperX": 299,
+        "rearBumperX": 1,
+        "groundY": 110
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "bmw_m3",
+      "sourceName": "BMW_M3",
+      "displayName": "BMW M3",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 308,
+        "height": 120
+      },
+      "layers": {
+        "body": {
+          "source": "BMW_M3.png",
+          "width": 308,
+          "height": 116
+        },
+        "wheel": {
+          "source": "BMW_M3_Wheel.png",
+          "width": 51,
+          "height": 51
+        },
+        "disk": {
+          "source": "BMW_M3_Disk.png",
+          "width": 36,
+          "height": 36
+        },
+        "detail": {
+          "source": "BMW_M3_Detail.png",
+          "width": 308,
+          "height": 116
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 66,
+          "y": 92.5
+        },
+        "frontWheelCenter": {
+          "x": 258,
+          "y": 92.5
+        },
+        "frontBumperX": 304,
+        "rearBumperX": 2,
+        "groundY": 118
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "bmw_m6",
+      "sourceName": "BMW_M6",
+      "displayName": "BMW M6",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 318,
+        "height": 120
+      },
+      "layers": {
+        "body": {
+          "source": "BMW_M6.png",
+          "width": 318,
+          "height": 115
+        },
+        "wheel": {
+          "source": "BMW_M6_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "BMW_M6_Disk.png",
+          "width": 40,
+          "height": 40
+        },
+        "detail": {
+          "source": "BMW_M6_Detail.png",
+          "width": 318,
+          "height": 115
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 67.5,
+          "y": 92
+        },
+        "frontWheelCenter": {
+          "x": 259,
+          "y": 92
+        },
+        "frontBumperX": 316,
+        "rearBumperX": 2,
+        "groundY": 118
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "brabus_700_biturbo",
+      "sourceName": "Brabus_700_Biturbo",
+      "displayName": "Brabus 700 Biturbo",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 311,
+        "height": 114
+      },
+      "layers": {
+        "body": {
+          "source": "Brabus_700_Biturbo.png",
+          "width": 311,
+          "height": 110
+        },
+        "wheel": {
+          "source": "Brabus_700_Biturbo_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Brabus_700_Biturbo_Disk.png",
+          "width": 40,
+          "height": 40
+        },
+        "detail": {
+          "source": "Brabus_700_Biturbo_Detail.png",
+          "width": 311,
+          "height": 110
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 60,
+          "y": 86
+        },
+        "frontWheelCenter": {
+          "x": 250.5,
+          "y": 86
+        },
+        "frontBumperX": 307,
+        "rearBumperX": 2,
+        "groundY": 112
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "bugatti_veyron_16",
+      "sourceName": "Bugatti_Veyron_16",
+      "displayName": "Bugatti Veyron 16",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 293,
+        "height": 110
+      },
+      "layers": {
+        "body": {
+          "source": "Bugatti_Veyron_16.png",
+          "width": 293,
+          "height": 106
+        },
+        "wheel": {
+          "source": "Bugatti_Veyron_16_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Bugatti_Veyron_16_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Bugatti_Veyron_16_Detail.png",
+          "width": 293,
+          "height": 106
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 49,
+          "y": 82
+        },
+        "frontWheelCenter": {
+          "x": 237.5,
+          "y": 82
+        },
+        "frontBumperX": 290,
+        "rearBumperX": 0,
+        "groundY": 108
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "bugatti_veyron_16_ss",
+      "sourceName": "Bugatti_Veyron_16_SS",
+      "displayName": "Bugatti Veyron 16 SS",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 293,
+        "height": 110
+      },
+      "layers": {
+        "body": {
+          "source": "Bugatti_Veyron_16_SS.png",
+          "width": 293,
+          "height": 106
+        },
+        "wheel": {
+          "source": "Bugatti_Veyron_16_SS_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Bugatti_Veyron_16_SS_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Bugatti_Veyron_16_SS_Detail.png",
+          "width": 293,
+          "height": 106
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 49,
+          "y": 82
+        },
+        "frontWheelCenter": {
+          "x": 237.5,
+          "y": 82
+        },
+        "frontBumperX": 290,
+        "rearBumperX": 0,
+        "groundY": 108
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "callaway_c16",
+      "sourceName": "Callaway_C16",
+      "displayName": "Callaway C16",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 299,
+        "height": 109
+      },
+      "layers": {
+        "body": {
+          "source": "Callaway_C16.png",
+          "width": 299,
+          "height": 105
+        },
+        "wheel": {
+          "source": "Callaway_C16_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Callaway_C16_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Callaway_C16_Detail.png",
+          "width": 299,
+          "height": 105
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 56,
+          "y": 81
+        },
+        "frontWheelCenter": {
+          "x": 246,
+          "y": 81
+        },
+        "frontBumperX": 296,
+        "rearBumperX": 2,
+        "groundY": 107
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "camaro_zl1",
+      "sourceName": "Camaro_ZL1",
+      "displayName": "Camaro ZL1",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 309,
+        "height": 107
+      },
+      "layers": {
+        "body": {
+          "source": "Camaro_ZL1.png",
+          "width": 309,
+          "height": 103
+        },
+        "wheel": {
+          "source": "Camaro_ZL1_Wheel.png",
+          "width": 48,
+          "height": 48
+        },
+        "disk": {
+          "source": "Camaro_ZL1_Disk.png",
+          "width": 40,
+          "height": 40
+        },
+        "detail": {
+          "source": "Camaro_ZL1_Detail.png",
+          "width": 309,
+          "height": 103
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 67,
+          "y": 81
+        },
+        "frontWheelCenter": {
+          "x": 251,
+          "y": 81
+        },
+        "frontBumperX": 305,
+        "rearBumperX": 1,
+        "groundY": 105
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "carrera_gt",
+      "sourceName": "Carrera_GT",
+      "displayName": "Carrera GT",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 315,
+        "height": 114
+      },
+      "layers": {
+        "body": {
+          "source": "Carrera_GT.png",
+          "width": 315,
+          "height": 110
+        },
+        "wheel": {
+          "source": "Carrera_GT_Wheel.png",
+          "width": 50,
+          "height": 50
+        },
+        "disk": {
+          "source": "Carrera_GT_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Carrera_GT_Detail.png",
+          "width": 315,
+          "height": 110
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 55,
+          "y": 87
+        },
+        "frontWheelCenter": {
+          "x": 246.5,
+          "y": 87
+        },
+        "frontBumperX": 311,
+        "rearBumperX": 0,
+        "groundY": 112
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "corvette_zr1",
+      "sourceName": "Corvette_ZR1",
+      "displayName": "Corvette ZR1",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 297,
+        "height": 110
+      },
+      "layers": {
+        "body": {
+          "source": "Corvette_ZR1.png",
+          "width": 297,
+          "height": 105
+        },
+        "wheel": {
+          "source": "Corvette_ZR1_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Corvette_ZR1_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Corvette_ZR1_Detail.png",
+          "width": 297,
+          "height": 105
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 55.5,
+          "y": 82
+        },
+        "frontWheelCenter": {
+          "x": 242,
+          "y": 82
+        },
+        "frontBumperX": 293,
+        "rearBumperX": 3,
+        "groundY": 108
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "dodge_challenger_440",
+      "sourceName": "Dodge_Challenger_440",
+      "displayName": "Dodge Challenger 440",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 322,
+        "height": 103
+      },
+      "layers": {
+        "body": {
+          "source": "Dodge_Challenger_440.png",
+          "width": 322,
+          "height": 100
+        },
+        "wheel": {
+          "source": "Dodge_Challenger_440_Wheel.png",
+          "width": 49,
+          "height": 49
+        },
+        "disk": {
+          "source": "Dodge_Challenger_440_Disk.png",
+          "width": 40,
+          "height": 40
+        },
+        "detail": {
+          "source": "Dodge_Challenger_440_Detail.png",
+          "width": 322,
+          "height": 100
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 69,
+          "y": 76.5
+        },
+        "frontWheelCenter": {
+          "x": 262,
+          "y": 76.5
+        },
+        "frontBumperX": 319,
+        "rearBumperX": 2,
+        "groundY": 101
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "dodge_charger",
+      "sourceName": "Dodge_Charger",
+      "displayName": "Dodge Charger",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 328,
+        "height": 119
+      },
+      "layers": {
+        "body": {
+          "source": "Dodge_Charger.png",
+          "width": 328,
+          "height": 115
+        },
+        "wheel": {
+          "source": "Dodge_Charger_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Dodge_Charger_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Dodge_Charger_Detail.png",
+          "width": 328,
+          "height": 115
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 67,
+          "y": 91
+        },
+        "frontWheelCenter": {
+          "x": 272.5,
+          "y": 91
+        },
+        "frontBumperX": 325,
+        "rearBumperX": 2,
+        "groundY": 117
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "dodge_srt",
+      "sourceName": "Dodge_SRT",
+      "displayName": "Dodge SRT",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 295,
+        "height": 117
+      },
+      "layers": {
+        "body": {
+          "source": "Dodge_SRT.png",
+          "width": 295,
+          "height": 114
+        },
+        "wheel": {
+          "source": "Dodge_SRT_Wheel.png",
+          "width": 48,
+          "height": 48
+        },
+        "disk": {
+          "source": "Dodge_SRT_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Dodge_SRT_Detail.png",
+          "width": 295,
+          "height": 114
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 57.5,
+          "y": 91
+        },
+        "frontWheelCenter": {
+          "x": 241.5,
+          "y": 91
+        },
+        "frontBumperX": 292,
+        "rearBumperX": 2,
+        "groundY": 115
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "enzo_ferrari",
+      "sourceName": "Enzo_Ferrari",
+      "displayName": "Enzo Ferrari",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 310,
+        "height": 104
+      },
+      "layers": {
+        "body": {
+          "source": "Enzo_Ferrari.png",
+          "width": 310,
+          "height": 100
+        },
+        "wheel": {
+          "source": "Enzo_Ferrari_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Enzo_Ferrari_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Enzo_Ferrari_Detail.png",
+          "width": 310,
+          "height": 100
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 52,
+          "y": 76
+        },
+        "frontWheelCenter": {
+          "x": 235,
+          "y": 76
+        },
+        "frontBumperX": 308,
+        "rearBumperX": 3,
+        "groundY": 102
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "ferrari_599_gto",
+      "sourceName": "Ferrari_599_GTO",
+      "displayName": "Ferrari 599 GTO",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 311,
+        "height": 114
+      },
+      "layers": {
+        "body": {
+          "source": "Ferrari_599_GTO.png",
+          "width": 311,
+          "height": 109
+        },
+        "wheel": {
+          "source": "Ferrari_599_GTO_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Ferrari_599_GTO_Disk.png",
+          "width": 40,
+          "height": 40
+        },
+        "detail": {
+          "source": "Ferrari_599_GTO_Detail.png",
+          "width": 311,
+          "height": 109
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 59.5,
+          "y": 86
+        },
+        "frontWheelCenter": {
+          "x": 247,
+          "y": 86
+        },
+        "frontBumperX": 308,
+        "rearBumperX": 2,
+        "groundY": 112
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "ferrari_599_novitec_rosso",
+      "sourceName": "Ferrari_599_Novitec_Rosso",
+      "displayName": "Ferrari 599 Novitec Rosso",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 311,
+        "height": 114
+      },
+      "layers": {
+        "body": {
+          "source": "Ferrari_599_Novitec_Rosso.png",
+          "width": 311,
+          "height": 109
+        },
+        "wheel": {
+          "source": "Ferrari_599_Novitec_Rosso_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Ferrari_599_Novitec_Rosso_Disk.png",
+          "width": 40,
+          "height": 40
+        },
+        "detail": {
+          "source": "Ferrari_599_Novitec_Rosso_Detail.png",
+          "width": 311,
+          "height": 109
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 59.5,
+          "y": 86
+        },
+        "frontWheelCenter": {
+          "x": 247,
+          "y": 86
+        },
+        "frontBumperX": 308,
+        "rearBumperX": 2,
+        "groundY": 112
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "ferrari_fxx",
+      "sourceName": "Ferrari_FXX",
+      "displayName": "Ferrari FXX",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 315,
+        "height": 109
+      },
+      "layers": {
+        "body": {
+          "source": "Ferrari_FXX.png",
+          "width": 315,
+          "height": 104
+        },
+        "wheel": {
+          "source": "Ferrari_FXX_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Ferrari_FXX_Disk.png",
+          "width": 40,
+          "height": 40
+        },
+        "detail": {
+          "source": "Ferrari_FXX_Detail.png",
+          "width": 315,
+          "height": 104
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 56.5,
+          "y": 81
+        },
+        "frontWheelCenter": {
+          "x": 239.5,
+          "y": 81
+        },
+        "frontBumperX": 314,
+        "rearBumperX": 0,
+        "groundY": 107
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "ford_gt_geigercars_hp790",
+      "sourceName": "Ford_GT_GeigerCars_HP790",
+      "displayName": "Ford GT GeigerCars HP790",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 315,
+        "height": 102
+      },
+      "layers": {
+        "body": {
+          "source": "Ford_GT_GeigerCars_HP790.png",
+          "width": 315,
+          "height": 96
+        },
+        "wheel": {
+          "source": "Ford_GT_GeigerCars_HP790_Wheel.png",
+          "width": 54,
+          "height": 54
+        },
+        "disk": {
+          "source": "Ford_GT_GeigerCars_HP790_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Ford_GT_GeigerCars_HP790_Detail.png",
+          "width": 315,
+          "height": 96
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 56.5,
+          "y": 73
+        },
+        "frontWheelCenter": {
+          "x": 246,
+          "y": 73
+        },
+        "frontBumperX": 312,
+        "rearBumperX": 2,
+        "groundY": 100
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "ford_mustang_429",
+      "sourceName": "Ford_Mustang_429",
+      "displayName": "Ford Mustang 429",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 320,
+        "height": 106
+      },
+      "layers": {
+        "body": {
+          "source": "Ford_Mustang_429.png",
+          "width": 320,
+          "height": 101
+        },
+        "wheel": {
+          "source": "Ford_Mustang_429_Wheel.png",
+          "width": 49,
+          "height": 49
+        },
+        "disk": {
+          "source": "Ford_Mustang_429_Disk.png",
+          "width": 40,
+          "height": 40
+        },
+        "detail": {
+          "source": "Ford_Mustang_429_Detail.png",
+          "width": 320,
+          "height": 101
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 73.5,
+          "y": 79.5
+        },
+        "frontWheelCenter": {
+          "x": 262,
+          "y": 79.5
+        },
+        "frontBumperX": 318,
+        "rearBumperX": 1,
+        "groundY": 104
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "ford_rs200_evolution",
+      "sourceName": "Ford_RS200_Evolution",
+      "displayName": "Ford RS200 Evolution",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 281,
+        "height": 114
+      },
+      "layers": {
+        "body": {
+          "source": "Ford_RS200_Evolution.png",
+          "width": 281,
+          "height": 109
+        },
+        "wheel": {
+          "source": "Ford_RS200_Evolution_Wheel.png",
+          "width": 48,
+          "height": 48
+        },
+        "disk": {
+          "source": "Ford_RS200_Evolution_Disk.png",
+          "width": 36,
+          "height": 36
+        },
+        "detail": {
+          "source": "Ford_RS200_Evolution_Detail.png",
+          "width": 281,
+          "height": 109
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 47.5,
+          "y": 88
+        },
+        "frontWheelCenter": {
+          "x": 224.5,
+          "y": 88
+        },
+        "frontBumperX": 278,
+        "rearBumperX": 3,
+        "groundY": 112
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "golf_gti",
+      "sourceName": "Golf_GTI",
+      "displayName": "Golf GTI",
+      "runtimeAvailable": true,
+      "canvas": {
+        "width": 281,
+        "height": 117
+      },
+      "layers": {
+        "body": {
+          "source": "Golf_GTI.png",
+          "width": 281,
+          "height": 111,
+          "src": "assets/art/cars/layered/golf_gti/body.webp"
+        },
+        "wheel": {
+          "source": "Golf_GTI_Wheel.png",
+          "width": 50,
+          "height": 50,
+          "src": "assets/art/cars/layered/golf_gti/wheel.webp"
+        },
+        "disk": {
+          "source": "Golf_GTI_Disk.png",
+          "width": 34,
+          "height": 34,
+          "src": "assets/art/cars/layered/golf_gti/disk.webp"
+        },
+        "detail": {
+          "source": "Golf_GTI_Detail.png",
+          "width": 281,
+          "height": 111,
+          "src": "assets/art/cars/layered/golf_gti/detail.webp"
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 46,
+          "y": 90
+        },
+        "frontWheelCenter": {
+          "x": 224.5,
+          "y": 90
+        },
+        "frontBumperX": 280,
+        "rearBumperX": 0,
+        "groundY": 115
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "gumpert_apollo_sport",
+      "sourceName": "Gumpert_Apollo_Sport",
+      "displayName": "Gumpert Apollo Sport",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 314,
+        "height": 119
+      },
+      "layers": {
+        "body": {
+          "source": "Gumpert_Apollo_Sport.png",
+          "width": 314,
+          "height": 116
+        },
+        "wheel": {
+          "source": "Gumpert_Apollo_Sport_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Gumpert_Apollo_Sport_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Gumpert_Apollo_Sport_Detail.png",
+          "width": 314,
+          "height": 116
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 67,
+          "y": 91
+        },
+        "frontWheelCenter": {
+          "x": 256,
+          "y": 91
+        },
+        "frontBumperX": 309,
+        "rearBumperX": 2,
+        "groundY": 117
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "hd_golf_gti",
+      "sourceName": "HD_GOLF_GTI",
+      "displayName": "HD GOLF GTI",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 295,
+        "height": 130
+      },
+      "layers": {
+        "body": {
+          "source": "HD_GOLF_GTI.png",
+          "width": 295,
+          "height": 130
+        },
+        "wheel": {
+          "source": "HD_GOLF_GTI_Wheel.png",
+          "width": 50,
+          "height": 50
+        },
+        "disk": {
+          "source": "HD_GOLF_GTI_Disk.png",
+          "width": 36,
+          "height": 36
+        },
+        "detail": {
+          "source": "HD_GOLF_GTI_Detail.png",
+          "width": 295,
+          "height": 130
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 47.5,
+          "y": 94
+        },
+        "frontWheelCenter": {
+          "x": 237,
+          "y": 94
+        },
+        "frontBumperX": 294,
+        "rearBumperX": 0,
+        "groundY": 119
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "hennessey_venom_gt",
+      "sourceName": "Hennessey_Venom_GT",
+      "displayName": "Hennessey Venom GT",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 303,
+        "height": 112
+      },
+      "layers": {
+        "body": {
+          "source": "Hennessey_Venom_GT.png",
+          "width": 303,
+          "height": 109
+        },
+        "wheel": {
+          "source": "Hennessey_Venom_GT_Wheel.png",
+          "width": 54,
+          "height": 54
+        },
+        "disk": {
+          "source": "Hennessey_Venom_GT_Disk.png",
+          "width": 42,
+          "height": 42
+        },
+        "detail": {
+          "source": "Hennessey_Venom_GT_Detail.png",
+          "width": 303,
+          "height": 109
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 39,
+          "y": 83
+        },
+        "frontWheelCenter": {
+          "x": 248,
+          "y": 83
+        },
+        "frontBumperX": 299,
+        "rearBumperX": 2,
+        "groundY": 110
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "honda_integra",
+      "sourceName": "Honda_Integra",
+      "displayName": "Honda Integra",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 301,
+        "height": 113
+      },
+      "layers": {
+        "body": {
+          "source": "Honda_Integra.png",
+          "width": 301,
+          "height": 110
+        },
+        "wheel": {
+          "source": "Honda_Integra_Wheel.png",
+          "width": 48,
+          "height": 48
+        },
+        "disk": {
+          "source": "Honda_Integra_Disk.png",
+          "width": 36,
+          "height": 36
+        },
+        "detail": {
+          "source": "Honda_Integra_Detail.png",
+          "width": 301,
+          "height": 110
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 59,
+          "y": 87
+        },
+        "frontWheelCenter": {
+          "x": 240,
+          "y": 87
+        },
+        "frontBumperX": 297,
+        "rearBumperX": 2,
+        "groundY": 111
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "honda_nsx_type_r",
+      "sourceName": "Honda_NSX_Type_R",
+      "displayName": "Honda NSX Type R",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 312,
+        "height": 108
+      },
+      "layers": {
+        "body": {
+          "source": "Honda_NSX_Type_R.png",
+          "width": 312,
+          "height": 105
+        },
+        "wheel": {
+          "source": "Honda_NSX_Type_R_Wheel.png",
+          "width": 48,
+          "height": 48
+        },
+        "disk": {
+          "source": "Honda_NSX_Type_R_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Honda_NSX_Type_R_Detail.png",
+          "width": 312,
+          "height": 105
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 67.5,
+          "y": 82
+        },
+        "frontWheelCenter": {
+          "x": 252,
+          "y": 82
+        },
+        "frontBumperX": 309,
+        "rearBumperX": 3,
+        "groundY": 106
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "honda_s2000",
+      "sourceName": "Honda_S2000",
+      "displayName": "Honda S2000",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 288,
+        "height": 109
+      },
+      "layers": {
+        "body": {
+          "source": "Honda_S2000.png",
+          "width": 288,
+          "height": 105
+        },
+        "wheel": {
+          "source": "Honda_S2000_Wheel.png",
+          "width": 47,
+          "height": 47
+        },
+        "disk": {
+          "source": "Honda_S2000_Disk.png",
+          "width": 34,
+          "height": 34
+        },
+        "detail": {
+          "source": "Honda_S2000_Detail.png",
+          "width": 288,
+          "height": 105
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 60,
+          "y": 83.5
+        },
+        "frontWheelCenter": {
+          "x": 232,
+          "y": 83.5
+        },
+        "frontBumperX": 284,
+        "rearBumperX": 2,
+        "groundY": 107
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "impreza_p1",
+      "sourceName": "Impreza_P1",
+      "displayName": "Impreza P1",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 303,
+        "height": 116
+      },
+      "layers": {
+        "body": {
+          "source": "Impreza_P1.png",
+          "width": 303,
+          "height": 112
+        },
+        "wheel": {
+          "source": "Impreza_P1_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Impreza_P1_Disk.png",
+          "width": 36,
+          "height": 36
+        },
+        "detail": {
+          "source": "Impreza_P1_Detail.png",
+          "width": 303,
+          "height": 112
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 63.5,
+          "y": 88
+        },
+        "frontWheelCenter": {
+          "x": 243,
+          "y": 88
+        },
+        "frontBumperX": 300,
+        "rearBumperX": 3,
+        "groundY": 114
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "koenigsegg_agera_r",
+      "sourceName": "Koenigsegg_Agera_R",
+      "displayName": "Koenigsegg Agera R",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 294,
+        "height": 106
+      },
+      "layers": {
+        "body": {
+          "source": "Koenigsegg_Agera_R.png",
+          "width": 294,
+          "height": 101
+        },
+        "wheel": {
+          "source": "Koenigsegg_Agera_R_Wheel.png",
+          "width": 50,
+          "height": 50
+        },
+        "disk": {
+          "source": "Koenigsegg_Agera_R_Disk.png",
+          "width": 40,
+          "height": 40
+        },
+        "detail": {
+          "source": "Koenigsegg_Agera_R_Detail.png",
+          "width": 294,
+          "height": 101
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 51,
+          "y": 79
+        },
+        "frontWheelCenter": {
+          "x": 239.5,
+          "y": 79
+        },
+        "frontBumperX": 292,
+        "rearBumperX": 1,
+        "groundY": 104
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "lamborghini_gallardo",
+      "sourceName": "Lamborghini_Gallardo",
+      "displayName": "Lamborghini Gallardo",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 298,
+        "height": 109
+      },
+      "layers": {
+        "body": {
+          "source": "Lamborghini_Gallardo.png",
+          "width": 298,
+          "height": 105
+        },
+        "wheel": {
+          "source": "Lamborghini_Gallardo_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Lamborghini_Gallardo_Disk.png",
+          "width": 37,
+          "height": 37
+        },
+        "detail": {
+          "source": "Lamborghini_Gallardo_Detail.png",
+          "width": 298,
+          "height": 105
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 50,
+          "y": 81
+        },
+        "frontWheelCenter": {
+          "x": 228.5,
+          "y": 81
+        },
+        "frontBumperX": 295,
+        "rearBumperX": 3,
+        "groundY": 107
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "lamborghini_murcielago",
+      "sourceName": "Lamborghini_Murcielago",
+      "displayName": "Lamborghini Murcielago",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 304,
+        "height": 103
+      },
+      "layers": {
+        "body": {
+          "source": "Lamborghini_Murcielago.png",
+          "width": 304,
+          "height": 99
+        },
+        "wheel": {
+          "source": "Lamborghini_Murcielago_Wheel.png",
+          "width": 50,
+          "height": 50
+        },
+        "disk": {
+          "source": "Lamborghini_Murcielago_Disk.png",
+          "width": 36,
+          "height": 36
+        },
+        "detail": {
+          "source": "Lamborghini_Murcielago_Detail.png",
+          "width": 304,
+          "height": 99
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 54.5,
+          "y": 76
+        },
+        "frontWheelCenter": {
+          "x": 237,
+          "y": 76
+        },
+        "frontBumperX": 301,
+        "rearBumperX": 2,
+        "groundY": 101
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "lancer_evo_x",
+      "sourceName": "Lancer_Evo_X",
+      "displayName": "Lancer Evo X",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 303,
+        "height": 122
+      },
+      "layers": {
+        "body": {
+          "source": "Lancer_Evo_X.png",
+          "width": 303,
+          "height": 118
+        },
+        "wheel": {
+          "source": "Lancer_Evo_X_Wheel.png",
+          "width": 48,
+          "height": 48
+        },
+        "disk": {
+          "source": "Lancer_Evo_X_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Lancer_Evo_X_Detail.png",
+          "width": 303,
+          "height": 118
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 61,
+          "y": 96
+        },
+        "frontWheelCenter": {
+          "x": 242.5,
+          "y": 96
+        },
+        "frontBumperX": 300,
+        "rearBumperX": 2,
+        "groundY": 120
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "lotus_elise_111s",
+      "sourceName": "Lotus_Elise_111s",
+      "displayName": "Lotus Elise 111s",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 275,
+        "height": 102
+      },
+      "layers": {
+        "body": {
+          "source": "Lotus_Elise_111s.png",
+          "width": 275,
+          "height": 95
+        },
+        "wheel": {
+          "source": "Lotus_Elise_111s_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Lotus_Elise_111s_Disk.png",
+          "width": 40,
+          "height": 40
+        },
+        "detail": {
+          "source": "Lotus_Elise_111s_Detail.png",
+          "width": 275,
+          "height": 95
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 47.5,
+          "y": 74
+        },
+        "frontWheelCenter": {
+          "x": 221.5,
+          "y": 74
+        },
+        "frontBumperX": 274,
+        "rearBumperX": 0,
+        "groundY": 100
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "mb_cls_63",
+      "sourceName": "MB_CLS_63",
+      "displayName": "MB CLS 63",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 324,
+        "height": 121
+      },
+      "layers": {
+        "body": {
+          "source": "MB_CLS_63.png",
+          "width": 324,
+          "height": 115
+        },
+        "wheel": {
+          "source": "MB_CLS_63_Wheel.png",
+          "width": 49,
+          "height": 49
+        },
+        "disk": {
+          "source": "MB_CLS_63_Disk.png",
+          "width": 39,
+          "height": 39
+        },
+        "detail": {
+          "source": "MB_CLS_63_Detail.png",
+          "width": 324,
+          "height": 115
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 74,
+          "y": 94.5
+        },
+        "frontWheelCenter": {
+          "x": 271,
+          "y": 94.5
+        },
+        "frontBumperX": 323,
+        "rearBumperX": 0,
+        "groundY": 119
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "maserati_mc12_corsa",
+      "sourceName": "Maserati_MC12_Corsa",
+      "displayName": "Maserati MC12 Corsa",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 352,
+        "height": 106
+      },
+      "layers": {
+        "body": {
+          "source": "Maserati_MC12_Corsa.png",
+          "width": 352,
+          "height": 101
+        },
+        "wheel": {
+          "source": "Maserati_MC12_Corsa_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Maserati_MC12_Corsa_Disk.png",
+          "width": 36,
+          "height": 36
+        },
+        "detail": {
+          "source": "Maserati_MC12_Corsa_Detail.png",
+          "width": 352,
+          "height": 101
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 95,
+          "y": 78
+        },
+        "frontWheelCenter": {
+          "x": 281.5,
+          "y": 78
+        },
+        "frontBumperX": 350,
+        "rearBumperX": 2,
+        "groundY": 104
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "mazda_rx8",
+      "sourceName": "Mazda_RX8",
+      "displayName": "Mazda RX8",
+      "runtimeAvailable": true,
+      "canvas": {
+        "width": 311,
+        "height": 117
+      },
+      "layers": {
+        "body": {
+          "source": "Mazda_RX8.png",
+          "width": 311,
+          "height": 114,
+          "src": "assets/art/cars/layered/mazda_rx8/body.webp"
+        },
+        "wheel": {
+          "source": "Mazda_RX8_Wheel.png",
+          "width": 52,
+          "height": 52,
+          "src": "assets/art/cars/layered/mazda_rx8/wheel.webp"
+        },
+        "disk": {
+          "source": "Mazda_RX8_Disk.png",
+          "width": 34,
+          "height": 35,
+          "src": "assets/art/cars/layered/mazda_rx8/disk.webp"
+        },
+        "detail": {
+          "source": "Mazda_RX8_Detail.png",
+          "width": 311,
+          "height": 114,
+          "src": "assets/art/cars/layered/mazda_rx8/detail.webp"
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 63.5,
+          "y": 89
+        },
+        "frontWheelCenter": {
+          "x": 254.5,
+          "y": 89
+        },
+        "frontBumperX": 307,
+        "rearBumperX": 3,
+        "groundY": 115
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "mclaren_f1",
+      "sourceName": "McLaren_F1",
+      "displayName": "McLaren F1",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 299,
+        "height": 107
+      },
+      "layers": {
+        "body": {
+          "source": "McLaren_F1.png",
+          "width": 299,
+          "height": 101
+        },
+        "wheel": {
+          "source": "McLaren_F1_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "McLaren_F1_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "McLaren_F1_Detail.png",
+          "width": 299,
+          "height": 101
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 50.5,
+          "y": 79
+        },
+        "frontWheelCenter": {
+          "x": 239,
+          "y": 79
+        },
+        "frontBumperX": 298,
+        "rearBumperX": 0,
+        "groundY": 105
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "mercedes_benz_slr_mclaren_hamann",
+      "sourceName": "Mercedes_Benz_SLR_McLaren_Hamann",
+      "displayName": "Mercedes Benz SLR McLaren Hamann",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 310,
+        "height": 114
+      },
+      "layers": {
+        "body": {
+          "source": "Mercedes_Benz_SLR_McLaren_Hamann.png",
+          "width": 310,
+          "height": 110
+        },
+        "wheel": {
+          "source": "Mercedes_Benz_SLR_McLaren_Hamann_Wheel.png",
+          "width": 50,
+          "height": 50
+        },
+        "disk": {
+          "source": "Mercedes_Benz_SLR_McLaren_Hamann_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Mercedes_Benz_SLR_McLaren_Hamann_Detail.png",
+          "width": 310,
+          "height": 110
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 66,
+          "y": 87
+        },
+        "frontWheelCenter": {
+          "x": 255.5,
+          "y": 87
+        },
+        "frontBumperX": 307,
+        "rearBumperX": 2,
+        "groundY": 112
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "mustang_cobra",
+      "sourceName": "Mustang_Cobra",
+      "displayName": "Mustang Cobra",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 306,
+        "height": 111
+      },
+      "layers": {
+        "body": {
+          "source": "Mustang_Cobra.png",
+          "width": 306,
+          "height": 110
+        },
+        "wheel": {
+          "source": "Mustang_Cobra_Wheel.png",
+          "width": 50,
+          "height": 50
+        },
+        "disk": {
+          "source": "Mustang_Cobra_Disk.png",
+          "width": 36,
+          "height": 36
+        },
+        "detail": {
+          "source": "Mustang_Cobra_Detail.png",
+          "width": 306,
+          "height": 110
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 63,
+          "y": 84
+        },
+        "frontWheelCenter": {
+          "x": 236.5,
+          "y": 84
+        },
+        "frontBumperX": 301,
+        "rearBumperX": 3,
+        "groundY": 109
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "nissan_gtr",
+      "sourceName": "Nissan_GTR",
+      "displayName": "Nissan GTR",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 303,
+        "height": 118
+      },
+      "layers": {
+        "body": {
+          "source": "Nissan_GTR.png",
+          "width": 303,
+          "height": 113
+        },
+        "wheel": {
+          "source": "Nissan_GTR_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Nissan_GTR_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Nissan_GTR_Detail.png",
+          "width": 303,
+          "height": 113
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 59,
+          "y": 90
+        },
+        "frontWheelCenter": {
+          "x": 245,
+          "y": 90
+        },
+        "frontBumperX": 298,
+        "rearBumperX": 3,
+        "groundY": 116
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "nissan_skyline",
+      "sourceName": "Nissan_Skyline",
+      "displayName": "Nissan Skyline",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 317,
+        "height": 120
+      },
+      "layers": {
+        "body": {
+          "source": "Nissan_Skyline.png",
+          "width": 317,
+          "height": 115
+        },
+        "wheel": {
+          "source": "Nissan_Skyline_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Nissan_Skyline_Disk.png",
+          "width": 40,
+          "height": 40
+        },
+        "detail": {
+          "source": "Nissan_Skyline_Detail.png",
+          "width": 317,
+          "height": 115
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 63,
+          "y": 92
+        },
+        "frontWheelCenter": {
+          "x": 252.5,
+          "y": 92
+        },
+        "frontBumperX": 313,
+        "rearBumperX": 3,
+        "groundY": 118
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "pontiac_firebird",
+      "sourceName": "Pontiac_Firebird",
+      "displayName": "Pontiac Firebird",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 328,
+        "height": 109
+      },
+      "layers": {
+        "body": {
+          "source": "Pontiac_Firebird.png",
+          "width": 328,
+          "height": 106
+        },
+        "wheel": {
+          "source": "Pontiac_Firebird_Wheel.png",
+          "width": 50,
+          "height": 50
+        },
+        "disk": {
+          "source": "Pontiac_Firebird_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Pontiac_Firebird_Detail.png",
+          "width": 328,
+          "height": 106
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 73.5,
+          "y": 82
+        },
+        "frontWheelCenter": {
+          "x": 252,
+          "y": 82
+        },
+        "frontBumperX": 325,
+        "rearBumperX": 2,
+        "groundY": 107
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "porsche_911",
+      "sourceName": "Porsche_911",
+      "displayName": "Porsche 911",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 290,
+        "height": 109
+      },
+      "layers": {
+        "body": {
+          "source": "Porsche_911.png",
+          "width": 290,
+          "height": 104
+        },
+        "wheel": {
+          "source": "Porsche_911_Wheel.png",
+          "width": 50,
+          "height": 50
+        },
+        "disk": {
+          "source": "Porsche_911_Disk.png",
+          "width": 39,
+          "height": 39
+        },
+        "detail": {
+          "source": "Porsche_911_Detail.png",
+          "width": 290,
+          "height": 104
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 68.5,
+          "y": 82
+        },
+        "frontWheelCenter": {
+          "x": 226,
+          "y": 82
+        },
+        "frontBumperX": 289,
+        "rearBumperX": 0,
+        "groundY": 107
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "renault_clio",
+      "sourceName": "Renault_Clio",
+      "displayName": "Renault Clio",
+      "runtimeAvailable": true,
+      "canvas": {
+        "width": 252,
+        "height": 114
+      },
+      "layers": {
+        "body": {
+          "source": "Renault_Clio.png",
+          "width": 252,
+          "height": 111,
+          "src": "assets/art/cars/layered/renault_clio/body.webp"
+        },
+        "wheel": {
+          "source": "Renault_Clio_Wheel.png",
+          "width": 48,
+          "height": 48,
+          "src": "assets/art/cars/layered/renault_clio/wheel.webp"
+        },
+        "disk": {
+          "source": "Renault_Clio_Disk.png",
+          "width": 36,
+          "height": 36,
+          "src": "assets/art/cars/layered/renault_clio/disk.webp"
+        },
+        "detail": {
+          "source": "Renault_Clio_Detail.png",
+          "width": 252,
+          "height": 111,
+          "src": "assets/art/cars/layered/renault_clio/detail.png"
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 34.5,
+          "y": 88
+        },
+        "frontWheelCenter": {
+          "x": 207.5,
+          "y": 88
+        },
+        "frontBumperX": 248,
+        "rearBumperX": 2,
+        "groundY": 112
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "ssc_ultimate_aero_tt",
+      "sourceName": "SSC_Ultimate_Aero_TT",
+      "displayName": "SSC Ultimate Aero TT",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 293,
+        "height": 104
+      },
+      "layers": {
+        "body": {
+          "source": "SSC_Ultimate_Aero_TT.png",
+          "width": 293,
+          "height": 101
+        },
+        "wheel": {
+          "source": "SSC_Ultimate_Aero_TT_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "SSC_Ultimate_Aero_TT_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "SSC_Ultimate_Aero_TT_Detail.png",
+          "width": 293,
+          "height": 101
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 54.5,
+          "y": 76
+        },
+        "frontWheelCenter": {
+          "x": 236,
+          "y": 76
+        },
+        "frontBumperX": 289,
+        "rearBumperX": 3,
+        "groundY": 102
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "saleen_s7",
+      "sourceName": "Saleen_S7",
+      "displayName": "Saleen S7",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 312,
+        "height": 100
+      },
+      "layers": {
+        "body": {
+          "source": "Saleen_S7.png",
+          "width": 312,
+          "height": 97
+        },
+        "wheel": {
+          "source": "Saleen_S7_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Saleen_S7_Disk.png",
+          "width": 36,
+          "height": 36
+        },
+        "detail": {
+          "source": "Saleen_S7_Detail.png",
+          "width": 312,
+          "height": 97
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 69.5,
+          "y": 72
+        },
+        "frontWheelCenter": {
+          "x": 253,
+          "y": 72
+        },
+        "frontBumperX": 309,
+        "rearBumperX": 2,
+        "groundY": 98
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "shelby_gt500",
+      "sourceName": "Shelby_GT500",
+      "displayName": "Shelby GT500",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 317,
+        "height": 118
+      },
+      "layers": {
+        "body": {
+          "source": "Shelby_GT500.png",
+          "width": 317,
+          "height": 115
+        },
+        "wheel": {
+          "source": "Shelby_GT500_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Shelby_GT500_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Shelby_GT500_Detail.png",
+          "width": 317,
+          "height": 115
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 71,
+          "y": 90
+        },
+        "frontWheelCenter": {
+          "x": 258.5,
+          "y": 90
+        },
+        "frontBumperX": 313,
+        "rearBumperX": 2,
+        "groundY": 116
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "toyota_supra",
+      "sourceName": "Toyota_Supra",
+      "displayName": "Toyota Supra",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 306,
+        "height": 111
+      },
+      "layers": {
+        "body": {
+          "source": "Toyota_Supra.png",
+          "width": 306,
+          "height": 105
+        },
+        "wheel": {
+          "source": "Toyota_Supra_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Toyota_Supra_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Toyota_Supra_Detail.png",
+          "width": 306,
+          "height": 105
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 58.5,
+          "y": 83
+        },
+        "frontWheelCenter": {
+          "x": 244.5,
+          "y": 83
+        },
+        "frontBumperX": 303,
+        "rearBumperX": 2,
+        "groundY": 109
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "tuatara",
+      "sourceName": "Tuatara",
+      "displayName": "Tuatara",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 293,
+        "height": 104
+      },
+      "layers": {
+        "body": {
+          "source": "Tuatara.png",
+          "width": 293,
+          "height": 101
+        },
+        "wheel": {
+          "source": "Tuatara_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Tuatara_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Tuatara_Detail.png",
+          "width": 293,
+          "height": 101
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 54.5,
+          "y": 76
+        },
+        "frontWheelCenter": {
+          "x": 236,
+          "y": 76
+        },
+        "frontBumperX": 289,
+        "rearBumperX": 3,
+        "groundY": 102
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "viper_srt_10",
+      "sourceName": "Viper_SRT_10",
+      "displayName": "Viper SRT 10",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 288,
+        "height": 110
+      },
+      "layers": {
+        "body": {
+          "source": "Viper_SRT_10.png",
+          "width": 288,
+          "height": 105
+        },
+        "wheel": {
+          "source": "Viper_SRT_10_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Viper_SRT_10_Disk.png",
+          "width": 38,
+          "height": 38
+        },
+        "detail": {
+          "source": "Viper_SRT_10_Detail.png",
+          "width": 288,
+          "height": 105
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 60,
+          "y": 82
+        },
+        "frontWheelCenter": {
+          "x": 233,
+          "y": 82
+        },
+        "frontBumperX": 286,
+        "rearBumperX": 1,
+        "groundY": 108
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    },
+    {
+      "assetId": "zonda_r",
+      "sourceName": "Zonda_R",
+      "displayName": "Zonda R",
+      "runtimeAvailable": false,
+      "canvas": {
+        "width": 331,
+        "height": 118
+      },
+      "layers": {
+        "body": {
+          "source": "Zonda_R.png",
+          "width": 331,
+          "height": 114
+        },
+        "wheel": {
+          "source": "Zonda_R_Wheel.png",
+          "width": 52,
+          "height": 52
+        },
+        "disk": {
+          "source": "Zonda_R_Disk.png",
+          "width": 36,
+          "height": 36
+        },
+        "detail": {
+          "source": "Zonda_R_Detail.png",
+          "width": 331,
+          "height": 114
+        }
+      },
+      "anchors": {
+        "rearWheelCenter": {
+          "x": 76.5,
+          "y": 90
+        },
+        "frontWheelCenter": {
+          "x": 270,
+          "y": 90
+        },
+        "frontBumperX": 327,
+        "rearBumperX": 3,
+        "groundY": 116
+      },
+      "calibration": {
+        "wheelDropPx": 5,
+        "wheelDropPercent": 0.1,
+        "method": "transparent-wheel-opening-v2"
+      }
+    }
+  ]
+}
