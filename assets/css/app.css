@@ -1185,3 +1185,165 @@ dialog.fr-dialog:has(.garage-inventory-dialog){
   .race-preview-card__heading{align-items:flex-start}
 }
 
+/* V0.4F layered vehicles and side-view drag strip */
+.vehicle-visual--layered{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-width:0;
+  overflow:visible;
+}
+.layered-car{
+  position:relative;
+  width:min(100%,360px);
+  aspect-ratio:var(--car-aspect);
+  flex:0 0 auto;
+  overflow:visible;
+  filter:drop-shadow(0 7px 5px #0008);
+}
+.layered-car__layer,.layered-car__paint{
+  position:absolute;
+  display:block;
+  object-fit:fill;
+  pointer-events:none;
+  user-select:none;
+  image-rendering:auto;
+}
+.layered-car__wheel{z-index:1}
+.layered-car__disk{z-index:2}
+.layered-car__body{z-index:3}
+.layered-car__paint{
+  inset:0;
+  z-index:4;
+  opacity:.62;
+  mix-blend-mode:multiply;
+}
+.layered-car__detail{z-index:5}
+.classified-card__visual .layered-car{width:min(92%,330px)}
+.dialog-vehicle .layered-car{width:min(100%,390px)}
+.garage-entry__visual .layered-car{width:min(94%,330px)}
+.build-shop-summary__vehicle .layered-car{width:min(92%,340px)}
+.race-preview-driver__visual .layered-car{width:min(100%,230px)}
+.race-preview-driver__visual .vehicle-visual{height:auto;overflow:visible}
+.vehicle-visual--raceSide .layered-car{width:100%;height:auto}
+.vehicle-visual--raceSide{height:auto}
+
+/* The old vertical/top-down strip is fully superseded in V0.4F. */
+.race-playback-dialog--side{width:min(1080px,calc(100vw - 28px))}
+.race-playback--side{width:100%}
+.race-stage--side{padding:8px 10px 10px}
+.race-strip--side{
+  position:relative;
+  height:300px;
+  overflow:hidden;
+  border:1px solid #343a3f;
+  background:
+    linear-gradient(180deg,#171a1d 0 49.5%,#0e1012 49.5% 50.5%,#171a1d 50.5% 100%);
+}
+.race-strip--side::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    repeating-linear-gradient(90deg,transparent 0 46px,#ffffff08 46px 47px),
+    linear-gradient(180deg,transparent 0 12%,#ffffff08 12% 12.5%,transparent 12.5% 87.5%,#ffffff08 87.5% 88%,transparent 88%);
+  pointer-events:none;
+}
+.race-strip--side::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,#090b0dcc,transparent 12%,transparent 88%,#090b0dcc);
+  pointer-events:none;
+}
+.race-strip__timing-line{
+  position:absolute;
+  top:0;
+  bottom:0;
+  z-index:3;
+  width:8px;
+  border-inline:2px solid #eee;
+  background:repeating-linear-gradient(180deg,#eee 0 10px,#222 10px 20px);
+}
+.race-strip__timing-line--start{left:8%}
+.race-strip__timing-line--finish{left:88%}
+.race-strip__timing-line span{
+  position:absolute;
+  top:8px;
+  left:12px;
+  padding:2px 5px;
+  background:#090b0d;
+  color:#e6e9eb;
+  font-size:10px;
+  font-weight:950;
+  letter-spacing:.1em;
+}
+.race-side-lane{
+  position:absolute;
+  left:0;
+  right:0;
+  height:50%;
+  z-index:5;
+}
+.race-side-lane--player{top:0}
+.race-side-lane--opponent{bottom:0}
+.race-side-lane__label{
+  position:absolute;
+  left:10px;
+  z-index:9;
+  color:#d9dde0;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.04em;
+  text-shadow:0 1px 2px #000;
+}
+.race-side-lane--player .race-side-lane__label{top:8px}
+.race-side-lane--opponent .race-side-lane__label{bottom:8px}
+.race-side-car{
+  position:absolute;
+  left:0;
+  z-index:8;
+  width:190px;
+  will-change:left;
+  filter:drop-shadow(0 6px 5px #000a);
+}
+.race-side-lane--player .race-side-car{top:34px}
+.race-side-lane--opponent .race-side-car{bottom:30px}
+.race-side-car .layered-car{width:190px}
+.race-strip__tree--side{
+  left:8%;
+  bottom:auto;
+  top:50%;
+  transform:translate(-50%,-50%);
+  z-index:12;
+}
+.race-playback.is-finished .race-strip--side{border-color:#646e74}
+.race-playback.has-results .race-strip--side{opacity:.86}
+.race-progress-board i{transition:none}
+.race-preview-driver__stats--pi{grid-template-columns:repeat(3,minmax(0,1fr))}
+.race-preview-driver__stats .pi-value{color:var(--accent-2);font-size:16px}
+.pi-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:3px 6px;
+  border:1px solid #74401f;
+  background:#21150f;
+  color:var(--accent-2);
+  font-size:11px;
+  font-weight:950;
+  letter-spacing:.05em;
+}
+
+@media(max-width:760px){
+  .race-playback-dialog--side{width:calc(100vw - 8px)}
+  .race-strip--side{height:250px}
+  .race-side-car,.race-side-car .layered-car{width:145px}
+  .race-side-lane--player .race-side-car{top:40px}
+  .race-side-lane--opponent .race-side-car{bottom:34px}
+  .race-side-lane__label{font-size:9px}
+  .race-strip__timing-line span{font-size:8px}
+}
+
