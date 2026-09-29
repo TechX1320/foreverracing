@@ -135,6 +135,7 @@ function racePreview(car, preview, player) {
         <div class="race-preview-driver__visual">${renderVehicle(car, { stage: Number(car.buildStage || 1), view: "racePreview" })}</div>
         <div class="race-preview-driver__identity"><span>YOU</span><strong>${escapeHtml(carLabel(car))}</strong><small>${escapeHtml(car.base?.drivetrain || "-")} • ${escapeHtml(buildType)}</small></div>
         <div class="race-preview-driver__stats race-preview-driver__stats--pi">
+          <span><small>CLASS</small><b>${escapeHtml(car.performanceClass || car.stockClass || "—")}</b></span>
           <span><small>PERFORMANCE</small><b class="pi-value">PI ${number(playerPi)}</b></span>
           <span><small>1/4 BEST</small><b>${best == null ? "—" : `${number(best,3)} s`}</b></span>
           <span><small>BUILD</small><b>${escapeHtml(buildType)}</b></span>
@@ -146,6 +147,7 @@ function racePreview(car, preview, player) {
         <div class="race-preview-driver__identity"><span>NEXT OPPONENT</span><strong>${escapeHtml(opponent?.name || "Finding opponent…")}</strong><small>${escapeHtml(opponent?.carName || "Matched car pending")}</small></div>
         <div class="race-preview-driver__stats race-preview-driver__stats--pi">
           ${opponent ? `
+            <span><small>CLASS</small><b>${escapeHtml(opponent.performanceClass || "—")}</b></span>
             <span><small>PERFORMANCE</small><b class="pi-value">PI ${number(opponent.performanceIndex || 0)}</b></span>
             <span><small>DRIVETRAIN</small><b>${escapeHtml(opponent.drivetrain || "—")}</b></span>
             <span><small>BUILD</small><b>${escapeHtml(opponent.buildType || "Street Car")}</b></span>
