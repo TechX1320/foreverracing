@@ -687,7 +687,8 @@ final class GameService
             $stage = (int)$run['stage'];
             $risk = $choice === 'push' ? 1.09 : 0.99;
             $boost = (float)($run['boost'] ?? 0);
-            $rating = ((float)$car['derived']['hp'] / max(500.0, (float)$car['derived']['weight'])) * (1 + $boost);
+            $basePi = (int)($car['performanceIndex'] ?? PerformanceIndex::forCar($car, self::racingConfig())['performanceIndex']);
+            $rating = $basePi * (1 + $boost);
             $difficulty = $rating * (0.88 + $stage * 0.035) * $risk;
             $roll = (mt_rand(930, 1070) / 1000) * $rating;
             $won = $roll >= $difficulty;
