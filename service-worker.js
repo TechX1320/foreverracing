@@ -59,6 +59,8 @@ const SHELL = [
   './assets/js/ui/components.js',
   './assets/js/ui/vehicleRenderer.js',
   './assets/js/ui/racePresentation.js',
+  './assets/js/content/ContentStudioCatalog.js',
+  './assets/js/screens/contentStudio.js',
   './assets/js/screens/showroom.js',
   './assets/js/screens/garage.js',
   './assets/js/screens/parts.js',
