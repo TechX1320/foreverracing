@@ -70,7 +70,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.4.0-h.2"')) throw new Error('Static index is missing the V0.4H.2 build marker.');
+if (!html.includes('data-build="0.4.0-h.3"')) throw new Error('Static index is missing the V0.4H.3 build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -313,5 +313,14 @@ if (!cssV04b.includes('V0.4H.1-H.2 wheel motion') ||
   throw new Error('V0.4H.1/H.2 race alignment / wheel / smoke CSS is incomplete.');
 }
 console.log('V0.4H.1-H.2 classic tree, wheel spin and grip-loss smoke checks passed.');
+
+if (!cssV04b.includes('V0.4H.3 race-lane vertical centering') ||
+    !cssV04b.includes('.race-side-lane .race-side-car{') ||
+    !cssV04b.includes('top:50%') ||
+    !cssV04b.includes('bottom:auto') ||
+    !cssV04b.includes('transform:translateY(-50%)')) {
+  throw new Error('V0.4H.3 race-lane centering CSS is incomplete.');
+}
+console.log('V0.4H.3 race-lane vertical centering check passed.');
 
 
