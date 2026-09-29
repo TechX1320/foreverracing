@@ -254,11 +254,13 @@ export function raceVisualProgress(now, startAt, finishAt, visualFinishAt, expon
   return 1 + (fly * 0.22);
 }
 
-export function frontBumperLeftAtProgress({ startPlaneX, finishPlaneX, carWidth, frontBumperRatio, progress }) {
-  const noseOffset = Math.max(0, Math.min(1, Number(frontBumperRatio ?? 1))) * Math.max(1, Number(carWidth || 1));
-  const startLeft = Number(startPlaneX || 0) - noseOffset;
-  const travel = Number(finishPlaneX || 0) - Number(startPlaneX || 0);
-  return startLeft + (travel * Number(progress || 0));
+export function carLeftAtProgress({ startPlaneX, finishPlaneX, carWidth, startAnchorRatio, frontBumperRatio, progress }) {
+  const width = Math.max(1, Number(carWidth || 1));
+  const stageOffset = Math.max(0, Math.min(1, Number(startAnchorRatio ?? frontBumperRatio ?? 1))) * width;
+  const noseOffset = Math.max(0, Math.min(1, Number(frontBumperRatio ?? 1))) * width;
+  const startLeft = Number(startPlaneX || 0) - stageOffset;
+  const finishLeft = Number(finishPlaneX || 0) - noseOffset;
+  return startLeft + ((finishLeft - startLeft) * Number(progress || 0));
 }
 
 function setSideProgress(car, bar, progress, geometry, strip, startLine, finishLine) {
@@ -271,10 +273,11 @@ function setSideProgress(car, bar, progress, geometry, strip, startLine, finishL
   const carWidth = Math.max(1, car.getBoundingClientRect().width);
   const startPlaneX = (startRect.left + (startRect.width / 2)) - stripRect.left;
   const finishPlaneX = (finishRect.left + (finishRect.width / 2)) - stripRect.left;
-  const left = frontBumperLeftAtProgress({
+  const left = carLeftAtProgress({
     startPlaneX,
     finishPlaneX,
     carWidth,
+    startAnchorRatio: geometry?.frontWheelRatio ?? geometry?.frontBumperRatio ?? 1,
     frontBumperRatio: geometry?.frontBumperRatio ?? 1,
     progress,
   });
