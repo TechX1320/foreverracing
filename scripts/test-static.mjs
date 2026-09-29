@@ -6,6 +6,11 @@ const docs = new URL('../docs/', import.meta.url);
 const required = [
   'index.html',
   'assets/css/app.css',
+  'assets/art/cars/atlas/cars-1.png',
+  'assets/art/cars/atlas/cars-2.png',
+  'assets/art/cars/atlas/cars-3.png',
+  'assets/art/cars/atlas/cars-4.png',
+  'assets/art/cars/atlas/cars-5.png',
   'assets/art/cars/layered/golf_gti/certified.png',
   'assets/art/cars/layered/golf_gti/body.webp',
   'assets/art/cars/layered/golf_gti/wheel.webp',
@@ -45,16 +50,17 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.4.0-f.1"')) throw new Error('Static index is missing the V0.4F.1 build marker.');
+if (!html.includes('data-build="0.4.0-g"')) throw new Error('Static index is missing the V0.4G build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
 const artCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/car-art.json', docs), 'utf8'));
 const starters = carCatalog.filter((car) => car.starter);
-if (carCatalog.length !== 3 || starters.length !== 3) throw new Error('V0.4F gameplay catalog must contain exactly the three validated starters.');
-if (starters.some((car) => Object.hasOwn(car, 'class'))) throw new Error('Letter classes must not return to the starter catalog.');
+if (carCatalog.length !== 3 || starters.length !== 3) throw new Error('V0.4G gameplay catalog must keep exactly the three spec-validated starters for now.');
+if (!starters.every((car) => car.class === 'D')) throw new Error('All three current starter cars must begin in D class.');
 if (artCatalog.carCount !== 57 && artCatalog.sourceAssetCount !== 57) throw new Error('Layered asset manifest must retain all 57 purchased car definitions.');
-if ((artCatalog.cars || []).filter((car) => car.runtimeAvailable).length !== 3) throw new Error('Exactly three layered assets should be runtime-enabled in V0.4F.');
+if ((artCatalog.cars || []).filter((car) => car.runtimeAvailable).length !== 57) throw new Error('All 57 purchased car visuals must be runtime-ready in V0.4G.');
+if (!(artCatalog.cars || []).every((car) => car.certifiedAtlas?.src && car.calibration?.wheelDropPx === 10)) throw new Error('Every purchased car needs certified PNG atlas metadata and the V0.4G wheel drop.');
 
 const expectedStarters = [
   { id:'golf_gti', make:'Volkswagen', model:'Golf GTI Mk6', hp:200, torque:207, weight:3034, drivetrain:'FWD', displacement:2.0, config:'I4', aspiration:'Turbo', hpRpm:5100, tqRpm:1800, redline:6000, revCut:6500 },
@@ -86,7 +92,7 @@ for (const file of [
 
 const rendererSource = await fs.readFile(new URL('assets/js/ui/vehicleRenderer.js', root), 'utf8');
 if (!rendererSource.includes('ART MISSING')) throw new Error('Vehicle renderer must expose an explicit missing-art placeholder.');
-if (!rendererSource.includes('renderLayeredVehicle') || !rendererSource.includes('data-certified-car') || !rendererSource.includes('centeredLayer') || !rendererSource.includes('frontBumperRatio') || !rendererSource.includes('frontWheelRatio')) throw new Error('Certified/layered side-profile vehicle renderer is incomplete.');
+if (!rendererSource.includes('renderLayeredVehicle') || !rendererSource.includes('data-certified-car') || !rendererSource.includes('layered-car--atlas') || !rendererSource.includes('background-size') || !rendererSource.includes('centeredLayer') || !rendererSource.includes('frontBumperRatio') || !rendererSource.includes('frontWheelRatio')) throw new Error('Certified PNG atlas / layered side-profile vehicle renderer is incomplete.');
 if (rendererSource.includes('topDown') || rendererSource.includes('renderProcedural(')) throw new Error('Old top-down/procedural vehicle rendering must not return.');
 const appSource = await fs.readFile(new URL('assets/js/app.js', root), 'utf8');
 if (!appSource.includes("clearForeverRacingCaches({ unregister: true })")) throw new Error('Static dev cache cleanup is missing.');
@@ -230,10 +236,10 @@ console.log('V0.4E tutorial wording, dialog sizing and Race Preview checks passe
 
 const performanceIndexSourceV04f = await fs.readFile(new URL('assets/js/domain/PerformanceIndex.js', root), 'utf8');
 const serverPerformanceIndexSourceV04f = await fs.readFile(new URL('app/lib/PerformanceIndex.php', root), 'utf8');
-if (!performanceIndexSourceV04f.includes('PERFORMANCE_INDEX_PASSES = 51') || !performanceIndexSourceV04f.includes('PERFORMANCE_INDEX_PER_TENTH = 8') || !performanceIndexSourceV04f.includes('medianEt')) {
+if (!performanceIndexSourceV04f.includes('PERFORMANCE_INDEX_PASSES = 51') || !performanceIndexSourceV04f.includes('PERFORMANCE_INDEX_PER_TENTH = 8') || !performanceIndexSourceV04f.includes('medianEt') || !performanceIndexSourceV04f.includes('performanceClassFromIndex')) {
   throw new Error('Deterministic 51-pass Performance Index benchmark is incomplete.');
 }
-if (!serverPerformanceIndexSourceV04f.includes('public const PASSES = 51') || !serverPerformanceIndexSourceV04f.includes('public const PER_TENTH = 8')) {
+if (!serverPerformanceIndexSourceV04f.includes('public const PASSES = 51') || !serverPerformanceIndexSourceV04f.includes('public const PER_TENTH = 8') || !serverPerformanceIndexSourceV04f.includes('classFromIndex')) {
   throw new Error('PHP Performance Index parity is incomplete.');
 }
 if (!racePresentationSourceV04d.includes('race-playback--side') ||
@@ -248,10 +254,11 @@ if (!quickRaceSource.includes('PERFORMANCE') || !quickRaceSource.includes('Oppon
   throw new Error('PI-based mystery Race Preview regressed.');
 }
 const v04fPlayerSurface = [appSource, usedLotSourceV04d, showroomSourceV04c, garageSource, partsSourceV04b, quickRaceSource, localGameSource, serverGameSourceV04c, html].join('\n');
-if (/D Class|Class D/.test(v04fPlayerSurface)) throw new Error('Legacy letter-class starter language remains player-facing.');
-if (!cssV04b.includes('V0.4F layered vehicles and side-view drag strip') || !cssV04b.includes('.race-strip--side') || !cssV04b.includes('.layered-car__wheel')) {
+if (!usedLotSourceV04d.includes('CLASS') || !garageSource.includes('performance-class-tag') || !quickRaceSource.includes('performanceClass')) throw new Error('V0.4G class letters are missing from player-facing vehicle surfaces.');
+if (!settingsSourceV04e.includes('57-Car Art Roster') || !settingsSourceV04e.includes('ART READY')) throw new Error('The 57-car runtime art roster debug view is missing.');
+if (!cssV04b.includes('V0.4F layered vehicles and side-view drag strip') || !cssV04b.includes('.race-strip--side') || !cssV04b.includes('.layered-car__wheel') || !cssV04b.includes('V0.4G roster / performance classes')) {
   throw new Error('V0.4F layered-car / side-view race CSS is missing.');
 }
-console.log('V0.4F layered art, PI privacy and bumper-timed side-view racing checks passed.');
+console.log('V0.4G 57-car PNG atlas, PI classes and bumper-timed side-view racing checks passed.');
 
 
