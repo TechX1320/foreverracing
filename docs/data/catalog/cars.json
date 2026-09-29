@@ -78,7 +78,29 @@
           "rearBumperX": 0,
           "groundY": 120
         },
-        "certifiedSrc": "assets/art/cars/layered/golf_gti/certified.png"
+        "certifiedSrc": "assets/art/cars/layered/golf_gti/certified.png",
+        "raceLayers": {
+          "body": {
+            "src": "assets/art/cars/race/golf_gti/body.png",
+            "width": 281,
+            "height": 111
+          },
+          "wheel": {
+            "src": "assets/art/cars/race/golf_gti/wheel.png",
+            "width": 50,
+            "height": 50
+          },
+          "disk": {
+            "src": "assets/art/cars/race/golf_gti/disk.png",
+            "width": 34,
+            "height": 34
+          },
+          "detail": {
+            "src": "assets/art/cars/race/golf_gti/detail.png",
+            "width": 281,
+            "height": 111
+          }
+        }
       }
     },
     "catalogId": "golf_gti",
@@ -167,7 +189,29 @@
           "rearBumperX": 3,
           "groundY": 120
         },
-        "certifiedSrc": "assets/art/cars/layered/mazda_rx8/certified.png"
+        "certifiedSrc": "assets/art/cars/layered/mazda_rx8/certified.png",
+        "raceLayers": {
+          "body": {
+            "src": "assets/art/cars/race/mazda_rx8/body.png",
+            "width": 311,
+            "height": 114
+          },
+          "wheel": {
+            "src": "assets/art/cars/race/mazda_rx8/wheel.png",
+            "width": 52,
+            "height": 52
+          },
+          "disk": {
+            "src": "assets/art/cars/race/mazda_rx8/disk.png",
+            "width": 34,
+            "height": 35
+          },
+          "detail": {
+            "src": "assets/art/cars/race/mazda_rx8/detail.png",
+            "width": 311,
+            "height": 114
+          }
+        }
       }
     },
     "catalogId": "mazda_rx8",
@@ -256,7 +300,29 @@
           "rearBumperX": 2,
           "groundY": 117
         },
-        "certifiedSrc": "assets/art/cars/layered/renault_clio/certified.png"
+        "certifiedSrc": "assets/art/cars/layered/renault_clio/certified.png",
+        "raceLayers": {
+          "body": {
+            "src": "assets/art/cars/race/renault_clio/body.png",
+            "width": 252,
+            "height": 111
+          },
+          "wheel": {
+            "src": "assets/art/cars/race/renault_clio/wheel.png",
+            "width": 48,
+            "height": 48
+          },
+          "disk": {
+            "src": "assets/art/cars/race/renault_clio/disk.png",
+            "width": 36,
+            "height": 36
+          },
+          "detail": {
+            "src": "assets/art/cars/race/renault_clio/detail.png",
+            "width": 252,
+            "height": 111
+          }
+        }
       }
     },
     "catalogId": "renault_clio",
