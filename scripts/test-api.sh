@@ -87,7 +87,7 @@ fi
 STARTER_BODY="$(jq -nc --arg listingId "$STARTER_LISTING_ID" '{listingId:$listingId}')"
 PLAYER="$(post usedlot/purchase.php "$STARTER_BODY")"
 CAR_ID="$(echo "$PLAYER" | jq -r '.player.selectedCarId')"
-echo "$PLAYER" | jq -e '.player.garage[0].buildStage == 1 and .player.garage[0].source == "used" and .player.garage[0].mileage >= 105000 and .player.garage[0].stockClass == "D" and .player.garage[0].performanceClass == "D" and .player.visual == null? // true' >/dev/null
+echo "$PLAYER" | jq -e '.player.garage[0].buildStage == 1 and .player.garage[0].source == "used" and .player.garage[0].mileage >= 105000 and .player.garage[0].stockClass == "D" and .player.garage[0].performanceClass == "D"' >/dev/null
 echo "$PLAYER" | jq -e '.player.tutorial.step == "visit_garage" and .player.garage[0].visual.layered.anchors.frontWheelCenter.y == 95' >/dev/null
 
 PLAYER="$(post tutorial/advance.php '{"action":"garage_explained"}')"
