@@ -1,5 +1,16 @@
 # Changelog
 
+## V0.4.0-f.1 — starter visual certification hotfix
+
+- Replaced the broken starter-layer runtime presentation with certified Golf GTI, Mazda RX-8 and Renault Clio V6 Sport composite PNGs.
+- Kept body / wheel / rim / detail metadata intact for future paint and wheel customization work.
+- Added Settings -> Car Art Debug for fast starter-art verification.
+- Added BUY + INSTALL as the primary Parts action while retaining BUY ONLY and Garage Inventory for later swapping/management.
+- Existing owned parts can now be installed directly from the Parts shop.
+- The tutorial now purchases + installs the first Intake in one action and proceeds directly to the first 1/4-mile race.
+- Tightened the visible tutorial from six actions to five.
+- Wheel-spin animation remains deferred polish.
+
 ## V0.4.0-f — layered vehicle visual reset
 
 - Replaced the generated/legacy vehicle presentation pipeline with purchased layered side-profile art.
