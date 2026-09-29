@@ -305,6 +305,10 @@ function identitySection(car) {
         ${selectField("Classifieds", "market.classifieds", String(car.market?.classifieds !== false), [["true","Listed"],["false","Hidden"]])}
         ${selectField("Showroom", "market.showroom", String(Boolean(car.market?.showroom)), [["false","Hidden"],["true","Listed"]])}
       </div>
+      <div class="content-studio__market-note">
+        <b>${marketPlacementLabel(car)}</b>
+        <span>Classifieds = used-market pool. Showroom = new-car dealer floor. Both may be enabled; Hidden/Hidden keeps the car playable but out of both stores.</span>
+      </div>
     </section>`;
 }
 
