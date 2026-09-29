@@ -115,8 +115,8 @@ final class GameService
     public static function purchaseNewCar(int $stockId): array
     {
         $spec = self::findBy(self::carCatalog(), 'stockId', $stockId);
-        if (!$spec) {
-            throw new GameException('That showroom car does not exist.', 404);
+        if (!$spec || (($spec['market']['showroom'] ?? false) !== true) || !self::isContentReleased($spec)) {
+            throw new GameException('That showroom car is not currently released.', 404);
         }
 
         return self::mutatePlayer(function (array $player) use ($spec): array {
@@ -958,7 +958,7 @@ final class GameService
         $catalog = self::carCatalog();
         $candidates = array_values(array_filter(
             $catalog,
-            fn(array $spec): bool => ($spec['market']['classifieds'] ?? true) !== false
+            fn(array $spec): bool => ($spec['market']['classifieds'] ?? true) !== false && self::isContentReleased($spec)
         ));
         if (!$candidates) {
             return ['generatedAt' => $now, 'expiresAt' => $now + $refresh, 'listings' => []];
@@ -1034,6 +1034,23 @@ final class GameService
         $color = trim((string)($paintColor ?? ''));
         if ($color !== '') $visual['paintColor'] = $color;
         return $visual;
+    }
+
+    private static function isContentReleased(array $content, ?int $now = null): bool
+    {
+        $release = is_array($content['release'] ?? null) ? $content['release'] : null;
+        if ($release === null) return true;
+
+        $mode = strtolower(trim((string)($release['mode'] ?? 'instant')));
+        if ($mode === 'draft') return false;
+        if ($mode === 'instant') return true;
+        if ($mode !== 'scheduled') return true;
+
+        $publishAt = trim((string)($release['publishAt'] ?? ''));
+        if ($publishAt === '') return false;
+        $timestamp = strtotime($publishAt);
+        if ($timestamp === false) return false;
+        return $timestamp <= ($now ?? time());
     }
 
     private static function requireCredits(array $player, int $amount): void
@@ -1167,7 +1184,7 @@ final class GameService
 
         $candidates = array_values(array_filter(
             self::carCatalog(),
-            fn(array $spec): bool => !empty($spec['visual']['layered']['layers']['body']['src'])
+            fn(array $spec): bool => !empty($spec['visual']['layered']['layers']['body']['src']) && self::isContentReleased($spec)
         ));
         if (!$tutorialRace) {
             $alternatives = array_values(array_filter(
