@@ -39,10 +39,10 @@ export async function renderSettings(ctx) {
           <input type="checkbox" data-setting="reduceMotion" ${settings.reduceMotion ? "checked" : ""}>
         </label>
         <div class="game-card">
-          <div class="split"><div><h3>Vehicle Rendering</h3><p>Authored vehicle art is used whenever it exists. Missing artwork is shown as an explicit ? placeholder so the art backlog is visible during development.</p></div><span class="pill pill--accent">AUTHORED / FALLBACK</span></div>
+          <div class="split"><div><h3>Vehicle Rendering</h3><p>Layered side-profile vehicle art is used for the validated catalog. Body, wheel, rim and detail layers share one renderer so paint and wheel customization can expand later.</p></div><span class="pill pill--accent">LAYERED ART</span></div>
         </div>
         <div class="game-card">
-          <div class="split"><div><h3>Build & Cached Assets</h3><p>Current build: <strong>${document.documentElement.dataset.build || "unknown"}</strong>. GitHub Pages development mode disables the offline service-worker cache so refreshes pull current assets.</p></div><span class="pill pill--accent">V0.4E</span></div>
+          <div class="split"><div><h3>Build & Cached Assets</h3><p>Current build: <strong>${document.documentElement.dataset.build || "unknown"}</strong>. GitHub Pages development mode disables the offline service-worker cache so refreshes pull current assets.</p></div><span class="pill pill--accent">V0.4F</span></div>
           <div class="game-card__actions"><button class="button button--small" type="button" data-clear-assets>CLEAR CACHED ASSETS</button></div>
         </div>
         <div class="game-card">
