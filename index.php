@@ -13,6 +13,7 @@ $storageText = $storageMode === 'local' ? 'BROWSER LOCAL' : 'PHP / JSON';
   <meta name="theme-color" content="#111315">
   <meta name="color-scheme" content="dark">
   <meta name="description" content="Forever Racing - a browser-based garage and drag racing game.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <title>Forever Racing</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="assets/css/app.css?v=<?= $build ?>">
