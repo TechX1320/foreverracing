@@ -1590,3 +1590,91 @@ dialog.fr-dialog:has(.garage-inventory-dialog){
   .content-studio__actions{grid-template-columns:1fr}
   .content-studio__actions .button--primary{grid-column:auto}
 }
+
+/* V0.5A.2 Content Studio polish */
+.content-studio__palette{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:6px;
+  padding:0 10px 10px;
+}
+.studio-paint-swatch{
+  position:relative;
+  min-height:42px;
+  border:1px solid var(--border);
+  background:#0d1012;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+}
+.studio-paint-swatch input{
+  position:absolute;
+  inset:4px;
+  width:calc(100% - 8px);
+  height:calc(100% - 8px);
+  border:0;
+  padding:0;
+  background:transparent;
+  cursor:pointer;
+}
+.studio-paint-swatch span{
+  position:absolute;
+  right:4px;
+  bottom:2px;
+  min-width:14px;
+  padding:1px 3px;
+  background:#000b;
+  color:#fff;
+  font-size:8px;
+  font-weight:900;
+  text-align:center;
+  pointer-events:none;
+}
+.content-studio__market-note{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  margin:0 10px 10px;
+  padding:8px 9px;
+  border:1px solid var(--border);
+  background:#0d1012;
+}
+.content-studio__market-note b{
+  flex:0 0 auto;
+  color:var(--accent-2);
+  font-size:10px;
+  letter-spacing:.05em;
+}
+.content-studio__market-note span{
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.45;
+}
+.content-studio__anchor-key{
+  position:absolute;
+  left:8px;
+  bottom:8px;
+  display:flex;
+  gap:8px;
+  padding:4px 6px;
+  border:1px solid #ffffff18;
+  background:#0009;
+  color:#c7ccd0;
+  font-size:9px;
+  font-weight:800;
+  pointer-events:none;
+}
+.content-studio__anchor-key span{display:flex;align-items:center;gap:4px}
+.content-studio__anchor-key i{
+  width:8px;
+  height:8px;
+  border:1px solid #fff;
+  border-radius:50%;
+  display:inline-block;
+}
+.content-studio__anchor-key .is-rear{background:var(--accent)}
+.content-studio__anchor-key .is-front{background:var(--good)}
+@media(max-width:760px){
+  .content-studio__palette{grid-template-columns:repeat(5,1fr)}
+  .content-studio__market-note{display:grid}
+}
