@@ -50,6 +50,7 @@ final class RaceSimulator
         $weight = max(500.0, (float)($context['weight'] ?? $context['weightLbs'] ?? 500));
         $grip = self::clamp((float)($context['grip'] ?? 1.0), 0.5, 2.0);
         $level = max(1, (int)($context['level'] ?? 1));
+        $drivetrain = strtoupper((string)($context['drivetrain'] ?? ''));
 
         $reaction = $this->reaction(
             $level,
@@ -100,12 +101,24 @@ final class RaceSimulator
         $foul = $reaction < 0;
         $total = $foul ? $et + 60 + abs($reaction) : $et + $reaction;
 
+        $driveFactor = $drivetrain === 'AWD' ? 0.82 : ($drivetrain === 'FWD' ? 1.04 : 1.0);
+        $surfaceFactor = !empty($condition['slippery']) ? 0.82 : 1.0;
+        $tractionDemand = ((($torque / $weight) * 9.0) + (($hp / $weight) * 2.0)) * $driveFactor;
+        $tractionCapacity = $grip * 0.72 * $surfaceFactor;
+        $gripLoss = self::clamp(($tractionDemand - $tractionCapacity) / 0.42, 0.0, 1.0);
+        $smokeLevel = self::clamp(($gripLoss - 0.06) / 0.6, 0.0, 1.0);
+
         return [
             'reactionTime' => round($reaction, 3),
             'elapsedTime' => round($et, 3),
             'trapSpeed' => round($trap, 2),
             'totalTime' => round($total, 3),
             'foul' => $foul,
+            'traction' => [
+                'gripLoss' => round($gripLoss, 3),
+                'wheelSlip' => round(self::clamp($gripLoss * 1.2, 0.0, 1.0), 3),
+                'smokeLevel' => round($smokeLevel, 3),
+            ],
         ];
     }
 
