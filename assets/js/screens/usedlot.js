@@ -12,7 +12,7 @@ export async function renderUsedLot(ctx) {
   let visibleListings = tutorialStarter
     ? listings.filter((listing) => {
         const car = catalog.find((entry) => Number(entry.stockId) === Number(listing.stockId));
-        return Boolean(car?.starter) && String(car?.class || "").toUpperCase() === "D";
+        return Boolean(car?.starter);
       })
     : listings;
 
@@ -22,14 +22,14 @@ export async function renderUsedLot(ctx) {
     listings = lot.listings || [];
     visibleListings = listings.filter((listing) => {
       const car = catalog.find((entry) => Number(entry.stockId) === Number(listing.stockId));
-      return Boolean(car?.starter) && String(car?.class || "").toUpperCase() === "D";
+      return Boolean(car?.starter);
     });
   }
 
   ctx.screenRoot.innerHTML = pageShell({
     title: "Classifieds",
     eyebrow: tutorialStarter ? "YOUR FIRST CAR" : "USED & OLDER CARS",
-    hint: tutorialStarter ? "D CLASS STARTERS" : `${visibleListings.length} listings`,
+    hint: tutorialStarter ? "STARTER CARS" : `${visibleListings.length} listings`,
     trail: tutorialStarter ? "Pick one cheap platform and start from the bottom" : `Refreshes ${formatTime(lot.expiresAt)}`,
     body: `
       ${tutorialStarter ? starterObjective() : `
@@ -67,7 +67,7 @@ function starterObjective() {
     <div class="ftue-focus-panel__step">STEP 2/6</div>
     <div class="ftue-focus-panel__copy">
       <span>FIRST CAR</span>
-      <strong>Pick a D Class beater.</strong>
+      <strong>Pick your starter car.</strong>
       <p>You are not starting rich. Choose one used starter below and build it into something worth racing.</p>
     </div>
     <div class="ftue-focus-panel__arrow">↓ SELECT A CAR BELOW</div>
@@ -82,7 +82,7 @@ function listingCard(listing, catalog, tutorialStarter = false) {
       <div class="classified-card__visual">${renderVehicle(car, { stage: 1, view: "sideProfile" })}</div>
       <div class="classified-card__body">
         <div class="classified-card__title">
-          <div><strong>${car.year} ${escapeHtml(car.make)} ${escapeHtml(car.model)}</strong><small>${escapeHtml(car.class || "")} • ${escapeHtml(car.base?.drivetrain || "")}</small></div>
+          <div><strong>${escapeHtml(catalogName(car))}</strong><small>PI ${number(car.benchmark?.performanceIndex || 0)} • ${escapeHtml(car.base?.drivetrain || "")}</small></div>
           <span class="condition-badge ${conditionClass(listing.condition)}">${number(listing.condition)}%</span>
         </div>
         <div class="classified-card__meta"><span>${number(listing.mileage)} mi</span><b>${money(listing.price)} cr</b></div>
@@ -107,14 +107,15 @@ function openListing(ctx, listingId, listings, catalog, playerSnapshot, tutorial
       <div class="classified-detail-dialog__hero">
         <div class="dialog-vehicle">${renderVehicle(car, { stage: 1, view: "sideProfile" })}</div>
         <div>
-          <span class="section-label">${tutorialStarter ? "FIRST CAR / D CLASS" : "CLASSIFIED LISTING"}</span>
-          <h2>${car.year} ${escapeHtml(car.make)} ${escapeHtml(car.model)}</h2>
+          <span class="section-label">${tutorialStarter ? "FIRST CAR / STARTER" : "CLASSIFIED LISTING"}</span>
+          <h2>${escapeHtml(catalogName(car))}</h2>
           <p>${conditionText(listing.condition)} • ${number(listing.mileage)} miles • ${escapeHtml(car.base?.drivetrain || "")}</p>
           <strong class="classified-detail-price">${money(listing.price)} cr</strong>
         </div>
       </div>
 
       <div class="classified-detail-specs">
+        <div><span>PERFORMANCE INDEX</span><b>PI ${number(car.benchmark?.performanceIndex || 0)}</b></div>
         <div><span>POWER</span><b>${number(car.base?.hp)} hp</b></div>
         <div><span>TORQUE</span><b>${number(car.base?.torque)} lb-ft</b></div>
         <div><span>WEIGHT</span><b>${number(car.base?.weight)} lb</b></div>
@@ -153,7 +154,7 @@ function openListing(ctx, listingId, listings, catalog, playerSnapshot, tutorial
       const data = await ctx.storage.buyUsedCar(listingId);
       ctx.store.setPlayer(data.player);
       closeDialog(dialog);
-      ctx.toast("Car purchased", `${car.year} ${car.make} ${car.model} is now in your Garage.`);
+      ctx.toast("Car purchased", `${catalogName(car)} is now in your Garage.`);
       if (data.player?.tutorial?.status === "active" && data.player?.tutorial?.step === "visit_garage") {
         ctx.router.navigate("garage");
       } else {
@@ -183,4 +184,9 @@ function conditionText(value) {
 function formatTime(timestamp) {
   if (!timestamp) return "soon";
   return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(new Date(Number(timestamp) * 1000));
+}
+
+
+function catalogName(car) {
+  return String(car?.displayName || [car?.year, car?.make, car?.model].filter(Boolean).join(" ") || "Unknown Car");
 }
