@@ -48,6 +48,15 @@ export function performanceIndexFromEt(et) {
   return Math.max(0, Math.round(value));
 }
 
+export function performanceClassFromIndex(index) {
+  const pi = Math.max(0, Number(index || 0));
+  if (pi < 450) return "D";
+  if (pi < 600) return "C";
+  if (pi < 750) return "B";
+  if (pi < 900) return "A";
+  return "S";
+}
+
 function median(values) {
   if (!values.length) return 0;
   const middle = Math.floor(values.length / 2);
