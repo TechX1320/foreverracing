@@ -82,7 +82,7 @@ Build: {$build}
 Storage mode: local
 Offline service worker: disabled in static development mode
 Race presentation: persistent two-phase start/finish with blocking real-time playback
-V0.4H.2: classic drag tree, centered strip/grooves, animated wheels and grip-loss tire smoke
+V0.4H.3: vertically centered race-lane cars, with H.2 wheel spin and grip-loss tire smoke retained
 Do not edit docs/ by hand; run php scripts/build-static.php.
 ");
 

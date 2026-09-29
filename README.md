@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.4.0-h.2 playable direction
+## V0.4.0-h.3 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,11 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.4H.3 race lane centering
+
+- Side-view race cars are vertically centered inside their own 50% lane instead of using asymmetric top/bottom offsets.
+- This fixes shorter sprites such as the RX-8 appearing too low in the lower lane while preserving staging, finish timing and fly-through behavior.
 
 ### V0.4H.2 race animation pass
 
