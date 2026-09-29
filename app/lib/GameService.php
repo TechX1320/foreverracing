@@ -1196,7 +1196,10 @@ final class GameService
         return [
             'name' => $name,
             'carName' => trim((string)($spec['displayName'] ?? '')) ?: trim(implode(' ', array_filter([$spec['year'] ?? null, $spec['make'] ?? null, $spec['model'] ?? null]))) ?: 'Opponent',
-            'visual' => is_array($spec['visual'] ?? null) ? $spec['visual'] : [],
+            'visual' => self::withPaintColor(
+                is_array($spec['visual'] ?? null) ? $spec['visual'] : [],
+                self::randomPaintColor($spec)
+            ),
             'performanceIndex' => $pi,
             'performanceClass' => PerformanceIndex::classFromIndex($pi),
             'drivetrain' => (string)($base['drivetrain'] ?? '-'),
