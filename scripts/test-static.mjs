@@ -170,6 +170,7 @@ const modules = [
   'assets/js/domain/LocalGameService.js',
   'assets/js/domain/PerformanceIndex.js',
   'assets/js/domain/ContentRelease.js',
+  'assets/js/domain/EngineCatalog.js',
   'assets/js/ui/vehicleRenderer.js',
   'assets/js/ui/racePresentation.js',
   'assets/js/storage/StorageProvider.js',
@@ -184,7 +185,9 @@ const modules = [
   'assets/js/screens/roguelike.js',
   'assets/js/screens/settings.js',
   'assets/js/content/ContentStudioCatalog.js',
+  'assets/js/content/ContentStudioEngineCatalog.js',
   'assets/js/screens/contentStudio.js',
+  'assets/js/screens/engineStudio.js',
 ];
 
 for (const file of modules) {
