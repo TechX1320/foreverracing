@@ -171,6 +171,8 @@ const modules = [
   'assets/js/screens/usedlot.js',
   'assets/js/screens/roguelike.js',
   'assets/js/screens/settings.js',
+  'assets/js/content/ContentStudioCatalog.js',
+  'assets/js/screens/contentStudio.js',
 ];
 
 for (const file of modules) {
