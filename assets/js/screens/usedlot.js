@@ -12,7 +12,7 @@ export async function renderUsedLot(ctx) {
   let visibleListings = tutorialStarter
     ? listings.filter((listing) => {
         const car = catalog.find((entry) => Number(entry.stockId) === Number(listing.stockId));
-        return Boolean(car?.starter);
+        return Boolean(listing?.starterListing) && Boolean(car?.starter);
       })
     : listings;
 
@@ -22,7 +22,7 @@ export async function renderUsedLot(ctx) {
     listings = lot.listings || [];
     visibleListings = listings.filter((listing) => {
       const car = catalog.find((entry) => Number(entry.stockId) === Number(listing.stockId));
-      return Boolean(car?.starter);
+      return Boolean(listing?.starterListing) && Boolean(car?.starter);
     });
   }
 
