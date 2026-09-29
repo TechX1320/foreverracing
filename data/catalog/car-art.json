@@ -1,17 +1,17 @@
 {
-  "version": 1,
+  "version": 2,
   "sourceAssetCount": 57,
-  "runtimeAssetCount": 3,
-  "notes": "Wheel centers are auto-detected from transparent wheel openings, then dropped 10% of tire height to avoid an overly slammed stance. Spot-check before enabling additional cars.",
+  "runtimeAssetCount": 57,
+  "notes": "V0.4G: all 57 purchased cars have certified PNG atlas art. Wheel centers use a 10px total drop from the detected opening center; gameplay specs remain separately validated before cars enter the market.",
   "cars": [
     {
       "assetId": "9ff_gt9",
       "sourceName": "9ff_GT9",
       "displayName": "9ff GT9",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 315,
-        "height": 104
+        "height": 109
       },
       "layers": {
         "body": {
@@ -38,30 +38,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 67.5,
-          "y": 77
+          "y": 82
         },
         "frontWheelCenter": {
           "x": 252.5,
-          "y": 77
+          "y": 82
         },
         "frontBumperX": 314,
         "rearBumperX": 0,
-        "groundY": 102
+        "groundY": 107
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-1.png",
+        "col": 0,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "alfa_romeo_8c_competizione",
       "sourceName": "Alfa_Romeo_8C_Competizione",
       "displayName": "Alfa Romeo 8C Competizione",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 294,
-        "height": 111
+        "height": 116
       },
       "layers": {
         "body": {
@@ -88,30 +97,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 49,
-          "y": 83
+          "y": 88
         },
         "frontWheelCenter": {
           "x": 238.5,
-          "y": 83
+          "y": 88
         },
         "frontBumperX": 291,
         "rearBumperX": 3,
-        "groundY": 109
+        "groundY": 114
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-1.png",
+        "col": 1,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "alfa_romeo_gt",
       "sourceName": "Alfa_Romeo_GT",
       "displayName": "Alfa Romeo GT",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 302,
-        "height": 118
+        "height": 123
       },
       "layers": {
         "body": {
@@ -138,30 +156,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 57,
-          "y": 91
+          "y": 96
         },
         "frontWheelCenter": {
           "x": 242.5,
-          "y": 91
+          "y": 96
         },
         "frontBumperX": 299,
         "rearBumperX": 1,
-        "groundY": 116
+        "groundY": 121
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-1.png",
+        "col": 2,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "aston_martin_one_77",
       "sourceName": "Aston_Martin_One_77",
       "displayName": "Aston Martin One 77",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 318,
-        "height": 116
+        "height": 121
       },
       "layers": {
         "body": {
@@ -188,30 +215,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 54,
-          "y": 86
+          "y": 91
         },
         "frontWheelCenter": {
           "x": 261.5,
-          "y": 86
+          "y": 91
         },
         "frontBumperX": 314,
         "rearBumperX": 1,
-        "groundY": 114
+        "groundY": 119
       },
       "calibration": {
-        "wheelDropPx": 6,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-1.png",
+        "col": 3,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "audi_r8_v10_mtm_biturbo",
       "sourceName": "Audi_R8_V10_MTM_Biturbo",
       "displayName": "Audi R8 V10 MTM Biturbo",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 302,
-        "height": 114
+        "height": 119
       },
       "layers": {
         "body": {
@@ -238,30 +274,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 56,
-          "y": 86
+          "y": 91
         },
         "frontWheelCenter": {
           "x": 242.5,
-          "y": 86
+          "y": 91
         },
         "frontBumperX": 301,
         "rearBumperX": 0,
-        "groundY": 112
+        "groundY": 117
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-1.png",
+        "col": 0,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "audi_rs6",
       "sourceName": "Audi_RS6",
       "displayName": "Audi RS6",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 307,
-        "height": 113
+        "height": 118
       },
       "layers": {
         "body": {
@@ -288,30 +333,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 59.5,
-          "y": 86
+          "y": 91
         },
         "frontWheelCenter": {
           "x": 249.5,
-          "y": 86
+          "y": 91
         },
         "frontBumperX": 306,
         "rearBumperX": 0,
-        "groundY": 111
+        "groundY": 116
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-1.png",
+        "col": 1,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "bmw_e36",
       "sourceName": "BMW_E36",
       "displayName": "BMW E36",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 301,
-        "height": 112
+        "height": 117
       },
       "layers": {
         "body": {
@@ -338,30 +392,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 64,
-          "y": 85
+          "y": 90
         },
         "frontWheelCenter": {
           "x": 249.5,
-          "y": 85
+          "y": 90
         },
         "frontBumperX": 299,
         "rearBumperX": 1,
-        "groundY": 110
+        "groundY": 115
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-1.png",
+        "col": 2,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "bmw_m3",
       "sourceName": "BMW_M3",
       "displayName": "BMW M3",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 308,
-        "height": 120
+        "height": 125
       },
       "layers": {
         "body": {
@@ -388,30 +451,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 66,
-          "y": 92.5
+          "y": 97.5
         },
         "frontWheelCenter": {
           "x": 258,
-          "y": 92.5
+          "y": 97.5
         },
         "frontBumperX": 304,
         "rearBumperX": 2,
-        "groundY": 118
+        "groundY": 123
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-1.png",
+        "col": 3,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "bmw_m6",
       "sourceName": "BMW_M6",
       "displayName": "BMW M6",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 318,
-        "height": 120
+        "height": 125
       },
       "layers": {
         "body": {
@@ -438,30 +510,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 67.5,
-          "y": 92
+          "y": 97
         },
         "frontWheelCenter": {
           "x": 259,
-          "y": 92
+          "y": 97
         },
         "frontBumperX": 316,
         "rearBumperX": 2,
-        "groundY": 118
+        "groundY": 123
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-1.png",
+        "col": 0,
+        "row": 2,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "brabus_700_biturbo",
       "sourceName": "Brabus_700_Biturbo",
       "displayName": "Brabus 700 Biturbo",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 311,
-        "height": 114
+        "height": 119
       },
       "layers": {
         "body": {
@@ -488,30 +569,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 60,
-          "y": 86
+          "y": 91
         },
         "frontWheelCenter": {
           "x": 250.5,
-          "y": 86
+          "y": 91
         },
         "frontBumperX": 307,
         "rearBumperX": 2,
-        "groundY": 112
+        "groundY": 117
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-1.png",
+        "col": 1,
+        "row": 2,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "bugatti_veyron_16",
       "sourceName": "Bugatti_Veyron_16",
       "displayName": "Bugatti Veyron 16",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 293,
-        "height": 110
+        "height": 115
       },
       "layers": {
         "body": {
@@ -538,30 +628,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 49,
-          "y": 82
+          "y": 87
         },
         "frontWheelCenter": {
           "x": 237.5,
-          "y": 82
+          "y": 87
         },
         "frontBumperX": 290,
         "rearBumperX": 0,
-        "groundY": 108
+        "groundY": 113
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-1.png",
+        "col": 2,
+        "row": 2,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "bugatti_veyron_16_ss",
       "sourceName": "Bugatti_Veyron_16_SS",
       "displayName": "Bugatti Veyron 16 SS",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 293,
-        "height": 110
+        "height": 115
       },
       "layers": {
         "body": {
@@ -588,30 +687,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 49,
-          "y": 82
+          "y": 87
         },
         "frontWheelCenter": {
           "x": 237.5,
-          "y": 82
+          "y": 87
         },
         "frontBumperX": 290,
         "rearBumperX": 0,
-        "groundY": 108
+        "groundY": 113
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-1.png",
+        "col": 3,
+        "row": 2,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "callaway_c16",
       "sourceName": "Callaway_C16",
       "displayName": "Callaway C16",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 299,
-        "height": 109
+        "height": 114
       },
       "layers": {
         "body": {
@@ -638,30 +746,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 56,
-          "y": 81
+          "y": 86
         },
         "frontWheelCenter": {
           "x": 246,
-          "y": 81
+          "y": 86
         },
         "frontBumperX": 296,
         "rearBumperX": 2,
-        "groundY": 107
+        "groundY": 112
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-2.png",
+        "col": 0,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "camaro_zl1",
       "sourceName": "Camaro_ZL1",
       "displayName": "Camaro ZL1",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 309,
-        "height": 107
+        "height": 112
       },
       "layers": {
         "body": {
@@ -688,30 +805,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 67,
-          "y": 81
+          "y": 86
         },
         "frontWheelCenter": {
           "x": 251,
-          "y": 81
+          "y": 86
         },
         "frontBumperX": 305,
         "rearBumperX": 1,
-        "groundY": 105
+        "groundY": 110
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-2.png",
+        "col": 1,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "carrera_gt",
       "sourceName": "Carrera_GT",
       "displayName": "Carrera GT",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 315,
-        "height": 114
+        "height": 119
       },
       "layers": {
         "body": {
@@ -738,30 +864,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 55,
-          "y": 87
+          "y": 92
         },
         "frontWheelCenter": {
           "x": 246.5,
-          "y": 87
+          "y": 92
         },
         "frontBumperX": 311,
         "rearBumperX": 0,
-        "groundY": 112
+        "groundY": 117
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-2.png",
+        "col": 2,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "corvette_zr1",
       "sourceName": "Corvette_ZR1",
       "displayName": "Corvette ZR1",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 297,
-        "height": 110
+        "height": 115
       },
       "layers": {
         "body": {
@@ -788,30 +923,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 55.5,
-          "y": 82
+          "y": 87
         },
         "frontWheelCenter": {
           "x": 242,
-          "y": 82
+          "y": 87
         },
         "frontBumperX": 293,
         "rearBumperX": 3,
-        "groundY": 108
+        "groundY": 113
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-2.png",
+        "col": 3,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "dodge_challenger_440",
       "sourceName": "Dodge_Challenger_440",
       "displayName": "Dodge Challenger 440",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 322,
-        "height": 103
+        "height": 108
       },
       "layers": {
         "body": {
@@ -838,30 +982,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 69,
-          "y": 76.5
+          "y": 81.5
         },
         "frontWheelCenter": {
           "x": 262,
-          "y": 76.5
+          "y": 81.5
         },
         "frontBumperX": 319,
         "rearBumperX": 2,
-        "groundY": 101
+        "groundY": 106
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-2.png",
+        "col": 0,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "dodge_charger",
       "sourceName": "Dodge_Charger",
       "displayName": "Dodge Charger",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 328,
-        "height": 119
+        "height": 124
       },
       "layers": {
         "body": {
@@ -888,30 +1041,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 67,
-          "y": 91
+          "y": 96
         },
         "frontWheelCenter": {
           "x": 272.5,
-          "y": 91
+          "y": 96
         },
         "frontBumperX": 325,
         "rearBumperX": 2,
-        "groundY": 117
+        "groundY": 122
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-2.png",
+        "col": 1,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "dodge_srt",
       "sourceName": "Dodge_SRT",
       "displayName": "Dodge SRT",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 295,
-        "height": 117
+        "height": 122
       },
       "layers": {
         "body": {
@@ -938,30 +1100,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 57.5,
-          "y": 91
+          "y": 96
         },
         "frontWheelCenter": {
           "x": 241.5,
-          "y": 91
+          "y": 96
         },
         "frontBumperX": 292,
         "rearBumperX": 2,
-        "groundY": 115
+        "groundY": 120
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-2.png",
+        "col": 2,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "enzo_ferrari",
       "sourceName": "Enzo_Ferrari",
       "displayName": "Enzo Ferrari",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 310,
-        "height": 104
+        "height": 109
       },
       "layers": {
         "body": {
@@ -988,30 +1159,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 52,
-          "y": 76
+          "y": 81
         },
         "frontWheelCenter": {
           "x": 235,
-          "y": 76
+          "y": 81
         },
         "frontBumperX": 308,
         "rearBumperX": 3,
-        "groundY": 102
+        "groundY": 107
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-2.png",
+        "col": 3,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "ferrari_599_gto",
       "sourceName": "Ferrari_599_GTO",
       "displayName": "Ferrari 599 GTO",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 311,
-        "height": 114
+        "height": 119
       },
       "layers": {
         "body": {
@@ -1038,30 +1218,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 59.5,
-          "y": 86
+          "y": 91
         },
         "frontWheelCenter": {
           "x": 247,
-          "y": 86
+          "y": 91
         },
         "frontBumperX": 308,
         "rearBumperX": 2,
-        "groundY": 112
+        "groundY": 117
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-2.png",
+        "col": 0,
+        "row": 2,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "ferrari_599_novitec_rosso",
       "sourceName": "Ferrari_599_Novitec_Rosso",
       "displayName": "Ferrari 599 Novitec Rosso",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 311,
-        "height": 114
+        "height": 119
       },
       "layers": {
         "body": {
@@ -1088,30 +1277,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 59.5,
-          "y": 86
+          "y": 91
         },
         "frontWheelCenter": {
           "x": 247,
-          "y": 86
+          "y": 91
         },
         "frontBumperX": 308,
         "rearBumperX": 2,
-        "groundY": 112
+        "groundY": 117
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-2.png",
+        "col": 1,
+        "row": 2,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "ferrari_fxx",
       "sourceName": "Ferrari_FXX",
       "displayName": "Ferrari FXX",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 315,
-        "height": 109
+        "height": 114
       },
       "layers": {
         "body": {
@@ -1138,30 +1336,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 56.5,
-          "y": 81
+          "y": 86
         },
         "frontWheelCenter": {
           "x": 239.5,
-          "y": 81
+          "y": 86
         },
         "frontBumperX": 314,
         "rearBumperX": 0,
-        "groundY": 107
+        "groundY": 112
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-2.png",
+        "col": 2,
+        "row": 2,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "ford_gt_geigercars_hp790",
       "sourceName": "Ford_GT_GeigerCars_HP790",
       "displayName": "Ford GT GeigerCars HP790",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 315,
-        "height": 102
+        "height": 107
       },
       "layers": {
         "body": {
@@ -1188,30 +1395,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 56.5,
-          "y": 73
+          "y": 78
         },
         "frontWheelCenter": {
           "x": 246,
-          "y": 73
+          "y": 78
         },
         "frontBumperX": 312,
         "rearBumperX": 2,
-        "groundY": 100
+        "groundY": 105
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-2.png",
+        "col": 3,
+        "row": 2,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "ford_mustang_429",
       "sourceName": "Ford_Mustang_429",
       "displayName": "Ford Mustang 429",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 320,
-        "height": 106
+        "height": 111
       },
       "layers": {
         "body": {
@@ -1238,30 +1454,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 73.5,
-          "y": 79.5
+          "y": 84.5
         },
         "frontWheelCenter": {
           "x": 262,
-          "y": 79.5
+          "y": 84.5
         },
         "frontBumperX": 318,
         "rearBumperX": 1,
-        "groundY": 104
+        "groundY": 109
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-3.png",
+        "col": 0,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "ford_rs200_evolution",
       "sourceName": "Ford_RS200_Evolution",
       "displayName": "Ford RS200 Evolution",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 281,
-        "height": 114
+        "height": 119
       },
       "layers": {
         "body": {
@@ -1288,20 +1513,29 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 47.5,
-          "y": 88
+          "y": 93
         },
         "frontWheelCenter": {
           "x": 224.5,
-          "y": 88
+          "y": 93
         },
         "frontBumperX": 278,
         "rearBumperX": 3,
-        "groundY": 112
+        "groundY": 117
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-3.png",
+        "col": 1,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
@@ -1311,7 +1545,7 @@
       "runtimeAvailable": true,
       "canvas": {
         "width": 281,
-        "height": 117
+        "height": 122
       },
       "layers": {
         "body": {
@@ -1342,31 +1576,40 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 46,
-          "y": 90
+          "y": 95
         },
         "frontWheelCenter": {
           "x": 224.5,
-          "y": 90
+          "y": 95
         },
         "frontBumperX": 280,
         "rearBumperX": 0,
-        "groundY": 115
+        "groundY": 120
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
       },
-      "certifiedSrc": "assets/art/cars/layered/golf_gti/certified.png"
+      "certifiedSrc": "assets/art/cars/layered/golf_gti/certified.png",
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-3.png",
+        "col": 2,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
+      }
     },
     {
       "assetId": "gumpert_apollo_sport",
       "sourceName": "Gumpert_Apollo_Sport",
       "displayName": "Gumpert Apollo Sport",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 314,
-        "height": 119
+        "height": 124
       },
       "layers": {
         "body": {
@@ -1393,30 +1636,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 67,
-          "y": 91
+          "y": 96
         },
         "frontWheelCenter": {
           "x": 256,
-          "y": 91
+          "y": 96
         },
         "frontBumperX": 309,
         "rearBumperX": 2,
-        "groundY": 117
+        "groundY": 122
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-3.png",
+        "col": 3,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "hd_golf_gti",
       "sourceName": "HD_GOLF_GTI",
       "displayName": "HD GOLF GTI",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 295,
-        "height": 130
+        "height": 135
       },
       "layers": {
         "body": {
@@ -1443,30 +1695,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 47.5,
-          "y": 94
+          "y": 99
         },
         "frontWheelCenter": {
           "x": 237,
-          "y": 94
+          "y": 99
         },
         "frontBumperX": 294,
         "rearBumperX": 0,
-        "groundY": 119
+        "groundY": 124
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-3.png",
+        "col": 0,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "hennessey_venom_gt",
       "sourceName": "Hennessey_Venom_GT",
       "displayName": "Hennessey Venom GT",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 303,
-        "height": 112
+        "height": 117
       },
       "layers": {
         "body": {
@@ -1493,30 +1754,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 39,
-          "y": 83
+          "y": 88
         },
         "frontWheelCenter": {
           "x": 248,
-          "y": 83
+          "y": 88
         },
         "frontBumperX": 299,
         "rearBumperX": 2,
-        "groundY": 110
+        "groundY": 115
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-3.png",
+        "col": 1,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "honda_integra",
       "sourceName": "Honda_Integra",
       "displayName": "Honda Integra",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 301,
-        "height": 113
+        "height": 118
       },
       "layers": {
         "body": {
@@ -1543,30 +1813,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 59,
-          "y": 87
+          "y": 92
         },
         "frontWheelCenter": {
           "x": 240,
-          "y": 87
+          "y": 92
         },
         "frontBumperX": 297,
         "rearBumperX": 2,
-        "groundY": 111
+        "groundY": 116
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-3.png",
+        "col": 2,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "honda_nsx_type_r",
       "sourceName": "Honda_NSX_Type_R",
       "displayName": "Honda NSX Type R",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 312,
-        "height": 108
+        "height": 113
       },
       "layers": {
         "body": {
@@ -1593,30 +1872,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 67.5,
-          "y": 82
+          "y": 87
         },
         "frontWheelCenter": {
           "x": 252,
-          "y": 82
+          "y": 87
         },
         "frontBumperX": 309,
         "rearBumperX": 3,
-        "groundY": 106
+        "groundY": 111
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-3.png",
+        "col": 3,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "honda_s2000",
       "sourceName": "Honda_S2000",
       "displayName": "Honda S2000",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 288,
-        "height": 109
+        "height": 114
       },
       "layers": {
         "body": {
@@ -1643,30 +1931,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 60,
-          "y": 83.5
+          "y": 88.5
         },
         "frontWheelCenter": {
           "x": 232,
-          "y": 83.5
+          "y": 88.5
         },
         "frontBumperX": 284,
         "rearBumperX": 2,
-        "groundY": 107
+        "groundY": 112
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-3.png",
+        "col": 0,
+        "row": 2,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "impreza_p1",
       "sourceName": "Impreza_P1",
       "displayName": "Impreza P1",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 303,
-        "height": 116
+        "height": 121
       },
       "layers": {
         "body": {
@@ -1693,30 +1990,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 63.5,
-          "y": 88
+          "y": 93
         },
         "frontWheelCenter": {
           "x": 243,
-          "y": 88
+          "y": 93
         },
         "frontBumperX": 300,
         "rearBumperX": 3,
-        "groundY": 114
+        "groundY": 119
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-3.png",
+        "col": 1,
+        "row": 2,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "koenigsegg_agera_r",
       "sourceName": "Koenigsegg_Agera_R",
       "displayName": "Koenigsegg Agera R",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 294,
-        "height": 106
+        "height": 111
       },
       "layers": {
         "body": {
@@ -1743,30 +2049,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 51,
-          "y": 79
+          "y": 84
         },
         "frontWheelCenter": {
           "x": 239.5,
-          "y": 79
+          "y": 84
         },
         "frontBumperX": 292,
         "rearBumperX": 1,
-        "groundY": 104
+        "groundY": 109
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-3.png",
+        "col": 2,
+        "row": 2,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "lamborghini_gallardo",
       "sourceName": "Lamborghini_Gallardo",
       "displayName": "Lamborghini Gallardo",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 298,
-        "height": 109
+        "height": 114
       },
       "layers": {
         "body": {
@@ -1793,30 +2108,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 50,
-          "y": 81
+          "y": 86
         },
         "frontWheelCenter": {
           "x": 228.5,
-          "y": 81
+          "y": 86
         },
         "frontBumperX": 295,
         "rearBumperX": 3,
-        "groundY": 107
+        "groundY": 112
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-3.png",
+        "col": 3,
+        "row": 2,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "lamborghini_murcielago",
       "sourceName": "Lamborghini_Murcielago",
       "displayName": "Lamborghini Murcielago",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 304,
-        "height": 103
+        "height": 108
       },
       "layers": {
         "body": {
@@ -1843,30 +2167,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 54.5,
-          "y": 76
+          "y": 81
         },
         "frontWheelCenter": {
           "x": 237,
-          "y": 76
+          "y": 81
         },
         "frontBumperX": 301,
         "rearBumperX": 2,
-        "groundY": 101
+        "groundY": 106
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-4.png",
+        "col": 0,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "lancer_evo_x",
       "sourceName": "Lancer_Evo_X",
       "displayName": "Lancer Evo X",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 303,
-        "height": 122
+        "height": 127
       },
       "layers": {
         "body": {
@@ -1893,30 +2226,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 61,
-          "y": 96
+          "y": 101
         },
         "frontWheelCenter": {
           "x": 242.5,
-          "y": 96
+          "y": 101
         },
         "frontBumperX": 300,
         "rearBumperX": 2,
-        "groundY": 120
+        "groundY": 125
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-4.png",
+        "col": 1,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "lotus_elise_111s",
       "sourceName": "Lotus_Elise_111s",
       "displayName": "Lotus Elise 111s",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 275,
-        "height": 102
+        "height": 107
       },
       "layers": {
         "body": {
@@ -1943,30 +2285,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 47.5,
-          "y": 74
+          "y": 79
         },
         "frontWheelCenter": {
           "x": 221.5,
-          "y": 74
+          "y": 79
         },
         "frontBumperX": 274,
         "rearBumperX": 0,
-        "groundY": 100
+        "groundY": 105
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-4.png",
+        "col": 2,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "mb_cls_63",
       "sourceName": "MB_CLS_63",
       "displayName": "MB CLS 63",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 324,
-        "height": 121
+        "height": 126
       },
       "layers": {
         "body": {
@@ -1993,30 +2344,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 74,
-          "y": 94.5
+          "y": 99.5
         },
         "frontWheelCenter": {
           "x": 271,
-          "y": 94.5
+          "y": 99.5
         },
         "frontBumperX": 323,
         "rearBumperX": 0,
-        "groundY": 119
+        "groundY": 124
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-4.png",
+        "col": 3,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "maserati_mc12_corsa",
       "sourceName": "Maserati_MC12_Corsa",
       "displayName": "Maserati MC12 Corsa",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 352,
-        "height": 106
+        "height": 111
       },
       "layers": {
         "body": {
@@ -2043,20 +2403,29 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 95,
-          "y": 78
+          "y": 83
         },
         "frontWheelCenter": {
           "x": 281.5,
-          "y": 78
+          "y": 83
         },
         "frontBumperX": 350,
         "rearBumperX": 2,
-        "groundY": 104
+        "groundY": 109
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-4.png",
+        "col": 0,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
@@ -2066,7 +2435,7 @@
       "runtimeAvailable": true,
       "canvas": {
         "width": 311,
-        "height": 117
+        "height": 122
       },
       "layers": {
         "body": {
@@ -2097,31 +2466,40 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 63.5,
-          "y": 89
+          "y": 94
         },
         "frontWheelCenter": {
           "x": 254.5,
-          "y": 89
+          "y": 94
         },
         "frontBumperX": 307,
         "rearBumperX": 3,
-        "groundY": 115
+        "groundY": 120
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
       },
-      "certifiedSrc": "assets/art/cars/layered/mazda_rx8/certified.png"
+      "certifiedSrc": "assets/art/cars/layered/mazda_rx8/certified.png",
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-4.png",
+        "col": 1,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
+      }
     },
     {
       "assetId": "mclaren_f1",
       "sourceName": "McLaren_F1",
       "displayName": "McLaren F1",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 299,
-        "height": 107
+        "height": 112
       },
       "layers": {
         "body": {
@@ -2148,30 +2526,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 50.5,
-          "y": 79
+          "y": 84
         },
         "frontWheelCenter": {
           "x": 239,
-          "y": 79
+          "y": 84
         },
         "frontBumperX": 298,
         "rearBumperX": 0,
-        "groundY": 105
+        "groundY": 110
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-4.png",
+        "col": 2,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "mercedes_benz_slr_mclaren_hamann",
       "sourceName": "Mercedes_Benz_SLR_McLaren_Hamann",
       "displayName": "Mercedes Benz SLR McLaren Hamann",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 310,
-        "height": 114
+        "height": 119
       },
       "layers": {
         "body": {
@@ -2198,30 +2585,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 66,
-          "y": 87
+          "y": 92
         },
         "frontWheelCenter": {
           "x": 255.5,
-          "y": 87
+          "y": 92
         },
         "frontBumperX": 307,
         "rearBumperX": 2,
-        "groundY": 112
+        "groundY": 117
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-4.png",
+        "col": 3,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "mustang_cobra",
       "sourceName": "Mustang_Cobra",
       "displayName": "Mustang Cobra",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 306,
-        "height": 111
+        "height": 116
       },
       "layers": {
         "body": {
@@ -2248,30 +2644,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 63,
-          "y": 84
+          "y": 89
         },
         "frontWheelCenter": {
           "x": 236.5,
-          "y": 84
+          "y": 89
         },
         "frontBumperX": 301,
         "rearBumperX": 3,
-        "groundY": 109
+        "groundY": 114
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-4.png",
+        "col": 0,
+        "row": 2,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "nissan_gtr",
       "sourceName": "Nissan_GTR",
       "displayName": "Nissan GTR",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 303,
-        "height": 118
+        "height": 123
       },
       "layers": {
         "body": {
@@ -2298,30 +2703,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 59,
-          "y": 90
+          "y": 95
         },
         "frontWheelCenter": {
           "x": 245,
-          "y": 90
+          "y": 95
         },
         "frontBumperX": 298,
         "rearBumperX": 3,
-        "groundY": 116
+        "groundY": 121
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-4.png",
+        "col": 1,
+        "row": 2,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "nissan_skyline",
       "sourceName": "Nissan_Skyline",
       "displayName": "Nissan Skyline",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 317,
-        "height": 120
+        "height": 125
       },
       "layers": {
         "body": {
@@ -2348,30 +2762,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 63,
-          "y": 92
+          "y": 97
         },
         "frontWheelCenter": {
           "x": 252.5,
-          "y": 92
+          "y": 97
         },
         "frontBumperX": 313,
         "rearBumperX": 3,
-        "groundY": 118
+        "groundY": 123
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-4.png",
+        "col": 2,
+        "row": 2,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "pontiac_firebird",
       "sourceName": "Pontiac_Firebird",
       "displayName": "Pontiac Firebird",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 328,
-        "height": 109
+        "height": 114
       },
       "layers": {
         "body": {
@@ -2398,30 +2821,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 73.5,
-          "y": 82
+          "y": 87
         },
         "frontWheelCenter": {
           "x": 252,
-          "y": 82
+          "y": 87
         },
         "frontBumperX": 325,
         "rearBumperX": 2,
-        "groundY": 107
+        "groundY": 112
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-4.png",
+        "col": 3,
+        "row": 2,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "porsche_911",
       "sourceName": "Porsche_911",
       "displayName": "Porsche 911",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 290,
-        "height": 109
+        "height": 114
       },
       "layers": {
         "body": {
@@ -2448,20 +2880,29 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 68.5,
-          "y": 82
+          "y": 87
         },
         "frontWheelCenter": {
           "x": 226,
-          "y": 82
+          "y": 87
         },
         "frontBumperX": 289,
         "rearBumperX": 0,
-        "groundY": 107
+        "groundY": 112
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-5.png",
+        "col": 0,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
@@ -2471,7 +2912,7 @@
       "runtimeAvailable": true,
       "canvas": {
         "width": 252,
-        "height": 114
+        "height": 119
       },
       "layers": {
         "body": {
@@ -2502,31 +2943,40 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 34.5,
-          "y": 88
+          "y": 93
         },
         "frontWheelCenter": {
           "x": 207.5,
-          "y": 88
+          "y": 93
         },
         "frontBumperX": 248,
         "rearBumperX": 2,
-        "groundY": 112
+        "groundY": 117
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
       },
-      "certifiedSrc": "assets/art/cars/layered/renault_clio/certified.png"
+      "certifiedSrc": "assets/art/cars/layered/renault_clio/certified.png",
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-5.png",
+        "col": 1,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
+      }
     },
     {
       "assetId": "ssc_ultimate_aero_tt",
       "sourceName": "SSC_Ultimate_Aero_TT",
       "displayName": "SSC Ultimate Aero TT",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 293,
-        "height": 104
+        "height": 109
       },
       "layers": {
         "body": {
@@ -2553,30 +3003,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 54.5,
-          "y": 76
+          "y": 81
         },
         "frontWheelCenter": {
           "x": 236,
-          "y": 76
+          "y": 81
         },
         "frontBumperX": 289,
         "rearBumperX": 3,
-        "groundY": 102
+        "groundY": 107
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-5.png",
+        "col": 2,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "saleen_s7",
       "sourceName": "Saleen_S7",
       "displayName": "Saleen S7",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 312,
-        "height": 100
+        "height": 105
       },
       "layers": {
         "body": {
@@ -2603,30 +3062,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 69.5,
-          "y": 72
+          "y": 77
         },
         "frontWheelCenter": {
           "x": 253,
-          "y": 72
+          "y": 77
         },
         "frontBumperX": 309,
         "rearBumperX": 2,
-        "groundY": 98
+        "groundY": 103
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-5.png",
+        "col": 3,
+        "row": 0,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "shelby_gt500",
       "sourceName": "Shelby_GT500",
       "displayName": "Shelby GT500",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 317,
-        "height": 118
+        "height": 123
       },
       "layers": {
         "body": {
@@ -2653,30 +3121,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 71,
-          "y": 90
+          "y": 95
         },
         "frontWheelCenter": {
           "x": 258.5,
-          "y": 90
+          "y": 95
         },
         "frontBumperX": 313,
         "rearBumperX": 2,
-        "groundY": 116
+        "groundY": 121
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-5.png",
+        "col": 0,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "toyota_supra",
       "sourceName": "Toyota_Supra",
       "displayName": "Toyota Supra",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 306,
-        "height": 111
+        "height": 116
       },
       "layers": {
         "body": {
@@ -2703,30 +3180,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 58.5,
-          "y": 83
+          "y": 88
         },
         "frontWheelCenter": {
           "x": 244.5,
-          "y": 83
+          "y": 88
         },
         "frontBumperX": 303,
         "rearBumperX": 2,
-        "groundY": 109
+        "groundY": 114
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-5.png",
+        "col": 1,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "tuatara",
       "sourceName": "Tuatara",
       "displayName": "Tuatara",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 293,
-        "height": 104
+        "height": 109
       },
       "layers": {
         "body": {
@@ -2753,30 +3239,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 54.5,
-          "y": 76
+          "y": 81
         },
         "frontWheelCenter": {
           "x": 236,
-          "y": 76
+          "y": 81
         },
         "frontBumperX": 289,
         "rearBumperX": 3,
-        "groundY": 102
+        "groundY": 107
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-5.png",
+        "col": 2,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "viper_srt_10",
       "sourceName": "Viper_SRT_10",
       "displayName": "Viper SRT 10",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 288,
-        "height": 110
+        "height": 115
       },
       "layers": {
         "body": {
@@ -2803,30 +3298,39 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 60,
-          "y": 82
+          "y": 87
         },
         "frontWheelCenter": {
           "x": 233,
-          "y": 82
+          "y": 87
         },
         "frontBumperX": 286,
         "rearBumperX": 1,
-        "groundY": 108
+        "groundY": 113
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-5.png",
+        "col": 3,
+        "row": 1,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     },
     {
       "assetId": "zonda_r",
       "sourceName": "Zonda_R",
       "displayName": "Zonda R",
-      "runtimeAvailable": false,
+      "runtimeAvailable": true,
       "canvas": {
         "width": 331,
-        "height": 118
+        "height": 123
       },
       "layers": {
         "body": {
@@ -2853,21 +3357,32 @@
       "anchors": {
         "rearWheelCenter": {
           "x": 76.5,
-          "y": 90
+          "y": 95
         },
         "frontWheelCenter": {
           "x": 270,
-          "y": 90
+          "y": 95
         },
         "frontBumperX": 327,
         "rearBumperX": 3,
-        "groundY": 116
+        "groundY": 121
       },
       "calibration": {
-        "wheelDropPx": 5,
-        "wheelDropPercent": 0.1,
-        "method": "transparent-wheel-opening-v2"
+        "wheelDropPx": 10,
+        "wheelDropPercent": 0.2,
+        "method": "transparent-wheel-opening-v3-certified"
+      },
+      "certifiedAtlas": {
+        "src": "assets/art/cars/atlas/cars-5.png",
+        "col": 0,
+        "row": 2,
+        "columns": 4,
+        "rows": 3,
+        "cellWidth": 360,
+        "cellHeight": 150
       }
     }
-  ]
+  ],
+  "artReadyCount": 57,
+  "gameplayVehicleCount": 3
 }
