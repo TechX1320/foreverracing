@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.4.0-f.1 playable direction
+## V0.4.0-g playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -109,6 +109,15 @@ Completing the tutorial no longer opens every system at once. The initial progre
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
 
+### V0.4G roster art and performance classes
+
+- All **57 purchased cars** now have runtime-ready PNG artwork packed into five transparent atlas pages.
+- The three current starters keep direct certified PNGs and received another wheel-position correction: the total wheel drop is now **10px** from the detected wheel-opening center.
+- Settings -> **Car Art Debug** now shows the entire 57-car roster and labels each entry **PLAYABLE** or **ART READY**.
+- Artwork availability and gameplay availability are separate. The current gameplay catalog remains Golf GTI Mk6, RX-8 and Clio V6 Sport until additional vehicle specs are researched/approved.
+- Performance Index now maps into temporary letter classes: **D < 450, C < 600, B < 750, A < 900, S >= 900**.
+- All three current starter cars are **D Class**. An owned car's performance class updates when its PI changes.
+
 ### V0.4F.1 visual hotfix
 
 - The Golf GTI, RX-8 and Clio V6 now use certified composite PNGs in normal gameplay so the starter visuals cannot be broken by layer conversion/import issues.
@@ -184,7 +193,7 @@ The first playable catalog contains only three cars whose visuals and gameplay d
 - **Mazda RX-8** — 1.3L naturally aspirated rotary, 238 hp, 159 lb-ft, RWD, 3,029 lb.
 - **Renault Clio V6 Sport** — 2.9L naturally aspirated rear-engine V6, 255 hp, 221 lb-ft, RWD, 3,086 lb.
 
-The purchased pack contains 57 complete four-layer vehicle sets. `data/catalog/car-art.json` keeps their source inventory and geometry, while `data/catalog/cars.json` contains only gameplay-enabled cars. The remaining assets are enabled progressively as their vehicle data is researched and approved.
+The purchased pack contains 57 complete four-layer vehicle sets. `data/catalog/car-art.json` keeps their source inventory, geometry and runtime PNG-atlas mapping, while `data/catalog/cars.json` contains only gameplay-enabled cars. All 57 visuals are runtime-ready; cars enter the market only after their gameplay data is researched and approved.
 
 Each layered car uses:
 
@@ -207,7 +216,7 @@ A hidden benchmark runs the car down a standardized 1/4 mile 51 times with deter
 
 That is exactly **8 PI per 0.1 second** of standardized quarter-mile performance.
 
-PI is used for current matchup/Circuit difficulty and is safe to show to players. Opponent Race Preview intentionally does **not** expose exact HP, torque or weight; it shows PI, drivetrain and build type instead. This preserves uncertainty while keeping matchup strength understandable.
+PI is used for current matchup/Circuit difficulty and is safe to show to players. V0.4G also derives D/C/B/A/S class letters from PI. Opponent Race Preview intentionally does **not** expose exact HP, torque or weight; it shows class, PI, drivetrain and build type instead. This preserves uncertainty while keeping matchup strength understandable.
 
 The current simulator is still an intermediate model. Engine RPM/redline/curve and deeper drivetrain behavior can be incorporated into later benchmark revisions without changing the PI-facing UI contract.
 
@@ -215,7 +224,7 @@ The current simulator is still an intermediate model. Engine RPM/redline/curve a
 
 `assets/js/ui/vehicleRenderer.js` composites the layered side-profile definition for every current vehicle surface. A car without a complete enabled layer set shows the explicit `ART MISSING` fallback rather than a fabricated vehicle.
 
-Runtime art lives under `assets/art/cars/layered/<assetId>/`. The source-name mapping is retained in `data/catalog/car-art.json` so each runtime car remains traceable to the purchased pack. The first three enabled sets are Golf GTI, Mazda RX-8 and Renault Clio.
+Runtime art uses five PNG atlas pages under `assets/art/cars/atlas/`, with direct certified PNGs retained for the three current starters. The source-name mapping and original layer geometry remain in `data/catalog/car-art.json` so every runtime car stays traceable to the purchased pack.
 
 The old generated side-profile/top-down sprite system is historical and no longer drives the current playable catalog. Side-view racing deliberately matches the purchased asset pack instead of inventing unavailable top-down art.
 
