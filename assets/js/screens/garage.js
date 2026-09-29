@@ -102,6 +102,7 @@ function carRow(player, car, catalog, tutorialStep) {
         <div class="stat-line">
           <span><b>${number(car.derived?.hp)}</b> HP</span>
           <span><b>${number(car.derived?.torque)}</b> LB-FT</span>
+          <span><b>PI ${number(car.performanceIndex || car.benchmark?.performanceIndex || 0)}</b> PERFORMANCE</span>
           <span><b>${number(car.derived?.weight)}</b> LB</span>
           <span><b>${number(car.mileage)}</b> MI</span>
         </div>

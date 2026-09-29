@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.4.0-e playable direction
+## V0.4.0-f playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -32,7 +32,7 @@ This build is the first gameplay/identity pass after the dual-runtime foundation
 New development profiles receive an action-first six-step tutorial:
 
 1. Welcome / choose **SELECT FIRST CAR**.
-2. Pick one of three used **D Class** starter listings in Classifieds.
+2. Pick one of three used starter cars in Classifieds: **Golf GTI Mk6, RX-8 or Clio V6 Sport**.
 3. Inspect the first car in Garage and continue through the large guided action.
 4. Parts locks every category except **Intake** and forces purchase of the Stage 1 Intake.
 5. Garage Inventory opens automatically and forces installation of that Intake.
@@ -92,7 +92,7 @@ The shop only purchases parts. Owned parts are marked **OWNED**. Installation/re
 
 **Classifieds** is the home for older/used vehicles and eventually player listings. It is also where a new player gets their first car.
 
-- The tutorial guarantees three D Class starter listings and filters out higher-class starter choices.
+- The tutorial guarantees the three validated layered-art starter listings and hides the broader rotating market until onboarding is complete.
 - Starter cars are intentionally used, high-mileage, imperfect cars: the progression fantasy starts at the bottom.
 - Listing cards are image-first and open a full details/purchase dialog.
 - Mileage and condition use separate visible price factors.
@@ -167,20 +167,50 @@ All three starter cars now have both a side-profile presentation asset and top-d
 
 Static GitHub Pages development mode also disables/unregisters the offline service worker cache and version-tags authored image URLs, so a normal reload should pull the current build instead of requiring a sign-out/sign-in cycle.
 
+### V0.4F visual reset, racing and Performance Index
+
+V0.4F makes the purchased layered side-profile pack the vehicle-art source of truth for the current catalog.
+
+The first playable catalog contains only three cars whose visuals and gameplay data are both validated:
+
+- **Volkswagen Golf GTI Mk6** — 2.0L turbo I4, 200 hp, 207 lb-ft, FWD, 3,034 lb.
+- **Mazda RX-8** — 1.3L naturally aspirated rotary, 238 hp, 159 lb-ft, RWD, 3,029 lb.
+- **Renault Clio V6 Sport** — 2.9L naturally aspirated rear-engine V6, 255 hp, 221 lb-ft, RWD, 3,086 lb.
+
+The purchased pack contains 57 complete four-layer vehicle sets. `data/catalog/car-art.json` keeps their source inventory and geometry, while `data/catalog/cars.json` contains only gameplay-enabled cars. The remaining assets are enabled progressively as their vehicle data is researched and approved.
+
+Each layered car uses:
+
+1. wheel/tire/brake layer, duplicated front and rear;
+2. rim/disk layer, duplicated front and rear;
+3. paintable body layer;
+4. non-paintable detail/window/body-line layer.
+
+Metadata stores one native coordinate system per car: rear/front wheel centers, ground line, front/rear bumper anchors and native canvas size. Every game screen scales from those same coordinates. The separated rim layer is intentional groundwork for a future visual wheel/rim shop.
+
+The race presentation is now **side-view and horizontal**. The front tire is staged on the start plane; elapsed timing stops when the **front-bumper anchor** reaches the finish timing plane. The sprite then continues past the finish visually without changing the recorded ET.
+
+### Performance Index
+
+V0.4F introduces a temporary numerical performance language before final class boundaries are designed.
+
+A hidden benchmark runs the car down a standardized 1/4 mile 51 times with deterministic simulation, no animation, no foul and neutral weather. The median ET becomes PI using:
+
+`PI = max(0, round((20.000 - quarterMileET) * 80))`
+
+That is exactly **8 PI per 0.1 second** of standardized quarter-mile performance.
+
+PI is used for current matchup/Circuit difficulty and is safe to show to players. Opponent Race Preview intentionally does **not** expose exact HP, torque or weight; it shows PI, drivetrain and build type instead. This preserves uncertainty while keeping matchup strength understandable.
+
+The current simulator is still an intermediate model. Engine RPM/redline/curve and deeper drivetrain behavior can be incorporated into later benchmark revisions without changing the PI-facing UI contract.
+
 ### Vehicle art pipeline
 
-The vehicle renderer uses authored art when it exists. Cars without finished artwork now show an explicit boxed `? / ART MISSING` marker instead of a generic fake car.
+`assets/js/ui/vehicleRenderer.js` composites the layered side-profile definition for every current vehicle surface. A car without a complete enabled layer set shows the explicit `ART MISSING` fallback rather than a fabricated vehicle.
 
-The first in-game sprite sheet contains top-down assets for:
+Runtime art lives under `assets/art/cars/layered/<assetId>/`. The source-name mapping is retained in `data/catalog/car-art.json` so each runtime car remains traceable to the purchased pack. The first three enabled sets are Golf GTI, Mazda RX-8 and Renault Clio.
 
-- 1998 Honda Civic DX
-- 2003 Nissan 350Z
-- 2004 Subaru Impreza WRX STI
-- 2005 Ford Mustang GT
-
-Vehicle metadata is view-aware. Showroom/Garage presentation can prefer `sideProfile`; racing can prefer `topDown`; dedicated `showroom` and `racePreview` overrides remain supported. The same structure can later contain stage-specific frames.
-
-Missing artwork is deliberately obvious so unfinished catalog cars are easy to find during development. See `assets/art/cars/README.md` for the art contract and current queue.
+The old generated side-profile/top-down sprite system is historical and no longer drives the current playable catalog. Side-view racing deliberately matches the purchased asset pack instead of inventing unavailable top-down art.
 
 ## TextTuned migration
 

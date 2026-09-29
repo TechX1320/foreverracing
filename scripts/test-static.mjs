@@ -6,23 +6,27 @@ const docs = new URL('../docs/', import.meta.url);
 const required = [
   'index.html',
   'assets/css/app.css',
-  'assets/art/cars/cars-top-down-v1.png',
-  'assets/art/cars/vehicles/2005-ford-mustang-gt-top-down-v03a.png',
-  'assets/art/cars/vehicles/1998-honda-civic-dx-top-down-v03a.png',
-  'assets/art/cars/vehicles/2003-nissan-350z-side-profile.png',
-  'assets/art/cars/vehicles/2005-ford-mustang-gt-side-profile.png',
-  'assets/art/cars/vehicles/1998-honda-civic-dx-side-profile.png',
-  'assets/art/cars/vehicles/1998-honda-civic-dx-top-down.png',
-  'assets/art/cars/vehicles/2003-nissan-350z-top-down.png',
-  'assets/art/cars/vehicles/2004-subaru-impreza-wrx-sti-top-down.png',
-  'assets/art/cars/vehicles/2005-ford-mustang-gt-top-down.png',
+  'assets/art/cars/layered/golf_gti/body.webp',
+  'assets/art/cars/layered/golf_gti/wheel.webp',
+  'assets/art/cars/layered/golf_gti/disk.webp',
+  'assets/art/cars/layered/golf_gti/detail.webp',
+  'assets/art/cars/layered/mazda_rx8/body.webp',
+  'assets/art/cars/layered/mazda_rx8/wheel.webp',
+  'assets/art/cars/layered/mazda_rx8/disk.webp',
+  'assets/art/cars/layered/mazda_rx8/detail.webp',
+  'assets/art/cars/layered/renault_clio/body.webp',
+  'assets/art/cars/layered/renault_clio/wheel.webp',
+  'assets/art/cars/layered/renault_clio/disk.webp',
+  'assets/art/cars/layered/renault_clio/detail.png',
   'assets/js/app.js',
   'assets/js/storage/LocalStorageProvider.js',
   'assets/js/domain/LocalGameService.js',
   'assets/js/domain/RaceSimulator.js',
+  'assets/js/domain/PerformanceIndex.js',
   'assets/js/ui/vehicleRenderer.js',
   'assets/js/ui/racePresentation.js',
   'data/catalog/cars.json',
+  'data/catalog/car-art.json',
   'data/catalog/parts.json',
   'data/catalog/engines.json',
   'data/config/game.json',
@@ -38,22 +42,33 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.4.0-e"')) throw new Error('Static index is missing the V0.4E build marker.');
+if (!html.includes('data-build="0.4.0-f"')) throw new Error('Static index is missing the V0.4F build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
+const artCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/car-art.json', docs), 'utf8'));
 const starters = carCatalog.filter((car) => car.starter);
-if (starters.length !== 3) throw new Error('Expected three starter cars.');
-if (!starters.every((car) => String(car.class || '').toUpperCase() === 'D')) throw new Error('Every FTUE starter must be D Class.');
-if (starters.some((car) => ['Mustang GT', '350Z'].includes(String(car.model)))) throw new Error('C Class cars must not remain in the FTUE starter pool.');
-const civicStarter = starters.find((car) => Number(car.stockId) === 1);
-if (!String(civicStarter?.visual?.sprites?.sideProfile?.src || '').includes('-side-profile.png')) throw new Error('The Civic starter art mapping is missing.');
-// Starters without authored art intentionally use the explicit ART MISSING renderer until the dedicated art pass.
+if (carCatalog.length !== 3 || starters.length !== 3) throw new Error('V0.4F gameplay catalog must contain exactly the three validated starters.');
+if (starters.some((car) => Object.hasOwn(car, 'class'))) throw new Error('Letter classes must not return to the starter catalog.');
+if (artCatalog.carCount !== 57 && artCatalog.sourceAssetCount !== 57) throw new Error('Layered asset manifest must retain all 57 purchased car definitions.');
+if ((artCatalog.cars || []).filter((car) => car.runtimeAvailable).length !== 3) throw new Error('Exactly three layered assets should be runtime-enabled in V0.4F.');
 
-const spriteCars = carCatalog.filter((car) => car?.visual?.sprites?.topDown?.sheet === 'assets/art/cars/cars-top-down-v1.png');
-if (spriteCars.length < 4) throw new Error('Expected at least four cars wired to the V1 pixel sprite sheet.');
-if (!spriteCars.every((car) => Number.isInteger(car.visual.sprites.topDown.index))) throw new Error('Sprite-backed cars must define a frame index.');
-if (!spriteCars.every((car) => String(car.visual.sprites.topDown.src || '').startsWith('assets/art/cars/vehicles/'))) throw new Error('Authored sprite cars must use direct per-car PNG sources.');
+const expectedStarters = [
+  { id:'golf_gti', make:'Volkswagen', model:'Golf GTI Mk6', hp:200, torque:207, weight:3034, drivetrain:'FWD', displacement:2.0, config:'I4', aspiration:'Turbo', hpRpm:5100, tqRpm:1800, redline:6000, revCut:6500 },
+  { id:'mazda_rx8', make:'Mazda', model:'RX-8', hp:238, torque:159, weight:3029, drivetrain:'RWD', displacement:1.3, config:'Rotary', aspiration:'Naturally Aspirated', hpRpm:8500, tqRpm:5500, redline:9000, revCut:9500 },
+  { id:'renault_clio', make:'Renault', model:'Clio V6 Sport', hp:255, torque:221, weight:3086, drivetrain:'RWD', displacement:2.9, config:'V6', aspiration:'Naturally Aspirated', hpRpm:7150, tqRpm:4650, redline:7200, revCut:7700 },
+];
+for (const expected of expectedStarters) {
+  const car = starters.find((row) => row.catalogId === expected.id);
+  if (!car) throw new Error(`Missing starter ${expected.id}.`);
+  if (car.make !== expected.make || car.model !== expected.model) throw new Error(`${expected.id} identity mismatch.`);
+  if (car.base.hp !== expected.hp || car.base.torque !== expected.torque || car.base.weight !== expected.weight || car.base.drivetrain !== expected.drivetrain) throw new Error(`${expected.id} OEM base stats mismatch.`);
+  if (car.engine.displacementLiters !== expected.displacement || car.engine.configuration !== expected.config || car.engine.aspiration !== expected.aspiration || car.engine.peakHpRpm !== expected.hpRpm || car.engine.peakTorqueRpm !== expected.tqRpm || car.engine.redlineRpm !== expected.redline || car.engine.revCutRpm !== expected.revCut) throw new Error(`${expected.id} engine metadata mismatch.`);
+  if (!car.visual?.layered?.layers?.body?.src || !car.visual?.layered?.layers?.wheel?.src || !car.visual?.layered?.layers?.disk?.src || !car.visual?.layered?.layers?.detail?.src) throw new Error(`${expected.id} layered art mapping is incomplete.`);
+  if (!(car.visual.layered.anchors.frontBumperX > car.visual.layered.anchors.frontWheelCenter.x)) throw new Error(`${expected.id} front-bumper anchor is invalid.`);
+  if (!(car.visual.layered.anchors.frontWheelCenter.y + car.visual.layered.layers.wheel.height / 2 >= car.visual.layered.anchors.groundY - 2)) throw new Error(`${expected.id} wheels still sit too high in the arches.`);
+  if (!(car.benchmark?.passes === 51 && car.benchmark?.performanceIndex > 0 && car.benchmark?.quarterMileEt > 0)) throw new Error(`${expected.id} benchmark / PI metadata is missing.`);
+}
 
 for (const file of [
   'data/catalog/cars.json',
@@ -67,9 +82,8 @@ for (const file of [
 
 const rendererSource = await fs.readFile(new URL('assets/js/ui/vehicleRenderer.js', root), 'utf8');
 if (!rendererSource.includes('ART MISSING')) throw new Error('Vehicle renderer must expose an explicit missing-art placeholder.');
-if (rendererSource.includes('renderProcedural(')) throw new Error('Generic procedural car fallback must not return.');
-const showroomResolve = rendererSource.match(/if \(view === 'showroom'\) \{([\s\S]*?)\} else if/);
-if (!showroomResolve || showroomResolve[1].includes('topDown')) throw new Error('Showroom must not fall back to top-down art.');
+if (!rendererSource.includes('renderLayeredVehicle') || !rendererSource.includes('centeredLayer') || !rendererSource.includes('frontBumperRatio') || !rendererSource.includes('frontWheelRatio')) throw new Error('Layered side-profile vehicle renderer is incomplete.');
+if (rendererSource.includes('topDown') || rendererSource.includes('renderProcedural(')) throw new Error('Old top-down/procedural vehicle rendering must not return.');
 const appSource = await fs.readFile(new URL('assets/js/app.js', root), 'utf8');
 if (!appSource.includes("clearForeverRacingCaches({ unregister: true })")) throw new Error('Static dev cache cleanup is missing.');
 
@@ -108,6 +122,7 @@ if (!appSource.includes('scheduleWelcomeTutorial')) throw new Error('Fresh-login
 const modules = [
   'assets/js/app.js',
   'assets/js/domain/LocalGameService.js',
+  'assets/js/domain/PerformanceIndex.js',
   'assets/js/ui/vehicleRenderer.js',
   'assets/js/ui/racePresentation.js',
   'assets/js/storage/StorageProvider.js',
@@ -157,7 +172,7 @@ const terminologySurface = [appSource, showroomSourceV04c, localGameSource, serv
 for (const legacyCopy of ['Build Stage 1', 'Build Stages', 'Stage 1 teaches', 'Stage 1 upgrades', 'Stage 1 cars', 'Stage 2 conversion', 'current Build Stage']) {
   if (terminologySurface.includes(legacyCopy)) throw new Error(`Legacy player-facing build-stage copy remains: ${legacyCopy}`);
 }
-if (!html.includes('BUILD TYPES') || !showroomSourceV04c.includes('Street Car') || !html.includes('Build Types only move forward.')) {
+if (!html.includes('BUILD TYPES') || !localGameSource.includes('Street Car') || !html.includes('Build Types only move forward.')) {
   throw new Error('Named Build Type terminology is incomplete.');
 }
 console.log('V0.4C readability and terminology checks passed.');
@@ -171,8 +186,8 @@ if (!cssV04b.includes('V0.4D FTUE and readable-game pass') || !cssV04b.includes(
 if (!appSource.includes('ROUTE_UNLOCK_LEVELS') || !appSource.includes("'showroom': 5") && !appSource.includes('showroom: 5')) {
   throw new Error('Post-FTUE level-based feature gates are missing.');
 }
-if (!usedLotSourceV04d.includes('D CLASS STARTERS') || !usedLotSourceV04d.includes('SELECT THIS CAR')) {
-  throw new Error('Classifieds starter selection flow is missing.');
+if (!usedLotSourceV04d.includes('STARTER CARS') || !usedLotSourceV04d.includes('PERFORMANCE INDEX') || !usedLotSourceV04d.includes('SELECT THIS CAR')) {
+  throw new Error('V0.4F Classifieds starter / PI flow is missing.');
 }
 if (!localGameSource.includes("'s1_intake_1'") || !localGameSource.includes('Local Test & Tune') || !localGameSource.includes('unlockLevel')) {
   throw new Error('Local V0.4D FTUE enforcement is incomplete.');
@@ -208,4 +223,31 @@ if (!serverGameSourceV04c.includes('quickRacePreview') || !serverGameSourceV04c.
   throw new Error('Server deterministic Race Preview path is incomplete.');
 }
 console.log('V0.4E tutorial wording, dialog sizing and Race Preview checks passed.');
+
+const performanceIndexSourceV04f = await fs.readFile(new URL('assets/js/domain/PerformanceIndex.js', root), 'utf8');
+const serverPerformanceIndexSourceV04f = await fs.readFile(new URL('app/lib/PerformanceIndex.php', root), 'utf8');
+if (!performanceIndexSourceV04f.includes('PERFORMANCE_INDEX_PASSES = 51') || !performanceIndexSourceV04f.includes('PERFORMANCE_INDEX_PER_TENTH = 8') || !performanceIndexSourceV04f.includes('medianEt')) {
+  throw new Error('Deterministic 51-pass Performance Index benchmark is incomplete.');
+}
+if (!serverPerformanceIndexSourceV04f.includes('public const PASSES = 51') || !serverPerformanceIndexSourceV04f.includes('public const PER_TENTH = 8')) {
+  throw new Error('PHP Performance Index parity is incomplete.');
+}
+if (!racePresentationSourceV04d.includes('race-playback--side') ||
+    !racePresentationSourceV04d.includes('frontWheelRatio') ||
+    !racePresentationSourceV04d.includes('frontBumperRatio') ||
+    !racePresentationSourceV04d.includes('carLeftAtProgress') ||
+    !racePresentationSourceV04d.includes('visualFinishAt') ||
+    !racePresentationSourceV04d.includes('timingNow = Math.min(now, playerFinish)')) {
+  throw new Error('Side-view front-bumper finish timing / visual fly-through regression.');
+}
+if (!quickRaceSource.includes('PERFORMANCE') || !quickRaceSource.includes('Opponent dyno data stays hidden') || quickRaceSource.includes('opponent.hp') || quickRaceSource.includes('opponent.torque') || quickRaceSource.includes('opponent.weight')) {
+  throw new Error('PI-based mystery Race Preview regressed.');
+}
+const v04fPlayerSurface = [appSource, usedLotSourceV04d, showroomSourceV04c, garageSource, partsSourceV04b, quickRaceSource, localGameSource, serverGameSourceV04c, html].join('\n');
+if (/D Class|Class D/.test(v04fPlayerSurface)) throw new Error('Legacy letter-class starter language remains player-facing.');
+if (!cssV04b.includes('V0.4F layered vehicles and side-view drag strip') || !cssV04b.includes('.race-strip--side') || !cssV04b.includes('.layered-car__wheel')) {
+  throw new Error('V0.4F layered-car / side-view race CSS is missing.');
+}
+console.log('V0.4F layered art, PI privacy and bumper-timed side-view racing checks passed.');
+
 

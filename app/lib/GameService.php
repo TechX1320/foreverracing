@@ -121,7 +121,7 @@ final class GameService
 
         return self::mutatePlayer(function (array $player) use ($spec): array {
             if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'buy_first_car') {
-                throw new GameException('Your first car comes from the Classifieds. Start with a D Class used car and work your way up.');
+                throw new GameException('Your first car comes from the Classifieds. Pick one of the starter cars and work your way up.');
             }
             if (($player['tutorial']['status'] ?? '') !== 'active' && (int)($player['progression']['level'] ?? 1) < 5) {
                 throw new GameException('The Showroom unlocks at Level 5. Keep building through Classifieds first.');
@@ -373,8 +373,8 @@ final class GameService
 
         $player = self::mutatePlayer(function (array $player) use ($listing, $spec): array {
             $tutorialStarter = ($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'buy_first_car';
-            if ($tutorialStarter && (empty($spec['starter']) || strtoupper((string)($spec['class'] ?? '')) !== 'D')) {
-                throw new GameException('Your first car must be one of the highlighted D Class starter listings.');
+            if ($tutorialStarter && empty($spec['starter'])) {
+                throw new GameException('Your first car must be one of the highlighted starter listings.');
             }
             $price = (int)$listing['price'];
             self::requireCredits($player, $price);
@@ -416,10 +416,14 @@ final class GameService
         $car = $player['garage'][$carIndex];
         $tutorialRace = ($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'first_race';
 
+        $playerBenchmark = PerformanceIndex::forCar($car, self::racingConfig());
+        $opponent = self::nextOpponentProfile($player, $car, $tutorialRace);
         return [
             'carId' => (string)$car['carId'],
             'carName' => self::carName($car),
-            'opponent' => self::nextOpponentProfile($player, $car, $tutorialRace),
+            'performanceIndex' => (int)$playerBenchmark['performanceIndex'],
+            'benchmarkEt' => (float)$playerBenchmark['quarterMileEt'],
+            'opponent' => self::publicOpponentProfile($opponent),
         ];
     }
 
@@ -461,10 +465,10 @@ final class GameService
             $weight = max(500.0, (float)($car['derived']['weight'] ?? 500));
             $grip = max(0.5, (float)($car['derived']['grip'] ?? 1));
             $opponentProfile = self::nextOpponentProfile($player, $car, $tutorialRace);
-            $opponentWeight = (float)$opponentProfile['weight'];
-            $opponentHp = (float)$opponentProfile['hp'];
-            $opponentTorque = (float)$opponentProfile['torque'];
-            $opponentGrip = (float)$opponentProfile['grip'];
+            $opponentWeight = (float)$opponentProfile['sim']['weight'];
+            $opponentHp = (float)$opponentProfile['sim']['hp'];
+            $opponentTorque = (float)$opponentProfile['sim']['torque'];
+            $opponentGrip = (float)$opponentProfile['sim']['grip'];
             $opponentLevel = (int)$opponentProfile['level'];
 
             $playerRun = $simulator->simulate([
@@ -489,7 +493,7 @@ final class GameService
                 : (int)round(mt_rand(90, 220) * $creditMultiplier);
             $expReward = self::raceExpReward($level, $opponentLevel, $won);
             $repReward = $won ? 5 : 2;
-            $opponentVisual = ['name' => (string)$opponentProfile['carName'], 'src' => (string)$opponentProfile['visualSrc']];
+            $opponentVisual = is_array($opponentProfile['visual'] ?? null) ? $opponentProfile['visual'] : [];
             $timeScale = self::raceTimeScale($racingConfig);
             $stagingMs = max(1800.0, (float)($racingConfig['presentation']['stagingMs'] ?? 2800)) * $timeScale;
             $greenAt = $timestampMs + $stagingMs;
@@ -511,16 +515,16 @@ final class GameService
                 'newBest' => false,
                 'playerCarId' => (string)$car['carId'],
                 'carName' => self::carName($car),
-                'playerVisualSrc' => self::raceVisualSrc($car),
+                'playerVisual' => is_array($car['visual'] ?? null) ? $car['visual'] : [],
+                'playerPerformanceIndex' => (int)($car['performanceIndex'] ?? PerformanceIndex::forCar($car, $racingConfig)['performanceIndex']),
                 'player' => $playerRun,
                 'opponent' => [
                     'name' => (string)$opponentProfile['name'],
-                    'carName' => $opponentVisual['name'],
-                    'visualSrc' => $opponentVisual['src'],
-                    'hp' => $opponentHp,
-                    'torque' => $opponentTorque,
-                    'weight' => $opponentWeight,
-                    'grip' => round($opponentGrip, 3),
+                    'carName' => (string)$opponentProfile['carName'],
+                    'visual' => $opponentVisual,
+                    'performanceIndex' => (int)$opponentProfile['performanceIndex'],
+                    'drivetrain' => (string)$opponentProfile['drivetrain'],
+                    'buildType' => (string)$opponentProfile['buildType'],
                     'level' => $opponentLevel,
                 ] + $opponentRun,
                 'reaction' => (float)$playerRun['reactionTime'],
@@ -616,7 +620,7 @@ final class GameService
                 $tutorialRep = (int)app_config()['tutorial_completion_rep'];
                 $player['wallet']['credits'] += $tutorialCredits;
                 $player['progression']['rep'] += $tutorialRep;
-                self::addTransaction($player, 'tutorial_reward', $tutorialCredits, 'FTUE completion reward');
+                self::addTransaction($player, 'tutorial_reward', $tutorialCredits, 'Tutorial completion reward');
                 self::completeTutorialStep($player, 'first_race', null);
                 $player['tutorial']['status'] = 'complete';
                 $player['tutorial']['step'] = 'complete';
@@ -683,7 +687,8 @@ final class GameService
             $stage = (int)$run['stage'];
             $risk = $choice === 'push' ? 1.09 : 0.99;
             $boost = (float)($run['boost'] ?? 0);
-            $rating = ((float)$car['derived']['hp'] / max(500.0, (float)$car['derived']['weight'])) * (1 + $boost);
+            $basePi = (int)($car['performanceIndex'] ?? PerformanceIndex::forCar($car, self::racingConfig())['performanceIndex']);
+            $rating = $basePi * (1 + $boost);
             $difficulty = $rating * (0.88 + $stage * 0.035) * $risk;
             $roll = (mt_rand(930, 1070) / 1000) * $rating;
             $won = $roll >= $difficulty;
@@ -760,27 +765,57 @@ final class GameService
         $spec = self::findBy(self::carCatalog(), 'stockId', (int)($car['stockId'] ?? 0));
         $car['buildStage'] = max(1, (int)($car['buildStage'] ?? 1));
         $car['stageBaseline'] = is_array($car['stageBaseline'] ?? null) ? $car['stageBaseline'] : null;
+        $car['catalogId'] = $car['catalogId'] ?? ($spec['catalogId'] ?? $spec['visual']['layered']['assetId'] ?? null);
         $car['factoryEngineId'] = $car['factoryEngineId'] ?? ($spec['factoryEngineId'] ?? null);
         $car['engineId'] = $car['engineId'] ?? $car['factoryEngineId'];
         $car['engineBay'] = $car['engineBay'] ?? ($spec['engineBay'] ?? null);
-        $catalogVisual = is_array($spec['visual'] ?? null) ? $spec['visual'] : ['profile' => 'sedan', 'color' => '#78838d'];
+        $car['engine'] = array_replace(
+            is_array($spec['engine'] ?? null) ? $spec['engine'] : [],
+            is_array($car['engine'] ?? null) ? $car['engine'] : []
+        );
+        $catalogVisual = is_array($spec['visual'] ?? null) ? $spec['visual'] : [];
         $savedVisual = is_array($car['visual'] ?? null) ? $car['visual'] : [];
         $car['visual'] = array_replace($catalogVisual, $savedVisual);
-        $car['visual']['sprites'] = array_replace(
-            is_array($catalogVisual['sprites'] ?? null) ? $catalogVisual['sprites'] : [],
-            is_array($savedVisual['sprites'] ?? null) ? $savedVisual['sprites'] : []
+        $catalogLayered = is_array($catalogVisual['layered'] ?? null) ? $catalogVisual['layered'] : [];
+        $savedLayered = is_array($savedVisual['layered'] ?? null) ? $savedVisual['layered'] : [];
+        $car['visual']['layered'] = array_replace($catalogLayered, $savedLayered);
+        $car['visual']['layered']['layers'] = array_replace(
+            is_array($catalogLayered['layers'] ?? null) ? $catalogLayered['layers'] : [],
+            is_array($savedLayered['layers'] ?? null) ? $savedLayered['layers'] : []
+        );
+        $car['visual']['layered']['anchors'] = array_replace(
+            is_array($catalogLayered['anchors'] ?? null) ? $catalogLayered['anchors'] : [],
+            is_array($savedLayered['anchors'] ?? null) ? $savedLayered['anchors'] : []
         );
         $car['raceRecords'] = array_replace(self::emptyRaceRecords(), is_array($car['raceRecords'] ?? null) ? $car['raceRecords'] : []);
+        if (!empty($car['derived']['hp']) && !empty($car['derived']['weight'])) {
+            $benchmark = PerformanceIndex::forCar($car, self::racingConfig());
+            $car['performanceIndex'] = (int)$benchmark['performanceIndex'];
+            $car['benchmarkEt'] = (float)$benchmark['quarterMileEt'];
+        }
         return $car;
     }
 
     private static function createOwnedCar(array $spec, string $source, int $mileage, int $condition, int $purchasePrice): array
     {
-        $base = $spec['base'];
+        $base = is_array($spec['base'] ?? null) ? $spec['base'] : [];
+        $derived = [
+            'hp' => (int)($base['hp'] ?? 1),
+            'torque' => (int)($base['torque'] ?? 1),
+            'weight' => (int)($base['weight'] ?? 500),
+            'grip' => (float)($base['grip'] ?? 1.0),
+        ];
+        $benchmark = PerformanceIndex::benchmark($derived, self::racingConfig());
+        $displayName = trim((string)($spec['displayName'] ?? ''));
+        if ($displayName === '') {
+            $displayName = trim(implode(' ', array_filter([$spec['year'] ?? null, $spec['make'] ?? null, $spec['model'] ?? null])));
+        }
+
         return [
             'carId' => self::id('car'),
             'stockId' => (int)$spec['stockId'],
-            'displayName' => sprintf('%d %s %s', (int)$spec['year'], (string)$spec['make'], (string)$spec['model']),
+            'catalogId' => $spec['catalogId'] ?? $spec['visual']['layered']['assetId'] ?? null,
+            'displayName' => $displayName !== '' ? $displayName : 'Unknown Car',
             'nickname' => '',
             'source' => $source,
             'purchasePrice' => $purchasePrice,
@@ -791,14 +826,16 @@ final class GameService
             'factoryEngineId' => $spec['factoryEngineId'] ?? null,
             'engineId' => $spec['factoryEngineId'] ?? null,
             'engineBay' => $spec['engineBay'] ?? null,
-            'visual' => $spec['visual'] ?? ['profile' => 'sedan', 'color' => '#78838d'],
+            'engine' => is_array($spec['engine'] ?? null) ? $spec['engine'] : [],
+            'visual' => is_array($spec['visual'] ?? null) ? $spec['visual'] : [],
+            'benchmark' => is_array($spec['benchmark'] ?? null) ? $spec['benchmark'] : $benchmark,
+            'performanceIndex' => (int)$benchmark['performanceIndex'],
+            'benchmarkEt' => (float)$benchmark['quarterMileEt'],
             'base' => [
-                'hp' => (int)$base['hp'], 'torque' => (int)$base['torque'], 'weight' => (int)$base['weight'],
+                'hp' => (int)($base['hp'] ?? 1), 'torque' => (int)($base['torque'] ?? 1), 'weight' => (int)($base['weight'] ?? 500),
                 'grip' => (float)($base['grip'] ?? 1.0), 'drivetrain' => (string)($base['drivetrain'] ?? 'FWD'),
             ],
-            'derived' => [
-                'hp' => (int)$base['hp'], 'torque' => (int)$base['torque'], 'weight' => (int)$base['weight'], 'grip' => (float)($base['grip'] ?? 1.0),
-            ],
+            'derived' => $derived,
             'raceRecords' => self::emptyRaceRecords(),
             'createdAt' => time(),
         ];
@@ -845,6 +882,9 @@ final class GameService
             'weight' => (int)round(max(500, $derived['weight'])),
             'grip' => round(max(0.5, $derived['grip']), 3),
         ];
+        $benchmark = PerformanceIndex::forCar($car, self::racingConfig());
+        $car['performanceIndex'] = (int)$benchmark['performanceIndex'];
+        $car['benchmarkEt'] = (float)$benchmark['quarterMileEt'];
         $car['installedParts'] = array_values(array_filter($installedParts));
         return $car;
     }
@@ -906,14 +946,10 @@ final class GameService
     private static function generateUsedLot(int $now, int $refresh): array
     {
         $catalog = self::carCatalog();
-        $currentYear = (int)date('Y');
         $candidates = array_values(array_filter(
             $catalog,
-            fn(array $spec): bool => (int)($spec['year'] ?? 0) <= $currentYear - 3
+            fn(array $spec): bool => ($spec['market']['classifieds'] ?? true) !== false
         ));
-        if (!$candidates) {
-            $candidates = $catalog;
-        }
         if (!$candidates) {
             return ['generatedAt' => $now, 'expiresAt' => $now + $refresh, 'listings' => []];
         }
@@ -944,7 +980,7 @@ final class GameService
 
         $starters = array_slice(array_values(array_filter(
             $candidates,
-            fn(array $spec): bool => !empty($spec['starter']) && strtoupper((string)($spec['class'] ?? '')) === 'D'
+            fn(array $spec): bool => !empty($spec['starter'])
         )), 0, 3);
 
         $listings = array_map(fn(array $spec): array => $makeListing($spec, true), $starters);
@@ -1063,26 +1099,17 @@ final class GameService
         return $min + ((mt_rand() / mt_getrandmax()) * ($max - $min));
     }
 
-    private static function raceVisualSrc(array $car): string
-    {
-        $sprites = is_array($car['visual']['sprites'] ?? null) ? $car['visual']['sprites'] : [];
-        return trim((string)($sprites['racePreview']['src'] ?? $sprites['topDown']['src'] ?? ''));
-    }
-
     private static function nextOpponentProfile(array $player, array $car, bool $tutorialRace = false): array
     {
-        $hp = max(1.0, (float)($car['derived']['hp'] ?? 1));
-        $torque = max(1.0, (float)($car['derived']['torque'] ?? 1));
-        $weight = max(500.0, (float)($car['derived']['weight'] ?? 500));
-        $grip = max(0.5, (float)($car['derived']['grip'] ?? 1));
+        $playerBenchmark = PerformanceIndex::forCar($car, self::racingConfig());
+        $playerPi = (int)$playerBenchmark['performanceIndex'];
         $level = max(1, (int)($player['progression']['level'] ?? 1));
         $raceIndex = max(0, (int)($player['stats']['races'] ?? 0));
         $seedText = implode('|', [
             (string)($player['user']['id'] ?? 1),
             (string)($car['carId'] ?? 'car'),
             (string)$raceIndex,
-            (string)round($hp),
-            (string)round($weight),
+            (string)$playerPi,
             $tutorialRace ? 'tutorial' : 'normal',
         ]);
         $state = (int)sprintf('%u', crc32($seedText));
@@ -1090,51 +1117,69 @@ final class GameService
             $state = (int)((($state * 1664525) + 1013904223) & 0xFFFFFFFF);
             return $state / 4294967296.0;
         };
-        $between = static fn(float $min, float $max): float => $min + ($rand() * ($max - $min));
+        $targetPi = $tutorialRace
+            ? max(0, $playerPi - 32)
+            : max(0, $playerPi + (int)round(($rand() * 48) - 24));
 
-        $pwr = $hp / $weight;
-        $difficulty = $tutorialRace ? $between(0.84, 0.89) : $between(0.94, 1.08);
-        $opponentWeight = max(1200, (int)round($weight * $between(0.90, 1.10)));
-        $opponentHp = max(55, (int)round($pwr * $difficulty * $opponentWeight));
-        $opponentTorque = max(50, (int)round($torque * $between(0.93, 1.07)));
-        $opponentGrip = max(0.65, min(1.45, $grip + $between(-0.06, 0.06)));
-        $opponentLevel = $tutorialRace ? 1 : max(1, $level + (int)floor($between(-3, 4)));
-        $visual = self::opponentRaceVisual($opponentHp / max(1, $opponentWeight));
+        $candidates = array_values(array_filter(
+            self::carCatalog(),
+            fn(array $spec): bool => !empty($spec['visual']['layered']['layers']['body']['src'])
+        ));
+        if (!$tutorialRace) {
+            $alternatives = array_values(array_filter(
+                $candidates,
+                fn(array $spec): bool => (int)($spec['stockId'] ?? 0) !== (int)($car['stockId'] ?? 0)
+            ));
+            if ($alternatives) $candidates = $alternatives;
+        }
+
+        $ranked = [];
+        foreach ($candidates as $spec) {
+            $benchmark = is_array($spec['benchmark'] ?? null)
+                ? $spec['benchmark']
+                : PerformanceIndex::benchmark(is_array($spec['base'] ?? null) ? $spec['base'] : [], self::racingConfig());
+            $ranked[] = ['spec' => $spec, 'benchmark' => $benchmark, 'delta' => abs((int)($benchmark['performanceIndex'] ?? 0) - $targetPi)];
+        }
+        usort($ranked, fn(array $a, array $b): int => ($a['delta'] <=> $b['delta']) ?: ((int)($a['spec']['stockId'] ?? 0) <=> (int)($b['spec']['stockId'] ?? 0)));
+        $chosen = $ranked[0] ?? ['spec' => self::carCatalog()[0] ?? [], 'benchmark' => ['performanceIndex' => $playerPi]];
+        $spec = $chosen['spec'];
+        $base = is_array($spec['base'] ?? null) ? $spec['base'] : [];
+        $pi = (int)($chosen['benchmark']['performanceIndex'] ?? PerformanceIndex::benchmark($base, self::racingConfig())['performanceIndex']);
         $names = ['Night Shift', 'Redline', 'The Commuter', 'Left Lane', 'Cut Light', 'Sleeper', 'Boost Leak', 'Test Mule'];
         $name = $tutorialRace ? 'Test Mule' : $names[min(count($names) - 1, (int)floor($rand() * count($names)))];
+        $opponentLevel = $tutorialRace ? 1 : max(1, $level + (int)round(($pi - $playerPi) / 24));
 
         return [
             'name' => $name,
-            'carName' => (string)$visual['name'],
-            'visualSrc' => (string)$visual['src'],
-            'hp' => $opponentHp,
-            'torque' => $opponentTorque,
-            'weight' => $opponentWeight,
-            'grip' => round($opponentGrip, 3),
+            'carName' => trim((string)($spec['displayName'] ?? '')) ?: trim(implode(' ', array_filter([$spec['year'] ?? null, $spec['make'] ?? null, $spec['model'] ?? null]))) ?: 'Opponent',
+            'visual' => is_array($spec['visual'] ?? null) ? $spec['visual'] : [],
+            'performanceIndex' => $pi,
+            'drivetrain' => (string)($base['drivetrain'] ?? '-'),
+            'buildType' => 'Street Car',
             'level' => $opponentLevel,
+            'stockId' => (int)($spec['stockId'] ?? 0),
+            'sim' => [
+                'hp' => max(1, (int)($base['hp'] ?? 1)),
+                'torque' => max(1, (int)($base['torque'] ?? 1)),
+                'weight' => max(500, (int)($base['weight'] ?? 500)),
+                'grip' => max(0.5, (float)($base['grip'] ?? 1)),
+            ],
         ];
     }
 
-
-    private static function opponentRaceVisual(float $targetRating): array
+    private static function publicOpponentProfile(array $profile): array
     {
-        $candidates = [];
-        foreach (self::carCatalog() as $spec) {
-            $sprites = is_array($spec['visual']['sprites'] ?? null) ? $spec['visual']['sprites'] : [];
-            $src = trim((string)($sprites['racePreview']['src'] ?? $sprites['topDown']['src'] ?? ''));
-            $hp = (float)($spec['base']['hp'] ?? 0);
-            $weight = max(1.0, (float)($spec['base']['weight'] ?? 0));
-            if ($src === '' || $hp <= 0 || $weight <= 1) continue;
-            $candidates[] = [
-                'src' => $src,
-                'name' => trim((string)($spec['displayName'] ?? implode(' ', array_filter([$spec['year'] ?? null, $spec['make'] ?? null, $spec['model'] ?? null])))) ?: 'Opponent',
-                'delta' => abs(($hp / $weight) - $targetRating),
-            ];
-        }
-        usort($candidates, fn(array $a, array $b): int => $a['delta'] <=> $b['delta']);
-        if (!$candidates) return ['src' => '', 'name' => 'Opponent'];
-        return ['src' => (string)$candidates[0]['src'], 'name' => (string)$candidates[0]['name']];
+        return [
+            'name' => (string)($profile['name'] ?? 'Opponent'),
+            'carName' => (string)($profile['carName'] ?? 'Opponent'),
+            'visual' => is_array($profile['visual'] ?? null) ? $profile['visual'] : [],
+            'performanceIndex' => (int)($profile['performanceIndex'] ?? 0),
+            'drivetrain' => (string)($profile['drivetrain'] ?? '-'),
+            'buildType' => (string)($profile['buildType'] ?? 'Street Car'),
+            'level' => (int)($profile['level'] ?? 1),
+        ];
     }
+
 
     private static function raceTimeScale(array $racingConfig): float
     {
