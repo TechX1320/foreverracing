@@ -171,6 +171,21 @@ export async function renderContentStudio(ctx) {
       renderWorkspace();
     });
 
+    host.querySelector("[data-factory-engine]")?.addEventListener("change", (event) => {
+      const engineId = String(event.currentTarget.value || "");
+      draft.factoryEngineId = engineId || null;
+      if (engineId) {
+        const engine = engineCatalog.find((row) => String(row.engineId) === engineId);
+        if (engine) applyEngineToCarDraft(draft, engine);
+      }
+      renderWorkspace();
+    });
+
+    host.querySelector("[data-edit-linked-engine]")?.addEventListener("click", () => {
+      if (draft.factoryEngineId) sessionStorage.setItem("foreverRacing.engineStudio.openEngineId", String(draft.factoryEngineId));
+      ctx.router.navigate("engine-studio");
+    });
+
     host.querySelectorAll("[data-studio-field]").forEach((input) => {
       input.addEventListener("input", () => {
         setDraftValue(draft, input.dataset.studioField, readInputValue(input));
