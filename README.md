@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.4.0-f playable direction
+## V0.4.0-f.1 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -29,14 +29,13 @@ This build is the first gameplay/identity pass after the dual-runtime foundation
 
 ### First-time user experience
 
-New development profiles receive an action-first six-step tutorial:
+New development profiles receive an action-first five-step tutorial:
 
 1. Welcome / choose **SELECT FIRST CAR**.
 2. Pick one of three used starter cars in Classifieds: **Golf GTI Mk6, RX-8 or Clio V6 Sport**.
 3. Inspect the first car in Garage and continue through the large guided action.
-4. Parts locks every category except **Intake** and forces purchase of the Stage 1 Intake.
-5. Garage Inventory opens automatically and forces installation of that Intake.
-6. Quick Race locks to the **1/4 mile**, guarantees a clean first launch in normal weather, and completes the basics.
+4. Parts locks every category except **Intake** and forces **BUY + INSTALL** on the Stage 1 Intake.
+5. Quick Race locks to the **1/4 mile**, guarantees a clean first launch in normal weather, and completes the basics.
 
 The tutorial is intentionally restrictive: new players are shown one action at a time rather than being asked to explore menus while learning the core loop. Build conversion remains reactive later, when the Street Car actually has every required category maxed.
 
@@ -61,7 +60,7 @@ Street Car rules:
 
 - Upgrade steps are purchased in order: 1 -> 2 -> 3.
 - The Parts category dialog shows projected HP / torque / weight before purchase.
-- Buying a part puts it in that car's Garage Inventory; installation happens in the Garage.
+- **BUY + INSTALL** purchases and applies the part immediately. **BUY ONLY** stores it in that car's Garage Inventory for later.
 - An installed Street Car ladder step cannot be downgraded.
 - Once all eight categories reach Step 3, the game reactively asks whether to upgrade the car into a Street Race Car.
 
@@ -86,7 +85,7 @@ The vehicle/engine model already has groundwork for engine-bay size, transverse/
 
 The Parts screen is a compact category launcher rather than one long upgrade table. Opening Intake, Exhaust, Tires, etc. creates a focused shopping dialog with the current car, its stats, projected results and the relevant purchasable options.
 
-The shop only purchases parts. Owned parts are marked **OWNED**. Installation/removal/swapping happens from **Garage -> Inventory** on the car itself.
+The shop supports **BUY + INSTALL**, **BUY ONLY**, and installing an already-owned compatible part. Garage -> Inventory remains the place for broader swapping/removal/setup management.
 
 ### Classifieds and Showroom
 
@@ -109,6 +108,14 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.4F.1 visual hotfix
+
+- The Golf GTI, RX-8 and Clio V6 now use certified composite PNGs in normal gameplay so the starter visuals cannot be broken by layer conversion/import issues.
+- The original body / wheel / rim / detail metadata is still retained for the future customization pipeline.
+- Settings includes **Car Art Debug** to inspect the exact three starter visuals used by gameplay.
+- Parts now defaults to **BUY + INSTALL** instead of forcing a trip back to Garage after every purchase.
+- The visible onboarding flow is five actions rather than six because first-part purchase and installation are now one action.
 
 ### V0.4E interaction cleanup
 
