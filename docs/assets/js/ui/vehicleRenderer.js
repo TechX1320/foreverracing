@@ -1,9 +1,9 @@
-export function renderVehicle(car, { stage = null, compact = false, view = "sideProfile", className = "" } = {}) {
+export function renderVehicle(car, { stage = null, compact = false, view = "sideProfile", className = "", animatedWheels = false } = {}) {
   const layered = car?.visual?.layered;
   if (!layered?.canvas || !layered?.layers || !layered?.anchors) {
     return renderMissingArt(car, { compact, view });
   }
-  return renderLayeredVehicle(car, layered, { stage, compact, view, className });
+  return renderLayeredVehicle(car, layered, { stage, compact, view, className, animatedWheels });
 }
 
 export function vehicleGeometry(car) {
@@ -39,10 +39,10 @@ export function vehicleGeometry(car) {
   };
 }
 
-function renderLayeredVehicle(car, layered, { compact, view, className }) {
+function renderLayeredVehicle(car, layered, { compact, view, className, animatedWheels }) {
   const canvasWidth = Math.max(1, Number(layered.canvas.width || 1));
   const canvasHeight = Math.max(1, Number(layered.canvas.height || 1));
-  const layers = layered.layers || {};
+  const layers = animatedWheels && layered.raceLayers ? layered.raceLayers : (layered.layers || {});
   const anchors = layered.anchors || {};
   const rear = anchors.rearWheelCenter || {};
   const front = anchors.frontWheelCenter || {};
@@ -57,7 +57,7 @@ function renderLayeredVehicle(car, layered, { compact, view, className }) {
   ].join(";");
 
   const certifiedSrc = String(layered.certifiedSrc || "").trim();
-  if (certifiedSrc) {
+  if (!animatedWheels && certifiedSrc) {
     return `
     <div class="vehicle-visual vehicle-visual--layered vehicle-visual--certified vehicle-visual--${escapeAttr(view)} ${compact ? "vehicle-visual--compact" : ""} ${escapeAttr(className)}"
          role="img"
@@ -74,7 +74,7 @@ function renderLayeredVehicle(car, layered, { compact, view, className }) {
   }
 
   const atlas = layered.certifiedAtlas;
-  if (atlas?.src) {
+  if (!animatedWheels && atlas?.src) {
     const columns = Math.max(1, Number(atlas.columns || 1));
     const rows = Math.max(1, Number(atlas.rows || 1));
     const col = Math.max(0, Number(atlas.col || 0));
@@ -110,15 +110,25 @@ function renderLayeredVehicle(car, layered, { compact, view, className }) {
     ? `<span class="layered-car__paint" style="${escapeAttr(paintStyle(layers.body.src, paintColor))}" aria-hidden="true"></span>`
     : "";
 
+  const rearSmoke = animatedWheels
+    ? smokeAnchor("rear", rear, canvasWidth, canvasHeight)
+    : "";
+  const frontSmoke = animatedWheels
+    ? smokeAnchor("front", front, canvasWidth, canvasHeight)
+    : "";
+
   return `
-    <div class="vehicle-visual vehicle-visual--layered vehicle-visual--${escapeAttr(view)} ${compact ? "vehicle-visual--compact" : ""} ${escapeAttr(className)}"
+    <div class="vehicle-visual vehicle-visual--layered vehicle-visual--${escapeAttr(view)} ${animatedWheels ? "vehicle-visual--animated-wheels" : ""} ${compact ? "vehicle-visual--compact" : ""} ${escapeAttr(className)}"
          role="img"
          aria-label="${escapeAttr(car?.displayName || "Vehicle")} side profile"
          data-layered-car
+         data-animated-wheels="${animatedWheels ? "1" : "0"}"
          data-asset-id="${escapeAttr(layered.assetId || "")}"
          data-front-bumper-ratio="${geometry?.frontBumperRatio ?? 1}"
          style="${escapeAttr(rootStyle)}">
       <div class="layered-car" aria-hidden="true">
+        ${rearSmoke}
+        ${frontSmoke}
         ${rearWheel}
         ${rearDisk}
         ${frontWheel}
@@ -128,6 +138,13 @@ function renderLayeredVehicle(car, layered, { compact, view, className }) {
         ${detail}
       </div>
     </div>`;
+}
+
+function smokeAnchor(position, center, canvasWidth, canvasHeight) {
+  if (center?.x == null || center?.y == null) return "";
+  const left = (Number(center.x) / canvasWidth) * 100;
+  const top = (Number(center.y) / canvasHeight) * 100;
+  return `<span class="layered-car__smoke layered-car__smoke--${escapeAttr(position)}" data-tire-smoke="${escapeAttr(position)}" style="left:${left}%;top:${top}%"></span>`;
 }
 
 function imageLayer(layer, className, canvasWidth, canvasHeight, origin) {
