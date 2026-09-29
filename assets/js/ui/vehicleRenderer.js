@@ -12,7 +12,7 @@ export function vehicleGeometry(car) {
   const width = Math.max(1, Number(layered.canvas.width || 1));
   const height = Math.max(1, Number(layered.canvas.height || 1));
   const atlas = layered.certifiedAtlas;
-  if (!animatedWheels && atlas?.src) {
+  if (atlas?.src) {
     const cellWidth = Math.max(1, Number(atlas.cellWidth || 360));
     const cellHeight = Math.max(1, Number(atlas.cellHeight || 150));
     const scale = Math.max(0.01, Number(atlas.scale || 1));
@@ -74,7 +74,7 @@ function renderLayeredVehicle(car, layered, { compact, view, className, animated
   }
 
   const atlas = layered.certifiedAtlas;
-  if (atlas?.src) {
+  if (!animatedWheels && atlas?.src) {
     const columns = Math.max(1, Number(atlas.columns || 1));
     const rows = Math.max(1, Number(atlas.rows || 1));
     const col = Math.max(0, Number(atlas.col || 0));
