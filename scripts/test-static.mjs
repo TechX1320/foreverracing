@@ -53,6 +53,8 @@ const required = [
   'assets/js/domain/PerformanceIndex.js',
   'assets/js/ui/vehicleRenderer.js',
   'assets/js/ui/racePresentation.js',
+  'assets/js/content/ContentStudioCatalog.js',
+  'assets/js/screens/contentStudio.js',
   'data/catalog/cars.json',
   'data/catalog/car-art.json',
   'data/catalog/parts.json',
@@ -70,7 +72,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.4.0-h.4"')) throw new Error('Static index is missing the V0.4H.4 build marker.');
+if (!html.includes('data-build="0.5.0-a"')) throw new Error('Static index is missing the V0.5A build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -117,6 +119,7 @@ if (!rendererSource.includes('renderLayeredVehicle') || !rendererSource.includes
 if (rendererSource.includes('topDown') || rendererSource.includes('renderProcedural(')) throw new Error('Old top-down/procedural vehicle rendering must not return.');
 const appSource = await fs.readFile(new URL('assets/js/app.js', root), 'utf8');
 if (!appSource.includes("clearForeverRacingCaches({ unregister: true })")) throw new Error('Static dev cache cleanup is missing.');
+if (!appSource.includes("renderContentStudio") || !appSource.includes(".register('content-studio'")) throw new Error('Content Studio route / navigation is missing.');
 
 const runtimeConfig = JSON.parse(await fs.readFile(new URL('data/config/game.json', docs), 'utf8'));
 if (runtimeConfig.defaultVehicleRendering !== 'authored') throw new Error('Authored vehicle rendering must be the default.');
@@ -138,6 +141,7 @@ const localProviderSource = await fs.readFile(new URL('assets/js/storage/LocalSt
 if (!localProviderSource.includes('localStorage.removeItem(PLAYER_KEY)')) throw new Error('Admin local logout must erase player data.');
 if (!localProviderSource.includes('already logged in in this browser')) throw new Error('Local duplicate-login guard is missing.');
 if (!localProviderSource.includes('quickRacePreview') || !localProviderSource.includes('startQuickRace') || !localProviderSource.includes('finishQuickRace')) throw new Error('Local race preview / two-phase storage lifecycle is missing.');
+if (!localProviderSource.includes('mergeContentStudioCars')) throw new Error('Content Studio local catalog overlay is missing.');
 
 const localGameSource = await fs.readFile(new URL('assets/js/domain/LocalGameService.js', root), 'utf8');
 if (!localGameSource.includes('quickRacePreview') || !localGameSource.includes('nextOpponentProfile') || !localGameSource.includes('activeRace') || !localGameSource.includes('finishQuickRace')) throw new Error('Deterministic preview / persistent active race lifecycle is missing.');
@@ -167,6 +171,8 @@ const modules = [
   'assets/js/screens/usedlot.js',
   'assets/js/screens/roguelike.js',
   'assets/js/screens/settings.js',
+  'assets/js/content/ContentStudioCatalog.js',
+  'assets/js/screens/contentStudio.js',
 ];
 
 for (const file of modules) {
@@ -331,5 +337,36 @@ if (!racePresentationSourceV04d.includes('racePhysicsProgress') ||
   throw new Error('V0.4H.4 physics-linked race/wheel motion is incomplete.');
 }
 console.log('V0.4H.4 physics-linked wheel-motion check passed.');
+
+const contentStudioSource = await fs.readFile(new URL('assets/js/screens/contentStudio.js', root), 'utf8');
+const contentStudioCatalogSource = await fs.readFile(new URL('assets/js/content/ContentStudioCatalog.js', root), 'utf8');
+if (!html.includes('CONTENT STUDIO') ||
+    !contentStudioSource.includes('CAR CREATOR') ||
+    !contentStudioSource.includes('PARTS TOOL') ||
+    !contentStudioSource.includes('WHEELS TOOL') ||
+    !contentStudioSource.includes('accept="image/png,.png"') ||
+    !contentStudioSource.includes('benchmarkPerformance') ||
+    !contentStudioSource.includes('performanceClassFromIndex') ||
+    !contentStudioSource.includes('SAVE CAR LOCALLY') ||
+    !contentStudioSource.includes('EXPORT CAR JSON')) {
+  throw new Error('V0.5A Car Creator UI / PI / PNG workflow is incomplete.');
+}
+if (!contentStudioCatalogSource.includes('mergeContentStudioCars') ||
+    !contentStudioCatalogSource.includes('saveContentStudioCar') ||
+    !contentStudioCatalogSource.includes('foreverRacing.contentStudio.cars.v1')) {
+  throw new Error('V0.5A Content Studio local persistence is incomplete.');
+}
+if (!rendererSource.includes('forceLayers') ||
+    !rendererSource.includes('paintLayer') ||
+    !rendererSource.includes('layer.z') ||
+    !rendererSource.includes('value.startsWith("data:")')) {
+  throw new Error('V0.5A editable XYZ layer / paint renderer support is incomplete.');
+}
+if (!cssV04b.includes('V0.5A Content Studio / Car Creator') ||
+    !cssV04b.includes('.content-studio__workspace') ||
+    !cssV04b.includes('.content-studio__layer-table')) {
+  throw new Error('V0.5A Content Studio styling is incomplete.');
+}
+console.log('V0.5A Content Studio / Car Creator checks passed.');
 
 

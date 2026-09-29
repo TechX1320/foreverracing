@@ -28,6 +28,7 @@ final class PerformanceIndex
                 'torque' => (float)($context['torque'] ?? 1),
                 'weight' => (float)($context['weight'] ?? $context['weightLbs'] ?? 500),
                 'grip' => (float)($context['grip'] ?? 1),
+                'drivetrain' => (string)($context['drivetrain'] ?? ''),
                 'level' => 100,
                 'allowFoul' => false,
                 'reactionOffset' => 0,

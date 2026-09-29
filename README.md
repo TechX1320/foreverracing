@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.4.0-h.4 playable direction
+## V0.5.0-a playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,17 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.5A Content Studio / Car Creator
+
+- Added a developer-only **Content Studio** route with **Car Creator** as the first authoring module.
+- Car Creator can start a new car, load any existing gameplay car, or use any of the 57 purchased art-roster entries as a starting point.
+- Factory engine and physics inputs feed the same deterministic 51-pass Performance Index benchmark as gameplay, so PI and D/C/B/A/S/X class update live while authoring.
+- PNG body / wheel / disk / detail layers can be uploaded in-browser. Canvas size, wheel anchors, bumper anchors, ground line, per-layer X/Y offsets and Z stacking are editable.
+- Layer 1 body paint can be previewed with a color mask while detail/wheel layers remain separate.
+- Saved cars become browser-local catalog overrides after reload, allowing GitHub Pages playtesting without modifying repository JSON.
+- Completed car definitions can be copied or exported as JSON for permanent repository integration.
+- Parts Tool and Wheels Tool are visible as the next planned Content Studio modules.
 
 ### V0.4H.4 physics-linked race motion
 

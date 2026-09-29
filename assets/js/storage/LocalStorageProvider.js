@@ -1,5 +1,6 @@
 import { StorageProvider } from './StorageProvider.js';
 import { LocalGameService } from '../domain/LocalGameService.js';
+import { mergeContentStudioCars } from '../content/ContentStudioCatalog.js';
 
 const PLAYER_KEY = 'foreverRacing.v02.player';
 const SESSION_KEY = 'foreverRacing.v02.session';
@@ -26,7 +27,8 @@ export class LocalStorageProvider extends StorageProvider {
       fetchJson('data/config/racing.json'),
     ]);
     this.#config = config;
-    this.#service = new LocalGameService({ cars, parts, config, buildStages: buildStages.stages || buildStages, racingConfig });
+    const authoredCars = mergeContentStudioCars(cars);
+    this.#service = new LocalGameService({ cars: authoredCars, parts, config, buildStages: buildStages.stages || buildStages, racingConfig });
   }
 
   async session() {
