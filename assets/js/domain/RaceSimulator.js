@@ -36,6 +36,7 @@ export class RaceSimulator {
     const weight = Math.max(500, Number(context.weight || context.weightLbs || 500));
     const grip = clamp(Number(context.grip || 1), 0.5, 2);
     const level = Math.max(1, Number(context.level || 1));
+    const drivetrain = String(context.drivetrain || "").toUpperCase();
 
     const reaction = this.#reaction(level, torque, weight, Number(context.reactionOffset || 0), context.allowFoul !== false);
     let et = Number(distance.etFactor) * Math.cbrt(weight / hp);
@@ -74,12 +75,24 @@ export class RaceSimulator {
     const foul = reaction < 0;
     const total = foul ? et + 60 + Math.abs(reaction) : et + reaction;
 
+    const driveFactor = drivetrain === "AWD" ? 0.82 : drivetrain === "FWD" ? 1.04 : 1;
+    const surfaceFactor = condition.slippery ? 0.82 : 1;
+    const tractionDemand = (((torque / weight) * 9) + ((hp / weight) * 2)) * driveFactor;
+    const tractionCapacity = grip * 0.72 * surfaceFactor;
+    const gripLoss = clamp((tractionDemand - tractionCapacity) / 0.42, 0, 1);
+    const smokeLevel = clamp((gripLoss - 0.06) / 0.6, 0, 1);
+
     return {
       reactionTime: round(reaction, 3),
       elapsedTime: round(et, 3),
       trapSpeed: round(trap, 2),
       totalTime: round(total, 3),
       foul,
+      traction: {
+        gripLoss: round(gripLoss, 3),
+        wheelSlip: round(clamp(gripLoss * 1.2, 0, 1), 3),
+        smokeLevel: round(smokeLevel, 3),
+      },
     };
   }
 
