@@ -3,7 +3,8 @@ export function renderVehicle(car, { stage = null, compact = false, view = "side
   if (!layered?.canvas || !layered?.layers || !layered?.anchors) {
     return renderMissingArt(car, { compact, view });
   }
-  return renderLayeredVehicle(car, layered, { stage, compact, view, className, animatedWheels, forceLayers });
+  const useEditableLayers = forceLayers || String(car?.visual?.renderMode || "") === "layers";
+  return renderLayeredVehicle(car, layered, { stage, compact, view, className, animatedWheels, forceLayers: useEditableLayers });
 }
 
 export function vehicleGeometry(car) {
