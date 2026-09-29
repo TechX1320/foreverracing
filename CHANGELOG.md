@@ -1,5 +1,16 @@
 # Changelog
 
+## V0.4.0-g — 57-car art roster and PI classes
+
+- Imported five certified PNG atlas pages covering all 57 purchased vehicle assets.
+- Lowered wheel placement again; the certified geometry now uses a 10px total wheel drop from the detected wheel-opening center.
+- Replaced the Golf GTI, RX-8 and Clio V6 starter composites with the corrected lower-wheel PNGs.
+- Expanded Settings -> Car Art Debug into a 57-car roster showing PLAYABLE vs ART READY state.
+- Kept gameplay limited to the three vehicles with validated specs; art-ready cars do not enter the market automatically.
+- Added PI-driven D/C/B/A/S classes with temporary thresholds: D < 450, C < 600, B < 750, A < 900, S >= 900.
+- Current starter cars remain D Class and owned-car class updates when PI changes.
+- Added class visibility to Classifieds, Garage, Showroom groundwork and Race Preview.
+
 ## V0.4.0-f.1 — starter visual certification hotfix
 
 - Replaced the broken starter-layer runtime presentation with certified Golf GTI, Mazda RX-8 and Renault Clio V6 Sport composite PNGs.
