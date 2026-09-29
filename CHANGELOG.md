@@ -1,5 +1,17 @@
 # Changelog
 
+## V0.5.0-a — Content Studio / Car Creator
+
+- Added the first Content Studio developer surface with Car Creator.
+- New cars can be authored from scratch; existing gameplay cars and all 57 art-roster cars can be loaded for editing.
+- Added live 51-pass PI/class calculation from the same Performance Index code used by gameplay.
+- Added browser PNG uploads for body, wheel, disk and detail layers.
+- Added editable canvas, wheel/bumper/ground anchors and per-layer X/Y/Z controls.
+- Extended the layered renderer with editor-forced layers, offsets, Z ordering and Layer 1 paint-mask preview.
+- Added browser-local Content Studio catalog overrides so saved cars can be reloaded directly into local gameplay for testing.
+- Added JSON export/copy workflow for permanent content integration.
+- Established Parts Tool and Wheels Tool as the next Content Studio modules.
+
 ## V0.4.0-h.4 — physics-linked wheel motion
 
 - Replaced the fixed race-position easing with a per-pass motion curve derived from elapsed time and trap speed.
