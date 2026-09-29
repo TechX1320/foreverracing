@@ -64,7 +64,7 @@ export async function renderUsedLot(ctx) {
 
 function starterObjective() {
   return `<section class="ftue-focus-panel">
-    <div class="ftue-focus-panel__step">STEP 2/6</div>
+    <div class="ftue-focus-panel__step">STEP 2/5</div>
     <div class="ftue-focus-panel__copy">
       <span>FIRST CAR</span>
       <strong>Pick your starter car.</strong>
