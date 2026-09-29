@@ -101,15 +101,16 @@ export class LocalGameService {
 
   purchaseNewCar(inputPlayer, stockId) {
     const spec = this.findBy(this.cars, 'stockId', Number(stockId));
-    if (!spec || spec?.market?.showroom !== true || !isContentReleased(spec)) {
-      throw new LocalGameError('That showroom car is not currently released.', 404);
-    }
+    if (!spec) throw new LocalGameError('That showroom car does not exist.', 404);
     return this.mutate(inputPlayer, (player) => {
       if (player.tutorial?.status === 'active' && player.tutorial?.step === 'buy_first_car') {
         throw new LocalGameError('Your first car comes from the Classifieds. Pick one of the starter cars and work your way up.');
       }
       if (player.tutorial?.status !== 'active' && Number(player.progression?.level || 1) < 5) {
         throw new LocalGameError('The Showroom unlocks at Level 5. Keep building through Classifieds first.');
+      }
+      if (spec?.market?.showroom !== true || !isContentReleased(spec)) {
+        throw new LocalGameError('That showroom car is not currently released.', 404);
       }
       const price = Number(spec.price || 0);
       this.requireCredits(player, price);
