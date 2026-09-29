@@ -1,5 +1,12 @@
 # Changelog
 
+## V0.4.0-h.4 — physics-linked wheel motion
+
+- Replaced the fixed race-position easing with a per-pass motion curve derived from elapsed time and trap speed.
+- Wheel rotation now integrates the same distance traveled as the race presentation, keeping tire speed synchronized with the car.
+- Driven-wheel launch slip now multiplies rolling wheel speed using the simulator's wheel-slip telemetry.
+- Post-finish fly-through continues from measured trap speed instead of a fixed extra-distance animation.
+
 ## V0.4.0-h.3 — race lane centering
 
 - Centered each side-view race car vertically inside its lane instead of using asymmetric lane offsets.
