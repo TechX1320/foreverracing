@@ -64,6 +64,18 @@ export function releaseState(content, nowMs = Date.now()) {
   };
 }
 
+export function nextScheduledReleaseAt(contents, nowMs = Date.now()) {
+  let next = null;
+  for (const content of Array.isArray(contents) ? contents : []) {
+    const release = normalizeRelease(content?.release, { legacyReleased: true });
+    if (release.mode !== RELEASE_MODES.SCHEDULED || !release.publishAt) continue;
+    const timestamp = Date.parse(release.publishAt);
+    if (!Number.isFinite(timestamp) || timestamp <= Number(nowMs)) continue;
+    if (next == null || timestamp < next) next = timestamp;
+  }
+  return next;
+}
+
 export function normalizeReleaseForSave(release, { nowMs = Date.now() } = {}) {
   const normalized = normalizeRelease(release, { legacyReleased: false });
 
