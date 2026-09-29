@@ -1,5 +1,23 @@
 # Changelog
 
+## V0.4.0-f — layered vehicle visual reset
+
+- Replaced the generated/legacy vehicle presentation pipeline with purchased layered side-profile art.
+- Added a 57-car art manifest describing body, tire/brake, rim and non-paintable detail layers plus wheel, ground and bumper anchors.
+- Corrected auto-generated wheel placement by lowering wheel centers to expose more tire instead of producing an overly slammed stance.
+- Reset the playable vehicle catalog to three fully validated starter cars: Volkswagen Golf GTI Mk6, Mazda RX-8 and Renault Clio V6 Sport.
+- Stored supplied OEM engine/output/redline data for all three starters without inventing model years.
+- Rebuilt the shared vehicle renderer as a layered compositor reused by Classifieds, Garage, Parts, Race Preview and racing.
+- Changed race presentation from top-down/vertical to side-view/horizontal because the purchased pack is side-profile only.
+- Staging aligns the front tire to the start plane; timing ends when the front-bumper anchor crosses the finish plane.
+- Cars continue visually through the finish after timing stops for a proper fly-through effect.
+- Added a deterministic 51-pass hidden stock quarter-mile benchmark and Performance Index: 8 PI per 0.1 second.
+- Removed temporary letter-class assumptions from current starter/tutorial presentation.
+- Race Preview now exposes PI, drivetrain and build type while hiding opponent HP, torque and weight.
+- Quick Race and The Circuit use PI as the temporary common performance/matchmaking language.
+- Preserved the guaranteed clean tutorial first-race win and two-phase/idempotent race transaction lifecycle.
+- Imported the three starter layer sets into runtime and GitHub Pages assets; the remaining purchased cars stay cataloged for later validation.
+
 ## V0.4.0-e — Race Preview and dialog cleanup
 
 - Replaced player-facing FTUE jargon with plain Step / tutorial language.
