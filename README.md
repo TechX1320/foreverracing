@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.5.0-a.2 playable direction
+## V0.5.0-a.3 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,13 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.5A.3 coordinate polish
+
+- Removed the extra Rear / Front anchor legend from the live car preview; the actual wheel-center dots remain.
+- Layer-table X/Y columns are now explicitly **X OFFSET / Y OFFSET** so they are not confused with the car's real wheel-center coordinates.
+- Wheel and disk rows now display their actual default rear/front center coordinates from the vehicle art metadata.
+- Body/detail layer X/Y remain source-canvas offsets.
 
 ### V0.5A.2 Content Studio polish
 

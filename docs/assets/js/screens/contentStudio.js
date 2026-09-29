@@ -360,18 +360,19 @@ function artSection(car) {
       </div>
 
       <div class="content-studio__layer-table">
-        <div class="content-studio__layer-head"><span>LAYER</span><span>PNG</span><span>X</span><span>Y</span><span>Z</span><span>W</span><span>H</span></div>
-        ${["wheel","disk","body","detail"].map((key) => layerRow(key, layers[key] || {})).join("")}
+        <div class="content-studio__layer-head"><span>LAYER</span><span>PNG</span><span>X OFFSET</span><span>Y OFFSET</span><span>Z</span><span>W</span><span>H</span></div>
+        ${["wheel","disk","body","detail"].map((key) => layerRow(key, layers[key] || {}, anchors)).join("")}
       </div>
-      <p class="muted">Wheel and disk X/Y are offsets from both wheel-center anchors. Body/detail X/Y are offsets from canvas origin. Z controls visual stacking order.</p>
+      <p class="muted">Wheel/disk placement uses the Rear/Front Wheel X/Y defaults above; the layer X/Y fields are optional offsets applied to both. Body/detail X/Y use the source-canvas origin. Z controls stacking.</p>
     </section>`;
 }
 
-function layerRow(key, layer) {
+function layerRow(key, layer, anchors = {}) {
   const source = layer.source || sourceName(layer.src) || "No PNG";
+  const positionHint = layerPositionHint(key, anchors);
   return `
     <div class="content-studio__layer-row">
-      <div><strong>${key.toUpperCase()}</strong><small>${escapeHtml(source)}</small></div>
+      <div><strong>${key.toUpperCase()}</strong><small>${escapeHtml(source)}</small>${positionHint ? `<small class="studio-layer-position">${escapeHtml(positionHint)}</small>` : ""}</div>
       <label class="studio-file-button">UPLOAD<input type="file" accept="image/png,.png" data-layer-upload="${key}"></label>
       ${miniNumber(`visual.layered.layers.${key}.x`, layer.x ?? 0, 0.5)}
       ${miniNumber(`visual.layered.layers.${key}.y`, layer.y ?? 0, 0.5)}
@@ -379,6 +380,14 @@ function layerRow(key, layer) {
       ${miniNumber(`visual.layered.layers.${key}.width`, layer.width ?? "", 1)}
       ${miniNumber(`visual.layered.layers.${key}.height`, layer.height ?? "", 1)}
     </div>`;
+}
+
+function layerPositionHint(key, anchors = {}) {
+  if (key !== "wheel" && key !== "disk") return "";
+  const rear = anchors.rearWheelCenter || {};
+  const front = anchors.frontWheelCenter || {};
+  if (rear.x == null || rear.y == null || front.x == null || front.y == null) return "";
+  return `Default centers: rear ${rear.x},${rear.y} • front ${front.x},${front.y}`;
 }
 
 function previewMarkup(car) {
@@ -397,7 +406,6 @@ function previewMarkup(car) {
         ${marker("Rear wheel anchor", a.rearWheelCenter, "is-rear")}
         ${marker("Front wheel anchor", a.frontWheelCenter, "is-front")}
       </div>
-      <div class="content-studio__anchor-key"><span><i class="is-rear"></i>Rear</span><span><i class="is-front"></i>Front</span></div>
     </div>`;
 }
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## V0.5.0-a.3 — Content Studio coordinate polish
+
+- Removed the redundant Rear / Front legend from the Car Creator preview.
+- Renamed layer X/Y controls to X OFFSET / Y OFFSET.
+- Wheel and disk rows now show the default rear/front wheel-center coordinates sourced from each car's art metadata.
+- Preserved per-layer X/Y as additive offsets so existing rendering behavior and saved cars remain compatible.
+
 ## V0.5.0-a.2 — Content Studio polish
 
 - Fixed Content Studio wheel-anchor markers so certified and atlas previews use the same rendered coordinate space as the visible car.
