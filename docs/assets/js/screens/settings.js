@@ -1,4 +1,6 @@
-import { bindHome, pageShell } from "../ui/components.js";
+import { bindHome, escapeHtml, pageShell } from "../ui/components.js";
+import { renderVehicle } from "../ui/vehicleRenderer.js";
+import { showDialog, closeDialog } from "../ui/modal.js";
 
 const KEY = "forever-racing-settings-v1";
 
@@ -39,10 +41,11 @@ export async function renderSettings(ctx) {
           <input type="checkbox" data-setting="reduceMotion" ${settings.reduceMotion ? "checked" : ""}>
         </label>
         <div class="game-card">
-          <div class="split"><div><h3>Vehicle Rendering</h3><p>Layered side-profile vehicle art is used for the validated catalog. Body, wheel, rim and detail layers share one renderer so paint and wheel customization can expand later.</p></div><span class="pill pill--accent">LAYERED ART</span></div>
+          <div class="split"><div><h3>Vehicle Rendering</h3><p>Certified starter composites are used in gameplay while the original body / wheel / rim / detail metadata stays available for future visual customization.</p></div><span class="pill pill--accent">CERTIFIED ART</span></div>
+          <div class="game-card__actions"><button class="button button--small" type="button" data-car-art-debug>CAR ART DEBUG</button></div>
         </div>
         <div class="game-card">
-          <div class="split"><div><h3>Build & Cached Assets</h3><p>Current build: <strong>${document.documentElement.dataset.build || "unknown"}</strong>. GitHub Pages development mode disables the offline service-worker cache so refreshes pull current assets.</p></div><span class="pill pill--accent">V0.4F</span></div>
+          <div class="split"><div><h3>Build & Cached Assets</h3><p>Current build: <strong>${document.documentElement.dataset.build || "unknown"}</strong>. GitHub Pages development mode disables the offline service-worker cache so refreshes pull current assets.</p></div><span class="pill pill--accent">V0.4F.1</span></div>
           <div class="game-card__actions"><button class="button button--small" type="button" data-clear-assets>CLEAR CACHED ASSETS</button></div>
         </div>
         <div class="game-card">
@@ -64,6 +67,35 @@ export async function renderSettings(ctx) {
       saveSettings(settings);
       ctx.toast("Settings saved", "Applied on this device.");
     });
+  });
+
+  ctx.screenRoot.querySelector("[data-car-art-debug]")?.addEventListener("click", async () => {
+    try {
+      const data = await ctx.storage.carCatalog();
+      const cars = (data.cars || []).filter((car) => car.starter);
+      const dialog = showDialog(`
+        <div class="dialog-body car-art-debug-dialog">
+          <span class="section-label">DEVELOPMENT / STARTER ART</span>
+          <h2>Car Art Debug</h2>
+          <p>These are the exact certified composites currently used by gameplay.</p>
+          <div class="car-art-debug-grid">
+            ${cars.map((car) => {
+              const art = car.visual?.layered || {};
+              const a = art.anchors || {};
+              return `<article class="car-art-debug-card">
+                <div class="car-art-debug-card__visual">${renderVehicle(car, { view: "sideProfile" })}</div>
+                <strong>${escapeHtml(car.displayName || car.catalogId)}</strong>
+                <small>${escapeHtml(art.assetId || "")}</small>
+                <code>rear ${a.rearWheelCenter?.x ?? "?"},${a.rearWheelCenter?.y ?? "?"} • front ${a.frontWheelCenter?.x ?? "?"},${a.frontWheelCenter?.y ?? "?"} • bumper ${a.frontBumperX ?? "?"}</code>
+              </article>`;
+            }).join("")}
+          </div>
+          <div class="dialog-actions"><button class="button button--primary" type="button" data-close-art-debug>CLOSE</button></div>
+        </div>`);
+      dialog.querySelector("[data-close-art-debug]")?.addEventListener("click", () => closeDialog(dialog));
+    } catch (err) {
+      ctx.toast("Art debug failed", err.message);
+    }
   });
 
   ctx.screenRoot.querySelector("[data-clear-assets]")?.addEventListener("click", async (event) => {
