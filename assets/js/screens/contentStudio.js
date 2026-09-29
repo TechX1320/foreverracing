@@ -384,20 +384,20 @@ function layerRow(key, layer) {
 function previewMarkup(car) {
   ensureDraftShape(car);
   const layered = car.visual.layered;
-  const width = Math.max(1, Number(layered.canvas?.width || 1));
-  const height = Math.max(1, Number(layered.canvas?.height || 1));
   const a = layered.anchors || {};
   const marker = (name, point, className) => {
-    if (point?.x == null || point?.y == null) return "";
-    return `<i class="studio-anchor ${className}" title="${escapeHtml(name)}" style="left:${(Number(point.x) / width) * 100}%;top:${(Number(point.y) / height) * 100}%"></i>`;
+    const ratio = previewAnchorRatio(car, point);
+    if (!ratio) return "";
+    return `<i class="studio-anchor ${className}" title="${escapeHtml(name)}" style="left:${ratio.x * 100}%;top:${ratio.y * 100}%"></i>`;
   };
   return `
     <div class="content-studio__vehicle-wrap">
       ${renderVehicle(car, { view: "sideProfile", className: "content-studio__vehicle" })}
       <div class="content-studio__anchors" aria-hidden="true">
-        ${marker("Rear wheel", a.rearWheelCenter, "is-rear")}
-        ${marker("Front wheel", a.frontWheelCenter, "is-front")}
+        ${marker("Rear wheel anchor", a.rearWheelCenter, "is-rear")}
+        ${marker("Front wheel anchor", a.frontWheelCenter, "is-front")}
       </div>
+      <div class="content-studio__anchor-key"><span><i class="is-rear"></i>Rear</span><span><i class="is-front"></i>Front</span></div>
     </div>`;
 }
 
