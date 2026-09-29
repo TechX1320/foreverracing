@@ -145,6 +145,7 @@ export async function renderContentStudio(ctx) {
         setDraftValue(draft, input.dataset.studioField, readInputValue(input));
         if (input.dataset.studioField === "base.hp") draft.engine.peakHp = Number(draft.base.hp || 0);
         if (input.dataset.studioField === "base.torque") draft.engine.peakTorque = Number(draft.base.torque || 0);
+        if (String(input.dataset.studioField || "").startsWith("visual.layered.layers.")) draft.visual.renderMode = "layers";
         refreshLivePreview();
       });
       input.addEventListener("change", refreshLivePreview);
@@ -177,6 +178,7 @@ export async function renderContentStudio(ctx) {
           const dataUrl = await fileToDataUrl(file);
           const dimensions = await imageDimensions(dataUrl);
           const key = input.dataset.layerUpload;
+          draft.visual.renderMode = "layers";
           const layer = draft.visual.layered.layers[key] ||= {};
           layer.src = dataUrl;
           layer.source = file.name;
@@ -311,6 +313,7 @@ function artSection(car) {
       <header><div><small>VISUAL ASSEMBLY</small><strong>Canvas, anchors, PNG layers & XYZ order</strong></div></header>
 
       <div class="studio-form-grid studio-form-grid--4">
+        ${selectField("Game Render Mode", "visual.renderMode", car.visual?.renderMode || "", [["","Certified / Atlas when available"],["layers","Editable Layers"]])}
         ${inputField("Canvas Width", "visual.layered.canvas.width", layered.canvas?.width, "number", { min: 1, step: 1 })}
         ${inputField("Canvas Height", "visual.layered.canvas.height", layered.canvas?.height, "number", { min: 1, step: 1 })}
         ${inputField("Rear Wheel X", "visual.layered.anchors.rearWheelCenter.x", anchors.rearWheelCenter?.x, "number", { step: 0.5 })}
@@ -466,6 +469,7 @@ function createBlankCar(stockId) {
     pricing: { status: "content-studio" },
     visual: {
       paintColor: null,
+      renderMode: "layers",
       layered: {
         assetId: "",
         canvas: { width: 320, height: 130 },
