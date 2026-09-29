@@ -60,10 +60,14 @@ export function normalizeEngineDefinition(engine = {}) {
 
 export function engineLabel(engine) {
   const row = normalizeEngineDefinition(engine);
-  const prefix = row.manufacturer ? `${row.manufacturer} ` : "";
-  const title = row.variantName || row.name || row.familyName || row.engineId;
-  const output = row.peakHp > 0 ? ` • ${Math.round(row.peakHp)} hp` : "";
-  return `${prefix}${title}${output}`.trim();
+  const identity = [row.manufacturer, row.familyName, row.variantName]
+    .map((value) => String(value || "").trim())
+    .filter(Boolean)
+    .filter((value, index, values) => values.indexOf(value) === index)
+    .join(" ");
+  const title = identity || row.name || row.engineId;
+  const output = row.peakHp > 0 && !title.toLowerCase().includes(`${Math.round(row.peakHp)} hp`) ? ` • ${Math.round(row.peakHp)} hp` : "";
+  return `${title}${output}`.trim();
 }
 
 export function engineToCarSnapshot(engine, existing = {}) {
