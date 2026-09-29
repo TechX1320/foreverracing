@@ -1,4 +1,5 @@
 import { RaceSimulator } from './RaceSimulator.js';
+import { benchmarkPerformance } from './PerformanceIndex.js';
 const clone = (value) => value == null ? value : structuredClone(value);
 const now = () => Math.floor(Date.now() / 1000);
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -234,9 +235,7 @@ export class LocalGameService {
 
   generateUsedLot() {
     const timestamp = now();
-    const currentYear = new Date().getFullYear();
-    const olderCars = this.cars.filter((spec) => Number(spec.year || 0) <= currentYear - 3);
-    const pool = olderCars.length ? olderCars : this.cars;
+    const pool = this.cars.filter((spec) => spec?.market?.classifieds !== false);
     if (!pool.length) return { generatedAt: timestamp, expiresAt: timestamp + this.config.usedLotRefreshSeconds, listings: [] };
 
     const makeListing = (spec, starterListing = false) => {
@@ -261,7 +260,7 @@ export class LocalGameService {
     };
 
     const starters = pool
-      .filter((spec) => Boolean(spec.starter) && String(spec.class || '').toUpperCase() === 'D')
+      .filter((spec) => Boolean(spec.starter))
       .slice(0, 3);
     const listings = starters.map((spec) => makeListing(spec, true));
     while (listings.length < 8) listings.push(makeListing(randomChoice(pool), false));
@@ -276,8 +275,8 @@ export class LocalGameService {
     if (!spec) throw new LocalGameError('Vehicle catalog entry is missing.', 500);
     const player = this.mutate(inputPlayer, (draft) => {
       const tutorialStarter = draft.tutorial?.status === 'active' && draft.tutorial?.step === 'buy_first_car';
-      if (tutorialStarter && (!spec.starter || String(spec.class || '').toUpperCase() !== 'D')) {
-        throw new LocalGameError('Your first car must be one of the highlighted D Class starter listings.');
+      if (tutorialStarter && !spec.starter) {
+        throw new LocalGameError('Your first car must be one of the highlighted starter listings.');
       }
       const price = Number(listing.price || 0);
       this.requireCredits(draft, price);
@@ -299,10 +298,14 @@ export class LocalGameService {
     const carIndex = this.requireOwnedCarIndex(player, player.selectedCarId);
     const car = player.garage[carIndex];
     const tutorialRace = player.tutorial?.status === 'active' && player.tutorial?.step === 'first_race';
+    const playerBenchmark = benchmarkPerformance(car.derived || car.base, this.racingConfig);
+    const opponent = this.nextOpponentProfile(player, car, tutorialRace);
     return {
       carId: car.carId,
       carName: this.carName(car),
-      opponent: this.nextOpponentProfile(player, car, tutorialRace),
+      performanceIndex: playerBenchmark.performanceIndex,
+      benchmarkEt: playerBenchmark.quarterMileEt,
+      opponent: this.publicOpponentProfile(opponent),
     };
   }
 
@@ -335,10 +338,10 @@ export class LocalGameService {
       const weight = Math.max(500, Number(car.derived?.weight || 500));
       const grip = Math.max(0.5, Number(car.derived?.grip || 1));
       const opponentProfile = this.nextOpponentProfile(draft, car, tutorialRace);
-      const opponentWeight = Number(opponentProfile.weight);
-      const opponentHp = Number(opponentProfile.hp);
-      const opponentTorque = Number(opponentProfile.torque);
-      const opponentGrip = Number(opponentProfile.grip);
+      const opponentWeight = Number(opponentProfile.sim.weight);
+      const opponentHp = Number(opponentProfile.sim.hp);
+      const opponentTorque = Number(opponentProfile.sim.torque);
+      const opponentGrip = Number(opponentProfile.sim.grip);
       const opponentLevel = Number(opponentProfile.level);
 
       const playerRun = this.raceSimulator.simulate({ hp, torque, weight, grip, level, allowFoul: !tutorialRace }, distance, weather);
@@ -360,7 +363,7 @@ export class LocalGameService {
         : Math.round(randomInt(90, 220) * creditMultiplier);
       const expReward = this.raceExpReward(level, opponentLevel, won);
       const repReward = won ? 5 : 2;
-      const opponentVisual = { name: opponentProfile.carName, src: opponentProfile.visualSrc };
+      const opponentVisual = clone(opponentProfile.visual || {});
       const timeScale = Math.max(0.01, Number(this.racingConfig?.presentation?.timeScale || 1));
       const stagingMs = Math.max(1800, Number(this.racingConfig?.presentation?.stagingMs || 2800)) * timeScale;
       const greenAt = Number(timestampMs) + stagingMs;
@@ -382,16 +385,16 @@ export class LocalGameService {
         newBest: false,
         playerCarId: car.carId,
         carName: this.carName(car),
-        playerVisualSrc: this.raceVisualSrc(car),
+        playerVisual: clone(car.visual || {}),
+        playerPerformanceIndex: Number(car.performanceIndex || benchmarkPerformance(car.derived || car.base, this.racingConfig).performanceIndex),
         player: playerRun,
         opponent: {
           name: opponentProfile.name,
-          carName: opponentVisual.name,
-          visualSrc: opponentVisual.src,
-          hp: opponentHp,
-          torque: opponentTorque,
-          weight: opponentWeight,
-          grip: Math.round(opponentGrip * 1000) / 1000,
+          carName: opponentProfile.carName,
+          visual: opponentVisual,
+          performanceIndex: opponentProfile.performanceIndex,
+          drivetrain: opponentProfile.drivetrain,
+          buildType: opponentProfile.buildType,
           level: opponentLevel,
           ...opponentRun,
         },
@@ -564,33 +567,57 @@ export class LocalGameService {
     const spec = this.findBy(this.cars, 'stockId', Number(car.stockId));
     car.buildStage = Math.max(1, Number(car.buildStage || 1));
     car.stageBaseline = car.stageBaseline && typeof car.stageBaseline === 'object' ? car.stageBaseline : null;
+    car.catalogId = car.catalogId || spec?.catalogId || spec?.visual?.layered?.assetId || null;
     car.factoryEngineId = car.factoryEngineId || spec?.factoryEngineId || null;
     car.engineId = car.engineId || car.factoryEngineId || null;
     car.engineBay = car.engineBay || clone(spec?.engineBay || null);
-    const catalogVisual = clone(spec?.visual || { profile: 'sedan', color: '#78838d' });
+    car.engine = { ...(clone(spec?.engine || {})), ...(car.engine || {}) };
+    const catalogVisual = clone(spec?.visual || {});
     const savedVisual = car.visual && typeof car.visual === 'object' ? car.visual : {};
     car.visual = {
       ...catalogVisual,
       ...savedVisual,
-      sprites: {
-        ...(catalogVisual.sprites || {}),
-        ...(savedVisual.sprites || {}),
+      layered: {
+        ...(catalogVisual.layered || {}),
+        ...(savedVisual.layered || {}),
+        layers: {
+          ...(catalogVisual.layered?.layers || {}),
+          ...(savedVisual.layered?.layers || {}),
+        },
+        anchors: {
+          ...(catalogVisual.layered?.anchors || {}),
+          ...(savedVisual.layered?.anchors || {}),
+        },
       },
     };
     car.raceRecords = { ...this.emptyRaceRecords(), ...(car.raceRecords || {}) };
+    if (car.derived?.hp && car.derived?.weight) {
+      const benchmark = benchmarkPerformance(car.derived, this.racingConfig);
+      car.performanceIndex = benchmark.performanceIndex;
+      car.benchmarkEt = benchmark.quarterMileEt;
+    }
     return car;
   }
 
   createOwnedCar(spec, source, mileage, condition, purchasePrice) {
     const base = spec.base || {};
+    const displayName = String(spec.displayName || [spec.year, spec.make, spec.model].filter(Boolean).join(' ') || 'Unknown Car');
+    const derived = { hp: Number(base.hp), torque: Number(base.torque), weight: Number(base.weight), grip: Number(base.grip || 1) };
+    const benchmark = benchmarkPerformance(derived, this.racingConfig);
     return {
       carId: this.id('car'),
       stockId: Number(spec.stockId),
-      displayName: `${Number(spec.year)} ${String(spec.make)} ${String(spec.model)}`,
+      catalogId: spec.catalogId || spec.visual?.layered?.assetId || null,
+      displayName,
       nickname: '', source, purchasePrice, mileage, condition, buildStage: 1, stageBaseline: null,
-      factoryEngineId: spec.factoryEngineId || null, engineId: spec.factoryEngineId || null, engineBay: clone(spec.engineBay || null), visual: clone(spec.visual || { profile: 'sedan', color: '#78838d' }),
+      factoryEngineId: spec.factoryEngineId || null, engineId: spec.factoryEngineId || null, engineBay: clone(spec.engineBay || null),
+      engine: clone(spec.engine || {}),
+      visual: clone(spec.visual || {}),
+      benchmark: clone(spec.benchmark || benchmark),
+      performanceIndex: benchmark.performanceIndex,
+      benchmarkEt: benchmark.quarterMileEt,
       base: { hp: Number(base.hp), torque: Number(base.torque), weight: Number(base.weight), grip: Number(base.grip || 1), drivetrain: String(base.drivetrain || 'FWD') },
-      derived: { hp: Number(base.hp), torque: Number(base.torque), weight: Number(base.weight), grip: Number(base.grip || 1) },
+      derived,
       raceRecords: this.emptyRaceRecords(),
       createdAt: now(),
     };
@@ -615,6 +642,9 @@ export class LocalGameService {
       }
     }
     car.derived = { hp: Math.round(Math.max(1, derived.hp)), torque: Math.round(Math.max(1, derived.torque)), weight: Math.round(Math.max(500, derived.weight)), grip: Math.round(Math.max(0.5, derived.grip) * 1000) / 1000 };
+    const benchmark = benchmarkPerformance(car.derived, this.racingConfig);
+    car.performanceIndex = benchmark.performanceIndex;
+    car.benchmarkEt = benchmark.quarterMileEt;
     car.installedParts = installedParts;
     return car;
   }
@@ -719,73 +749,69 @@ export class LocalGameService {
     };
   }
 
-  raceVisualSrc(car) {
-    const sprites = car?.visual?.sprites || {};
-    return String(sprites?.racePreview?.src || sprites?.topDown?.src || '').trim();
-  }
-
   nextOpponentProfile(player, car, tutorialRace = false) {
-    const hp = Math.max(1, Number(car?.derived?.hp || 1));
-    const torque = Math.max(1, Number(car?.derived?.torque || 1));
-    const weight = Math.max(500, Number(car?.derived?.weight || 500));
-    const grip = Math.max(0.5, Number(car?.derived?.grip || 1));
+    const playerBenchmark = benchmarkPerformance(car?.derived || car?.base || {}, this.racingConfig);
+    const playerPi = playerBenchmark.performanceIndex;
     const level = Math.max(1, Number(player?.progression?.level || 1));
     const raceIndex = Math.max(0, Number(player?.stats?.races || 0));
     const seedText = [
       player?.user?.id || 1,
       car?.carId || 'car',
       raceIndex,
-      Math.round(hp),
-      Math.round(weight),
+      playerPi,
       tutorialRace ? 'tutorial' : 'normal',
     ].join('|');
     const rng = seededRandom(stableSeed(seedText));
-    const between = (min, max) => min + (rng() * (max - min));
-    const pwr = hp / weight;
-    const difficulty = tutorialRace ? between(0.84, 0.89) : between(0.94, 1.08);
-    const opponentWeight = Math.max(1200, Math.round(weight * between(0.90, 1.10)));
-    const opponentHp = Math.max(55, Math.round(pwr * difficulty * opponentWeight));
-    const opponentTorque = Math.max(50, Math.round(torque * between(0.93, 1.07)));
-    const opponentGrip = Math.max(0.65, Math.min(1.45, grip + between(-0.06, 0.06)));
-    const opponentLevel = tutorialRace ? 1 : Math.max(1, level + Math.floor(between(-3, 4)));
-    const visual = this.opponentRaceVisual(opponentHp / Math.max(1, opponentWeight));
+    const targetPi = tutorialRace ? Math.max(0, playerPi - 32) : Math.max(0, playerPi + Math.round((rng() * 48) - 24));
+    let candidates = (this.cars || []).filter((spec) => spec?.visual?.layered?.layers?.body?.src);
+    if (!tutorialRace) {
+      const alternatives = candidates.filter((spec) => Number(spec.stockId) !== Number(car.stockId));
+      if (alternatives.length) candidates = alternatives;
+    }
+    const ranked = candidates
+      .map((spec) => {
+        const benchmark = spec.benchmark?.performanceIndex != null
+          ? spec.benchmark
+          : benchmarkPerformance(spec.base || {}, this.racingConfig);
+        return { spec, benchmark, delta: Math.abs(Number(benchmark.performanceIndex) - targetPi) };
+      })
+      .sort((a, b) => a.delta - b.delta || Number(a.spec.stockId) - Number(b.spec.stockId));
+    const chosen = ranked[0] || { spec: this.cars[0] || {}, benchmark: { performanceIndex: playerPi } };
+    const spec = chosen.spec;
+    const base = spec.base || {};
+    const pi = Number(chosen.benchmark.performanceIndex || benchmarkPerformance(base, this.racingConfig).performanceIndex);
     const names = ['Night Shift', 'Redline', 'The Commuter', 'Left Lane', 'Cut Light', 'Sleeper', 'Boost Leak', 'Test Mule'];
     const name = tutorialRace ? 'Test Mule' : names[Math.min(names.length - 1, Math.floor(rng() * names.length))];
+    const opponentLevel = tutorialRace ? 1 : Math.max(1, level + Math.round((pi - playerPi) / 24));
 
     return {
       name,
-      carName: visual.name,
-      visualSrc: visual.src,
-      hp: opponentHp,
-      torque: opponentTorque,
-      weight: opponentWeight,
-      grip: Math.round(opponentGrip * 1000) / 1000,
+      carName: String(spec.displayName || [spec.year, spec.make, spec.model].filter(Boolean).join(' ') || 'Opponent'),
+      visual: clone(spec.visual || {}),
+      performanceIndex: pi,
+      drivetrain: String(base.drivetrain || '-'),
+      buildType: 'Street Car',
       level: opponentLevel,
+      stockId: Number(spec.stockId || 0),
+      sim: {
+        hp: Math.max(1, Number(base.hp || 1)),
+        torque: Math.max(1, Number(base.torque || 1)),
+        weight: Math.max(500, Number(base.weight || 500)),
+        grip: Math.max(0.5, Number(base.grip || 1)),
+      },
     };
   }
 
-
-  opponentRaceVisual(targetRating) {
-    const candidates = (this.cars || [])
-      .map((spec) => {
-        const sprites = spec?.visual?.sprites || {};
-        const src = String(sprites?.racePreview?.src || sprites?.topDown?.src || '').trim();
-        const hp = Number(spec?.base?.hp || 0);
-        const weight = Math.max(1, Number(spec?.base?.weight || 0));
-        if (!src || hp <= 0 || weight <= 1) return null;
-        return {
-          src,
-          name: String(spec.displayName || [spec.year, spec.make, spec.model].filter(Boolean).join(' ') || 'Opponent'),
-          delta: Math.abs((hp / weight) - Number(targetRating || 0)),
-        };
-      })
-      .filter(Boolean)
-      .sort((a, b) => a.delta - b.delta);
-    return candidates[0] || { src: '', name: 'Opponent' };
-  }
-
-  opponentName() {
-    return randomChoice(['Night Shift', 'Redline', 'The Commuter', 'Left Lane', 'Cut Light', 'Sleeper', 'Boost Leak', 'Test Mule']);
+  publicOpponentProfile(profile) {
+    return {
+      name: profile.name,
+      carName: profile.carName,
+      visual: clone(profile.visual || {}),
+      performanceIndex: Number(profile.performanceIndex || 0),
+      drivetrain: profile.drivetrain,
+      buildType: profile.buildType,
+      level: Number(profile.level || 1),
+    };
   }
 }
 
