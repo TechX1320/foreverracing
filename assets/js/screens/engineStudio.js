@@ -159,6 +159,8 @@ export async function renderEngineStudio(ctx) {
       input.addEventListener("change", refresh);
     });
 
+    host.querySelector('[data-engine-field="curveProfile"]')?.addEventListener("change", () => render());
+
     host.querySelectorAll("[data-curve-rpm],[data-curve-torque]").forEach((input) => {
       input.addEventListener("input", () => {
         const index = Number(input.dataset.curveIndex || 0);
@@ -317,7 +319,7 @@ function curveSection(engine) {
       <header>
         <div><small>DYNO CURVE</small><strong>Torque-first power curve</strong></div>
         <div class="engine-studio__header-actions">
-          <button class="button button--small" type="button" data-generate-curve>GENERATE BASELINE</button>
+          <button class="button button--small" type="button" data-generate-curve>GENERATE FROM PROFILE</button>
           <button class="button button--small" type="button" data-add-curve>ADD POINT</button>
         </div>
       </header>
@@ -461,7 +463,7 @@ function setValue(target, path, value) {
     if (!cursor[key] || typeof cursor[key] !== "object") cursor[key] = {};
     cursor = cursor[key];
   }
-  if (parts.at(-1) === "tags" || parts.at(-1) === "orientations") cursor[parts.at(-1)] = uniqueList(value);
+  if (parts.at(-1) === "tags") cursor[parts.at(-1)] = uniqueList(value);
   else cursor[parts.at(-1)] = value;
 }
 
