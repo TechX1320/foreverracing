@@ -51,8 +51,12 @@ export function deleteContentStudioCar(catalogId) {
   return next.length !== rows.length;
 }
 
-export function findContentStudioCar(catalogId) {
+export function findContentStudioRecord(catalogId) {
   const id = String(catalogId || "");
   const row = listContentStudioCars().find((entry) => String(entry?.car?.catalogId || entry?.catalogId || "") === id);
-  return row?.car ? structuredClone(row.car) : null;
+  return row ? structuredClone(row) : null;
+}
+
+export function findContentStudioCar(catalogId) {
+  return findContentStudioRecord(catalogId)?.car || null;
 }

@@ -4,7 +4,8 @@ export function renderVehicle(car, { stage = null, compact = false, view = "side
     return renderMissingArt(car, { compact, view });
   }
 
-  const wantsEditableLayers = forceLayers || String(car?.visual?.renderMode || "") === "layers";
+  const paintColor = String(car?.visual?.paintColor || "").trim();
+  const wantsEditableLayers = forceLayers || String(car?.visual?.renderMode || "") === "layers" || Boolean(paintColor);
   const hasEditableLayers = hasLayerSource(layered.layers) || hasLayerSource(layered.raceLayers);
   const useEditableLayers = wantsEditableLayers && hasEditableLayers;
   const hasCertifiedArt = Boolean(String(layered.certifiedSrc || "").trim() || layered.certifiedAtlas?.src);

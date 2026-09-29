@@ -101,7 +101,14 @@
             "height": 111
           }
         }
-      }
+      },
+      "paintPalette": [
+        "#f3f3ef",
+        "#18191b",
+        "#a51f2d",
+        "#315f91",
+        "#6f7377"
+      ]
     },
     "catalogId": "golf_gti",
     "market": {
@@ -212,7 +219,14 @@
             "height": 114
           }
         }
-      }
+      },
+      "paintPalette": [
+        "#e7e8e6",
+        "#1d1e20",
+        "#b3262e",
+        "#325f91",
+        "#c59b2a"
+      ]
     },
     "catalogId": "mazda_rx8",
     "market": {
@@ -323,7 +337,14 @@
             "height": 111
           }
         }
-      }
+      },
+      "paintPalette": [
+        "#dedfdc",
+        "#1f2022",
+        "#315f9e",
+        "#a62c35",
+        "#c6a02d"
+      ]
     },
     "catalogId": "renault_clio",
     "market": {

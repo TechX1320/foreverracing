@@ -29,9 +29,10 @@ export async function renderShowroom(ctx) {
 
 function showroomCard(car, player) {
   const canBuy = Number(player?.wallet?.credits || 0) >= Number(car.price || 0);
+  const visualCar = showroomPaintCar(car);
   return `
     <article class="classified-card showroom-card">
-      <div class="classified-card__visual">${renderVehicle(car, { view: "showroom" })}</div>
+      <div class="classified-card__visual">${renderVehicle(visualCar, { view: "showroom" })}</div>
       <div class="classified-card__body">
         <div class="classified-card__title">
           <div><strong>${escapeHtml(catalogName(car))}</strong><small>${escapeHtml(car.class || "—")} CLASS • PI ${number(car.benchmark?.performanceIndex || 0)} • ${escapeHtml(car.base?.drivetrain || "")}</small></div>
@@ -50,11 +51,12 @@ function showroomCard(car, player) {
 function confirmPurchase(ctx, stockId) {
   const car = catalogCache?.find((entry) => Number(entry.stockId) === stockId);
   if (!car) return;
+  const visualCar = showroomPaintCar(car);
   const player = ctx.store.player;
   const dialog = showDialog(`
     <div class="dialog-body classified-detail-dialog">
       <div class="classified-detail-dialog__hero">
-        <div class="dialog-vehicle">${renderVehicle(car, { view: "showroom" })}</div>
+        <div class="dialog-vehicle">${renderVehicle(visualCar, { view: "showroom" })}</div>
         <div><span class="section-label">SHOWROOM / ${escapeHtml(car.class || "UNRATED")} CLASS</span><h2>${escapeHtml(catalogName(car))}</h2><p>PI ${number(car.benchmark?.performanceIndex || 0)} • ${escapeHtml(car.base?.drivetrain || "")}</p><strong class="classified-detail-price">${money(car.price)} cr</strong></div>
       </div>
       <div class="form-error" data-purchase-error></div>
@@ -78,6 +80,16 @@ function confirmPurchase(ctx, stockId) {
       button.disabled = false;
     }
   });
+}
+
+function showroomPaintCar(car) {
+  const palette = Array.isArray(car?.visual?.paintPalette) ? car.visual.paintPalette : [];
+  const color = String(car?.visual?.paintColor || palette[0] || "").trim();
+  if (!color) return car;
+  const visualCar = structuredClone(car);
+  visualCar.visual ||= {};
+  visualCar.visual.paintColor = color;
+  return visualCar;
 }
 
 function catalogName(car) {

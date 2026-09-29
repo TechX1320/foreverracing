@@ -129,7 +129,7 @@ final class GameService
             $price = (int)$spec['price'];
             self::requireCredits($player, $price);
             $player['wallet']['credits'] -= $price;
-            $car = self::createOwnedCar($spec, 'new', 0, 100, $price);
+            $car = self::createOwnedCar($spec, 'new', 0, 100, $price, self::firstPaintColor($spec));
             $player['garage'][] = $car;
             $player['stats']['showroomPurchases'] = (int)$player['stats']['showroomPurchases'] + 1;
             if (!$player['selectedCarId']) {
@@ -384,7 +384,8 @@ final class GameService
                 'used',
                 (int)$listing['mileage'],
                 (int)$listing['condition'],
-                $price
+                $price,
+                isset($listing['paintColor']) ? (string)$listing['paintColor'] : null
             );
             $player['garage'][] = $car;
             $player['stats']['usedPurchases'] = (int)$player['stats']['usedPurchases'] + 1;
@@ -802,7 +803,7 @@ final class GameService
         return $car;
     }
 
-    private static function createOwnedCar(array $spec, string $source, int $mileage, int $condition, int $purchasePrice): array
+    private static function createOwnedCar(array $spec, string $source, int $mileage, int $condition, int $purchasePrice, ?string $paintColor = null): array
     {
         $base = is_array($spec['base'] ?? null) ? $spec['base'] : [];
         $derived = [
@@ -833,7 +834,7 @@ final class GameService
             'engineId' => $spec['factoryEngineId'] ?? null,
             'engineBay' => $spec['engineBay'] ?? null,
             'engine' => is_array($spec['engine'] ?? null) ? $spec['engine'] : [],
-            'visual' => is_array($spec['visual'] ?? null) ? $spec['visual'] : [],
+            'visual' => self::withPaintColor(is_array($spec['visual'] ?? null) ? $spec['visual'] : [], $paintColor ?? self::firstPaintColor($spec)),
             'benchmark' => is_array($spec['benchmark'] ?? null) ? $spec['benchmark'] : $benchmark,
             'stockClass' => (string)($spec['class'] ?? PerformanceIndex::classFromIndex((int)($spec['benchmark']['performanceIndex'] ?? $benchmark['performanceIndex']))),
             'performanceIndex' => (int)$benchmark['performanceIndex'],
@@ -984,6 +985,7 @@ final class GameService
                 'mileageFactor' => round($mileageFactor, 3),
                 'conditionFactor' => round($conditionFactor, 3),
                 'starterListing' => $starterListing,
+                'paintColor' => self::randomPaintColor($spec),
             ];
         };
 
@@ -999,6 +1001,39 @@ final class GameService
         }
 
         return ['generatedAt' => $now, 'expiresAt' => $now + $refresh, 'listings' => $listings];
+    }
+
+    private static function paintPalette(array $spec): array
+    {
+        $visual = is_array($spec['visual'] ?? null) ? $spec['visual'] : [];
+        $palette = is_array($visual['paintPalette'] ?? null) ? $visual['paintPalette'] : [];
+        return array_values(array_filter(array_map(
+            fn($value): string => trim((string)$value),
+            $palette
+        ), fn(string $value): bool => (bool)preg_match('/^#[0-9a-f]{6}$/i', $value)));
+    }
+
+    private static function firstPaintColor(array $spec): ?string
+    {
+        $palette = self::paintPalette($spec);
+        if ($palette) return (string)$palette[0];
+        $visual = is_array($spec['visual'] ?? null) ? $spec['visual'] : [];
+        $color = trim((string)($visual['paintColor'] ?? ''));
+        return $color !== '' ? $color : null;
+    }
+
+    private static function randomPaintColor(array $spec): ?string
+    {
+        $palette = self::paintPalette($spec);
+        if (!$palette) return self::firstPaintColor($spec);
+        return (string)$palette[array_rand($palette)];
+    }
+
+    private static function withPaintColor(array $visual, ?string $paintColor): array
+    {
+        $color = trim((string)($paintColor ?? ''));
+        if ($color !== '') $visual['paintColor'] = $color;
+        return $visual;
     }
 
     private static function requireCredits(array $player, int $amount): void
@@ -1161,7 +1196,10 @@ final class GameService
         return [
             'name' => $name,
             'carName' => trim((string)($spec['displayName'] ?? '')) ?: trim(implode(' ', array_filter([$spec['year'] ?? null, $spec['make'] ?? null, $spec['model'] ?? null]))) ?: 'Opponent',
-            'visual' => is_array($spec['visual'] ?? null) ? $spec['visual'] : [],
+            'visual' => self::withPaintColor(
+                is_array($spec['visual'] ?? null) ? $spec['visual'] : [],
+                self::randomPaintColor($spec)
+            ),
             'performanceIndex' => $pi,
             'performanceClass' => PerformanceIndex::classFromIndex($pi),
             'drivetrain' => (string)($base['drivetrain'] ?? '-'),

@@ -4,6 +4,7 @@ import { benchmarkPerformance, performanceClassFromIndex } from "../domain/Perfo
 import {
   deleteContentStudioCar,
   findContentStudioCar,
+  findContentStudioRecord,
   listContentStudioCars,
   saveContentStudioCar,
 } from "../content/ContentStudioCatalog.js";
@@ -15,6 +16,8 @@ const BUILD_MODULES = [
 ];
 
 const LAYER_DEFAULT_Z = { wheel: 1, disk: 2, body: 3, detail: 5 };
+const DEFAULT_PAINT_PALETTE = ["#f4f4f1", "#1c1d20", "#b52b32", "#315f9e", "#73777c"];
+const USED_LOT_KEY = "foreverRacing.v02.usedLot";
 
 export async function renderContentStudio(ctx) {
   const build = String(document.documentElement.dataset.build || "").trim();
@@ -50,7 +53,8 @@ export async function renderContentStudio(ctx) {
 
   const renderWorkspace = () => {
     const score = scoreCar(draft, racingConfig);
-    const currentLocal = findContentStudioCar(draft.catalogId);
+    const currentLocal = findContentStudioRecord(draft.catalogId);
+    const localState = currentLocal ? (currentLocal.enabled === false ? "LOCAL DRAFT" : "LOCAL ACTIVE") : "UNSAVED / SOURCE";
     host.innerHTML = `
       <div class="content-studio">
         <div class="content-studio__modules">
@@ -69,7 +73,7 @@ export async function renderContentStudio(ctx) {
             </select>
           </label>
           <button class="button button--small" type="button" data-studio-new>NEW CAR</button>
-          <span class="pill ${currentLocal ? "pill--accent" : ""}">${currentLocal ? "LOCAL OVERRIDE" : "UNSAVED / SOURCE"}</span>
+          <span class="pill ${currentLocal?.enabled !== false && currentLocal ? "pill--accent" : ""}">${localState}</span>
         </div>
 
         <div class="content-studio__workspace">
@@ -91,22 +95,25 @@ export async function renderContentStudio(ctx) {
             </section>
 
             <section class="content-studio__preview-card">
-              <div class="content-studio__preview-head"><div><small>PAINT TEST</small><strong>Layer 1 body mask</strong></div></div>
+              <div class="content-studio__preview-head"><div><small>FACTORY PAINT</small><strong>5-color palette + preview</strong></div></div>
               <div class="content-studio__paint-row">
                 <input type="color" value="${paintValue(draft.visual?.paintColor)}" data-studio-paint>
                 <input type="text" value="${escapeHtml(draft.visual?.paintColor || "")}" placeholder="#ffffff or blank" data-studio-field="visual.paintColor">
                 <button class="button button--small" type="button" data-clear-paint>CLEAR</button>
               </div>
-              <p class="muted">This is the first pass at player paint. It tints the lowest body layer while keeping detail, wheel and disk layers separate.</p>
+              <div class="content-studio__palette" aria-label="Factory paint palette">
+                ${paintPaletteMarkup(draft.visual?.paintPalette)}
+              </div>
+              <p class="muted">These colors can be assigned to Classifieds listings so the same model does not always appear in one color. Paint needs a usable body layer; atlas-only cars stay on their authored color until layered PNGs are added.</p>
             </section>
 
             <section class="content-studio__actions">
-              <button class="button button--primary" type="button" data-save-car>SAVE CAR LOCALLY</button>
-              <button class="button" type="button" data-save-reload>SAVE + RELOAD</button>
+              <button class="button" type="button" data-save-car>SAVE DRAFT LOCALLY</button>
+              <button class="button button--primary" type="button" data-save-reload>ACTIVATE LOCALLY + RELOAD</button>
               <button class="button" type="button" data-export-car>EXPORT CAR JSON</button>
               <button class="button" type="button" data-copy-car>COPY JSON</button>
               ${currentLocal ? '<button class="button button--quiet" type="button" data-delete-override>REMOVE LOCAL OVERRIDE</button>' : ""}
-              <p>Saved cars become a browser-local catalog overlay. Reloading injects them into the local game catalog for playtesting. Export JSON is the handoff for committing permanent content.</p>
+              <p><b>Draft</b> keeps the car in Content Studio only. <b>Activate Locally</b> injects it into this browser\'s game catalog and refreshes Classifieds data. Permanent activation still means committing the exported definition and final art into the repository.</p>
             </section>
           </aside>
 
@@ -167,6 +174,21 @@ export async function renderContentStudio(ctx) {
       refreshLivePreview();
     });
 
+    host.querySelectorAll("[data-paint-palette]").forEach((input) => {
+      input.addEventListener("input", () => {
+        const index = Number(input.dataset.paintPalette || 0);
+        draft.visual.paintPalette ||= [...DEFAULT_PAINT_PALETTE];
+        draft.visual.paintPalette[index] = paintValue(input.value);
+        draft.visual.paintColor = draft.visual.paintPalette[index];
+        draft.visual.renderMode = "layers";
+        const previewColor = host.querySelector("[data-studio-paint]");
+        const text = host.querySelector('[data-studio-field="visual.paintColor"]');
+        if (previewColor) previewColor.value = draft.visual.paintColor;
+        if (text) text.value = draft.visual.paintColor;
+        refreshLivePreview();
+      });
+    });
+
     host.querySelectorAll("[data-layer-upload]").forEach((input) => {
       input.addEventListener("change", async () => {
         const file = input.files?.[0];
@@ -198,8 +220,8 @@ export async function renderContentStudio(ctx) {
       });
     });
 
-    host.querySelector("[data-save-car]")?.addEventListener("click", () => saveDraft(false));
-    host.querySelector("[data-save-reload]")?.addEventListener("click", () => saveDraft(true));
+    host.querySelector("[data-save-car]")?.addEventListener("click", () => saveDraft(false, false));
+    host.querySelector("[data-save-reload]")?.addEventListener("click", () => saveDraft(true, true));
     host.querySelector("[data-export-car]")?.addEventListener("click", () => {
       try {
         const car = finalizedCar(draft, racingConfig, catalogCars);
@@ -242,13 +264,19 @@ export async function renderContentStudio(ctx) {
     if (trap) trap.textContent = `${score.quarterMileTrap.toFixed(1)} mph`;
   };
 
-  const saveDraft = (reload) => {
+  const saveDraft = (reload, enabled) => {
     try {
       const car = finalizedCar(draft, racingConfig, catalogCars);
-      saveContentStudioCar(car, { enabled: true });
+      saveContentStudioCar(car, { enabled });
       draft = structuredClone(car);
       lastLoadedId = car.catalogId;
-      ctx.toast("Car saved", reload ? "Reloading with the local catalog override enabled." : "Reload when you want the game catalog to use this version.");
+      if (enabled) localStorage.removeItem(USED_LOT_KEY);
+      ctx.toast(
+        enabled ? "Car activated locally" : "Draft saved",
+        enabled
+          ? "Reloading with the car in the local game catalog. Classifieds will regenerate from the updated market pool."
+          : "The car stays in Content Studio and will not enter gameplay until activated."
+      );
       if (reload) {
         setTimeout(() => location.reload(), 120);
       } else {
@@ -276,6 +304,10 @@ function identitySection(car) {
         ${selectField("Starter Car", "starter", String(Boolean(car.starter)), [["false","No"],["true","Yes"]])}
         ${selectField("Classifieds", "market.classifieds", String(car.market?.classifieds !== false), [["true","Listed"],["false","Hidden"]])}
         ${selectField("Showroom", "market.showroom", String(Boolean(car.market?.showroom)), [["false","Hidden"],["true","Listed"]])}
+      </div>
+      <div class="content-studio__market-note">
+        <b>${marketPlacementLabel(car)}</b>
+        <span>Classifieds = used-market pool. Showroom = new-car dealer floor. Both may be enabled; Hidden/Hidden keeps the car playable but out of both stores.</span>
       </div>
     </section>`;
 }
@@ -352,20 +384,20 @@ function layerRow(key, layer) {
 function previewMarkup(car) {
   ensureDraftShape(car);
   const layered = car.visual.layered;
-  const width = Math.max(1, Number(layered.canvas?.width || 1));
-  const height = Math.max(1, Number(layered.canvas?.height || 1));
   const a = layered.anchors || {};
   const marker = (name, point, className) => {
-    if (point?.x == null || point?.y == null) return "";
-    return `<i class="studio-anchor ${className}" title="${escapeHtml(name)}" style="left:${(Number(point.x) / width) * 100}%;top:${(Number(point.y) / height) * 100}%"></i>`;
+    const ratio = previewAnchorRatio(car, point);
+    if (!ratio) return "";
+    return `<i class="studio-anchor ${className}" title="${escapeHtml(name)}" style="left:${ratio.x * 100}%;top:${ratio.y * 100}%"></i>`;
   };
   return `
     <div class="content-studio__vehicle-wrap">
       ${renderVehicle(car, { view: "sideProfile", className: "content-studio__vehicle" })}
       <div class="content-studio__anchors" aria-hidden="true">
-        ${marker("Rear wheel", a.rearWheelCenter, "is-rear")}
-        ${marker("Front wheel", a.frontWheelCenter, "is-front")}
+        ${marker("Rear wheel anchor", a.rearWheelCenter, "is-rear")}
+        ${marker("Front wheel anchor", a.frontWheelCenter, "is-front")}
       </div>
+      <div class="content-studio__anchor-key"><span><i class="is-rear"></i>Rear</span><span><i class="is-front"></i>Front</span></div>
     </div>`;
 }
 
@@ -393,6 +425,8 @@ function finalizedCar(source, racingConfig, catalogCars) {
   car.starter = Boolean(car.starter);
   car.market.classifieds = Boolean(car.market.classifieds);
   car.market.showroom = Boolean(car.market.showroom);
+  car.visual.paintPalette = normalizePaintPalette(car.visual.paintPalette);
+  if (car.visual.paintColor) car.visual.paintColor = paintValue(car.visual.paintColor);
   car.engine.peakHp = Math.max(1, Number(car.base.hp || 1));
   car.engine.peakTorque = Math.max(1, Number(car.base.torque || 1));
   car.base.hp = Math.max(1, Number(car.base.hp || 1));
@@ -471,6 +505,7 @@ function createBlankCar(stockId) {
     pricing: { status: "content-studio" },
     visual: {
       paintColor: null,
+      paintPalette: [...DEFAULT_PAINT_PALETTE],
       renderMode: "layers",
       layered: {
         assetId: "",
@@ -503,6 +538,7 @@ function ensureDraftShape(car) {
   car.base ||= {};
   car.market ||= {};
   car.visual ||= {};
+  car.visual.paintPalette = normalizePaintPalette(car.visual.paintPalette);
   car.visual.layered ||= {};
   car.visual.layered.canvas ||= { width: 320, height: 130 };
   car.visual.layered.layers ||= {};
@@ -581,6 +617,77 @@ function setDraftValue(target, path, value) {
 function paintValue(value) {
   const text = String(value || "").trim();
   return /^#[0-9a-f]{6}$/i.test(text) ? text : "#ffffff";
+}
+
+function paintPaletteMarkup(palette) {
+  return normalizePaintPalette(palette).map((color, index) => `
+    <label class="studio-paint-swatch" title="Factory paint ${index + 1}">
+      <input type="color" value="${escapeHtml(color)}" data-paint-palette="${index}">
+      <span>${index + 1}</span>
+    </label>`).join("");
+}
+
+function normalizePaintPalette(palette) {
+  const source = Array.isArray(palette) ? palette : [];
+  return DEFAULT_PAINT_PALETTE.map((fallback, index) => {
+    const value = String(source[index] || "").trim();
+    return /^#[0-9a-f]{6}$/i.test(value) ? value.toLowerCase() : fallback;
+  });
+}
+
+function marketPlacementLabel(car) {
+  const classifieds = car?.market?.classifieds !== false;
+  const showroom = car?.market?.showroom === true;
+  if (classifieds && showroom) return "MARKET: CLASSIFIEDS + SHOWROOM";
+  if (showroom) return "MARKET: SHOWROOM ONLY";
+  if (classifieds) return "MARKET: CLASSIFIEDS ONLY";
+  return "MARKET: HIDDEN";
+}
+
+function previewAnchorRatio(car, point) {
+  if (point?.x == null || point?.y == null) return null;
+  const layered = car?.visual?.layered || {};
+  const canvasWidth = Math.max(1, Number(layered.canvas?.width || 1));
+  const canvasHeight = Math.max(1, Number(layered.canvas?.height || 1));
+  const px = Number(point.x);
+  const py = Number(point.y);
+  const editingLayers = String(car?.visual?.renderMode || "") === "layers" || Boolean(String(car?.visual?.paintColor || "").trim());
+
+  if (editingLayers) {
+    return { x: clampRatio(px / canvasWidth), y: clampRatio(py / canvasHeight) };
+  }
+
+  if (layered.certifiedSrc) {
+    const atlas = layered.certifiedAtlas;
+    const rootWidth = Math.max(1, Number(atlas?.cellWidth || canvasWidth));
+    const rootHeight = Math.max(1, Number(atlas?.cellHeight || canvasHeight));
+    const scale = Math.min(rootWidth / canvasWidth, rootHeight / canvasHeight);
+    const imageWidth = canvasWidth * scale;
+    const imageHeight = canvasHeight * scale;
+    const offsetX = (rootWidth - imageWidth) / 2;
+    const offsetY = (rootHeight - imageHeight) / 2;
+    return {
+      x: clampRatio((offsetX + (px * scale)) / rootWidth),
+      y: clampRatio((offsetY + (py * scale)) / rootHeight),
+    };
+  }
+
+  const atlas = layered.certifiedAtlas;
+  if (atlas?.src) {
+    const cellWidth = Math.max(1, Number(atlas.cellWidth || 360));
+    const cellHeight = Math.max(1, Number(atlas.cellHeight || 150));
+    const scale = Math.max(0.01, Number(atlas.scale || 1));
+    return {
+      x: clampRatio((Number(atlas.carX || 0) + (px * scale)) / cellWidth),
+      y: clampRatio((Number(atlas.carY || 0) + (py * scale)) / cellHeight),
+    };
+  }
+
+  return { x: clampRatio(px / canvasWidth), y: clampRatio(py / canvasHeight) };
+}
+
+function clampRatio(value) {
+  return Math.max(0, Math.min(1, Number.isFinite(Number(value)) ? Number(value) : 0));
 }
 
 function sourceName(src) {

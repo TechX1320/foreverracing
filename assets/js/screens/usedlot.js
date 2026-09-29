@@ -77,9 +77,10 @@ function starterObjective() {
 function listingCard(listing, catalog, tutorialStarter = false) {
   const car = catalog.find((entry) => Number(entry.stockId) === Number(listing.stockId));
   if (!car) return "";
+  const visualCar = listingPaintCar(car, listing);
   return `
     <article class="classified-card ${tutorialStarter ? "tutorial-target classified-card--starter" : ""}">
-      <div class="classified-card__visual">${renderVehicle(car, { stage: 1, view: "sideProfile" })}</div>
+      <div class="classified-card__visual">${renderVehicle(visualCar, { stage: 1, view: "sideProfile" })}</div>
       <div class="classified-card__body">
         <div class="classified-card__title">
           <div><strong>${escapeHtml(catalogName(car))}</strong><small>${escapeHtml(car.class || "—")} CLASS • PI ${number(car.benchmark?.performanceIndex || 0)} • ${escapeHtml(car.base?.drivetrain || "")}</small></div>
@@ -95,6 +96,7 @@ function openListing(ctx, listingId, listings, catalog, playerSnapshot, tutorial
   const listing = listings.find((entry) => String(entry.listingId) === String(listingId));
   const car = catalog.find((entry) => Number(entry.stockId) === Number(listing?.stockId));
   if (!listing || !car) return;
+  const visualCar = listingPaintCar(car, listing);
 
   const canBuy = Number(ctx.store.player?.wallet?.credits || 0) >= Number(listing.price || 0);
   const conditionFactor = Number(listing.conditionFactor || 1);
@@ -105,7 +107,7 @@ function openListing(ctx, listingId, listings, catalog, playerSnapshot, tutorial
   const dialog = showDialog(`
     <div class="dialog-body classified-detail-dialog">
       <div class="classified-detail-dialog__hero">
-        <div class="dialog-vehicle">${renderVehicle(car, { stage: 1, view: "sideProfile" })}</div>
+        <div class="dialog-vehicle">${renderVehicle(visualCar, { stage: 1, view: "sideProfile" })}</div>
         <div>
           <span class="section-label">${tutorialStarter ? "FIRST CAR" : "CLASSIFIED LISTING"} / ${escapeHtml(car.class || "UNRATED")} CLASS</span>
           <h2>${escapeHtml(catalogName(car))}</h2>
@@ -166,6 +168,15 @@ function openListing(ctx, listingId, listings, catalog, playerSnapshot, tutorial
       event.currentTarget.disabled = false;
     }
   });
+}
+
+function listingPaintCar(car, listing) {
+  const color = String(listing?.paintColor || "").trim();
+  if (!color) return car;
+  const visualCar = structuredClone(car);
+  visualCar.visual ||= {};
+  visualCar.visual.paintColor = color;
+  return visualCar;
 }
 
 function conditionClass(value) {
