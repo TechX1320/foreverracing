@@ -1,5 +1,10 @@
 # Changelog
 
+## V0.4.0-h.3 — race lane centering
+
+- Centered each side-view race car vertically inside its lane instead of using asymmetric lane offsets.
+- Fixes the Mazda RX-8 appearing too low in the lower lane while keeping front-wheel staging, front-bumper timing and wheel/smoke animation unchanged.
+
 ## V0.4.0-h.2 — wheel spin and grip-loss smoke
 
 - Restored the original CSS drag tree after the purchased sprite-tree experiment.
