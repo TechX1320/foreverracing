@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.5.0-b playable direction
+## V0.5.0-c playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,17 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.5C Engine Creator
+
+- Added a dedicated **Engine Creator** inside Content Studio, modeled after the familiar Auto Dyno Curve workflow without requiring ChatGPT inside the game tool.
+- Engines now have **family + variant IDs**, manufacturer/name metadata, displacement, configuration, aspiration, compression, weight, fitment orientation, tags, peak HP/TQ anchors, redline and rev limiter.
+- Power curves are **torque-first**: RPM + torque are authored directly and horsepower is always derived with HP = Torque × RPM / 5252.
+- Engine Creator includes a live HP/TQ graph, editable curve table, validation, and a quick **Generate Baseline** option for rough game curves before source-backed refinement.
+- Local engine drafts can be saved, activated, exported or copied just like cars.
+- Car Creator now has a **Factory Engine** selector. Linked engine specs come from Engine Creator while chassis weight, grip, drivetrain and engine location remain car-specific.
+- The three current playable cars are now linked to dedicated engine variants and the older swap-fitment engine catalog has been migrated into the new schema for future completion.
+- Parts Tool remains **NEXT**, now with the engine IDs/families it needs for engine-specific compatibility from day one.
 
 ### V0.5B release system + Parts Creator foundation
 
