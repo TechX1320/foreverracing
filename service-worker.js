@@ -1,4 +1,4 @@
-const CACHE = 'forever-racing-shell-v0.4.0-h.4';
+const CACHE = 'forever-racing-shell-v0.5.0-a';
 const SHELL = [
   './',
   './manifest.webmanifest',
