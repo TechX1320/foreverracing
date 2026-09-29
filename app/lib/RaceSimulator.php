@@ -3,8 +3,12 @@ declare(strict_types=1);
 
 final class RaceSimulator
 {
-    public function __construct(private readonly array $config)
+    /** @var callable|null */
+    private $rng;
+
+    public function __construct(private readonly array $config, ?callable $rng = null)
     {
+        $this->rng = $rng;
     }
 
     public function distance(string $key): array
@@ -135,7 +139,9 @@ final class RaceSimulator
 
     private function random(float $min, float $max): float
     {
-        return $min + ((mt_rand() / mt_getrandmax()) * ($max - $min));
+        $unit = $this->rng ? (float)call_user_func($this->rng) : (mt_rand() / mt_getrandmax());
+        $unit = min(1.0, max(0.0, $unit));
+        return $min + ($unit * ($max - $min));
     }
 
     private static function clamp(float $value, float $min, float $max): float
