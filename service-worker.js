@@ -1,24 +1,27 @@
-const CACHE = 'forever-racing-shell-v0.4.0-e';
+const CACHE = 'forever-racing-shell-v0.4.0-f';
 const SHELL = [
   './',
   './manifest.webmanifest',
   './assets/css/app.css',
-  './assets/art/cars/cars-top-down-v1.png',
-  './assets/art/cars/vehicles/2005-ford-mustang-gt-top-down-v03a.png',
-  './assets/art/cars/vehicles/1998-honda-civic-dx-top-down-v03a.png',
-  './assets/art/cars/vehicles/2003-nissan-350z-side-profile.png',
-  './assets/art/cars/vehicles/2005-ford-mustang-gt-side-profile.png',
-  './assets/art/cars/vehicles/1998-honda-civic-dx-side-profile.png',
-  './assets/art/cars/vehicles/1998-honda-civic-dx-top-down.png',
-  './assets/art/cars/vehicles/2003-nissan-350z-top-down.png',
-  './assets/art/cars/vehicles/2004-subaru-impreza-wrx-sti-top-down.png',
-  './assets/art/cars/vehicles/2005-ford-mustang-gt-top-down.png',
+  './assets/art/cars/layered/golf_gti/body.webp',
+  './assets/art/cars/layered/golf_gti/wheel.webp',
+  './assets/art/cars/layered/golf_gti/disk.webp',
+  './assets/art/cars/layered/golf_gti/detail.webp',
+  './assets/art/cars/layered/mazda_rx8/body.webp',
+  './assets/art/cars/layered/mazda_rx8/wheel.webp',
+  './assets/art/cars/layered/mazda_rx8/disk.webp',
+  './assets/art/cars/layered/mazda_rx8/detail.webp',
+  './assets/art/cars/layered/renault_clio/body.webp',
+  './assets/art/cars/layered/renault_clio/wheel.webp',
+  './assets/art/cars/layered/renault_clio/disk.webp',
+  './assets/art/cars/layered/renault_clio/detail.png',
   './assets/js/app.js',
   './assets/js/core/api.js',
   './assets/js/core/store.js',
   './assets/js/core/router.js',
   './assets/js/domain/LocalGameService.js',
   './assets/js/domain/RaceSimulator.js',
+  './assets/js/domain/PerformanceIndex.js',
   './assets/js/storage/StorageProvider.js',
   './assets/js/storage/ApiStorageProvider.js',
   './assets/js/storage/LocalStorageProvider.js',
@@ -37,12 +40,13 @@ const SHELL = [
   './assets/js/screens/placeholders.js',
   './assets/js/screens/settings.js',
   './data/catalog/cars.json',
+  './data/catalog/car-art.json',
   './data/catalog/parts.json',
   './data/catalog/engines.json',
   './data/config/game.json',
   './data/config/build-stages.json',
   './data/config/racing.json'
-];
+]
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()));
