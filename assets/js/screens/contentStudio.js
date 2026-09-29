@@ -4,6 +4,7 @@ import { benchmarkPerformance, performanceClassFromIndex } from "../domain/Perfo
 import {
   deleteContentStudioCar,
   findContentStudioCar,
+  findContentStudioRecord,
   listContentStudioCars,
   saveContentStudioCar,
 } from "../content/ContentStudioCatalog.js";
@@ -15,6 +16,8 @@ const BUILD_MODULES = [
 ];
 
 const LAYER_DEFAULT_Z = { wheel: 1, disk: 2, body: 3, detail: 5 };
+const DEFAULT_PAINT_PALETTE = ["#f4f4f1", "#1c1d20", "#b52b32", "#315f9e", "#73777c"];
+const USED_LOT_KEY = "foreverRacing.v02.usedLot";
 
 export async function renderContentStudio(ctx) {
   const build = String(document.documentElement.dataset.build || "").trim();
@@ -50,7 +53,8 @@ export async function renderContentStudio(ctx) {
 
   const renderWorkspace = () => {
     const score = scoreCar(draft, racingConfig);
-    const currentLocal = findContentStudioCar(draft.catalogId);
+    const currentLocal = findContentStudioRecord(draft.catalogId);
+    const localState = currentLocal ? (currentLocal.enabled === false ? "LOCAL DRAFT" : "LOCAL ACTIVE") : "UNSAVED / SOURCE";
     host.innerHTML = `
       <div class="content-studio">
         <div class="content-studio__modules">
@@ -69,7 +73,7 @@ export async function renderContentStudio(ctx) {
             </select>
           </label>
           <button class="button button--small" type="button" data-studio-new>NEW CAR</button>
-          <span class="pill ${currentLocal ? "pill--accent" : ""}">${currentLocal ? "LOCAL OVERRIDE" : "UNSAVED / SOURCE"}</span>
+          <span class="pill ${currentLocal?.enabled !== false && currentLocal ? "pill--accent" : ""}">${localState}</span>
         </div>
 
         <div class="content-studio__workspace">
