@@ -1,4 +1,4 @@
-const CACHE = 'forever-racing-shell-v0.4.0-h.0';
+const CACHE = 'forever-racing-shell-v0.4.0-h.2';
 const SHELL = [
   './',
   './manifest.webmanifest',
@@ -10,6 +10,19 @@ const SHELL = [
   './assets/art/race/divider.png',
   './assets/art/race/shadow.png',
   './assets/art/race/xmas.png',
+  './assets/art/race/smoke.png',
+  './assets/art/cars/race/golf_gti/body.png',
+  './assets/art/cars/race/golf_gti/wheel.png',
+  './assets/art/cars/race/golf_gti/disk.png',
+  './assets/art/cars/race/golf_gti/detail.png',
+  './assets/art/cars/race/mazda_rx8/body.png',
+  './assets/art/cars/race/mazda_rx8/wheel.png',
+  './assets/art/cars/race/mazda_rx8/disk.png',
+  './assets/art/cars/race/mazda_rx8/detail.png',
+  './assets/art/cars/race/renault_clio/body.png',
+  './assets/art/cars/race/renault_clio/wheel.png',
+  './assets/art/cars/race/renault_clio/disk.png',
+  './assets/art/cars/race/renault_clio/detail.png',
   './assets/art/cars/atlas/cars-1.png',
   './assets/art/cars/atlas/cars-2.png',
   './assets/art/cars/atlas/cars-3.png',
