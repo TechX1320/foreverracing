@@ -160,7 +160,7 @@ function openCategory(ctx, carId, key) {
     <div class="dialog-body parts-shop-dialog">
       <div class="parts-shop-dialog__titlebar">
         <div>
-          <span class="section-label">${tutorialStep === "buy_first_upgrade" ? "STEP 4/6 • BUY THIS PART" : escapeHtml(buildName(Number(car.buildStage || 1)))}</span>
+          <span class="section-label">${tutorialStep === "buy_first_upgrade" ? "STEP 4/5 • BUY THIS PART" : escapeHtml(buildName(Number(car.buildStage || 1)))}</span>
           <h2>${escapeHtml(specs[0]?.category || key)}</h2>
           <p>${escapeHtml(carLabel(car))}</p>
         </div>
@@ -176,7 +176,7 @@ function openCategory(ctx, carId, key) {
           ? streetCategoryRows(player, car, specs, tutorialStep)
           : choiceCategoryRows(player, car, specs)}
       </div>
-      <div class="parts-shop-dialog__note">Buying adds the part to this car. Installation happens from Garage Inventory.</div>
+      <div class="parts-shop-dialog__note">BUY + INSTALL applies the part immediately. BUY ONLY keeps it in Garage Inventory for later.</div>
       <div class="dialog-actions"><button class="button button--small" type="button" data-close>CLOSE</button><button class="button button--primary button--small" type="button" data-inventory>GARAGE INVENTORY</button></div>
     </div>`);
 
@@ -186,26 +186,79 @@ function openCategory(ctx, carId, key) {
     sessionStorage.setItem("foreverRacing.openInventory", String(car.carId));
     ctx.router.navigate("garage");
   });
-  dialog.querySelectorAll("[data-buy-part]").forEach((button) => {
+  dialog.querySelectorAll("[data-buy-part],[data-buy-install-part]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const installNow = Boolean(button.dataset.buyInstallPart);
+      const catalogId = button.dataset.buyInstallPart || button.dataset.buyPart;
+      await purchasePart(ctx, dialog, car, catalogId, installNow, button);
+    });
+  });
+
+  dialog.querySelectorAll("[data-install-shop-part]").forEach((button) => {
     button.addEventListener("click", async () => {
       button.disabled = true;
       try {
-        const data = await ctx.storage.buyPart(button.dataset.buyPart);
+        const data = await ctx.storage.installPart(button.dataset.installShopPart, car.carId);
         ctx.store.setPlayer(data.player);
         closeDialog(dialog);
-        ctx.toast("Part purchased", "Owned. Now install it from the car's Garage Inventory.");
-        if (data.player?.tutorial?.status === "active" && data.player?.tutorial?.step === "install_first_upgrade") {
-          sessionStorage.setItem("foreverRacing.openInventory", String(car.carId));
-          ctx.router.navigate("garage");
+        ctx.toast("Part installed", "The car's setup and stats were updated.");
+        if (data.player?.tutorial?.status === "active" && data.player?.tutorial?.step === "first_race") {
+          ctx.router.navigate("quick-race");
         } else {
           await renderParts(ctx);
         }
       } catch (err) {
-        ctx.toast("Purchase blocked", err.message);
+        ctx.toast("Install blocked", err.message);
         button.disabled = false;
       }
     });
   });
+}
+
+async function purchasePart(ctx, dialog, car, catalogId, installNow, button) {
+  button.disabled = true;
+  let purchased = null;
+  try {
+    purchased = await ctx.storage.buyPart(catalogId);
+    ctx.store.setPlayer(purchased.player);
+
+    if (!installNow) {
+      closeDialog(dialog);
+      ctx.toast("Part purchased", "Saved to Garage Inventory.");
+      await renderParts(ctx);
+      return;
+    }
+
+    const owned = [...(purchased.player?.inventory?.parts || [])]
+      .reverse()
+      .find((item) =>
+        String(item.catalogId) === String(catalogId)
+        && String(item.purchasedForCarId || "") === String(car.carId)
+        && !item.installedOnCarId
+      );
+
+    if (!owned) throw new Error("Purchased part could not be found in this car's inventory.");
+
+    const installed = await ctx.storage.installPart(owned.inventoryId, car.carId);
+    ctx.store.setPlayer(installed.player);
+    closeDialog(dialog);
+    ctx.toast("Purchased + installed", "Upgrade applied immediately.");
+
+    if (installed.player?.tutorial?.status === "active" && installed.player?.tutorial?.step === "first_race") {
+      ctx.router.navigate("quick-race");
+    } else {
+      await renderParts(ctx);
+    }
+  } catch (err) {
+    if (purchased?.player) {
+      closeDialog(dialog);
+      ctx.toast("Part purchased", `Installation was blocked: ${err.message}`);
+      await renderParts(ctx);
+      return;
+    }
+    ctx.toast("Purchase blocked", err.message);
+    button.disabled = false;
+  }
 }
 
 function streetCategoryRows(player, car, specs, tutorialStep = null) {
@@ -225,8 +278,10 @@ function streetCategoryRows(player, car, specs, tutorialStep = null) {
       let action = '<span class="status-text">LOCKED</span>';
       if (installed) action = '<span class="status-text status-text--good">INSTALLED</span>';
       else if (complete) action = '<span class="status-text status-text--good">COMPLETED</span>';
-      else if (owned) action = '<span class="status-text status-text--good">OWNED</span>';
-      else if (next) action = `<button class="button button--primary button--small" data-buy-part="${escapeHtml(part.catalogId)}" ${canBuy ? "" : "disabled"}>BUY • ${money(part.price)} CR</button>`;
+      else if (owned) action = `<button class="button button--primary button--small" data-install-shop-part="${escapeHtml(owned.inventoryId)}">INSTALL</button>`;
+      else if (next) action = tutorialStep === "buy_first_upgrade"
+        ? `<button class="button button--primary button--small" data-buy-install-part="${escapeHtml(part.catalogId)}" ${canBuy ? "" : "disabled"}>BUY + INSTALL • ${money(part.price)} CR</button>`
+        : `<div class="parts-shop-row__buy-actions"><button class="button button--primary button--small" data-buy-install-part="${escapeHtml(part.catalogId)}" ${canBuy ? "" : "disabled"}>BUY + INSTALL • ${money(part.price)} CR</button><button class="button button--small" data-buy-part="${escapeHtml(part.catalogId)}" ${canBuy ? "" : "disabled"}>BUY ONLY</button></div>`;
 
       return `<article class="parts-shop-row ${complete ? "is-complete" : ""}">
         <div class="parts-shop-row__title"><span>STEP ${tier}</span><strong>${escapeHtml(part.name)}</strong><small>${escapeHtml(part.description || "")}</small></div>
@@ -256,8 +311,8 @@ function choiceCategoryRows(player, car, specs) {
       <div class="parts-shop-row__action">${installed
         ? '<span class="status-text status-text--good">INSTALLED</span>'
         : owned
-          ? '<span class="status-text status-text--good">OWNED</span>'
-          : `<button class="button button--primary button--small" data-buy-part="${escapeHtml(part.catalogId)}" ${canBuy ? "" : "disabled"}>BUY • ${money(part.price)} CR</button>`
+          ? `<button class="button button--primary button--small" data-install-shop-part="${escapeHtml(owned.inventoryId)}">INSTALL</button>`
+          : `<div class="parts-shop-row__buy-actions"><button class="button button--primary button--small" data-buy-install-part="${escapeHtml(part.catalogId)}" ${canBuy ? "" : "disabled"}>BUY + INSTALL • ${money(part.price)} CR</button><button class="button button--small" data-buy-part="${escapeHtml(part.catalogId)}" ${canBuy ? "" : "disabled"}>BUY ONLY</button></div>`
       }</div>
     </article>`;
   }).join("");
@@ -293,8 +348,8 @@ function promptStageConversion(ctx, carId) {
 function tutorialObjective(step, carId) {
   if (step === "buy_first_upgrade") {
     return `<section class="ftue-focus-panel ftue-focus-panel--compact">
-      <div class="ftue-focus-panel__step">STEP 4/6</div>
-      <div class="ftue-focus-panel__copy"><span>FIRST MOD</span><strong>Click INTAKE.</strong><p>Everything else is locked. Buy the Stage 1 Intake, then the game will take you directly back to your Garage.</p></div>
+      <div class="ftue-focus-panel__step">STEP 4/5</div>
+      <div class="ftue-focus-panel__copy"><span>FIRST MOD</span><strong>Click INTAKE.</strong><p>Everything else is locked. Buy + Install the Stage 1 Intake, then go straight to your first 1/4-mile race.</p></div>
       <div class="ftue-focus-panel__arrow">↓ INTAKE IS HIGHLIGHTED</div>
     </section>`;
   }
