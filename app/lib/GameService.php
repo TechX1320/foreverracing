@@ -956,12 +956,15 @@ final class GameService
     private static function generateUsedLot(int $now, int $refresh): array
     {
         $catalog = self::carCatalog();
+        $expiresAt = $now + $refresh;
+        $nextReleaseAt = self::nextScheduledReleaseTimestamp($catalog, $now);
+        if ($nextReleaseAt !== null) $expiresAt = min($expiresAt, $nextReleaseAt);
         $candidates = array_values(array_filter(
             $catalog,
             fn(array $spec): bool => ($spec['market']['classifieds'] ?? true) !== false && self::isContentReleased($spec)
         ));
         if (!$candidates) {
-            return ['generatedAt' => $now, 'expiresAt' => $now + $refresh, 'listings' => []];
+            return ['generatedAt' => $now, 'expiresAt' => $expiresAt, 'listings' => []];
         }
 
         $makeListing = function (array $spec, bool $starterListing = false): array {
@@ -1000,7 +1003,7 @@ final class GameService
             $listings[] = $makeListing($spec, false);
         }
 
-        return ['generatedAt' => $now, 'expiresAt' => $now + $refresh, 'listings' => $listings];
+        return ['generatedAt' => $now, 'expiresAt' => $expiresAt, 'listings' => $listings];
     }
 
     private static function paintPalette(array $spec): array
@@ -1034,6 +1037,22 @@ final class GameService
         $color = trim((string)($paintColor ?? ''));
         if ($color !== '') $visual['paintColor'] = $color;
         return $visual;
+    }
+
+    private static function nextScheduledReleaseTimestamp(array $contents, int $now): ?int
+    {
+        $next = null;
+        foreach ($contents as $content) {
+            if (!is_array($content)) continue;
+            $release = is_array($content['release'] ?? null) ? $content['release'] : null;
+            if ($release === null || strtolower(trim((string)($release['mode'] ?? ''))) !== 'scheduled') continue;
+            $publishAt = trim((string)($release['publishAt'] ?? ''));
+            if ($publishAt === '') continue;
+            $timestamp = strtotime($publishAt);
+            if ($timestamp === false || $timestamp <= $now) continue;
+            if ($next === null || $timestamp < $next) $next = $timestamp;
+        }
+        return $next;
     }
 
     private static function isContentReleased(array $content, ?int $now = null): bool
