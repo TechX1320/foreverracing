@@ -73,7 +73,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.5.0-a.1"')) throw new Error('Static index is missing the V0.5A.1 build marker.');
+if (!html.includes('data-build="0.5.0-a.2"')) throw new Error('Static index is missing the V0.5A.2 build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -348,7 +348,8 @@ if (!html.includes('CONTENT STUDIO') ||
     !contentStudioSource.includes('accept="image/png,.png"') ||
     !contentStudioSource.includes('benchmarkPerformance') ||
     !contentStudioSource.includes('performanceClassFromIndex') ||
-    !contentStudioSource.includes('SAVE CAR LOCALLY') ||
+    !contentStudioSource.includes('SAVE DRAFT LOCALLY') ||
+    !contentStudioSource.includes('ACTIVATE LOCALLY + RELOAD') ||
     !contentStudioSource.includes('EXPORT CAR JSON')) {
   throw new Error('V0.5A Car Creator UI / PI / PNG workflow is incomplete.');
 }
@@ -379,5 +380,22 @@ if (!html.includes('rel="icon" href="favicon.svg"') ||
   throw new Error('V0.5A.1 Content Studio certified/atlas preview fallback is incomplete.');
 }
 console.log('V0.5A.1 Content Studio preview checks passed.');
+
+if (!contentStudioSource.includes('DEFAULT_PAINT_PALETTE') ||
+    !contentStudioSource.includes('paintPaletteMarkup') ||
+    !contentStudioSource.includes('previewAnchorRatio') ||
+    !contentStudioSource.includes('marketPlacementLabel') ||
+    !contentStudioSource.includes('USED_LOT_KEY') ||
+    !contentStudioCatalogSource.includes('findContentStudioRecord') ||
+    !rendererSource.includes('Boolean(paintColor)') ||
+    !localGameSource.includes('paintColor: randomPaintColor(spec)') ||
+    !localGameSource.includes('withPaintColor') ||
+    !cssV04b.includes('V0.5A.2 Content Studio polish')) {
+  throw new Error('V0.5A.2 Content Studio market/paint polish is incomplete.');
+}
+if (!carCatalog.every((car) => Array.isArray(car.visual?.paintPalette) && car.visual.paintPalette.length === 5)) {
+  throw new Error('V0.5A.2 playable cars must have five factory paint colors.');
+}
+console.log('V0.5A.2 Content Studio market/paint polish checks passed.');
 
 
