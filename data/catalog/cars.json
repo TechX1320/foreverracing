@@ -1,339 +1,248 @@
 [
   {
     "stockId": 1,
-    "year": 1998,
-    "make": "Honda",
-    "model": "Civic DX",
-    "class": "D",
-    "price": 9500,
+    "make": "Volkswagen",
+    "model": "Golf GTI Mk6",
+    "displayName": "Volkswagen Golf GTI Mk6",
+    "starter": true,
+    "price": 15000,
+    "engine": {
+      "displacementLiters": 2,
+      "configuration": "I4",
+      "aspiration": "Turbo",
+      "layout": "Front",
+      "peakHp": 200,
+      "peakHpRpm": 5100,
+      "peakTorque": 207,
+      "peakTorqueRpm": 1800,
+      "redlineRpm": 6000,
+      "revCutRpm": 6500
+    },
     "base": {
-      "hp": 106,
-      "torque": 103,
-      "weight": 2388,
-      "grip": 0.92,
+      "hp": 200,
+      "torque": 207,
+      "weight": 3034,
+      "grip": 1,
       "drivetrain": "FWD"
     },
-    "starter": true,
-    "factoryEngineId": "honda_d16y7_16",
-    "engineBay": {
-      "sizeClass": 2,
-      "orientations": [
-        "transverse"
-      ],
-      "factoryDisplacement": 1.6,
-      "stage3DisplacementAllowance": 0.6
+    "benchmark": {
+      "quarterMileEt": 15.938,
+      "performanceIndex": 325,
+      "passes": 51,
+      "version": 1
+    },
+    "pricing": {
+      "status": "temporary-balance"
     },
     "visual": {
-      "profile": "compact",
-      "color": "#6d9bb8",
-      "sprites": {
-        "topDown": {
-          "sheet": "assets/art/cars/cars-top-down-v1.png",
-          "index": 0,
-          "columns": 4,
-          "rows": 1,
-          "src": "assets/art/cars/vehicles/1998-honda-civic-dx-top-down-v03a.png"
+      "paintColor": null,
+      "layered": {
+        "assetId": "golf_gti",
+        "sourceName": "Golf_GTI",
+        "canvas": {
+          "width": 281,
+          "height": 117
         },
-        "sideProfile": {
-          "src": "assets/art/cars/vehicles/1998-honda-civic-dx-side-profile.png"
+        "layers": {
+          "body": {
+            "src": "assets/art/cars/layered/golf_gti/body.png",
+            "width": 281,
+            "height": 111
+          },
+          "wheel": {
+            "src": "assets/art/cars/layered/golf_gti/wheel.png",
+            "width": 50,
+            "height": 50
+          },
+          "disk": {
+            "src": "assets/art/cars/layered/golf_gti/disk.png",
+            "width": 34,
+            "height": 34
+          },
+          "detail": {
+            "src": "assets/art/cars/layered/golf_gti/detail.png",
+            "width": 281,
+            "height": 111
+          }
+        },
+        "anchors": {
+          "rearWheelCenter": {
+            "x": 46,
+            "y": 90
+          },
+          "frontWheelCenter": {
+            "x": 224.5,
+            "y": 90
+          },
+          "frontBumperX": 280,
+          "rearBumperX": 0,
+          "groundY": 115
         }
       }
     }
   },
   {
     "stockId": 2,
-    "year": 2002,
-    "make": "Acura",
-    "model": "RSX",
-    "class": "D",
-    "price": 16800,
-    "base": {
-      "hp": 160,
-      "torque": 141,
-      "weight": 2721,
-      "grip": 0.96,
-      "drivetrain": "FWD"
-    },
+    "make": "Mazda",
+    "model": "RX-8",
+    "displayName": "Mazda RX-8",
     "starter": true,
-    "factoryEngineId": null,
+    "price": 15000,
+    "engine": {
+      "displacementLiters": 1.3,
+      "configuration": "Rotary",
+      "aspiration": "Naturally Aspirated",
+      "layout": "Front",
+      "peakHp": 238,
+      "peakHpRpm": 8500,
+      "peakTorque": 159,
+      "peakTorqueRpm": 5500,
+      "redlineRpm": 9000,
+      "revCutRpm": 9500
+    },
+    "base": {
+      "hp": 238,
+      "torque": 159,
+      "weight": 3029,
+      "grip": 1,
+      "drivetrain": "RWD"
+    },
+    "benchmark": {
+      "quarterMileEt": 15.041,
+      "performanceIndex": 397,
+      "passes": 51,
+      "version": 1
+    },
+    "pricing": {
+      "status": "temporary-balance"
+    },
     "visual": {
-      "profile": "sports",
-      "color": "#818891"
+      "paintColor": null,
+      "layered": {
+        "assetId": "mazda_rx8",
+        "sourceName": "Mazda_RX8",
+        "canvas": {
+          "width": 311,
+          "height": 117
+        },
+        "layers": {
+          "body": {
+            "src": "assets/art/cars/layered/mazda_rx8/body.png",
+            "width": 311,
+            "height": 114
+          },
+          "wheel": {
+            "src": "assets/art/cars/layered/mazda_rx8/wheel.png",
+            "width": 52,
+            "height": 52
+          },
+          "disk": {
+            "src": "assets/art/cars/layered/mazda_rx8/disk.png",
+            "width": 34,
+            "height": 35
+          },
+          "detail": {
+            "src": "assets/art/cars/layered/mazda_rx8/detail.png",
+            "width": 311,
+            "height": 114
+          }
+        },
+        "anchors": {
+          "rearWheelCenter": {
+            "x": 63.5,
+            "y": 89
+          },
+          "frontWheelCenter": {
+            "x": 254.5,
+            "y": 89
+          },
+          "frontBumperX": 307,
+          "rearBumperX": 3,
+          "groundY": 115
+        }
+      }
     }
   },
   {
     "stockId": 3,
-    "year": 2005,
-    "make": "Ford",
-    "model": "Mustang GT",
-    "class": "C",
-    "price": 24500,
-    "base": {
-      "hp": 300,
-      "torque": 320,
-      "weight": 3483,
-      "grip": 0.98,
-      "drivetrain": "RWD"
-    },
-    "starter": false,
-    "factoryEngineId": "ford_modular_46_3v",
-    "engineBay": {
-      "sizeClass": 5,
-      "orientations": [
-        "longitudinal"
-      ],
-      "factoryDisplacement": 4.6,
-      "stage3DisplacementAllowance": 0.6
-    },
-    "visual": {
-      "profile": "muscle",
-      "color": "#b84b43",
-      "sprites": {
-        "topDown": {
-          "sheet": "assets/art/cars/cars-top-down-v1.png",
-          "index": 3,
-          "columns": 4,
-          "rows": 1,
-          "src": "assets/art/cars/vehicles/2005-ford-mustang-gt-top-down-v03a.png"
-        },
-        "sideProfile": {
-          "src": "assets/art/cars/vehicles/2005-ford-mustang-gt-side-profile.png"
-        }
-      }
-    }
-  },
-  {
-    "stockId": 4,
-    "year": 2003,
-    "make": "Nissan",
-    "model": "350Z",
-    "class": "C",
-    "price": 27800,
-    "base": {
-      "hp": 287,
-      "torque": 274,
-      "weight": 3197,
-      "grip": 1.01,
-      "drivetrain": "RWD"
-    },
-    "starter": false,
-    "factoryEngineId": "nissan_vq35de_35",
-    "engineBay": {
-      "sizeClass": 4,
-      "orientations": [
-        "longitudinal"
-      ],
-      "factoryDisplacement": 3.5,
-      "stage3DisplacementAllowance": 0.6
-    },
-    "visual": {
-      "profile": "sports",
-      "color": "#c59b3d",
-      "sprites": {
-        "topDown": {
-          "sheet": "assets/art/cars/cars-top-down-v1.png",
-          "index": 1,
-          "columns": 4,
-          "rows": 1,
-          "src": "assets/art/cars/vehicles/2003-nissan-350z-top-down.png"
-        },
-        "sideProfile": {
-          "src": "assets/art/cars/vehicles/2003-nissan-350z-side-profile.png"
-        }
-      }
-    }
-  },
-  {
-    "stockId": 5,
-    "year": 2002,
-    "make": "Chevrolet",
-    "model": "Camaro Z28",
-    "class": "C",
-    "price": 26400,
-    "base": {
-      "hp": 310,
-      "torque": 340,
-      "weight": 3439,
-      "grip": 0.97,
-      "drivetrain": "RWD"
-    },
-    "starter": false,
-    "factoryEngineId": null,
-    "visual": {
-      "profile": "muscle",
-      "color": "#5b78a6"
-    }
-  },
-  {
-    "stockId": 6,
-    "year": 2004,
-    "make": "Subaru",
-    "model": "Impreza WRX STI",
-    "class": "C",
-    "price": 32200,
-    "base": {
-      "hp": 300,
-      "torque": 300,
-      "weight": 3263,
-      "grip": 1.08,
-      "drivetrain": "AWD"
-    },
-    "starter": false,
-    "factoryEngineId": null,
-    "visual": {
-      "profile": "sedan",
-      "color": "#406a8c",
-      "sprites": {
-        "topDown": {
-          "sheet": "assets/art/cars/cars-top-down-v1.png",
-          "index": 2,
-          "columns": 4,
-          "rows": 1,
-          "src": "assets/art/cars/vehicles/2004-subaru-impreza-wrx-sti-top-down.png"
-        }
-      }
-    }
-  },
-  {
-    "stockId": 7,
-    "year": 1999,
-    "make": "Mazda",
-    "model": "MX-5 Miata",
-    "class": "D",
-    "price": 14900,
-    "base": {
-      "hp": 140,
-      "torque": 119,
-      "weight": 2350,
-      "grip": 1.02,
-      "drivetrain": "RWD"
-    },
+    "make": "Renault",
+    "model": "Clio V6 Sport",
+    "displayName": "Renault Clio V6 Sport",
     "starter": true,
-    "factoryEngineId": null,
-    "visual": {
-      "profile": "roadster",
-      "color": "#9d4b45"
-    }
-  },
-  {
-    "stockId": 8,
-    "year": 2013,
-    "make": "Fiat",
-    "model": "500 Abarth",
-    "class": "D",
-    "price": 21900,
-    "base": {
-      "hp": 160,
-      "torque": 170,
-      "weight": 2512,
-      "grip": 0.98,
-      "drivetrain": "FWD"
+    "price": 15000,
+    "engine": {
+      "displacementLiters": 2.9,
+      "configuration": "V6",
+      "aspiration": "Naturally Aspirated",
+      "layout": "Rear",
+      "peakHp": 255,
+      "peakHpRpm": 7150,
+      "peakTorque": 221,
+      "peakTorqueRpm": 4650,
+      "redlineRpm": 7200,
+      "revCutRpm": 7700
     },
-    "starter": false,
-    "factoryEngineId": "fiat_multiair_14t",
-    "engineBay": {
-      "sizeClass": 2,
-      "orientations": [
-        "transverse"
-      ],
-      "factoryDisplacement": 1.4,
-      "stage3DisplacementAllowance": 0.5
-    },
-    "visual": {
-      "profile": "micro",
-      "color": "#8f979e"
-    }
-  },
-  {
-    "stockId": 9,
-    "year": 2013,
-    "make": "Hyundai",
-    "model": "Veloster Turbo",
-    "class": "D",
-    "price": 22500,
     "base": {
-      "hp": 201,
-      "torque": 195,
-      "weight": 2800,
-      "grip": 0.99,
-      "drivetrain": "FWD"
-    },
-    "starter": false,
-    "factoryEngineId": null,
-    "visual": {
-      "profile": "hatch",
-      "color": "#587d91"
-    }
-  },
-  {
-    "stockId": 10,
-    "year": 2018,
-    "make": "Subaru",
-    "model": "Impreza 2.0i",
-    "class": "D",
-    "price": 21400,
-    "base": {
-      "hp": 152,
-      "torque": 145,
-      "weight": 3076,
-      "grip": 1.04,
-      "drivetrain": "AWD"
-    },
-    "starter": false,
-    "factoryEngineId": null,
-    "visual": {
-      "profile": "hatch",
-      "color": "#6c7d86"
-    }
-  },
-  {
-    "stockId": 11,
-    "year": 2016,
-    "make": "Ford",
-    "model": "Shelby GT350",
-    "class": "B",
-    "price": 54800,
-    "base": {
-      "hp": 526,
-      "torque": 429,
-      "weight": 3760,
-      "grip": 1.08,
+      "hp": 255,
+      "torque": 221,
+      "weight": 3086,
+      "grip": 1,
       "drivetrain": "RWD"
     },
-    "starter": false,
-    "factoryEngineId": "ford_coyote_50",
-    "engineBay": {
-      "sizeClass": 5,
-      "orientations": [
-        "longitudinal"
-      ],
-      "factoryDisplacement": 5.2,
-      "stage3DisplacementAllowance": 0.6
+    "benchmark": {
+      "quarterMileEt": 14.792,
+      "performanceIndex": 417,
+      "passes": 51,
+      "version": 1
+    },
+    "pricing": {
+      "status": "temporary-balance"
     },
     "visual": {
-      "profile": "muscle",
-      "color": "#51627c"
-    }
-  },
-  {
-    "stockId": 12,
-    "year": 2003,
-    "make": "Acura",
-    "model": "NSX",
-    "class": "B",
-    "price": 68500,
-    "base": {
-      "hp": 290,
-      "torque": 224,
-      "weight": 3153,
-      "grip": 1.1,
-      "drivetrain": "RWD"
-    },
-    "starter": false,
-    "factoryEngineId": null,
-    "visual": {
-      "profile": "sports",
-      "color": "#9b4c48"
+      "paintColor": null,
+      "layered": {
+        "assetId": "renault_clio",
+        "sourceName": "Renault_Clio",
+        "canvas": {
+          "width": 252,
+          "height": 114
+        },
+        "layers": {
+          "body": {
+            "src": "assets/art/cars/layered/renault_clio/body.png",
+            "width": 252,
+            "height": 111
+          },
+          "wheel": {
+            "src": "assets/art/cars/layered/renault_clio/wheel.png",
+            "width": 48,
+            "height": 48
+          },
+          "disk": {
+            "src": "assets/art/cars/layered/renault_clio/disk.png",
+            "width": 36,
+            "height": 36
+          },
+          "detail": {
+            "src": "assets/art/cars/layered/renault_clio/detail.png",
+            "width": 252,
+            "height": 111
+          }
+        },
+        "anchors": {
+          "rearWheelCenter": {
+            "x": 34.5,
+            "y": 88
+          },
+          "frontWheelCenter": {
+            "x": 207.5,
+            "y": 88
+          },
+          "frontBumperX": 248,
+          "rearBumperX": 2,
+          "groundY": 112
+        }
+      }
     }
   }
 ]
