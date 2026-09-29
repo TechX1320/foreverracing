@@ -115,8 +115,8 @@ final class GameService
     public static function purchaseNewCar(int $stockId): array
     {
         $spec = self::findBy(self::carCatalog(), 'stockId', $stockId);
-        if (!$spec || (($spec['market']['showroom'] ?? false) !== true) || !self::isContentReleased($spec)) {
-            throw new GameException('That showroom car is not currently released.', 404);
+        if (!$spec) {
+            throw new GameException('That showroom car does not exist.', 404);
         }
 
         return self::mutatePlayer(function (array $player) use ($spec): array {
@@ -125,6 +125,9 @@ final class GameService
             }
             if (($player['tutorial']['status'] ?? '') !== 'active' && (int)($player['progression']['level'] ?? 1) < 5) {
                 throw new GameException('The Showroom unlocks at Level 5. Keep building through Classifieds first.');
+            }
+            if (($spec['market']['showroom'] ?? false) !== true || !self::isContentReleased($spec)) {
+                throw new GameException('That showroom car is not currently released.', 404);
             }
             $price = (int)$spec['price'];
             self::requireCredits($player, $price);
