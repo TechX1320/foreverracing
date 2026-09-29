@@ -65,7 +65,7 @@ copyTree($root . '/assets', $docs . '/assets');
 copyTree($root . '/data/catalog', $docs . '/data/catalog');
 copyTree($root . '/data/config', $docs . '/data/config');
 
-foreach (['manifest.webmanifest', 'service-worker.js'] as $file) {
+foreach (['manifest.webmanifest', 'service-worker.js', 'favicon.svg'] as $file) {
     if (!copy($root . '/' . $file, $docs . '/' . $file)) {
         throw new RuntimeException("Unable to copy {$file}");
     }
@@ -82,7 +82,7 @@ Build: {$build}
 Storage mode: local
 Offline service worker: disabled in static development mode
 Race presentation: persistent two-phase start/finish with blocking real-time playback
-V0.5A: Content Studio / Car Creator with live PI, layered PNG authoring and local catalog playtesting
+V0.5A.1: Content Studio preview fixes for certified/atlas cars, editable layers and favicon cleanup
 Do not edit docs/ by hand; run php scripts/build-static.php.
 ");
 

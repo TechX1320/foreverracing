@@ -3,7 +3,15 @@ export function renderVehicle(car, { stage = null, compact = false, view = "side
   if (!layered?.canvas || !layered?.layers || !layered?.anchors) {
     return renderMissingArt(car, { compact, view });
   }
-  const useEditableLayers = forceLayers || String(car?.visual?.renderMode || "") === "layers";
+
+  const wantsEditableLayers = forceLayers || String(car?.visual?.renderMode || "") === "layers";
+  const hasEditableLayers = hasLayerSource(layered.layers) || hasLayerSource(layered.raceLayers);
+  const useEditableLayers = wantsEditableLayers && hasEditableLayers;
+  const hasCertifiedArt = Boolean(String(layered.certifiedSrc || "").trim() || layered.certifiedAtlas?.src);
+  if (!hasEditableLayers && !hasCertifiedArt) {
+    return renderMissingArt(car, { compact, view });
+  }
+
   return renderLayeredVehicle(car, layered, { stage, compact, view, className, animatedWheels, forceLayers: useEditableLayers });
 }
 
@@ -43,7 +51,7 @@ export function vehicleGeometry(car) {
 function renderLayeredVehicle(car, layered, { compact, view, className, animatedWheels, forceLayers }) {
   const canvasWidth = Math.max(1, Number(layered.canvas.width || 1));
   const canvasHeight = Math.max(1, Number(layered.canvas.height || 1));
-  const layers = animatedWheels && layered.raceLayers ? layered.raceLayers : (layered.layers || {});
+  const layers = resolveLayers(layered, { animatedWheels, forceLayers });
   const anchors = layered.anchors || {};
   const rear = anchors.rearWheelCenter || {};
   const front = anchors.frontWheelCenter || {};
@@ -139,6 +147,32 @@ function renderLayeredVehicle(car, layered, { compact, view, className, animated
         ${detail}
       </div>
     </div>`;
+}
+
+function resolveLayers(layered, { animatedWheels = false, forceLayers = false } = {}) {
+  const authored = layered?.layers || {};
+  const race = layered?.raceLayers || null;
+  const useRaceSources = Boolean(race) && (animatedWheels || forceLayers);
+  if (!useRaceSources) return authored;
+
+  const merged = {};
+  for (const key of ["wheel", "disk", "body", "detail"]) {
+    const authoredLayer = authored[key] || {};
+    const raceLayer = race[key] || {};
+    const uploaded = String(authoredLayer.src || "").startsWith("data:") || String(authoredLayer.src || "").startsWith("blob:");
+    const sourceLayer = uploaded ? authoredLayer : (raceLayer.src ? raceLayer : authoredLayer);
+    merged[key] = {
+      ...sourceLayer,
+      x: authoredLayer.x ?? sourceLayer.x ?? 0,
+      y: authoredLayer.y ?? sourceLayer.y ?? 0,
+      z: authoredLayer.z ?? sourceLayer.z,
+    };
+  }
+  return merged;
+}
+
+function hasLayerSource(layers) {
+  return Boolean(layers && Object.values(layers).some((layer) => String(layer?.src || "").trim()));
 }
 
 function smokeAnchor(position, center, canvasWidth, canvasHeight) {

@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.5.0-a playable direction
+## V0.5.0-a.1 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,14 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.5A.1 Content Studio preview hotfix
+
+- Existing playable cars now open in Content Studio using their certified production artwork instead of immediately forcing raw editable layers.
+- Art-roster-only cars now correctly fall back to the certified atlas until PNG layers are actually available.
+- Editable mode for the three current playable cars uses the known-good race PNG layer sources while preserving Content Studio X/Y/Z transforms.
+- Paint or layer edits switch into editable-layer preview mode; untouched cars stay visually identical to normal gameplay.
+- Added an explicit Forever Racing favicon to remove the browser's missing-favicon request.
 
 ### V0.5A Content Studio / Car Creator
 
