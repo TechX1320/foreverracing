@@ -413,6 +413,7 @@ function physicsSection(car, engines = []) {
   const engineOptions = [
     ["", "Custom / Legacy Engine"],
     ...engines
+      .filter((engine) => (Number(engine.peakHp || 0) > 0 && Number(engine.peakTorque || 0) > 0) || String(engine.engineId) === String(car.factoryEngineId || ""))
       .slice()
       .sort((a, b) => engineLabel(a).localeCompare(engineLabel(b)))
       .map((engine) => [engine.engineId, engineLabel(engine)]),
