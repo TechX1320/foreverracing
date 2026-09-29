@@ -1347,3 +1347,12 @@ dialog.fr-dialog:has(.garage-inventory-dialog){
   .race-strip__timing-line span{font-size:8px}
 }
 
+
+.race-preview-mystery{
+  margin:0;
+  padding:9px 12px;
+  border-top:1px solid var(--border);
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.45;
+}
