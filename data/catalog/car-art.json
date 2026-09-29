@@ -60,7 +60,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 22,
+        "carY": 38,
+        "renderWidth": 315,
+        "renderHeight": 109
       }
     },
     {
@@ -119,7 +124,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 33,
+        "carY": 31,
+        "renderWidth": 294,
+        "renderHeight": 116
       }
     },
     {
@@ -178,7 +188,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 29,
+        "carY": 24,
+        "renderWidth": 302,
+        "renderHeight": 123
       }
     },
     {
@@ -237,7 +252,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 21,
+        "carY": 26,
+        "renderWidth": 318,
+        "renderHeight": 121
       }
     },
     {
@@ -296,7 +316,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 29,
+        "carY": 28,
+        "renderWidth": 302,
+        "renderHeight": 119
       }
     },
     {
@@ -355,7 +380,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 26,
+        "carY": 29,
+        "renderWidth": 307,
+        "renderHeight": 118
       }
     },
     {
@@ -414,7 +444,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 29,
+        "carY": 30,
+        "renderWidth": 301,
+        "renderHeight": 117
       }
     },
     {
@@ -473,7 +508,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 26,
+        "carY": 22,
+        "renderWidth": 308,
+        "renderHeight": 125
       }
     },
     {
@@ -532,7 +572,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 21,
+        "carY": 22,
+        "renderWidth": 318,
+        "renderHeight": 125
       }
     },
     {
@@ -591,7 +636,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 24,
+        "carY": 28,
+        "renderWidth": 311,
+        "renderHeight": 119
       }
     },
     {
@@ -650,7 +700,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 33,
+        "carY": 32,
+        "renderWidth": 293,
+        "renderHeight": 115
       }
     },
     {
@@ -709,7 +764,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 33,
+        "carY": 32,
+        "renderWidth": 293,
+        "renderHeight": 115
       }
     },
     {
@@ -768,7 +828,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 30,
+        "carY": 33,
+        "renderWidth": 299,
+        "renderHeight": 114
       }
     },
     {
@@ -827,7 +892,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 25,
+        "carY": 35,
+        "renderWidth": 309,
+        "renderHeight": 112
       }
     },
     {
@@ -886,7 +956,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 22,
+        "carY": 28,
+        "renderWidth": 315,
+        "renderHeight": 119
       }
     },
     {
@@ -945,7 +1020,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 31,
+        "carY": 32,
+        "renderWidth": 297,
+        "renderHeight": 115
       }
     },
     {
@@ -1004,7 +1084,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 19,
+        "carY": 39,
+        "renderWidth": 322,
+        "renderHeight": 108
       }
     },
     {
@@ -1063,7 +1148,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 16,
+        "carY": 23,
+        "renderWidth": 328,
+        "renderHeight": 124
       }
     },
     {
@@ -1122,7 +1212,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 32,
+        "carY": 25,
+        "renderWidth": 295,
+        "renderHeight": 122
       }
     },
     {
@@ -1181,7 +1276,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 25,
+        "carY": 38,
+        "renderWidth": 310,
+        "renderHeight": 109
       }
     },
     {
@@ -1240,7 +1340,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 24,
+        "carY": 28,
+        "renderWidth": 311,
+        "renderHeight": 119
       }
     },
     {
@@ -1299,7 +1404,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 24,
+        "carY": 28,
+        "renderWidth": 311,
+        "renderHeight": 119
       }
     },
     {
@@ -1358,7 +1468,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 22,
+        "carY": 33,
+        "renderWidth": 315,
+        "renderHeight": 114
       }
     },
     {
@@ -1417,7 +1532,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 22,
+        "carY": 40,
+        "renderWidth": 315,
+        "renderHeight": 107
       }
     },
     {
@@ -1476,7 +1596,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 20,
+        "carY": 36,
+        "renderWidth": 320,
+        "renderHeight": 111
       }
     },
     {
@@ -1535,7 +1660,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 39,
+        "carY": 28,
+        "renderWidth": 281,
+        "renderHeight": 119
       }
     },
     {
@@ -1599,7 +1729,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 39,
+        "carY": 25,
+        "renderWidth": 281,
+        "renderHeight": 122
       }
     },
     {
@@ -1658,7 +1793,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 23,
+        "carY": 23,
+        "renderWidth": 314,
+        "renderHeight": 124
       }
     },
     {
@@ -1717,7 +1857,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 32,
+        "carY": 12,
+        "renderWidth": 295,
+        "renderHeight": 135
       }
     },
     {
@@ -1776,7 +1921,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 28,
+        "carY": 30,
+        "renderWidth": 303,
+        "renderHeight": 117
       }
     },
     {
@@ -1835,7 +1985,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 29,
+        "carY": 29,
+        "renderWidth": 301,
+        "renderHeight": 118
       }
     },
     {
@@ -1894,7 +2049,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 24,
+        "carY": 34,
+        "renderWidth": 312,
+        "renderHeight": 113
       }
     },
     {
@@ -1953,7 +2113,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 36,
+        "carY": 33,
+        "renderWidth": 288,
+        "renderHeight": 114
       }
     },
     {
@@ -2012,7 +2177,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 28,
+        "carY": 26,
+        "renderWidth": 303,
+        "renderHeight": 121
       }
     },
     {
@@ -2071,7 +2241,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 33,
+        "carY": 36,
+        "renderWidth": 294,
+        "renderHeight": 111
       }
     },
     {
@@ -2130,7 +2305,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 31,
+        "carY": 33,
+        "renderWidth": 298,
+        "renderHeight": 114
       }
     },
     {
@@ -2189,7 +2369,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 28,
+        "carY": 39,
+        "renderWidth": 304,
+        "renderHeight": 108
       }
     },
     {
@@ -2248,7 +2433,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 28,
+        "carY": 20,
+        "renderWidth": 303,
+        "renderHeight": 127
       }
     },
     {
@@ -2307,7 +2497,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 42,
+        "carY": 40,
+        "renderWidth": 275,
+        "renderHeight": 107
       }
     },
     {
@@ -2366,7 +2561,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 18,
+        "carY": 21,
+        "renderWidth": 324,
+        "renderHeight": 126
       }
     },
     {
@@ -2425,7 +2625,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 0.988636,
+        "carX": 6,
+        "carY": 37,
+        "renderWidth": 348,
+        "renderHeight": 110
       }
     },
     {
@@ -2489,7 +2694,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 24,
+        "carY": 25,
+        "renderWidth": 311,
+        "renderHeight": 122
       }
     },
     {
@@ -2548,7 +2758,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 30,
+        "carY": 35,
+        "renderWidth": 299,
+        "renderHeight": 112
       }
     },
     {
@@ -2607,7 +2822,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 25,
+        "carY": 28,
+        "renderWidth": 310,
+        "renderHeight": 119
       }
     },
     {
@@ -2666,7 +2886,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 27,
+        "carY": 31,
+        "renderWidth": 306,
+        "renderHeight": 116
       }
     },
     {
@@ -2725,7 +2950,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 28,
+        "carY": 24,
+        "renderWidth": 303,
+        "renderHeight": 123
       }
     },
     {
@@ -2784,7 +3014,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 21,
+        "carY": 22,
+        "renderWidth": 317,
+        "renderHeight": 125
       }
     },
     {
@@ -2843,7 +3078,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 16,
+        "carY": 33,
+        "renderWidth": 328,
+        "renderHeight": 114
       }
     },
     {
@@ -2902,7 +3142,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 35,
+        "carY": 33,
+        "renderWidth": 290,
+        "renderHeight": 114
       }
     },
     {
@@ -2966,7 +3211,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 54,
+        "carY": 28,
+        "renderWidth": 252,
+        "renderHeight": 119
       }
     },
     {
@@ -3025,7 +3275,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 33,
+        "carY": 38,
+        "renderWidth": 293,
+        "renderHeight": 109
       }
     },
     {
@@ -3084,7 +3339,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 24,
+        "carY": 42,
+        "renderWidth": 312,
+        "renderHeight": 105
       }
     },
     {
@@ -3143,7 +3403,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 21,
+        "carY": 24,
+        "renderWidth": 317,
+        "renderHeight": 123
       }
     },
     {
@@ -3202,7 +3467,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 27,
+        "carY": 31,
+        "renderWidth": 306,
+        "renderHeight": 116
       }
     },
     {
@@ -3261,7 +3531,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 33,
+        "carY": 38,
+        "renderWidth": 293,
+        "renderHeight": 109
       }
     },
     {
@@ -3320,7 +3595,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 36,
+        "carY": 32,
+        "renderWidth": 288,
+        "renderHeight": 115
       }
     },
     {
@@ -3379,7 +3659,12 @@
         "columns": 4,
         "rows": 3,
         "cellWidth": 360,
-        "cellHeight": 150
+        "cellHeight": 150,
+        "scale": 1,
+        "carX": 14,
+        "carY": 24,
+        "renderWidth": 331,
+        "renderHeight": 123
       }
     }
   ],
