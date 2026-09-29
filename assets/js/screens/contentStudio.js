@@ -162,6 +162,10 @@ export async function renderContentStudio(ctx) {
       });
       lastLoadedId = id;
       ensureDraftShape(draft);
+      if (draft.factoryEngineId) {
+        const engine = engineCatalog.find((row) => String(row.engineId) === String(draft.factoryEngineId));
+        if (engine) applyEngineToCarDraft(draft, engine);
+      }
       renderWorkspace();
     });
 
@@ -285,7 +289,7 @@ export async function renderContentStudio(ctx) {
     host.querySelector("[data-save-reload]")?.addEventListener("click", () => saveDraft(true, true));
     host.querySelector("[data-export-car]")?.addEventListener("click", () => {
       try {
-        const car = finalizedCar(draft, racingConfig, catalogCars);
+        const car = finalizedCar(draft, racingConfig, catalogCars, engineCatalog);
         downloadJson(car, `${car.catalogId || "forever-racing-car"}.json`);
       } catch (error) {
         ctx.toast("Export blocked", error.message);
@@ -293,7 +297,7 @@ export async function renderContentStudio(ctx) {
     });
     host.querySelector("[data-copy-car]")?.addEventListener("click", async () => {
       try {
-        const car = finalizedCar(draft, racingConfig, catalogCars);
+        const car = finalizedCar(draft, racingConfig, catalogCars, engineCatalog);
         await navigator.clipboard.writeText(JSON.stringify(car, null, 2));
         ctx.toast("Car JSON copied", "Ready to paste into a commit or review.");
       } catch (error) {
@@ -327,7 +331,7 @@ export async function renderContentStudio(ctx) {
 
   const saveDraft = (reload, enabled) => {
     try {
-      const car = finalizedCar(draft, racingConfig, catalogCars);
+      const car = finalizedCar(draft, racingConfig, catalogCars, engineCatalog);
       saveContentStudioCar(car, { enabled });
       draft = structuredClone(car);
       lastLoadedId = car.catalogId;
@@ -556,9 +560,14 @@ function scoreCar(car, racingConfig) {
   };
 }
 
-function finalizedCar(source, racingConfig, catalogCars) {
+function finalizedCar(source, racingConfig, catalogCars, engines = []) {
   const car = structuredClone(source);
   ensureDraftShape(car);
+  if (car.factoryEngineId) {
+    const engine = engines.find((row) => String(row.engineId) === String(car.factoryEngineId));
+    if (!engine) throw new Error("The selected Factory Engine is not available.");
+    applyEngineToCarDraft(car, engine);
+  }
   car.make = String(car.make || "").trim();
   car.model = String(car.model || "").trim();
   car.displayName = String(car.displayName || `${car.make} ${car.model}`).trim();
@@ -634,6 +643,7 @@ function createBlankCar(stockId) {
     catalogId: "",
     starter: false,
     price: 15000,
+    factoryEngineId: null,
     engine: {
       displacementLiters: 2,
       configuration: "I4",
@@ -667,6 +677,16 @@ function createBlankCar(stockId) {
     },
     market: { classifieds: true, showroom: false },
   };
+}
+
+function applyEngineToCarDraft(car, engine) {
+  const row = normalizeEngineDefinition(engine);
+  car.factoryEngineId = row.engineId || null;
+  car.engine = engineToCarSnapshot(row, car.engine || {});
+  car.base ||= {};
+  if (row.peakHp > 0) car.base.hp = row.peakHp;
+  if (row.peakTorque > 0) car.base.torque = row.peakTorque;
+  return car;
 }
 
 function blankAnchors() {
@@ -723,6 +743,10 @@ function buildAvailableCars(catalogCars, artCars) {
 
 function nextStockId(cars) {
   return Math.max(0, ...cars.map((car) => Number(car.stockId || 0))) + 1;
+}
+
+function readOnlyField(label, value) {
+  return `<label class="studio-field"><span>${escapeHtml(label)}</span><input type="text" value="${escapeHtml(value ?? "")}" readonly tabindex="-1"></label>`;
 }
 
 function inputField(label, path, value, type = "text", options = {}) {
