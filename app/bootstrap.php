@@ -30,4 +30,5 @@ require_once __DIR__ . '/lib/JsonStore.php';
 require_once __DIR__ . '/lib/Auth.php';
 require_once __DIR__ . '/lib/Api.php';
 require_once __DIR__ . '/lib/RaceSimulator.php';
+require_once __DIR__ . '/lib/PerformanceIndex.php';
 require_once __DIR__ . '/lib/GameService.php';
