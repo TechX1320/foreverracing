@@ -29,6 +29,8 @@ function runPresentation(ctx, activeRace) {
 
     const playerCar = dialog.querySelector("[data-race-player-car]");
     const opponentCar = dialog.querySelector("[data-race-opponent-car]");
+    const strip = dialog.querySelector(".race-strip");
+    const finishLine = dialog.querySelector(".race-strip__finish");
     const playerBar = dialog.querySelector("[data-race-player-progress]");
     const opponentBar = dialog.querySelector("[data-race-opponent-progress]");
     const clock = dialog.querySelector("[data-race-clock]");
@@ -51,6 +53,8 @@ function runPresentation(ctx, activeRace) {
     const opponentFinish = opponentStart + (Math.max(0.1, Number(opponentRun.elapsedTime || 0)) * 1000 * timeScale);
     const progressExponent = Math.max(1, Number(activeRace.progressExponent || 1.38));
     const revealDelay = Math.max(0, Number(activeRace.revealDelayMs || 650)) * timeScale;
+    const flyThroughMs = 500 * timeScale;
+    const visualFinishAt = finishAt + flyThroughMs;
 
     let frame = 0;
     let settling = false;
@@ -111,20 +115,26 @@ function runPresentation(ctx, activeRace) {
       updateTree(tree, phase, now, startedAt, greenAt, playerStart, race);
       const p = raceProgress(now, playerStart, playerFinish, progressExponent);
       const o = raceProgress(now, opponentStart, opponentFinish, progressExponent);
-      setProgress(playerCar, playerBar, p);
-      setProgress(opponentCar, opponentBar, o);
+      const pVisual = raceVisualProgress(now, playerStart, playerFinish, progressExponent, flyThroughMs);
+      const oVisual = raceVisualProgress(now, opponentStart, opponentFinish, progressExponent, flyThroughMs);
+      setProgress(playerCar, playerBar, pVisual, p, strip, finishLine);
+      setProgress(opponentCar, opponentBar, oVisual, o, strip, finishLine);
 
-      const simSeconds = Math.max(0, (now - greenAt) / (1000 * timeScale));
+      const timingNow = Math.min(now, finishAt);
+      const simSeconds = Math.max(0, (timingNow - greenAt) / (1000 * timeScale));
       clock.textContent = simSeconds > 0 ? simSeconds.toFixed(2) : "0.00";
       liveStatus.textContent = liveRaceStatus(now, greenAt, playerStart, opponentStart, playerFinish, opponentFinish, playerRun, opponentRun);
 
-      if (now < finishAt) {
+      if (now < visualFinishAt) {
+        if (now >= finishAt) {
+          phase.textContent = "FINISH";
+          liveStatus.textContent = "THROUGH THE TRAPS";
+          trackWrap.classList.add("is-finished");
+        }
         frame = requestAnimationFrame(animate);
         return;
       }
 
-      setProgress(playerCar, playerBar, 1);
-      setProgress(opponentCar, opponentBar, 1);
       phase.textContent = "FINISH";
       liveStatus.textContent = "PASS COMPLETE • VERIFYING TIMING SLIP";
       trackWrap.classList.add("is-finished");
@@ -242,10 +252,33 @@ function raceProgress(now, startAt, finishAt, exponent) {
   return Math.pow(raw, exponent);
 }
 
-function setProgress(car, bar, progress) {
-  const percent = Math.max(0, Math.min(100, progress * 100));
-  if (car) car.style.bottom = `${(6 + (percent * 0.86)).toFixed(3)}%`;
-  if (bar) bar.style.width = `${percent.toFixed(2)}%`;
+function raceVisualProgress(now, startAt, finishAt, exponent, flyThroughMs) {
+  const timed = raceProgress(now, startAt, finishAt, exponent);
+  if (timed < 1 || now <= finishAt) return timed;
+  const extra = Math.max(0, Math.min(1, (now - finishAt) / Math.max(1, flyThroughMs)));
+  return 1 + (extra * 0.18);
+}
+
+function setProgress(car, bar, visualProgress, timingProgress, strip, finishLine) {
+  const timedPercent = Math.max(0, Math.min(100, timingProgress * 100));
+  if (car) {
+    const startBottom = 6;
+    const finishBottom = frontBumperFinishBottom(car, strip, finishLine);
+    const travel = Math.max(1, finishBottom - startBottom);
+    car.style.bottom = `${(startBottom + (travel * visualProgress)).toFixed(3)}%`;
+  }
+  if (bar) bar.style.width = `${timedPercent.toFixed(2)}%`;
+}
+
+function frontBumperFinishBottom(car, strip, finishLine) {
+  if (!car || !strip || !finishLine) return 76;
+  const stripHeight = Math.max(1, Number(strip.clientHeight || strip.getBoundingClientRect().height || 1));
+  const carHeight = Math.max(1, Number(car.offsetHeight || car.getBoundingClientRect().height || 1));
+  const lineTop = Number(finishLine.offsetTop || 0);
+  const lineHeight = Math.max(1, Number(finishLine.offsetHeight || finishLine.getBoundingClientRect().height || 1));
+  const timingPlaneY = lineTop + (lineHeight / 2);
+  const desiredCenterY = timingPlaneY + (carHeight / 2);
+  return Math.max(0, Math.min(100, ((stripHeight - desiredCenterY) / stripHeight) * 100));
 }
 
 function liveRaceStatus(now, greenAt, playerStart, opponentStart, playerFinish, opponentFinish, playerRun, opponentRun) {
