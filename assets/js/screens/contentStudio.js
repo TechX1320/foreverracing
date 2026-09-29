@@ -108,7 +108,7 @@ export async function renderContentStudio(ctx) {
                 <button class="button button--small" type="button" data-clear-paint>CLEAR</button>
               </div>
               <div class="content-studio__palette" aria-label="Factory paint palette">
-                ${paintPaletteMarkup(draft.visual?.paintPalette)}
+                ${paintPaletteMarkup(draft.visual?.paintPalette, draft.visual?.paintColor)}
               </div>
               <p class="muted">These colors can be assigned to Classifieds listings so the same model does not always appear in one color. Paint needs a usable body layer; atlas-only cars stay on their authored color until layered PNGs are added.</p>
             </section>
@@ -199,17 +199,26 @@ export async function renderContentStudio(ctx) {
     });
 
     host.querySelectorAll("[data-paint-palette]").forEach((input) => {
-      input.addEventListener("input", () => {
+      const previewPaletteColor = () => {
         const index = Number(input.dataset.paintPalette || 0);
         draft.visual.paintPalette ||= [...DEFAULT_PAINT_PALETTE];
-        draft.visual.paintPalette[index] = paintValue(input.value);
-        draft.visual.paintColor = draft.visual.paintPalette[index];
+        draft.visual.paintColor = paintValue(input.value || draft.visual.paintPalette[index]);
         draft.visual.renderMode = "layers";
         const previewColor = host.querySelector("[data-studio-paint]");
         const text = host.querySelector('[data-studio-field="visual.paintColor"]');
         if (previewColor) previewColor.value = draft.visual.paintColor;
         if (text) text.value = draft.visual.paintColor;
+        host.querySelectorAll(".studio-paint-swatch").forEach((swatch) => swatch.classList.remove("is-selected"));
+        input.closest(".studio-paint-swatch")?.classList.add("is-selected");
         refreshLivePreview();
+      };
+
+      input.addEventListener("click", previewPaletteColor);
+      input.addEventListener("input", () => {
+        const index = Number(input.dataset.paintPalette || 0);
+        draft.visual.paintPalette ||= [...DEFAULT_PAINT_PALETTE];
+        draft.visual.paintPalette[index] = paintValue(input.value);
+        previewPaletteColor();
       });
     });
 
@@ -685,9 +694,10 @@ function paintValue(value) {
   return /^#[0-9a-f]{6}$/i.test(text) ? text : "#ffffff";
 }
 
-function paintPaletteMarkup(palette) {
+function paintPaletteMarkup(palette, activeColor = null) {
+  const selected = paintValue(activeColor);
   return normalizePaintPalette(palette).map((color, index) => `
-    <label class="studio-paint-swatch" title="Factory paint ${index + 1}">
+    <label class="studio-paint-swatch ${paintValue(color) === selected ? "is-selected" : ""}" title="Click to preview factory paint ${index + 1}">
       <input type="color" value="${escapeHtml(color)}" data-paint-palette="${index}">
       <span>${index + 1}</span>
     </label>`).join("");
