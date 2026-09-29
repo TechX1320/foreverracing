@@ -514,7 +514,8 @@ export class LocalGameService {
       const stage = Number(run.stage || 1);
       const risk = choice === 'push' ? 1.09 : 0.99;
       const boost = Number(run.boost || 0);
-      const rating = (Number(car.derived?.hp || 1) / Math.max(500, Number(car.derived?.weight || 500))) * (1 + boost);
+      const basePi = Number(car.performanceIndex || benchmarkPerformance(car.derived || car.base, this.racingConfig).performanceIndex);
+      const rating = basePi * (1 + boost);
       const difficulty = rating * (0.88 + stage * 0.035) * risk;
       const roll = (randomInt(930, 1070) / 1000) * rating;
       const won = roll >= difficulty;
