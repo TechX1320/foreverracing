@@ -1318,25 +1318,25 @@
           "source": "Golf_GTI.png",
           "width": 281,
           "height": 111,
-          "src": "assets/art/cars/layered/golf_gti/body.png"
+          "src": "assets/art/cars/layered/golf_gti/body.webp"
         },
         "wheel": {
           "source": "Golf_GTI_Wheel.png",
           "width": 50,
           "height": 50,
-          "src": "assets/art/cars/layered/golf_gti/wheel.png"
+          "src": "assets/art/cars/layered/golf_gti/wheel.webp"
         },
         "disk": {
           "source": "Golf_GTI_Disk.png",
           "width": 34,
           "height": 34,
-          "src": "assets/art/cars/layered/golf_gti/disk.png"
+          "src": "assets/art/cars/layered/golf_gti/disk.webp"
         },
         "detail": {
           "source": "Golf_GTI_Detail.png",
           "width": 281,
           "height": 111,
-          "src": "assets/art/cars/layered/golf_gti/detail.png"
+          "src": "assets/art/cars/layered/golf_gti/detail.webp"
         }
       },
       "anchors": {
@@ -2072,25 +2072,25 @@
           "source": "Mazda_RX8.png",
           "width": 311,
           "height": 114,
-          "src": "assets/art/cars/layered/mazda_rx8/body.png"
+          "src": "assets/art/cars/layered/mazda_rx8/body.webp"
         },
         "wheel": {
           "source": "Mazda_RX8_Wheel.png",
           "width": 52,
           "height": 52,
-          "src": "assets/art/cars/layered/mazda_rx8/wheel.png"
+          "src": "assets/art/cars/layered/mazda_rx8/wheel.webp"
         },
         "disk": {
           "source": "Mazda_RX8_Disk.png",
           "width": 34,
           "height": 35,
-          "src": "assets/art/cars/layered/mazda_rx8/disk.png"
+          "src": "assets/art/cars/layered/mazda_rx8/disk.webp"
         },
         "detail": {
           "source": "Mazda_RX8_Detail.png",
           "width": 311,
           "height": 114,
-          "src": "assets/art/cars/layered/mazda_rx8/detail.png"
+          "src": "assets/art/cars/layered/mazda_rx8/detail.webp"
         }
       },
       "anchors": {
@@ -2476,19 +2476,19 @@
           "source": "Renault_Clio.png",
           "width": 252,
           "height": 111,
-          "src": "assets/art/cars/layered/renault_clio/body.png"
+          "src": "assets/art/cars/layered/renault_clio/body.webp"
         },
         "wheel": {
           "source": "Renault_Clio_Wheel.png",
           "width": 48,
           "height": 48,
-          "src": "assets/art/cars/layered/renault_clio/wheel.png"
+          "src": "assets/art/cars/layered/renault_clio/wheel.webp"
         },
         "disk": {
           "source": "Renault_Clio_Disk.png",
           "width": 36,
           "height": 36,
-          "src": "assets/art/cars/layered/renault_clio/disk.png"
+          "src": "assets/art/cars/layered/renault_clio/disk.webp"
         },
         "detail": {
           "source": "Renault_Clio_Detail.png",
