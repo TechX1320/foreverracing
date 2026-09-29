@@ -5,6 +5,27 @@ const now = () => Math.floor(Date.now() / 1000);
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const randomChoice = (rows) => rows[randomInt(0, rows.length - 1)];
 
+function paintPalette(spec) {
+  const colors = Array.isArray(spec?.visual?.paintPalette) ? spec.visual.paintPalette : [];
+  return colors.map((value) => String(value || "").trim()).filter((value) => /^#[0-9a-f]{6}$/i.test(value));
+}
+
+function firstPaintColor(spec) {
+  return paintPalette(spec)[0] || String(spec?.visual?.paintColor || "").trim() || null;
+}
+
+function randomPaintColor(spec) {
+  const colors = paintPalette(spec);
+  return colors.length ? randomChoice(colors) : firstPaintColor(spec);
+}
+
+function withPaintColor(visual, paintColor) {
+  const next = visual && typeof visual === "object" ? visual : {};
+  const color = String(paintColor || "").trim();
+  if (color) next.paintColor = color;
+  return next;
+}
+
 export class LocalGameError extends Error {
   constructor(message, status = 400) {
     super(message);
@@ -90,7 +111,7 @@ export class LocalGameService {
       const price = Number(spec.price || 0);
       this.requireCredits(player, price);
       player.wallet.credits -= price;
-      const car = this.createOwnedCar(spec, 'new', 0, 100, price);
+      const car = this.createOwnedCar(spec, 'new', 0, 100, price, firstPaintColor(spec));
       player.garage.push(car);
       player.stats.showroomPurchases = Number(player.stats.showroomPurchases || 0) + 1;
       if (!player.selectedCarId) player.selectedCarId = car.carId;
@@ -256,6 +277,7 @@ export class LocalGameService {
         mileageFactor: Math.round(mileageFactor * 1000) / 1000,
         conditionFactor: Math.round(conditionFactor * 1000) / 1000,
         starterListing,
+        paintColor: randomPaintColor(spec),
       };
     };
 
@@ -281,7 +303,7 @@ export class LocalGameService {
       const price = Number(listing.price || 0);
       this.requireCredits(draft, price);
       draft.wallet.credits -= price;
-      const car = this.createOwnedCar(spec, 'used', Number(listing.mileage || 0), Number(listing.condition || 100), price);
+      const car = this.createOwnedCar(spec, 'used', Number(listing.mileage || 0), Number(listing.condition || 100), price, listing.paintColor || null);
       draft.garage.push(car);
       draft.stats.usedPurchases = Number(draft.stats.usedPurchases || 0) + 1;
       if (!draft.selectedCarId) draft.selectedCarId = car.carId;
@@ -606,7 +628,7 @@ export class LocalGameService {
     return car;
   }
 
-  createOwnedCar(spec, source, mileage, condition, purchasePrice) {
+  createOwnedCar(spec, source, mileage, condition, purchasePrice, paintColor = null) {
     const base = spec.base || {};
     const displayName = String(spec.displayName || [spec.year, spec.make, spec.model].filter(Boolean).join(' ') || 'Unknown Car');
     const derived = { hp: Number(base.hp), torque: Number(base.torque), weight: Number(base.weight), grip: Number(base.grip || 1) };
@@ -619,7 +641,7 @@ export class LocalGameService {
       nickname: '', source, purchasePrice, mileage, condition, buildStage: 1, stageBaseline: null,
       factoryEngineId: spec.factoryEngineId || null, engineId: spec.factoryEngineId || null, engineBay: clone(spec.engineBay || null),
       engine: clone(spec.engine || {}),
-      visual: clone(spec.visual || {}),
+      visual: withPaintColor(clone(spec.visual || {}), paintColor || firstPaintColor(spec)),
       benchmark: clone(spec.benchmark || benchmark),
       stockClass: String(spec.class || performanceClassFromIndex(spec.benchmark?.performanceIndex ?? benchmark.performanceIndex)),
       performanceIndex: benchmark.performanceIndex,
@@ -797,7 +819,10 @@ export class LocalGameService {
     return {
       name,
       carName: String(spec.displayName || [spec.year, spec.make, spec.model].filter(Boolean).join(' ') || 'Opponent'),
-      visual: clone(spec.visual || {}),
+      visual: withPaintColor(
+        clone(spec.visual || {}),
+        paintPalette(spec).length ? paintPalette(spec)[Math.min(paintPalette(spec).length - 1, Math.floor(rng() * paintPalette(spec).length))] : firstPaintColor(spec)
+      ),
       performanceIndex: pi,
       performanceClass: performanceClassFromIndex(pi),
       drivetrain: String(base.drivetrain || '-'),
