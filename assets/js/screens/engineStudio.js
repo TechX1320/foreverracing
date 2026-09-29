@@ -236,7 +236,7 @@ export async function renderEngineStudio(ctx) {
 
   const save = (enabled) => {
     try {
-      const engine = finalizeEngine(draft);
+      const engine = finalizeEngine(draft, { strict: enabled });
       saveContentStudioEngine(engine, { enabled });
       engines = mergeContentStudioEngines(Array.isArray(baseEngines) ? baseEngines : [], { includeDrafts: true });
       draft = structuredClone(engine);
@@ -376,7 +376,7 @@ function dynoChart(engine) {
     </svg>`;
 }
 
-function finalizeEngine(source) {
+function finalizeEngine(source, { strict = true } = {}) {
   const engine = normalizeEngineDefinition(source);
   engine.engineId = slugify(engine.engineId || engine.name);
   engine.familyId = slugify(engine.familyId || engine.familyName || engine.engineId);
@@ -388,8 +388,11 @@ function finalizeEngine(source) {
   engine.orientations = uniqueList(source.orientations);
   engine.powerCurve = normalizePowerCurve(source.powerCurve);
 
-  const issues = validateEngineCurve(engine);
-  if (issues.length) throw new Error(issues[0]);
+  if (!engine.engineId) throw new Error("Engine ID or Display Name is required before saving.");
+  if (strict) {
+    const issues = validateEngineCurve(engine);
+    if (issues.length) throw new Error(issues[0]);
+  }
 
   engine.sourceStatus = "engine-tool";
   return engine;
