@@ -22,6 +22,8 @@ assert.equal(performanceClassFromIndex(450), 'C');
 assert.equal(performanceClassFromIndex(600), 'B');
 assert.equal(performanceClassFromIndex(750), 'A');
 assert.equal(performanceClassFromIndex(900), 'S');
+assert.equal(performanceClassFromIndex(1099), 'S');
+assert.equal(performanceClassFromIndex(1100), 'X');
 let player = game.defaultPlayer();
 
 assert.equal(player.wallet.credits, 75000);
