@@ -51,6 +51,7 @@ const SHELL = [
   './assets/js/domain/LocalGameService.js',
   './assets/js/domain/RaceSimulator.js',
   './assets/js/domain/PerformanceIndex.js',
+  './assets/js/domain/ContentRelease.js',
   './assets/js/storage/StorageProvider.js',
   './assets/js/storage/ApiStorageProvider.js',
   './assets/js/storage/LocalStorageProvider.js',
