@@ -1,6 +1,7 @@
 import { bindHome, escapeHtml, money, number, pageShell } from "../ui/components.js";
 import { renderVehicle } from "../ui/vehicleRenderer.js";
 import { showDialog, closeDialog } from "../ui/modal.js";
+import { isContentReleased } from "../domain/ContentRelease.js";
 
 let catalogCache = null;
 
@@ -8,7 +9,7 @@ export async function renderShowroom(ctx) {
   const player = ctx.store.player;
   const data = await ctx.storage.carCatalog();
   catalogCache = data.cars || [];
-  const cars = catalogCache.filter((car) => car?.market?.showroom === true);
+  const cars = catalogCache.filter((car) => car?.market?.showroom === true && isContentReleased(car));
 
   ctx.screenRoot.innerHTML = pageShell({
     title: "Showroom",

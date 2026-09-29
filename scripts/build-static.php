@@ -82,7 +82,7 @@ Build: {$build}
 Storage mode: local
 Offline service worker: disabled in static development mode
 Race presentation: persistent two-phase start/finish with blocking real-time playback
-V0.5A.3: Content Studio coordinate polish with simplified anchor preview and clearer layer offsets
+V0.5B: Car Creator release scheduling, clickable paint previews and Parts Creator architecture foundation
 Do not edit docs/ by hand; run php scripts/build-static.php.
 ");
 

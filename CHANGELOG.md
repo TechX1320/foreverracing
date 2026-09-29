@@ -1,5 +1,14 @@
 # Changelog
 
+## V0.5.0-b — release scheduling + Parts Creator foundation
+
+- Added per-car Draft / Release Immediately / Scheduled Release controls to Car Creator.
+- Unreleased cars are gated from Classifieds, Showroom purchases, and random race-opponent selection in both local and server game services.
+- Classifieds expiry now honors the next scheduled car release so scheduled content can enter the pool on time.
+- Added reusable ContentRelease lifecycle helpers for future parts, wheels, wraps, and limited content.
+- Factory paint swatches now immediately preview their current color when clicked and visually mark the selected swatch.
+- Added a detailed Parts Creator architecture covering engine-specific compatibility, build-stage choices, tags, requirements/conflicts, custom parts, and deprecated/replacement parts.
+
 ## V0.5.0-a.3 — Content Studio coordinate polish
 
 - Removed the redundant Rear / Front legend from the Car Creator preview.

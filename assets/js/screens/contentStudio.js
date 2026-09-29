@@ -2,6 +2,12 @@ import { bindHome, escapeHtml, pageShell } from "../ui/components.js";
 import { renderVehicle } from "../ui/vehicleRenderer.js";
 import { benchmarkPerformance, performanceClassFromIndex } from "../domain/PerformanceIndex.js";
 import {
+  normalizeRelease,
+  normalizeReleaseForSave,
+  releaseState,
+  toDatetimeLocalValue,
+} from "../domain/ContentRelease.js";
+import {
   deleteContentStudioCar,
   findContentStudioCar,
   findContentStudioRecord,
@@ -11,7 +17,7 @@ import {
 
 const BUILD_MODULES = [
   { id: "cars", label: "CAR CREATOR", state: "ACTIVE" },
-  { id: "parts", label: "PARTS TOOL", state: "PLANNED" },
+  { id: "parts", label: "PARTS TOOL", state: "NEXT" },
   { id: "wheels", label: "WHEELS TOOL", state: "PLANNED" },
 ];
 
@@ -102,7 +108,7 @@ export async function renderContentStudio(ctx) {
                 <button class="button button--small" type="button" data-clear-paint>CLEAR</button>
               </div>
               <div class="content-studio__palette" aria-label="Factory paint palette">
-                ${paintPaletteMarkup(draft.visual?.paintPalette)}
+                ${paintPaletteMarkup(draft.visual?.paintPalette, draft.visual?.paintColor)}
               </div>
               <p class="muted">These colors can be assigned to Classifieds listings so the same model does not always appear in one color. Paint needs a usable body layer; atlas-only cars stay on their authored color until layered PNGs are added.</p>
             </section>
@@ -119,6 +125,7 @@ export async function renderContentStudio(ctx) {
 
           <div class="content-studio__editor">
             ${identitySection(draft)}
+            ${releaseSection(draft)}
             ${physicsSection(draft)}
             ${artSection(draft)}
           </div>
@@ -132,10 +139,14 @@ export async function renderContentStudio(ctx) {
     host.querySelector("[data-studio-load]")?.addEventListener("change", (event) => {
       const id = String(event.currentTarget.value || "");
       if (!id) return;
-      const local = findContentStudioCar(id);
+      const localRecord = findContentStudioRecord(id);
+      const local = localRecord?.car || null;
       const catalog = catalogCars.find((car) => String(car.catalogId) === id);
       const art = artCars.find((car) => String(car.assetId) === id);
       draft = local || (catalog ? structuredClone(catalog) : artToDraft(art, nextStockId(catalogCars)));
+      draft.release = normalizeRelease(draft.release, {
+        legacyReleased: Boolean(catalog || (localRecord && localRecord.enabled !== false)),
+      });
       lastLoadedId = id;
       ensureDraftShape(draft);
       renderWorkspace();
@@ -159,6 +170,19 @@ export async function renderContentStudio(ctx) {
       input.addEventListener("change", refreshLivePreview);
     });
 
+    host.querySelector("[data-release-mode]")?.addEventListener("change", (event) => {
+      const mode = String(event.currentTarget.value || "draft");
+      draft.release = normalizeRelease(draft.release, { legacyReleased: false });
+      draft.release.mode = mode;
+      if (mode !== "scheduled") draft.release.publishAt = null;
+      renderWorkspace();
+    });
+
+    host.querySelector("[data-release-at]")?.addEventListener("change", (event) => {
+      draft.release = normalizeRelease(draft.release, { legacyReleased: false });
+      draft.release.publishAt = String(event.currentTarget.value || "");
+      renderWorkspace();
+    });
     host.querySelector("[data-studio-paint]")?.addEventListener("input", (event) => {
       draft.visual.paintColor = String(event.currentTarget.value || "");
       draft.visual.renderMode = "layers";
@@ -175,17 +199,26 @@ export async function renderContentStudio(ctx) {
     });
 
     host.querySelectorAll("[data-paint-palette]").forEach((input) => {
-      input.addEventListener("input", () => {
+      const previewPaletteColor = () => {
         const index = Number(input.dataset.paintPalette || 0);
         draft.visual.paintPalette ||= [...DEFAULT_PAINT_PALETTE];
-        draft.visual.paintPalette[index] = paintValue(input.value);
-        draft.visual.paintColor = draft.visual.paintPalette[index];
+        draft.visual.paintColor = paintValue(input.value || draft.visual.paintPalette[index]);
         draft.visual.renderMode = "layers";
         const previewColor = host.querySelector("[data-studio-paint]");
         const text = host.querySelector('[data-studio-field="visual.paintColor"]');
         if (previewColor) previewColor.value = draft.visual.paintColor;
         if (text) text.value = draft.visual.paintColor;
+        host.querySelectorAll(".studio-paint-swatch").forEach((swatch) => swatch.classList.remove("is-selected"));
+        input.closest(".studio-paint-swatch")?.classList.add("is-selected");
         refreshLivePreview();
+      };
+
+      input.addEventListener("click", previewPaletteColor);
+      input.addEventListener("input", () => {
+        const index = Number(input.dataset.paintPalette || 0);
+        draft.visual.paintPalette ||= [...DEFAULT_PAINT_PALETTE];
+        draft.visual.paintPalette[index] = paintValue(input.value);
+        previewPaletteColor();
       });
     });
 
@@ -307,11 +340,42 @@ function identitySection(car) {
       </div>
       <div class="content-studio__market-note">
         <b>${marketPlacementLabel(car)}</b>
-        <span>Classifieds = used-market pool. Showroom = new-car dealer floor. Both may be enabled; Hidden/Hidden keeps the car playable but out of both stores.</span>
+        <span>Classifieds = used-market pool. Showroom = new-car dealer floor. Release status below is the final gate for both stores. Both markets may be enabled; Hidden/Hidden keeps the car out of both.</span>
       </div>
     </section>`;
 }
 
+function releaseSection(car) {
+  const release = normalizeRelease(car?.release, { legacyReleased: false });
+  const status = releaseState({ release });
+  const scheduled = release.mode === "scheduled";
+  return `
+    <section class="content-studio__section content-studio__release">
+      <header><div><small>RELEASE</small><strong>Publishing & schedule</strong></div><span class="studio-release-status is-${escapeHtml(status.state)}">${escapeHtml(status.label)}</span></header>
+      <div class="studio-form-grid studio-form-grid--4">
+        <label class="studio-field">
+          <span>Release Mode</span>
+          <select data-release-mode>
+            <option value="draft" ${release.mode === "draft" ? "selected" : ""}>Keep as Draft</option>
+            <option value="instant" ${release.mode === "instant" ? "selected" : ""}>Release Immediately</option>
+            <option value="scheduled" ${release.mode === "scheduled" ? "selected" : ""}>Schedule Release</option>
+          </select>
+        </label>
+        <label class="studio-field">
+          <span>Release Date & Time</span>
+          <input type="datetime-local" value="${escapeHtml(toDatetimeLocalValue(release.publishAt))}" data-release-at ${scheduled ? "" : "disabled"}>
+        </label>
+      </div>
+      <div class="content-studio__release-note">
+        <b>${scheduled ? "SCHEDULED RELEASE" : release.mode === "instant" ? "INSTANT RELEASE" : "PRIVATE DRAFT"}</b>
+        <span>${scheduled
+          ? "The car stays hidden from Classifieds, Showroom and random opponents until this time. The market cache expires at the scheduled release so it becomes eligible immediately afterward."
+          : release.mode === "instant"
+            ? "Once this car is activated or committed, its selected markets are live immediately."
+            : "The car may be saved or locally activated for testing, but public game surfaces keep it hidden."}</span>
+      </div>
+    </section>`;
+}
 function physicsSection(car) {
   return `
     <section class="content-studio__section">
@@ -433,6 +497,7 @@ function finalizedCar(source, racingConfig, catalogCars) {
   car.starter = Boolean(car.starter);
   car.market.classifieds = Boolean(car.market.classifieds);
   car.market.showroom = Boolean(car.market.showroom);
+  car.release = normalizeReleaseForSave(car.release);
   car.visual.paintPalette = normalizePaintPalette(car.visual.paintPalette);
   if (car.visual.paintColor) car.visual.paintColor = paintValue(car.visual.paintColor);
   car.engine.peakHp = Math.max(1, Number(car.base.hp || 1));
@@ -511,6 +576,7 @@ function createBlankCar(stockId) {
     },
     base: { hp: 200, torque: 180, weight: 3000, grip: 1, drivetrain: "RWD" },
     pricing: { status: "content-studio" },
+    release: { mode: "draft", publishAt: null },
     visual: {
       paintColor: null,
       paintPalette: [...DEFAULT_PAINT_PALETTE],
@@ -545,6 +611,7 @@ function ensureDraftShape(car) {
   car.engine ||= {};
   car.base ||= {};
   car.market ||= {};
+  car.release = normalizeRelease(car.release, { legacyReleased: false });
   car.visual ||= {};
   car.visual.paintPalette = normalizePaintPalette(car.visual.paintPalette);
   car.visual.layered ||= {};
@@ -627,9 +694,10 @@ function paintValue(value) {
   return /^#[0-9a-f]{6}$/i.test(text) ? text : "#ffffff";
 }
 
-function paintPaletteMarkup(palette) {
+function paintPaletteMarkup(palette, activeColor = null) {
+  const selected = activeColor ? paintValue(activeColor) : null;
   return normalizePaintPalette(palette).map((color, index) => `
-    <label class="studio-paint-swatch" title="Factory paint ${index + 1}">
+    <label class="studio-paint-swatch ${selected && paintValue(color) === selected ? "is-selected" : ""}" title="Click to preview factory paint ${index + 1}">
       <input type="color" value="${escapeHtml(color)}" data-paint-palette="${index}">
       <span>${index + 1}</span>
     </label>`).join("");

@@ -1,5 +1,6 @@
 import { RaceSimulator } from './RaceSimulator.js';
 import { benchmarkPerformance, performanceClassFromIndex } from './PerformanceIndex.js';
+import { isContentReleased, nextScheduledReleaseAt } from './ContentRelease.js';
 const clone = (value) => value == null ? value : structuredClone(value);
 const now = () => Math.floor(Date.now() / 1000);
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -107,6 +108,9 @@ export class LocalGameService {
       }
       if (player.tutorial?.status !== 'active' && Number(player.progression?.level || 1) < 5) {
         throw new LocalGameError('The Showroom unlocks at Level 5. Keep building through Classifieds first.');
+      }
+      if (spec?.market?.showroom !== true || !isContentReleased(spec)) {
+        throw new LocalGameError('That showroom car is not currently released.', 404);
       }
       const price = Number(spec.price || 0);
       this.requireCredits(player, price);
@@ -256,7 +260,7 @@ export class LocalGameService {
 
   generateUsedLot() {
     const timestamp = now();
-    const pool = this.cars.filter((spec) => spec?.market?.classifieds !== false);
+    const pool = this.cars.filter((spec) => spec?.market?.classifieds !== false && isContentReleased(spec));
     if (!pool.length) return { generatedAt: timestamp, expiresAt: timestamp + this.config.usedLotRefreshSeconds, listings: [] };
 
     const makeListing = (spec, starterListing = false) => {
@@ -287,7 +291,11 @@ export class LocalGameService {
     const listings = starters.map((spec) => makeListing(spec, true));
     while (listings.length < 8) listings.push(makeListing(randomChoice(pool), false));
 
-    return { generatedAt: timestamp, expiresAt: timestamp + this.config.usedLotRefreshSeconds, listings };
+    const normalExpiry = timestamp + this.config.usedLotRefreshSeconds;
+    const nextReleaseMs = nextScheduledReleaseAt(this.cars, Date.now());
+    const releaseExpiry = nextReleaseMs == null ? null : Math.ceil(nextReleaseMs / 1000);
+    const expiresAt = releaseExpiry != null ? Math.min(normalExpiry, releaseExpiry) : normalExpiry;
+    return { generatedAt: timestamp, expiresAt, listings };
   }
 
   purchaseUsedCar(inputPlayer, lot, listingId) {
@@ -795,7 +803,7 @@ export class LocalGameService {
     ].join('|');
     const rng = seededRandom(stableSeed(seedText));
     const targetPi = tutorialRace ? Math.max(0, playerPi - 32) : Math.max(0, playerPi + Math.round((rng() * 48) - 24));
-    let candidates = (this.cars || []).filter((spec) => spec?.visual?.layered?.layers?.body?.src);
+    let candidates = (this.cars || []).filter((spec) => spec?.visual?.layered?.layers?.body?.src && isContentReleased(spec));
     if (!tutorialRace) {
       const alternatives = candidates.filter((spec) => Number(spec.stockId) !== Number(car.stockId));
       if (alternatives.length) candidates = alternatives;
