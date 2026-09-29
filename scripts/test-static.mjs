@@ -70,7 +70,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.4.0-h.3"')) throw new Error('Static index is missing the V0.4H.3 build marker.');
+if (!html.includes('data-build="0.4.0-h.4"')) throw new Error('Static index is missing the V0.4H.4 build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -322,5 +322,14 @@ if (!cssV04b.includes('V0.4H.3 race-lane vertical centering') ||
   throw new Error('V0.4H.3 race-lane centering CSS is incomplete.');
 }
 console.log('V0.4H.3 race-lane vertical centering check passed.');
+
+if (!racePresentationSourceV04d.includes('racePhysicsProgress') ||
+    !racePresentationSourceV04d.includes('physicsMotionExponent') ||
+    !racePresentationSourceV04d.includes('trapFeetPerSecond') ||
+    !racePresentationSourceV04d.includes('deltaTravelFeet') ||
+    !racePresentationSourceV04d.includes('slipRatio')) {
+  throw new Error('V0.4H.4 physics-linked race/wheel motion is incomplete.');
+}
+console.log('V0.4H.4 physics-linked wheel-motion check passed.');
 
 

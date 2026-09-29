@@ -119,8 +119,8 @@ function runPresentation(ctx, activeRace) {
       const now = Date.now();
       updateTree(tree, phase, now, startedAt, greenAt, playerStart, race);
 
-      const playerProgress = raceVisualProgress(now, playerStart, playerFinish, visualFinishAt, progressExponent);
-      const opponentProgress = raceVisualProgress(now, opponentStart, opponentFinish, visualFinishAt, progressExponent);
+      const playerProgress = racePhysicsProgress(now, playerStart, playerFinish, visualFinishAt, playerRun, race.distanceFeet, timeScale, progressExponent);
+      const opponentProgress = racePhysicsProgress(now, opponentStart, opponentFinish, visualFinishAt, opponentRun, race.distanceFeet, timeScale, progressExponent);
       setSideProgress(playerCar, playerBar, playerProgress, playerGeometry, strip, startLine, finishLine);
       setSideProgress(opponentCar, opponentBar, opponentProgress, opponentGeometry, strip, startLine, finishLine);
       updateWheelMotion(playerCar, playerRun, race.playerDrivetrain, playerProgress, now, playerStart, race.distanceFeet, timeScale);
@@ -240,6 +240,34 @@ function setLamp(node, on) {
   node?.classList.toggle("is-on", Boolean(on));
 }
 
+export function physicsMotionExponent(run, distanceFeet = 1320, fallbackExponent = 1.38) {
+  const distance = Math.max(1, Number(distanceFeet || 1320));
+  const elapsed = Math.max(0.1, Number(run?.elapsedTime || 0));
+  const trapFeetPerSecond = Math.max(0, Number(run?.trapSpeed || 0)) * (5280 / 3600);
+  const derived = (trapFeetPerSecond * elapsed) / distance;
+  if (!Number.isFinite(derived) || derived <= 0) return Math.max(1, Number(fallbackExponent || 1.38));
+  return Math.max(1.05, Math.min(2.4, derived));
+}
+
+export function racePhysicsProgress(now, startAt, finishAt, visualFinishAt, run, distanceFeet = 1320, timeScale = 1, fallbackExponent = 1.38) {
+  if (now <= startAt) return 0;
+
+  const distance = Math.max(1, Number(distanceFeet || 1320));
+  const exponent = physicsMotionExponent(run, distance, fallbackExponent);
+  if (now < finishAt) {
+    const raw = Math.max(0, Math.min(1, (now - startAt) / Math.max(1, finishAt - startAt)));
+    return Math.pow(raw, exponent);
+  }
+
+  const scaledSecondMs = Math.max(1, 1000 * Math.max(0.01, Number(timeScale || 1)));
+  const postFinishSeconds = Math.max(0, Math.min(now, visualFinishAt) - finishAt) / scaledSecondMs;
+  const trapFeetPerSecond = Math.max(0, Number(run?.trapSpeed || 0)) * (5280 / 3600);
+  const flyThroughProgress = trapFeetPerSecond > 0
+    ? (trapFeetPerSecond * postFinishSeconds) / distance
+    : ((Math.max(0, Math.min(1, (now - finishAt) / Math.max(1, visualFinishAt - finishAt)))) * 0.08);
+  return 1 + Math.max(0, Math.min(0.22, flyThroughProgress));
+}
+
 export function raceVisualProgress(now, startAt, finishAt, visualFinishAt, exponent = 1.38) {
   if (now <= startAt) return 0;
   if (now < finishAt) {
@@ -283,22 +311,30 @@ function setSideProgress(car, bar, progress, geometry, strip, startLine, finishL
 
 function updateWheelMotion(car, run, drivetrain, progress, now, startAt, distanceFeet, timeScale) {
   if (!car) return;
-  const travelFeet = Math.max(0, Number(distanceFeet || 1320)) * Math.max(0, Number(progress || 0));
-  const rollingDegrees = ((travelFeet / 6.6) * 360) % 360;
+  const distance = Math.max(1, Number(distanceFeet || 1320));
+  const travelFeet = distance * Math.max(0, Number(progress || 0));
+  const previousTravelFeet = Math.max(0, Number(car.dataset.wheelTravelFeet || 0));
+  const deltaTravelFeet = Math.max(0, travelFeet - previousTravelFeet);
+  car.dataset.wheelTravelFeet = travelFeet.toFixed(6);
+
   const rawElapsed = (now - startAt) / Math.max(1, 1000 * timeScale);
   const elapsed = Math.max(0, rawElapsed);
   const slip = Math.max(0, Math.min(1, Number(run?.traction?.wheelSlip || 0)));
   const slipWindow = Math.max(0, 1 - (elapsed / Math.max(0.45, 0.65 + (slip * 1.7))));
-  const slipDegrees = elapsed * 900 * slip * slipWindow;
+  const slipRatio = 1 + (slip * 1.5 * slipWindow);
+  const rollingDeltaDegrees = (deltaTravelFeet / 6.6) * 360;
   const drive = String(drivetrain || "").toUpperCase();
+
+  const frontDriven = drive === "AWD" || drive === "FWD";
+  const rearDriven = drive === "AWD" || drive === "RWD" || !drive;
+  const frontAngle = Number(car.dataset.frontWheelAngle || 0) + (rollingDeltaDegrees * (frontDriven ? slipRatio : 1));
+  const rearAngle = Number(car.dataset.rearWheelAngle || 0) + (rollingDeltaDegrees * (rearDriven ? slipRatio : 1));
+  car.dataset.frontWheelAngle = frontAngle.toFixed(4);
+  car.dataset.rearWheelAngle = rearAngle.toFixed(4);
 
   car.querySelectorAll(".layered-car__wheel,.layered-car__disk").forEach((node) => {
     const front = node.classList.contains("front-wheel") || node.classList.contains("front-disk");
-    const rear = node.classList.contains("rear-wheel") || node.classList.contains("rear-disk");
-    const driven = drive === "AWD"
-      || (drive === "FWD" && front)
-      || ((drive === "RWD" || !drive) && rear);
-    const angle = (rollingDegrees + (driven ? slipDegrees : 0)) % 360;
+    const angle = front ? frontAngle : rearAngle;
     node.style.transform = `rotate(${angle.toFixed(2)}deg)`;
   });
 
