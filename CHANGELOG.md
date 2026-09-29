@@ -1,5 +1,15 @@
 # Changelog
 
+## V0.5.0-c.1 — Engine Creator simplification
+
+- Removed unused compression ratio, engine weight, physical size-class and orientation authoring.
+- Standardized future swap fitment around displacement allowances plus explicit compatibility exceptions.
+- Replaced curve-evidence selection with gameplay-oriented curve profiles.
+- Added nine baseline profiles including Small / Economy, Turbo Street, Muscle V8, JDM VTEC, High-Rev NA, Motorbike, Diesel and Rotary.
+- Profile selection now shapes generated torque curves while HP stays derived from torque.
+- Migrated the engine catalog to the lighter schema.
+
+
 ## V0.5.0-c — Engine Creator
 
 - Added Engine Creator as a second active Content Studio module.
