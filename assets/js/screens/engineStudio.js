@@ -37,6 +37,15 @@ export async function renderEngineStudio(ctx) {
   const host = root.querySelector("[data-engine-studio]");
   let draft = createBlankEngine();
   let loadedId = "";
+  const requestedEngineId = String(sessionStorage.getItem("foreverRacing.engineStudio.openEngineId") || "");
+  if (requestedEngineId) {
+    sessionStorage.removeItem("foreverRacing.engineStudio.openEngineId");
+    const requested = engines.find((engine) => String(engine.engineId) === requestedEngineId);
+    if (requested) {
+      draft = normalizeEngineDefinition(requested);
+      loadedId = requestedEngineId;
+    }
+  }
 
   const render = () => {
     const normalized = normalizeEngineDefinition(draft);
