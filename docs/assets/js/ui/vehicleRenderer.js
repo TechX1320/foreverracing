@@ -10,14 +10,32 @@ export function vehicleGeometry(car) {
   const layered = car?.visual?.layered;
   if (!layered?.canvas || !layered?.anchors) return null;
   const width = Math.max(1, Number(layered.canvas.width || 1));
+  const height = Math.max(1, Number(layered.canvas.height || 1));
+  const atlas = layered.certifiedAtlas;
+  if (atlas?.src) {
+    const cellWidth = Math.max(1, Number(atlas.cellWidth || 360));
+    const cellHeight = Math.max(1, Number(atlas.cellHeight || 150));
+    const scale = Math.max(0.01, Number(atlas.scale || 1));
+    const carX = Number(atlas.carX || 0);
+    const carY = Number(atlas.carY || 0);
+    return {
+      canvasWidth: cellWidth,
+      canvasHeight: cellHeight,
+      frontWheelRatio: clamp01((carX + (Number(layered.anchors.frontWheelCenter?.x ?? width) * scale)) / cellWidth),
+      rearWheelRatio: clamp01((carX + (Number(layered.anchors.rearWheelCenter?.x ?? 0) * scale)) / cellWidth),
+      frontBumperRatio: clamp01((carX + (Number(layered.anchors.frontBumperX ?? width) * scale)) / cellWidth),
+      rearBumperRatio: clamp01((carX + (Number(layered.anchors.rearBumperX ?? 0) * scale)) / cellWidth),
+      groundRatio: clamp01((carY + (Number(layered.anchors.groundY ?? height) * scale)) / cellHeight),
+    };
+  }
   return {
     canvasWidth: width,
-    canvasHeight: Math.max(1, Number(layered.canvas.height || 1)),
+    canvasHeight: height,
     frontWheelRatio: clamp01(Number(layered.anchors.frontWheelCenter?.x ?? width) / width),
     rearWheelRatio: clamp01(Number(layered.anchors.rearWheelCenter?.x ?? 0) / width),
     frontBumperRatio: clamp01(Number(layered.anchors.frontBumperX ?? width) / width),
     rearBumperRatio: clamp01(Number(layered.anchors.rearBumperX ?? 0) / width),
-    groundRatio: clamp01(Number(layered.anchors.groundY ?? layered.canvas.height) / Math.max(1, Number(layered.canvas.height || 1))),
+    groundRatio: clamp01(Number(layered.anchors.groundY ?? height) / height),
   };
 }
 
@@ -29,8 +47,10 @@ function renderLayeredVehicle(car, layered, { compact, view, className }) {
   const rear = anchors.rearWheelCenter || {};
   const front = anchors.frontWheelCenter || {};
   const geometry = vehicleGeometry(car);
+  const displayWidth = Math.max(1, Number(geometry?.canvasWidth || canvasWidth));
+  const displayHeight = Math.max(1, Number(geometry?.canvasHeight || canvasHeight));
   const rootStyle = [
-    `--car-aspect:${canvasWidth}/${canvasHeight}`,
+    `--car-aspect:${displayWidth}/${displayHeight}`,
     `--front-bumper-ratio:${geometry?.frontBumperRatio ?? 1}`,
     `--rear-bumper-ratio:${geometry?.rearBumperRatio ?? 0}`,
     `--ground-ratio:${geometry?.groundRatio ?? 1}`,
@@ -50,6 +70,32 @@ function renderLayeredVehicle(car, layered, { compact, view, className }) {
       <div class="layered-car layered-car--certified" aria-hidden="true">
         <img data-vehicle-image class="layered-car__certified" src="${escapeAttr(versionedAsset(certifiedSrc))}" alt="">
       </div>
+    </div>`;
+  }
+
+  const atlas = layered.certifiedAtlas;
+  if (atlas?.src) {
+    const columns = Math.max(1, Number(atlas.columns || 1));
+    const rows = Math.max(1, Number(atlas.rows || 1));
+    const col = Math.max(0, Number(atlas.col || 0));
+    const row = Math.max(0, Number(atlas.row || 0));
+    const posX = columns <= 1 ? 0 : (col / (columns - 1)) * 100;
+    const posY = rows <= 1 ? 0 : (row / (rows - 1)) * 100;
+    const atlasStyle = [
+      `background-image:url("${versionedAsset(atlas.src)}")`,
+      `background-size:${columns * 100}% ${rows * 100}%`,
+      `background-position:${posX}% ${posY}%`,
+    ].join(";");
+    return `
+    <div class="vehicle-visual vehicle-visual--layered vehicle-visual--certified vehicle-visual--atlas vehicle-visual--${escapeAttr(view)} ${compact ? "vehicle-visual--compact" : ""} ${escapeAttr(className)}"
+         role="img"
+         aria-label="${escapeAttr(car?.displayName || "Vehicle")} side profile"
+         data-layered-car
+         data-certified-car
+         data-asset-id="${escapeAttr(layered.assetId || "")}"
+         data-front-bumper-ratio="${geometry?.frontBumperRatio ?? 1}"
+         style="${escapeAttr(rootStyle)}">
+      <div class="layered-car layered-car--atlas" aria-hidden="true" style="${escapeAttr(atlasStyle)}"></div>
     </div>`;
   }
 
