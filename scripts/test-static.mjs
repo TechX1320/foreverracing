@@ -451,7 +451,7 @@ if (!appSource.includes("renderEngineStudio") ||
     !contentStudioSource.includes('EDIT ENGINE') ||
     !engineStudioSource.includes('ENGINE CREATOR') ||
     !engineStudioSource.includes('Torque-first power curve') ||
-    !engineStudioSource.includes('GENERATE BASELINE') ||
+    !engineStudioSource.includes('GENERATE FROM PROFILE') ||
     !engineStudioSource.includes('SAVE ENGINE DRAFT') ||
     !engineStudioSource.includes('ACTIVATE ENGINE LOCALLY') ||
     !engineDomainSource.includes('deriveHorsepower') ||
