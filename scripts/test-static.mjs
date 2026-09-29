@@ -209,3 +209,12 @@ if (!serverGameSourceV04c.includes('quickRacePreview') || !serverGameSourceV04c.
 }
 console.log('V0.4E tutorial wording, dialog sizing and Race Preview checks passed.');
 
+if (!racePresentationSourceV04d.includes('frontBumperFinishBottom') ||
+    !racePresentationSourceV04d.includes('raceVisualProgress') ||
+    !racePresentationSourceV04d.includes('visualFinishAt') ||
+    !racePresentationSourceV04d.includes('timingNow = Math.min(now, finishAt)')) {
+  throw new Error('Front-bumper finish timing / visual fly-through regression.');
+}
+console.log('V0.4F front-bumper timing geometry check passed.');
+
+
