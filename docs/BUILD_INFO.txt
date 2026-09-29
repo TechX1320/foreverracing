@@ -1,7 +1,7 @@
 Generated from shared source for GitHub Pages.
-Build: 0.4.0-f
+Build: 0.4.0-f.1
 Storage mode: local
 Offline service worker: disabled in static development mode
-Race presentation: horizontal side-view, persistent two-phase start/finish, front-bumper timing with visual fly-through
-V0.4F: layered side-profile cars, validated three-car starter catalog and deterministic Performance Index
+Race presentation: persistent two-phase start/finish with blocking real-time playback
+V0.4F.1: certified starter car visuals and direct Buy + Install parts flow
 Do not edit docs/ by hand; run php scripts/build-static.php.
