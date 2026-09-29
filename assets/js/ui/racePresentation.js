@@ -289,9 +289,16 @@ function updateWheelMotion(car, run, drivetrain, progress, now, startAt, distanc
   const elapsed = Math.max(0, rawElapsed);
   const slip = Math.max(0, Math.min(1, Number(run?.traction?.wheelSlip || 0)));
   const slipWindow = Math.max(0, 1 - (elapsed / Math.max(0.45, 0.65 + (slip * 1.7))));
-  const angle = (rollingDegrees + (elapsed * 900 * slip * slipWindow)) % 360;
+  const slipDegrees = elapsed * 900 * slip * slipWindow;
+  const drive = String(drivetrain || "").toUpperCase();
 
   car.querySelectorAll(".layered-car__wheel,.layered-car__disk").forEach((node) => {
+    const front = node.classList.contains("front-wheel") || node.classList.contains("front-disk");
+    const rear = node.classList.contains("rear-wheel") || node.classList.contains("rear-disk");
+    const driven = drive === "AWD"
+      || (drive === "FWD" && front)
+      || ((drive === "RWD" || !drive) && rear);
+    const angle = (rollingDegrees + (driven ? slipDegrees : 0)) % 360;
     node.style.transform = `rotate(${angle.toFixed(2)}deg)`;
   });
 
