@@ -65,7 +65,7 @@ copyTree($root . '/assets', $docs . '/assets');
 copyTree($root . '/data/catalog', $docs . '/data/catalog');
 copyTree($root . '/data/config', $docs . '/data/config');
 
-foreach (['manifest.webmanifest', 'service-worker.js'] as $file) {
+foreach (['manifest.webmanifest', 'service-worker.js', 'favicon.svg'] as $file) {
     if (!copy($root . '/' . $file, $docs . '/' . $file)) {
         throw new RuntimeException("Unable to copy {$file}");
     }
