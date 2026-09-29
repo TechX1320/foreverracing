@@ -215,6 +215,7 @@ export async function renderEngineStudio(ctx) {
     host.querySelector("[data-engine-delete]")?.addEventListener("click", () => {
       if (!draft.engineId) return;
       deleteContentStudioEngine(draft.engineId);
+      engines = mergeContentStudioEngines(Array.isArray(baseEngines) ? baseEngines : [], { includeDrafts: true });
       ctx.toast("Local engine override removed", "The repository engine will be used again.");
       render();
     });
