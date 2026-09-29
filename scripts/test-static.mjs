@@ -6,6 +6,13 @@ const docs = new URL('../docs/', import.meta.url);
 const required = [
   'index.html',
   'assets/css/app.css',
+  'assets/art/race/road.jpg',
+  'assets/art/race/race_track.png',
+  'assets/art/race/start.png',
+  'assets/art/race/finish.png',
+  'assets/art/race/divider.png',
+  'assets/art/race/shadow.png',
+  'assets/art/race/xmas.png',
   'assets/art/cars/atlas/cars-1.png',
   'assets/art/cars/atlas/cars-2.png',
   'assets/art/cars/atlas/cars-3.png',
@@ -50,7 +57,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.4.0-g"')) throw new Error('Static index is missing the V0.4G build marker.');
+if (!html.includes('data-build="0.4.0-h.0"')) throw new Error('Static index is missing the V0.4H.0 build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -208,8 +215,8 @@ if (!serverGameSourceV04c.includes("'s1_intake_1'") || !serverGameSourceV04c.inc
 if (!raceSimulatorSourceV04d.includes('allowFoul') || !raceSimulatorSourceV04d.includes('quickRace !== false')) {
   throw new Error('V0.4D tutorial foul/weather gates are missing.');
 }
-if (!racePresentationSourceV04d.includes('ratio >= 0.52 && ratio < 0.68') || !racePresentationSourceV04d.includes('RED LIGHT • YOU LEFT BEFORE GREEN')) {
-  throw new Error('Drag-tree timing fix is missing.');
+if (!racePresentationSourceV04d.includes('ratio >= 0.52') || !racePresentationSourceV04d.includes('ratio >= 0.68') || !racePresentationSourceV04d.includes('data.treeState') || !racePresentationSourceV04d.includes('RED LIGHT • YOU LEFT BEFORE GREEN')) {
+  throw new Error('Drag-tree timing/state progression is missing.');
 }
 console.log('V0.4D guided FTUE, unlock progression and race-gating checks passed.');
 
@@ -260,5 +267,18 @@ if (!cssV04b.includes('V0.4F layered vehicles and side-view drag strip') || !css
   throw new Error('V0.4F layered-car / side-view race CSS is missing.');
 }
 console.log('V0.4G 57-car PNG atlas, PI classes and bumper-timed side-view racing checks passed.');
+
+if (!racePresentationSourceV04d.includes('race-strip__surface') ||
+    !racePresentationSourceV04d.includes('race-side-car__shadow') ||
+    !racePresentationSourceV04d.includes('data-tree-state="idle"')) {
+  throw new Error('V0.4H.0 race visual markup is incomplete.');
+}
+for (const assetRef of ['road.jpg', 'race_track.png', 'start.png', 'finish.png', 'shadow.png', 'xmas.png']) {
+  if (!cssV04b.includes(assetRef)) throw new Error(`V0.4H.0 race CSS is missing ${assetRef}.`);
+}
+if (!cssV04b.includes('V0.4H.0 purchased drag-strip visual pass')) {
+  throw new Error('V0.4H.0 race visual CSS marker is missing.');
+}
+console.log('V0.4H.0 purchased race-track visuals checks passed.');
 
 
