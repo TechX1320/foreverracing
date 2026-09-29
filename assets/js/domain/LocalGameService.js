@@ -1,6 +1,6 @@
 import { RaceSimulator } from './RaceSimulator.js';
 import { benchmarkPerformance, performanceClassFromIndex } from './PerformanceIndex.js';
-import { isContentReleased } from './ContentRelease.js';
+import { isContentReleased, nextScheduledReleaseAt } from './ContentRelease.js';
 const clone = (value) => value == null ? value : structuredClone(value);
 const now = () => Math.floor(Date.now() / 1000);
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -290,7 +290,11 @@ export class LocalGameService {
     const listings = starters.map((spec) => makeListing(spec, true));
     while (listings.length < 8) listings.push(makeListing(randomChoice(pool), false));
 
-    return { generatedAt: timestamp, expiresAt: timestamp + this.config.usedLotRefreshSeconds, listings };
+    const normalExpiry = timestamp + this.config.usedLotRefreshSeconds;
+    const nextReleaseMs = nextScheduledReleaseAt(this.cars, Date.now());
+    const releaseExpiry = nextReleaseMs == null ? null : Math.ceil(nextReleaseMs / 1000);
+    const expiresAt = releaseExpiry != null ? Math.min(normalExpiry, releaseExpiry) : normalExpiry;
+    return { generatedAt: timestamp, expiresAt, listings };
   }
 
   purchaseUsedCar(inputPlayer, lot, listingId) {
