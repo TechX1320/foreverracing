@@ -464,6 +464,7 @@ final class GameService
             $torque = max(1.0, (float)($car['derived']['torque'] ?? 1));
             $weight = max(500.0, (float)($car['derived']['weight'] ?? 500));
             $grip = max(0.5, (float)($car['derived']['grip'] ?? 1));
+            $drivetrain = (string)($car['derived']['drivetrain'] ?? $car['base']['drivetrain'] ?? '-');
             $opponentProfile = self::nextOpponentProfile($player, $car, $tutorialRace);
             $opponentWeight = (float)$opponentProfile['sim']['weight'];
             $opponentHp = (float)$opponentProfile['sim']['hp'];
@@ -472,11 +473,11 @@ final class GameService
             $opponentLevel = (int)$opponentProfile['level'];
 
             $playerRun = $simulator->simulate([
-                'hp' => $hp, 'torque' => $torque, 'weight' => $weight, 'grip' => $grip, 'level' => $level,
+                'hp' => $hp, 'torque' => $torque, 'weight' => $weight, 'grip' => $grip, 'drivetrain' => $drivetrain, 'level' => $level,
                 'allowFoul' => !$tutorialRace,
             ], $distance, $weather);
             $opponentRun = $simulator->simulate([
-                'hp' => $opponentHp, 'torque' => $opponentTorque, 'weight' => $opponentWeight, 'grip' => $opponentGrip, 'level' => $opponentLevel,
+                'hp' => $opponentHp, 'torque' => $opponentTorque, 'weight' => $opponentWeight, 'grip' => $opponentGrip, 'drivetrain' => (string)($opponentProfile['drivetrain'] ?? '-'), 'level' => $opponentLevel,
                 'allowFoul' => !$tutorialRace, 'reactionOffset' => $tutorialRace ? 0.16 : 0,
             ], $distance, $weather);
             if ($tutorialRace && (float)$opponentRun['totalTime'] <= (float)$playerRun['totalTime']) {
@@ -506,6 +507,7 @@ final class GameService
                 'won' => $won,
                 'distance' => $distance,
                 'distanceLabel' => (string)($distanceConfig['label'] ?? $distance),
+                'distanceFeet' => (int)($distanceConfig['feet'] ?? 1320),
                 'location' => $location,
                 'weather' => $weather,
                 'margin' => round(abs((float)$playerRun['totalTime'] - (float)$opponentRun['totalTime']), 3),
@@ -516,6 +518,7 @@ final class GameService
                 'playerCarId' => (string)$car['carId'],
                 'carName' => self::carName($car),
                 'playerVisual' => is_array($car['visual'] ?? null) ? $car['visual'] : [],
+                'playerDrivetrain' => $drivetrain,
                 'playerPerformanceIndex' => (int)($car['performanceIndex'] ?? PerformanceIndex::forCar($car, $racingConfig)['performanceIndex']),
                 'playerPerformanceClass' => (string)($car['performanceClass'] ?? PerformanceIndex::classFromIndex((int)($car['performanceIndex'] ?? 0))),
                 'player' => $playerRun,
@@ -1170,6 +1173,7 @@ final class GameService
                 'torque' => max(1, (int)($base['torque'] ?? 1)),
                 'weight' => max(500, (int)($base['weight'] ?? 500)),
                 'grip' => max(0.5, (float)($base['grip'] ?? 1)),
+                'drivetrain' => (string)($base['drivetrain'] ?? '-'),
             ],
         ];
     }
