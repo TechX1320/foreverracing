@@ -1,16 +1,19 @@
-const CACHE = 'forever-racing-shell-v0.4.0-f';
+const CACHE = 'forever-racing-shell-v0.4.0-f.1';
 const SHELL = [
   './',
   './manifest.webmanifest',
   './assets/css/app.css',
+  './assets/art/cars/layered/golf_gti/certified.png',
   './assets/art/cars/layered/golf_gti/body.webp',
   './assets/art/cars/layered/golf_gti/wheel.webp',
   './assets/art/cars/layered/golf_gti/disk.webp',
   './assets/art/cars/layered/golf_gti/detail.webp',
+  './assets/art/cars/layered/mazda_rx8/certified.png',
   './assets/art/cars/layered/mazda_rx8/body.webp',
   './assets/art/cars/layered/mazda_rx8/wheel.webp',
   './assets/art/cars/layered/mazda_rx8/disk.webp',
   './assets/art/cars/layered/mazda_rx8/detail.webp',
+  './assets/art/cars/layered/renault_clio/certified.png',
   './assets/art/cars/layered/renault_clio/body.webp',
   './assets/art/cars/layered/renault_clio/wheel.webp',
   './assets/art/cars/layered/renault_clio/disk.webp',
