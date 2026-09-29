@@ -49,7 +49,7 @@ export async function renderQuickRace(ctx) {
         }).join("")}
       </div>
       ${result ? raceResult(result) : ""}
-      ${current ? racePreview(current, preview?.opponent || null, player) : `
+      ${current ? racePreview(current, preview, player) : `
         <div class="empty-state"><strong>You need a Current Car.</strong><span>Buy a car and select it in the Garage first.</span><div class="cluster" style="justify-content:center;margin-top:14px"><button class="button button--primary button--small" data-go-garage>Open Garage</button><button class="button button--small" data-go-showroom>Showroom</button></div></div>`}
       ${raceHistory(player)}
       <details class="collapsible-section">
@@ -119,20 +119,11 @@ async function completeActiveRace(ctx, activeRace, tutorialBeforeStart = null) {
   }
 }
 
-function racePreview(car, opponent, player) {
-  const playerStats = [
-    ["POWER", `${number(car.derived?.hp)} hp`],
-    ["TORQUE", `${number(car.derived?.torque)} lb-ft`],
-    ["WEIGHT", `${number(car.derived?.weight)} lb`],
-    ["GRIP", number(car.derived?.grip, 3)],
-  ];
-
-  const opponentStats = opponent ? [
-    ["POWER", `${number(opponent.hp)} hp`],
-    ["TORQUE", `${number(opponent.torque)} lb-ft`],
-    ["WEIGHT", `${number(opponent.weight)} lb`],
-    ["GRIP", number(opponent.grip, 3)],
-  ] : [];
+function racePreview(car, preview, player) {
+  const opponent = preview?.opponent || null;
+  const playerPi = Number(preview?.performanceIndex || car?.performanceIndex || car?.benchmark?.performanceIndex || 0);
+  const best = car?.raceRecords?.["1/4"]?.bestEt;
+  const buildType = Number(car?.buildStage || 1) === 1 ? "Street Car" : "Race Build";
 
   return `<section class="race-preview-card">
     <div class="race-preview-card__heading">
@@ -142,19 +133,29 @@ function racePreview(car, opponent, player) {
     <div class="race-preview-matchup">
       <article class="race-preview-driver race-preview-driver--player">
         <div class="race-preview-driver__visual">${renderVehicle(car, { stage: Number(car.buildStage || 1), view: "racePreview" })}</div>
-        <div class="race-preview-driver__identity"><span>YOU</span><strong>${escapeHtml(carLabel(car))}</strong><small>${escapeHtml(car.base?.drivetrain || "-")} • ${escapeHtml(car.displayName || "")}</small></div>
-        <div class="race-preview-driver__stats">${playerStats.map(([label,value]) => `<span><small>${label}</small><b>${value}</b></span>`).join("")}</div>
+        <div class="race-preview-driver__identity"><span>YOU</span><strong>${escapeHtml(carLabel(car))}</strong><small>${escapeHtml(car.base?.drivetrain || "-")} • ${escapeHtml(buildType)}</small></div>
+        <div class="race-preview-driver__stats race-preview-driver__stats--pi">
+          <span><small>PERFORMANCE</small><b class="pi-value">PI ${number(playerPi)}</b></span>
+          <span><small>1/4 BEST</small><b>${best == null ? "—" : `${number(best,3)} s`}</b></span>
+          <span><small>BUILD</small><b>${escapeHtml(buildType)}</b></span>
+        </div>
       </article>
       <div class="race-preview-vs">VS</div>
       <article class="race-preview-driver race-preview-driver--opponent">
-        <div class="race-preview-driver__visual">${opponent?.visualSrc ? `<img class="race-preview-opponent-image" src="${escapeHtml(opponent.visualSrc)}" alt="" aria-hidden="true">` : '<div class="race-preview-opponent-placeholder">?</div>'}</div>
+        <div class="race-preview-driver__visual">${opponent?.visual ? renderVehicle({ displayName: opponent.carName || "Opponent", visual: opponent.visual }, { view: "racePreview" }) : '<div class="race-preview-opponent-placeholder">?</div>'}</div>
         <div class="race-preview-driver__identity"><span>NEXT OPPONENT</span><strong>${escapeHtml(opponent?.name || "Finding opponent…")}</strong><small>${escapeHtml(opponent?.carName || "Matched car pending")}</small></div>
-        <div class="race-preview-driver__stats">${opponentStats.length ? opponentStats.map(([label,value]) => `<span><small>${label}</small><b>${value}</b></span>`).join("") : '<span class="race-preview-loading">MATCHING…</span>'}</div>
+        <div class="race-preview-driver__stats race-preview-driver__stats--pi">
+          ${opponent ? `
+            <span><small>PERFORMANCE</small><b class="pi-value">PI ${number(opponent.performanceIndex || 0)}</b></span>
+            <span><small>DRIVETRAIN</small><b>${escapeHtml(opponent.drivetrain || "—")}</b></span>
+            <span><small>BUILD</small><b>${escapeHtml(opponent.buildType || "Street Car")}</b></span>
+          ` : '<span class="race-preview-loading">MATCHING…</span>'}
+        </div>
       </article>
     </div>
+    <p class="race-preview-mystery">Opponent dyno data stays hidden. PI is the matchup shorthand: every 8 PI represents roughly one tenth of a second in the standardized 1/4-mile benchmark.</p>
   </section>`;
 }
-
 
 function raceResult(race) {
   const player = race.player || {};
