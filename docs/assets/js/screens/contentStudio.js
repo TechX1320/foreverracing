@@ -1,6 +1,7 @@
 import { bindHome, escapeHtml, pageShell } from "../ui/components.js";
 import { renderVehicle } from "../ui/vehicleRenderer.js";
 import { benchmarkPerformance, performanceClassFromIndex } from "../domain/PerformanceIndex.js";
+import { engineLabel, engineToCarSnapshot, normalizeEngineDefinition } from "../domain/EngineCatalog.js";
 import {
   normalizeRelease,
   normalizeReleaseForSave,
@@ -14,9 +15,11 @@ import {
   listContentStudioCars,
   saveContentStudioCar,
 } from "../content/ContentStudioCatalog.js";
+import { mergeContentStudioEngines } from "../content/ContentStudioEngineCatalog.js";
 
 const BUILD_MODULES = [
   { id: "cars", label: "CAR CREATOR", state: "ACTIVE" },
+  { id: "engines", label: "ENGINE CREATOR", state: "ACTIVE" },
   { id: "parts", label: "PARTS TOOL", state: "NEXT" },
   { id: "wheels", label: "WHEELS TOOL", state: "PLANNED" },
 ];
@@ -28,24 +31,27 @@ const USED_LOT_KEY = "foreverRacing.v02.usedLot";
 export async function renderContentStudio(ctx) {
   const build = String(document.documentElement.dataset.build || "").trim();
   const suffix = build ? `?v=${encodeURIComponent(build)}` : "";
-  const [catalogData, artResponse, racingResponse] = await Promise.all([
+  const [catalogData, artResponse, racingResponse, engineResponse] = await Promise.all([
     ctx.storage.carCatalog(),
     fetch(`data/catalog/car-art.json${suffix}`, { cache: "no-store" }),
     fetch(`data/config/racing.json${suffix}`, { cache: "no-store" }),
+    fetch(`data/catalog/engines.json${suffix}`, { cache: "no-store" }),
   ]);
   if (!artResponse.ok) throw new Error(`Unable to load car art catalog (${artResponse.status}).`);
   if (!racingResponse.ok) throw new Error(`Unable to load racing config (${racingResponse.status}).`);
+  if (!engineResponse.ok) throw new Error(`Unable to load engine catalog (${engineResponse.status}).`);
 
   const catalogCars = Array.isArray(catalogData?.cars) ? catalogData.cars : [];
   const artData = await artResponse.json();
   const artCars = Array.isArray(artData?.cars) ? artData.cars : [];
   const racingConfig = await racingResponse.json();
+  const engineCatalog = mergeContentStudioEngines(await engineResponse.json()).map(normalizeEngineDefinition);
   const root = ctx.screenRoot;
 
   root.innerHTML = pageShell({
     title: "Content Studio",
     eyebrow: "DEVELOPMENT / CONTENT TOOLS",
-    hint: "Cars now • parts and wheels next",
+    hint: "Cars + engines now • Parts Tool next",
     trail: "Browser-local authoring workspace",
     body: '<div data-content-studio></div>',
   });
@@ -64,10 +70,15 @@ export async function renderContentStudio(ctx) {
     host.innerHTML = `
       <div class="content-studio">
         <div class="content-studio__modules">
-          ${BUILD_MODULES.map((module) => `
-            <button type="button" class="content-studio__module ${module.id === "cars" ? "is-active" : ""}" ${module.id === "cars" ? "" : "disabled"}>
+          ${BUILD_MODULES.map((module) => {
+            const active = module.id === "cars";
+            const enabled = module.id === "cars" || module.id === "engines";
+            const routeAttr = module.id === "engines" ? ' data-open-engine-creator' : "";
+            return `
+            <button type="button" class="content-studio__module ${active ? "is-active" : ""}"${routeAttr} ${enabled ? "" : "disabled"}>
               <b>${module.label}</b><span>${module.state}</span>
-            </button>`).join("")}
+            </button>`;
+          }).join("")}
         </div>
 
         <div class="content-studio__toolbar">
@@ -126,7 +137,7 @@ export async function renderContentStudio(ctx) {
           <div class="content-studio__editor">
             ${identitySection(draft)}
             ${releaseSection(draft)}
-            ${physicsSection(draft)}
+            ${physicsSection(draft, engineCatalog)}
             ${artSection(draft)}
           </div>
         </div>
@@ -136,6 +147,8 @@ export async function renderContentStudio(ctx) {
   };
 
   const bindWorkspace = () => {
+    host.querySelector("[data-open-engine-creator]")?.addEventListener("click", () => ctx.router.navigate("engine-studio"));
+
     host.querySelector("[data-studio-load]")?.addEventListener("change", (event) => {
       const id = String(event.currentTarget.value || "");
       if (!id) return;
@@ -149,6 +162,10 @@ export async function renderContentStudio(ctx) {
       });
       lastLoadedId = id;
       ensureDraftShape(draft);
+      if (draft.factoryEngineId) {
+        const engine = engineCatalog.find((row) => String(row.engineId) === String(draft.factoryEngineId));
+        if (engine) applyEngineToCarDraft(draft, engine);
+      }
       renderWorkspace();
     });
 
@@ -156,6 +173,21 @@ export async function renderContentStudio(ctx) {
       draft = createBlankCar(nextStockId(catalogCars));
       lastLoadedId = "";
       renderWorkspace();
+    });
+
+    host.querySelector("[data-factory-engine]")?.addEventListener("change", (event) => {
+      const engineId = String(event.currentTarget.value || "");
+      draft.factoryEngineId = engineId || null;
+      if (engineId) {
+        const engine = engineCatalog.find((row) => String(row.engineId) === engineId);
+        if (engine) applyEngineToCarDraft(draft, engine);
+      }
+      renderWorkspace();
+    });
+
+    host.querySelector("[data-edit-linked-engine]")?.addEventListener("click", () => {
+      if (draft.factoryEngineId) sessionStorage.setItem("foreverRacing.engineStudio.openEngineId", String(draft.factoryEngineId));
+      ctx.router.navigate("engine-studio");
     });
 
     host.querySelectorAll("[data-studio-field]").forEach((input) => {
@@ -257,7 +289,7 @@ export async function renderContentStudio(ctx) {
     host.querySelector("[data-save-reload]")?.addEventListener("click", () => saveDraft(true, true));
     host.querySelector("[data-export-car]")?.addEventListener("click", () => {
       try {
-        const car = finalizedCar(draft, racingConfig, catalogCars);
+        const car = finalizedCar(draft, racingConfig, catalogCars, engineCatalog);
         downloadJson(car, `${car.catalogId || "forever-racing-car"}.json`);
       } catch (error) {
         ctx.toast("Export blocked", error.message);
@@ -265,7 +297,7 @@ export async function renderContentStudio(ctx) {
     });
     host.querySelector("[data-copy-car]")?.addEventListener("click", async () => {
       try {
-        const car = finalizedCar(draft, racingConfig, catalogCars);
+        const car = finalizedCar(draft, racingConfig, catalogCars, engineCatalog);
         await navigator.clipboard.writeText(JSON.stringify(car, null, 2));
         ctx.toast("Car JSON copied", "Ready to paste into a commit or review.");
       } catch (error) {
@@ -299,7 +331,7 @@ export async function renderContentStudio(ctx) {
 
   const saveDraft = (reload, enabled) => {
     try {
-      const car = finalizedCar(draft, racingConfig, catalogCars);
+      const car = finalizedCar(draft, racingConfig, catalogCars, engineCatalog);
       saveContentStudioCar(car, { enabled });
       draft = structuredClone(car);
       lastLoadedId = car.catalogId;
@@ -376,28 +408,73 @@ function releaseSection(car) {
       </div>
     </section>`;
 }
-function physicsSection(car) {
-  return `
-    <section class="content-studio__section">
-      <header><div><small>PHYSICS ENGINE</small><strong>Factory powertrain & performance inputs</strong></div></header>
+function physicsSection(car, engines = []) {
+  const linked = engines.find((engine) => String(engine.engineId) === String(car.factoryEngineId || ""));
+  const engineOptions = [
+    ["", "Custom / Legacy Engine"],
+    ...engines
+      .filter((engine) => (Number(engine.peakHp || 0) > 0 && Number(engine.peakTorque || 0) > 0) || String(engine.engineId) === String(car.factoryEngineId || ""))
+      .slice()
+      .sort((a, b) => engineLabel(a).localeCompare(engineLabel(b)))
+      .map((engine) => [engine.engineId, engineLabel(engine)]),
+  ];
+
+  const engineFields = linked
+    ? `
+      <div class="content-studio__engine-link">
+        <div>
+          <small>LINKED ENGINE</small>
+          <strong>${escapeHtml(engineLabel(linked))}</strong>
+          <span>${escapeHtml(linked.familyId || linked.engineId)} • ${escapeHtml(linked.configuration || "-")} • ${escapeHtml(linked.aspiration || "-")}</span>
+        </div>
+        <button class="button button--small" type="button" data-edit-linked-engine>EDIT ENGINE</button>
+      </div>
+      <div class="studio-form-grid studio-form-grid--4">
+        ${readOnlyField("Displacement (L)", linked.displacementLiters)}
+        ${readOnlyField("Engine Config", linked.configuration)}
+        ${readOnlyField("Aspiration", linked.aspiration)}
+        ${readOnlyField("Peak HP", linked.peakHp)}
+        ${readOnlyField("HP RPM", linked.peakHpRpm)}
+        ${readOnlyField("Peak Torque", linked.peakTorque)}
+        ${readOnlyField("TQ RPM", linked.peakTorqueRpm)}
+        ${readOnlyField("Redline RPM", linked.redlineRpm)}
+        ${readOnlyField("Rev Cut RPM", linked.revCutRpm)}
+      </div>`
+    : `
       <div class="studio-form-grid studio-form-grid--4">
         ${inputField("Displacement (L)", "engine.displacementLiters", car.engine?.displacementLiters, "number", { min: 0.1, step: 0.1 })}
         ${inputField("Engine Config", "engine.configuration", car.engine?.configuration, "text", { placeholder: "I4 / V6 / V8 / Rotary" })}
         ${selectField("Aspiration", "engine.aspiration", car.engine?.aspiration || "Naturally Aspirated", [
           ["Naturally Aspirated","Naturally Aspirated"],["Turbo","Turbo"],["Twin Turbo","Twin Turbo"],["Supercharged","Supercharged"],["Turbo Diesel","Turbo Diesel"]
         ])}
-        ${selectField("Engine Layout", "engine.layout", car.engine?.layout || "Front", [["Front","Front"],["Mid","Mid"],["Rear","Rear"]])}
-
         ${inputField("Peak HP", "base.hp", car.base?.hp, "number", { min: 1, step: 1 })}
         ${inputField("HP RPM", "engine.peakHpRpm", car.engine?.peakHpRpm, "number", { min: 500, step: 50 })}
         ${inputField("Peak Torque", "base.torque", car.base?.torque, "number", { min: 1, step: 1 })}
         ${inputField("TQ RPM", "engine.peakTorqueRpm", car.engine?.peakTorqueRpm, "number", { min: 500, step: 50 })}
+        ${inputField("Redline RPM", "engine.redlineRpm", car.engine?.redlineRpm, "number", { min: 1000, step: 100 })}
+        ${inputField("Rev Cut RPM", "engine.revCutRpm", car.engine?.revCutRpm, "number", { min: 1000, step: 100 })}
+      </div>`;
 
+  return `
+    <section class="content-studio__section">
+      <header><div><small>PHYSICS ENGINE</small><strong>Factory engine link & chassis inputs</strong></div></header>
+      <div class="studio-form-grid studio-form-grid--4">
+        <label class="studio-field studio-field--wide">
+          <span>Factory Engine</span>
+          <select data-factory-engine>
+            ${engineOptions.map(([id, text]) => `<option value="${escapeHtml(id)}" ${String(id) === String(car.factoryEngineId || "") ? "selected" : ""}>${escapeHtml(text)}</option>`).join("")}
+          </select>
+        </label>
+        ${selectField("Engine Location", "engine.layout", car.engine?.layout || "Front", [["Front","Front"],["Mid","Mid"],["Rear","Rear"]])}
         ${inputField("Curb Weight (lb)", "base.weight", car.base?.weight, "number", { min: 500, step: 1 })}
         ${inputField("Grip", "base.grip", car.base?.grip, "number", { min: 0.5, max: 2, step: 0.01 })}
         ${selectField("Drivetrain", "base.drivetrain", car.base?.drivetrain || "RWD", [["FWD","FWD"],["RWD","RWD"],["AWD","AWD"]])}
-        ${inputField("Redline RPM", "engine.redlineRpm", car.engine?.redlineRpm, "number", { min: 1000, step: 100 })}
-        ${inputField("Rev Cut RPM", "engine.revCutRpm", car.engine?.revCutRpm, "number", { min: 1000, step: 100 })}
+      </div>
+      ${engineFields}
+      <div class="content-studio__engine-note">
+        ${linked
+          ? "This car is engine-linked. Engine output/spec fields come from Engine Creator; Car Creator owns the chassis weight, grip, drivetrain and engine location."
+          : "Legacy/custom mode keeps engine specs inside the car. Select a Factory Engine before release if you want engine-specific parts and future engine swaps to follow the engine catalog."}
       </div>
     </section>`;
 }
@@ -484,9 +561,14 @@ function scoreCar(car, racingConfig) {
   };
 }
 
-function finalizedCar(source, racingConfig, catalogCars) {
+function finalizedCar(source, racingConfig, catalogCars, engines = []) {
   const car = structuredClone(source);
   ensureDraftShape(car);
+  if (car.factoryEngineId) {
+    const engine = engines.find((row) => String(row.engineId) === String(car.factoryEngineId));
+    if (!engine) throw new Error("The selected Factory Engine is not available.");
+    applyEngineToCarDraft(car, engine);
+  }
   car.make = String(car.make || "").trim();
   car.model = String(car.model || "").trim();
   car.displayName = String(car.displayName || `${car.make} ${car.model}`).trim();
@@ -562,6 +644,7 @@ function createBlankCar(stockId) {
     catalogId: "",
     starter: false,
     price: 15000,
+    factoryEngineId: null,
     engine: {
       displacementLiters: 2,
       configuration: "I4",
@@ -595,6 +678,16 @@ function createBlankCar(stockId) {
     },
     market: { classifieds: true, showroom: false },
   };
+}
+
+function applyEngineToCarDraft(car, engine) {
+  const row = normalizeEngineDefinition(engine);
+  car.factoryEngineId = row.engineId || null;
+  car.engine = engineToCarSnapshot(row, car.engine || {});
+  car.base ||= {};
+  if (row.peakHp > 0) car.base.hp = row.peakHp;
+  if (row.peakTorque > 0) car.base.torque = row.peakTorque;
+  return car;
 }
 
 function blankAnchors() {
@@ -651,6 +744,10 @@ function buildAvailableCars(catalogCars, artCars) {
 
 function nextStockId(cars) {
   return Math.max(0, ...cars.map((car) => Number(car.stockId || 0))) + 1;
+}
+
+function readOnlyField(label, value) {
+  return `<label class="studio-field"><span>${escapeHtml(label)}</span><input type="text" value="${escapeHtml(value ?? "")}" readonly tabindex="-1"></label>`;
 }
 
 function inputField(label, path, value, type = "text", options = {}) {
