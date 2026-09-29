@@ -13,6 +13,19 @@ const required = [
   'assets/art/race/divider.png',
   'assets/art/race/shadow.png',
   'assets/art/race/xmas.png',
+  'assets/art/race/smoke.png',
+  'assets/art/cars/race/golf_gti/body.png',
+  'assets/art/cars/race/golf_gti/wheel.png',
+  'assets/art/cars/race/golf_gti/disk.png',
+  'assets/art/cars/race/golf_gti/detail.png',
+  'assets/art/cars/race/mazda_rx8/body.png',
+  'assets/art/cars/race/mazda_rx8/wheel.png',
+  'assets/art/cars/race/mazda_rx8/disk.png',
+  'assets/art/cars/race/mazda_rx8/detail.png',
+  'assets/art/cars/race/renault_clio/body.png',
+  'assets/art/cars/race/renault_clio/wheel.png',
+  'assets/art/cars/race/renault_clio/disk.png',
+  'assets/art/cars/race/renault_clio/detail.png',
   'assets/art/cars/atlas/cars-1.png',
   'assets/art/cars/atlas/cars-2.png',
   'assets/art/cars/atlas/cars-3.png',
@@ -57,7 +70,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.4.0-h.0"')) throw new Error('Static index is missing the V0.4H.0 build marker.');
+if (!html.includes('data-build="0.4.0-h.2"')) throw new Error('Static index is missing the V0.4H.2 build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -82,6 +95,7 @@ for (const expected of expectedStarters) {
   if (car.engine.displacementLiters !== expected.displacement || car.engine.configuration !== expected.config || car.engine.aspiration !== expected.aspiration || car.engine.peakHpRpm !== expected.hpRpm || car.engine.peakTorqueRpm !== expected.tqRpm || car.engine.redlineRpm !== expected.redline || car.engine.revCutRpm !== expected.revCut) throw new Error(`${expected.id} engine metadata mismatch.`);
   if (!car.visual?.layered?.certifiedSrc) throw new Error(`${expected.id} certified gameplay art is missing.`);
   if (!car.visual?.layered?.layers?.body?.src || !car.visual?.layered?.layers?.wheel?.src || !car.visual?.layered?.layers?.disk?.src || !car.visual?.layered?.layers?.detail?.src) throw new Error(`${expected.id} layered customization metadata is incomplete.`);
+  if (!car.visual?.layered?.raceLayers?.body?.src || !car.visual?.layered?.raceLayers?.wheel?.src || !car.visual?.layered?.raceLayers?.disk?.src || !car.visual?.layered?.raceLayers?.detail?.src) throw new Error(`${expected.id} race animation layers are incomplete.`);
   if (!(car.visual.layered.anchors.frontBumperX > car.visual.layered.anchors.frontWheelCenter.x)) throw new Error(`${expected.id} front-bumper anchor is invalid.`);
   if (!(car.visual.layered.anchors.frontWheelCenter.y + car.visual.layered.layers.wheel.height / 2 >= car.visual.layered.anchors.groundY - 2)) throw new Error(`${expected.id} wheels still sit too high in the arches.`);
   if (!(car.benchmark?.passes === 51 && car.benchmark?.performanceIndex > 0 && car.benchmark?.quarterMileEt > 0)) throw new Error(`${expected.id} benchmark / PI metadata is missing.`);
@@ -99,7 +113,7 @@ for (const file of [
 
 const rendererSource = await fs.readFile(new URL('assets/js/ui/vehicleRenderer.js', root), 'utf8');
 if (!rendererSource.includes('ART MISSING')) throw new Error('Vehicle renderer must expose an explicit missing-art placeholder.');
-if (!rendererSource.includes('renderLayeredVehicle') || !rendererSource.includes('data-certified-car') || !rendererSource.includes('layered-car--atlas') || !rendererSource.includes('background-size') || !rendererSource.includes('centeredLayer') || !rendererSource.includes('frontBumperRatio') || !rendererSource.includes('frontWheelRatio')) throw new Error('Certified PNG atlas / layered side-profile vehicle renderer is incomplete.');
+if (!rendererSource.includes('renderLayeredVehicle') || !rendererSource.includes('data-certified-car') || !rendererSource.includes('layered-car--atlas') || !rendererSource.includes('animatedWheels') || !rendererSource.includes('smokeAnchor') || !rendererSource.includes('centeredLayer') || !rendererSource.includes('frontBumperRatio') || !rendererSource.includes('frontWheelRatio')) throw new Error('Certified / animated layered vehicle renderer is incomplete.');
 if (rendererSource.includes('topDown') || rendererSource.includes('renderProcedural(')) throw new Error('Old top-down/procedural vehicle rendering must not return.');
 const appSource = await fs.readFile(new URL('assets/js/app.js', root), 'utf8');
 if (!appSource.includes("clearForeverRacingCaches({ unregister: true })")) throw new Error('Static dev cache cleanup is missing.');
@@ -215,8 +229,8 @@ if (!serverGameSourceV04c.includes("'s1_intake_1'") || !serverGameSourceV04c.inc
 if (!raceSimulatorSourceV04d.includes('allowFoul') || !raceSimulatorSourceV04d.includes('quickRace !== false')) {
   throw new Error('V0.4D tutorial foul/weather gates are missing.');
 }
-if (!racePresentationSourceV04d.includes('ratio >= 0.52') || !racePresentationSourceV04d.includes('ratio >= 0.68') || !racePresentationSourceV04d.includes('dataset.treeState') || !racePresentationSourceV04d.includes('RED LIGHT • YOU LEFT BEFORE GREEN')) {
-  throw new Error('Drag-tree timing/state progression is missing.');
+if (!racePresentationSourceV04d.includes('data-tree-pre') || !racePresentationSourceV04d.includes('setLamp') || !racePresentationSourceV04d.includes('ratio >= 0.52') || !racePresentationSourceV04d.includes('ratio >= 0.68') || !racePresentationSourceV04d.includes('RED LIGHT • YOU LEFT BEFORE GREEN')) {
+  throw new Error('Classic drag-tree timing/state progression is missing.');
 }
 console.log('V0.4D guided FTUE, unlock progression and race-gating checks passed.');
 
@@ -243,10 +257,10 @@ console.log('V0.4E tutorial wording, dialog sizing and Race Preview checks passe
 
 const performanceIndexSourceV04f = await fs.readFile(new URL('assets/js/domain/PerformanceIndex.js', root), 'utf8');
 const serverPerformanceIndexSourceV04f = await fs.readFile(new URL('app/lib/PerformanceIndex.php', root), 'utf8');
-if (!performanceIndexSourceV04f.includes('PERFORMANCE_INDEX_PASSES = 51') || !performanceIndexSourceV04f.includes('PERFORMANCE_INDEX_PER_TENTH = 8') || !performanceIndexSourceV04f.includes('medianEt') || !performanceIndexSourceV04f.includes('performanceClassFromIndex')) {
+if (!performanceIndexSourceV04f.includes('PERFORMANCE_INDEX_PASSES = 51') || !performanceIndexSourceV04f.includes('PERFORMANCE_INDEX_PER_TENTH = 8') || !performanceIndexSourceV04f.includes('medianEt') || !performanceIndexSourceV04f.includes('performanceClassFromIndex') || !performanceIndexSourceV04f.includes('1100') || !performanceIndexSourceV04f.includes('return "X"')) {
   throw new Error('Deterministic 51-pass Performance Index benchmark is incomplete.');
 }
-if (!serverPerformanceIndexSourceV04f.includes('public const PASSES = 51') || !serverPerformanceIndexSourceV04f.includes('public const PER_TENTH = 8') || !serverPerformanceIndexSourceV04f.includes('classFromIndex')) {
+if (!serverPerformanceIndexSourceV04f.includes('public const PASSES = 51') || !serverPerformanceIndexSourceV04f.includes('public const PER_TENTH = 8') || !serverPerformanceIndexSourceV04f.includes('classFromIndex') || !serverPerformanceIndexSourceV04f.includes('1100') || !serverPerformanceIndexSourceV04f.includes("return 'X'")) {
   throw new Error('PHP Performance Index parity is incomplete.');
 }
 if (!racePresentationSourceV04d.includes('race-playback--side') ||
@@ -270,8 +284,8 @@ console.log('V0.4G 57-car PNG atlas, PI classes and bumper-timed side-view racin
 
 if (!racePresentationSourceV04d.includes('race-strip__surface') ||
     !racePresentationSourceV04d.includes('race-side-car__shadow') ||
-    !racePresentationSourceV04d.includes('data-tree-state="idle"')) {
-  throw new Error('V0.4H.0 race visual markup is incomplete.');
+    !racePresentationSourceV04d.includes('data-tree-pre')) {
+  throw new Error('V0.4H.0/H.2 race visual markup is incomplete.');
 }
 for (const assetRef of ['road.jpg', 'race_track.png', 'start.png', 'finish.png', 'shadow.png', 'xmas.png']) {
   if (!cssV04b.includes(assetRef)) throw new Error(`V0.4H.0 race CSS is missing ${assetRef}.`);
@@ -280,5 +294,24 @@ if (!cssV04b.includes('V0.4H.0 purchased drag-strip visual pass')) {
   throw new Error('V0.4H.0 race visual CSS marker is missing.');
 }
 console.log('V0.4H.0 purchased race-track visuals checks passed.');
+
+if (!racePresentationSourceV04d.includes('updateWheelMotion') ||
+    !racePresentationSourceV04d.includes('updateTireSmoke') ||
+    !racePresentationSourceV04d.includes('layered-car__wheel,.layered-car__disk') ||
+    !racePresentationSourceV04d.includes('traction?.gripLoss')) {
+  throw new Error('V0.4H.1/H.2 wheel-spin or grip-smoke presentation logic is missing.');
+}
+if (!raceSimulatorSourceV04d.includes('tractionDemand') ||
+    !raceSimulatorSourceV04d.includes('gripLoss') ||
+    !serverGameSourceV04c.includes('playerDrivetrain')) {
+  throw new Error('V0.4H.2 grip-loss race telemetry is incomplete.');
+}
+if (!cssV04b.includes('V0.4H.1-H.2 wheel motion') ||
+    !cssV04b.includes('smoke.png') ||
+    !cssV04b.includes('top:50%') ||
+    !cssV04b.includes('.vehicle-visual--animated-wheels')) {
+  throw new Error('V0.4H.1/H.2 race alignment / wheel / smoke CSS is incomplete.');
+}
+console.log('V0.4H.1-H.2 classic tree, wheel spin and grip-loss smoke checks passed.');
 
 

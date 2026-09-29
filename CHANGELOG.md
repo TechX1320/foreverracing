@@ -1,5 +1,17 @@
 # Changelog
 
+## V0.4.0-h.2 — wheel spin and grip-loss smoke
+
+- Restored the original CSS drag tree after the purchased sprite-tree experiment.
+- Re-centered the road texture so its own white stripe sits at the middle of the strip.
+- Repositioned both lanes so the tires ride through the darker rubbered-in grooves.
+- Added race-only body / tire / rim / detail PNG layers for all three playable starter cars.
+- Wheels and rims now rotate from track travel; extra launch slip is applied only to the driven wheels.
+- Added deterministic traction telemetry in both JS and PHP race simulators: grip loss, wheel slip and smoke level.
+- Added purchased tire-smoke animation during launch traction loss; FWD smokes front tires, RWD rear tires and AWD both.
+- Added X Class at PI 1100+; S Class now covers PI 900-1099.
+- Preserved front-wheel staging, front-bumper finish timing and post-finish visual fly-through.
+
 ## V0.4.0-h.0 — purchased drag-strip visual pass
 
 - Replaced the placeholder Quick Race strip with the purchased road texture.
@@ -17,7 +29,7 @@
 - Replaced the Golf GTI, RX-8 and Clio V6 starter composites with the corrected lower-wheel PNGs.
 - Expanded Settings -> Car Art Debug into a 57-car roster showing PLAYABLE vs ART READY state.
 - Kept gameplay limited to the three vehicles with validated specs; art-ready cars do not enter the market automatically.
-- Added PI-driven D/C/B/A/S classes with temporary thresholds: D < 450, C < 600, B < 750, A < 900, S >= 900.
+- Added PI-driven D/C/B/A/S classes with temporary thresholds: D < 450, C < 600, B < 750, A < 900, S < 1100, X >= 1100.
 - Current starter cars remain D Class and owned-car class updates when PI changes.
 - Added class visibility to Classifieds, Garage, Showroom groundwork and Race Preview.
 

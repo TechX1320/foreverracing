@@ -1434,3 +1434,62 @@ dialog.fr-dialog:has(.garage-inventory-dialog){
 .car-art-debug-card__status .pill{font-size:9px}
 @media(max-width:980px){.car-art-debug-grid--roster{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:760px){.car-art-debug-grid--roster{grid-template-columns:1fr}}
+
+
+/* V0.4H.1-H.2 wheel motion, groove alignment and grip smoke */
+.race-strip__surface{
+  background-size:auto,100% 133.333%;
+  background-position:center,center top;
+}
+.race-side-lane--player .race-side-car{top:24px}
+.race-side-lane--opponent .race-side-car{bottom:8px}
+
+.race-strip__tree--side{
+  left:8%;
+  top:50%;
+  width:auto;
+  height:auto;
+  display:grid;
+  gap:3px;
+  padding:5px 4px;
+  transform:translate(-50%,-50%);
+  border:1px solid #4b5054;
+  background:#090b0c;
+  filter:drop-shadow(0 4px 5px #000d);
+}
+.race-strip__tree--side .tree-bulb{width:10px;height:10px}
+
+.vehicle-visual--animated-wheels .layered-car__wheel,
+.vehicle-visual--animated-wheels .layered-car__disk{
+  transform-origin:50% 50%;
+  will-change:transform;
+}
+.vehicle-visual--animated-wheels .layered-car{
+  overflow:visible;
+}
+.layered-car__smoke{
+  position:absolute;
+  z-index:0;
+  width:31%;
+  aspect-ratio:1/1;
+  transform:translate(-72%,-58%) scale(.82);
+  transform-origin:center;
+  background-image:url("../art/race/smoke.png");
+  background-repeat:no-repeat;
+  background-size:100% 800%;
+  background-position:center 0%;
+  opacity:0;
+  pointer-events:none;
+  will-change:opacity,background-position,transform;
+  filter:blur(.15px);
+}
+.layered-car__smoke.is-active{
+  transform:translate(-76%,-61%) scale(1);
+}
+
+@media(max-width:760px){
+  .race-side-lane--player .race-side-car{top:20px}
+  .race-side-lane--opponent .race-side-car{bottom:7px}
+  .race-strip__tree--side{width:auto;height:auto}
+  .race-strip__tree--side .tree-bulb{width:9px;height:9px}
+}

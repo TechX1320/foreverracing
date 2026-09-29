@@ -337,6 +337,7 @@ export class LocalGameService {
       const torque = Math.max(1, Number(car.derived?.torque || 1));
       const weight = Math.max(500, Number(car.derived?.weight || 500));
       const grip = Math.max(0.5, Number(car.derived?.grip || 1));
+      const drivetrain = String(car.derived?.drivetrain || car.base?.drivetrain || "-");
       const opponentProfile = this.nextOpponentProfile(draft, car, tutorialRace);
       const opponentWeight = Number(opponentProfile.sim.weight);
       const opponentHp = Number(opponentProfile.sim.hp);
@@ -344,9 +345,9 @@ export class LocalGameService {
       const opponentGrip = Number(opponentProfile.sim.grip);
       const opponentLevel = Number(opponentProfile.level);
 
-      const playerRun = this.raceSimulator.simulate({ hp, torque, weight, grip, level, allowFoul: !tutorialRace }, distance, weather);
+      const playerRun = this.raceSimulator.simulate({ hp, torque, weight, grip, drivetrain, level, allowFoul: !tutorialRace }, distance, weather);
       const opponentRun = this.raceSimulator.simulate({
-        hp: opponentHp, torque: opponentTorque, weight: opponentWeight, grip: opponentGrip, level: opponentLevel,
+        hp: opponentHp, torque: opponentTorque, weight: opponentWeight, grip: opponentGrip, drivetrain: opponentProfile.drivetrain, level: opponentLevel,
         allowFoul: !tutorialRace, reactionOffset: tutorialRace ? 0.16 : 0,
       }, distance, weather);
       if (tutorialRace && opponentRun.totalTime <= playerRun.totalTime) {
@@ -376,6 +377,7 @@ export class LocalGameService {
         won,
         distance,
         distanceLabel: String(distanceConfig.label || distance),
+        distanceFeet: Number(distanceConfig.feet || 1320),
         location,
         weather,
         margin: round3(Math.abs(playerRun.totalTime - opponentRun.totalTime)),
@@ -386,6 +388,7 @@ export class LocalGameService {
         playerCarId: car.carId,
         carName: this.carName(car),
         playerVisual: clone(car.visual || {}),
+        playerDrivetrain: drivetrain,
         playerPerformanceIndex: Number(car.performanceIndex || benchmarkPerformance(car.derived || car.base, this.racingConfig).performanceIndex),
         playerPerformanceClass: String(car.performanceClass || performanceClassFromIndex(car.performanceIndex)),
         player: playerRun,
@@ -806,6 +809,7 @@ export class LocalGameService {
         torque: Math.max(1, Number(base.torque || 1)),
         weight: Math.max(500, Number(base.weight || 500)),
         grip: Math.max(0.5, Number(base.grip || 1)),
+        drivetrain: String(base.drivetrain || "-"),
       },
     };
   }

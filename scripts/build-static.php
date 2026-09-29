@@ -82,7 +82,7 @@ Build: {$build}
 Storage mode: local
 Offline service worker: disabled in static development mode
 Race presentation: persistent two-phase start/finish with blocking real-time playback
-V0.4H.0: purchased drag-strip road, timing markers, Christmas tree and car shadows
+V0.4H.2: classic drag tree, centered strip/grooves, animated wheels and grip-loss tire smoke
 Do not edit docs/ by hand; run php scripts/build-static.php.
 ");
 

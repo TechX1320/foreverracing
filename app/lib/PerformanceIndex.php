@@ -71,7 +71,8 @@ final class PerformanceIndex
         if ($pi < 600) return 'C';
         if ($pi < 750) return 'B';
         if ($pi < 900) return 'A';
-        return 'S';
+        if ($pi < 1100) return 'S';
+        return 'X';
     }
 
     private static function median(array $values): float
