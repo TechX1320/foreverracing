@@ -1,4 +1,5 @@
 import { escapeHtml, money, number } from "./components.js";
+import { renderVehicle, vehicleGeometry } from "./vehicleRenderer.js";
 
 let activePlayback = null;
 
@@ -18,7 +19,7 @@ function runPresentation(ctx, activeRace) {
   return new Promise((resolve, reject) => {
     const race = activeRace.race || {};
     const dialog = document.createElement("dialog");
-    dialog.className = "race-playback-dialog";
+    dialog.className = "race-playback-dialog race-playback-dialog--side";
     dialog.setAttribute("aria-label", "Race in progress");
     dialog.innerHTML = playbackMarkup(activeRace);
     document.body.appendChild(dialog);
@@ -37,20 +38,28 @@ function runPresentation(ctx, activeRace) {
     const tree = dialog.querySelector("[data-race-tree]");
     const resultWrap = dialog.querySelector("[data-race-final]");
     const trackWrap = dialog.querySelector("[data-race-track-wrap]");
+    const strip = dialog.querySelector("[data-race-strip]");
+    const startLine = dialog.querySelector("[data-race-start-line]");
+    const finishLine = dialog.querySelector("[data-race-finish-line]");
     const continueButton = dialog.querySelector("[data-race-continue]");
 
     const timeScale = Math.max(0.01, Number(activeRace.timeScale || 1));
     const startedAt = Number(activeRace.startedAt || Date.now());
     const greenAt = Number(activeRace.greenAt || startedAt);
-    const finishAt = Number(activeRace.finishAt || greenAt);
     const playerRun = race.player || {};
     const opponentRun = race.opponent || {};
     const playerStart = greenAt + (Number(playerRun.reactionTime || 0) * 1000 * timeScale);
     const opponentStart = greenAt + (Number(opponentRun.reactionTime || 0) * 1000 * timeScale);
     const playerFinish = playerStart + (Math.max(0.1, Number(playerRun.elapsedTime || 0)) * 1000 * timeScale);
     const opponentFinish = opponentStart + (Math.max(0.1, Number(opponentRun.elapsedTime || 0)) * 1000 * timeScale);
+    const physicalFinishAt = Math.max(playerFinish, opponentFinish);
+    const flyThroughMs = Math.max(300, Number(activeRace.flyThroughMs || 650)) * timeScale;
+    const visualFinishAt = physicalFinishAt + flyThroughMs;
     const progressExponent = Math.max(1, Number(activeRace.progressExponent || 1.38));
     const revealDelay = Math.max(0, Number(activeRace.revealDelayMs || 650)) * timeScale;
+
+    const playerGeometry = vehicleGeometry({ visual: race.playerVisual || {} }) || { frontBumperRatio: 1 };
+    const opponentGeometry = vehicleGeometry({ visual: opponentRun.visual || {} }) || { frontBumperRatio: 1 };
 
     let frame = 0;
     let settling = false;
@@ -109,22 +118,24 @@ function runPresentation(ctx, activeRace) {
     const animate = () => {
       const now = Date.now();
       updateTree(tree, phase, now, startedAt, greenAt, playerStart, race);
-      const p = raceProgress(now, playerStart, playerFinish, progressExponent);
-      const o = raceProgress(now, opponentStart, opponentFinish, progressExponent);
-      setProgress(playerCar, playerBar, p);
-      setProgress(opponentCar, opponentBar, o);
 
-      const simSeconds = Math.max(0, (now - greenAt) / (1000 * timeScale));
+      const playerProgress = raceVisualProgress(now, playerStart, playerFinish, visualFinishAt, progressExponent);
+      const opponentProgress = raceVisualProgress(now, opponentStart, opponentFinish, visualFinishAt, progressExponent);
+      setSideProgress(playerCar, playerBar, playerProgress, playerGeometry, strip, startLine, finishLine);
+      setSideProgress(opponentCar, opponentBar, opponentProgress, opponentGeometry, strip, startLine, finishLine);
+
+      // The visible timer belongs to the player's pass. It freezes at the exact
+      // instant the player's front-bumper anchor reaches the finish timing plane.
+      const timingNow = Math.min(now, playerFinish);
+      const simSeconds = Math.max(0, (timingNow - greenAt) / (1000 * timeScale));
       clock.textContent = simSeconds > 0 ? simSeconds.toFixed(2) : "0.00";
       liveStatus.textContent = liveRaceStatus(now, greenAt, playerStart, opponentStart, playerFinish, opponentFinish, playerRun, opponentRun);
 
-      if (now < finishAt) {
+      if (now < visualFinishAt) {
         frame = requestAnimationFrame(animate);
         return;
       }
 
-      setProgress(playerCar, playerBar, 1);
-      setProgress(opponentCar, opponentBar, 1);
       phase.textContent = "FINISH";
       liveStatus.textContent = "PASS COMPLETE • VERIFYING TIMING SLIP";
       trackWrap.classList.add("is-finished");
@@ -143,7 +154,7 @@ function playbackMarkup(activeRace) {
   const weather = race.weather?.name || "Unknown weather";
 
   return `
-    <section class="race-playback" data-race-track-wrap>
+    <section class="race-playback race-playback--side" data-race-track-wrap>
       <header class="race-playback__head">
         <div>
           <span class="section-label">${escapeHtml(race.distanceLabel || race.distance || "RACE")} • ${escapeHtml(location)}</span>
@@ -151,23 +162,17 @@ function playbackMarkup(activeRace) {
         </div>
         <div class="race-playback__meta">
           <span>WEATHER<b>${escapeHtml(weather)}</b></span>
-          <span>RACE CLOCK<b><i data-race-clock>0.00</i>s</b></span>
+          <span>YOUR RACE CLOCK<b><i data-race-clock>0.00</i>s</b></span>
         </div>
       </header>
 
       <div class="race-playback__status" data-race-live-status aria-live="polite">PRE-STAGE • BOTH LANES LOCKED</div>
 
-      <div class="race-stage">
-        <div class="race-stage__labels">
-          <span>YOU • ${escapeHtml(race.carName || "Current Car")}</span>
-          <span>${escapeHtml(opponent.name || "Opponent")} • ${escapeHtml(opponent.carName || "Race Car")}</span>
-        </div>
-        <div class="race-strip">
-          <div class="race-strip__finish"><span>FINISH</span></div>
-          <div class="race-strip__lane race-strip__lane--left">
-            ${carToken(race.playerVisualSrc, race.carName || "Player car", "data-race-player-car")}
-          </div>
-          <div class="race-strip__tree" data-race-tree aria-label="Drag racing starting tree">
+      <div class="race-stage race-stage--side">
+        <div class="race-strip race-strip--side" data-race-strip>
+          <div class="race-strip__timing-line race-strip__timing-line--start" data-race-start-line><span>START</span></div>
+          <div class="race-strip__timing-line race-strip__timing-line--finish" data-race-finish-line><span>FINISH</span></div>
+          <div class="race-strip__tree race-strip__tree--side" data-race-tree aria-label="Drag racing starting tree">
             <i class="tree-bulb tree-bulb--pre" data-tree-pre></i>
             <i class="tree-bulb tree-bulb--stage" data-tree-stage></i>
             <i class="tree-bulb tree-bulb--amber" data-tree-amber="1"></i>
@@ -176,11 +181,17 @@ function playbackMarkup(activeRace) {
             <i class="tree-bulb tree-bulb--green" data-tree-green></i>
             <i class="tree-bulb tree-bulb--red" data-tree-red></i>
           </div>
-          <div class="race-strip__lane race-strip__lane--right">
-            ${carToken(opponent.visualSrc, opponent.carName || "Opponent car", "data-race-opponent-car")}
+
+          <div class="race-side-lane race-side-lane--player">
+            <span class="race-side-lane__label">YOU • ${escapeHtml(race.carName || "Current Car")} • PI ${number(race.playerPerformanceIndex || 0)}</span>
+            ${raceCar({ displayName: race.carName || "Player car", visual: race.playerVisual || {} }, "data-race-player-car")}
           </div>
-          <div class="race-strip__start"><span>START</span></div>
+          <div class="race-side-lane race-side-lane--opponent">
+            <span class="race-side-lane__label">${escapeHtml(opponent.name || "Opponent")} • ${escapeHtml(opponent.carName || "Race Car")} • PI ${number(opponent.performanceIndex || 0)}</span>
+            ${raceCar({ displayName: opponent.carName || "Opponent car", visual: opponent.visual || {} }, "data-race-opponent-car")}
+          </div>
         </div>
+
         <div class="race-progress-board">
           <div><span>YOU</span><b><i data-race-player-progress></i></b></div>
           <div><span>OPPONENT</span><b><i data-race-opponent-progress></i></b></div>
@@ -189,17 +200,14 @@ function playbackMarkup(activeRace) {
 
       <div class="race-playback__final" data-race-final hidden></div>
       <footer class="race-playback__footer">
-        <span>Race controls are locked until the pass is complete.</span>
+        <span>Timing stops at the front bumper. Cars continue through the traps visually.</span>
         <button class="button button--primary" type="button" data-race-continue hidden>RETURN TO PITS</button>
       </footer>
     </section>`;
 }
 
-function carToken(src, label, attr) {
-  if (!src) {
-    return `<div class="race-strip__car race-strip__car--missing" ${attr}><b>?</b><small>ART MISSING</small></div>`;
-  }
-  return `<img class="race-strip__car" ${attr} src="${escapeHtml(src)}" alt="${escapeHtml(label)}">`;
+function raceCar(car, attr) {
+  return `<div class="race-side-car" ${attr}>${renderVehicle(car, { view: "raceSide", className: "race-side-car__vehicle" })}</div>`;
 }
 
 function updateTree(tree, phase, now, startedAt, greenAt, playerStart, race) {
@@ -235,17 +243,45 @@ function setLamp(node, on) {
   node?.classList.toggle("is-on", Boolean(on));
 }
 
-function raceProgress(now, startAt, finishAt, exponent) {
+export function raceVisualProgress(now, startAt, finishAt, visualFinishAt, exponent = 1.38) {
   if (now <= startAt) return 0;
-  if (now >= finishAt) return 1;
-  const raw = Math.max(0, Math.min(1, (now - startAt) / Math.max(1, finishAt - startAt)));
-  return Math.pow(raw, exponent);
+  if (now < finishAt) {
+    const raw = Math.max(0, Math.min(1, (now - startAt) / Math.max(1, finishAt - startAt)));
+    return Math.pow(raw, Math.max(1, Number(exponent || 1)));
+  }
+  if (now >= visualFinishAt) return 1.22;
+  const fly = Math.max(0, Math.min(1, (now - finishAt) / Math.max(1, visualFinishAt - finishAt)));
+  return 1 + (fly * 0.22);
 }
 
-function setProgress(car, bar, progress) {
-  const percent = Math.max(0, Math.min(100, progress * 100));
-  if (car) car.style.bottom = `${(6 + (percent * 0.86)).toFixed(3)}%`;
-  if (bar) bar.style.width = `${percent.toFixed(2)}%`;
+export function carLeftAtProgress({ startPlaneX, finishPlaneX, carWidth, startAnchorRatio, frontBumperRatio, progress }) {
+  const width = Math.max(1, Number(carWidth || 1));
+  const stageOffset = Math.max(0, Math.min(1, Number(startAnchorRatio ?? frontBumperRatio ?? 1))) * width;
+  const noseOffset = Math.max(0, Math.min(1, Number(frontBumperRatio ?? 1))) * width;
+  const startLeft = Number(startPlaneX || 0) - stageOffset;
+  const finishLeft = Number(finishPlaneX || 0) - noseOffset;
+  return startLeft + ((finishLeft - startLeft) * Number(progress || 0));
+}
+
+function setSideProgress(car, bar, progress, geometry, strip, startLine, finishLine) {
+  if (bar) bar.style.width = `${Math.max(0, Math.min(100, progress * 100)).toFixed(2)}%`;
+  if (!car || !strip || !startLine || !finishLine) return;
+
+  const stripRect = strip.getBoundingClientRect();
+  const startRect = startLine.getBoundingClientRect();
+  const finishRect = finishLine.getBoundingClientRect();
+  const carWidth = Math.max(1, car.getBoundingClientRect().width);
+  const startPlaneX = (startRect.left + (startRect.width / 2)) - stripRect.left;
+  const finishPlaneX = (finishRect.left + (finishRect.width / 2)) - stripRect.left;
+  const left = carLeftAtProgress({
+    startPlaneX,
+    finishPlaneX,
+    carWidth,
+    startAnchorRatio: geometry?.frontWheelRatio ?? geometry?.frontBumperRatio ?? 1,
+    frontBumperRatio: geometry?.frontBumperRatio ?? 1,
+    progress,
+  });
+  car.style.left = `${left.toFixed(2)}px`;
 }
 
 function liveRaceStatus(now, greenAt, playerStart, opponentStart, playerFinish, opponentFinish, playerRun, opponentRun) {
@@ -256,9 +292,9 @@ function liveRaceStatus(now, greenAt, playerStart, opponentStart, playerFinish, 
   }
   const pFinished = now >= playerFinish;
   const oFinished = now >= opponentFinish;
-  if (pFinished && oFinished) return "BOTH CARS THROUGH THE TRAPS";
-  if (pFinished) return playerRun.foul ? "YOU FINISHED • RED LIGHT RECORDED" : "YOU ARE THROUGH THE TRAPS";
-  if (oFinished) return opponentRun.foul ? "OPPONENT FINISHED • RED LIGHT" : "OPPONENT IS THROUGH THE TRAPS";
+  if (pFinished && oFinished) return "BOTH FRONT BUMPERS THROUGH THE TRAPS";
+  if (pFinished) return playerRun.foul ? "YOU FINISHED • RED LIGHT RECORDED" : "YOUR BUMPER IS THROUGH THE TRAPS";
+  if (oFinished) return opponentRun.foul ? "OPPONENT FINISHED • RED LIGHT" : "OPPONENT BUMPER IS THROUGH THE TRAPS";
   return "RACE IN PROGRESS • CONTROLS LOCKED";
 }
 
