@@ -257,10 +257,10 @@ console.log('V0.4E tutorial wording, dialog sizing and Race Preview checks passe
 
 const performanceIndexSourceV04f = await fs.readFile(new URL('assets/js/domain/PerformanceIndex.js', root), 'utf8');
 const serverPerformanceIndexSourceV04f = await fs.readFile(new URL('app/lib/PerformanceIndex.php', root), 'utf8');
-if (!performanceIndexSourceV04f.includes('PERFORMANCE_INDEX_PASSES = 51') || !performanceIndexSourceV04f.includes('PERFORMANCE_INDEX_PER_TENTH = 8') || !performanceIndexSourceV04f.includes('medianEt') || !performanceIndexSourceV04f.includes('performanceClassFromIndex')) {
+if (!performanceIndexSourceV04f.includes('PERFORMANCE_INDEX_PASSES = 51') || !performanceIndexSourceV04f.includes('PERFORMANCE_INDEX_PER_TENTH = 8') || !performanceIndexSourceV04f.includes('medianEt') || !performanceIndexSourceV04f.includes('performanceClassFromIndex') || !performanceIndexSourceV04f.includes('1100') || !performanceIndexSourceV04f.includes('return "X"')) {
   throw new Error('Deterministic 51-pass Performance Index benchmark is incomplete.');
 }
-if (!serverPerformanceIndexSourceV04f.includes('public const PASSES = 51') || !serverPerformanceIndexSourceV04f.includes('public const PER_TENTH = 8') || !serverPerformanceIndexSourceV04f.includes('classFromIndex')) {
+if (!serverPerformanceIndexSourceV04f.includes('public const PASSES = 51') || !serverPerformanceIndexSourceV04f.includes('public const PER_TENTH = 8') || !serverPerformanceIndexSourceV04f.includes('classFromIndex') || !serverPerformanceIndexSourceV04f.includes('1100') || !serverPerformanceIndexSourceV04f.includes("return 'X'")) {
   throw new Error('PHP Performance Index parity is incomplete.');
 }
 if (!racePresentationSourceV04d.includes('race-playback--side') ||
