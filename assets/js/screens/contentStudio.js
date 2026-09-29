@@ -404,28 +404,72 @@ function releaseSection(car) {
       </div>
     </section>`;
 }
-function physicsSection(car) {
-  return `
-    <section class="content-studio__section">
-      <header><div><small>PHYSICS ENGINE</small><strong>Factory powertrain & performance inputs</strong></div></header>
+function physicsSection(car, engines = []) {
+  const linked = engines.find((engine) => String(engine.engineId) === String(car.factoryEngineId || ""));
+  const engineOptions = [
+    ["", "Custom / Legacy Engine"],
+    ...engines
+      .slice()
+      .sort((a, b) => engineLabel(a).localeCompare(engineLabel(b)))
+      .map((engine) => [engine.engineId, engineLabel(engine)]),
+  ];
+
+  const engineFields = linked
+    ? `
+      <div class="content-studio__engine-link">
+        <div>
+          <small>LINKED ENGINE</small>
+          <strong>${escapeHtml(engineLabel(linked))}</strong>
+          <span>${escapeHtml(linked.familyId || linked.engineId)} • ${escapeHtml(linked.configuration || "-")} • ${escapeHtml(linked.aspiration || "-")}</span>
+        </div>
+        <button class="button button--small" type="button" data-edit-linked-engine>EDIT ENGINE</button>
+      </div>
+      <div class="studio-form-grid studio-form-grid--4">
+        ${readOnlyField("Displacement (L)", linked.displacementLiters)}
+        ${readOnlyField("Engine Config", linked.configuration)}
+        ${readOnlyField("Aspiration", linked.aspiration)}
+        ${readOnlyField("Peak HP", linked.peakHp)}
+        ${readOnlyField("HP RPM", linked.peakHpRpm)}
+        ${readOnlyField("Peak Torque", linked.peakTorque)}
+        ${readOnlyField("TQ RPM", linked.peakTorqueRpm)}
+        ${readOnlyField("Redline RPM", linked.redlineRpm)}
+        ${readOnlyField("Rev Cut RPM", linked.revCutRpm)}
+      </div>`
+    : `
       <div class="studio-form-grid studio-form-grid--4">
         ${inputField("Displacement (L)", "engine.displacementLiters", car.engine?.displacementLiters, "number", { min: 0.1, step: 0.1 })}
         ${inputField("Engine Config", "engine.configuration", car.engine?.configuration, "text", { placeholder: "I4 / V6 / V8 / Rotary" })}
         ${selectField("Aspiration", "engine.aspiration", car.engine?.aspiration || "Naturally Aspirated", [
           ["Naturally Aspirated","Naturally Aspirated"],["Turbo","Turbo"],["Twin Turbo","Twin Turbo"],["Supercharged","Supercharged"],["Turbo Diesel","Turbo Diesel"]
         ])}
-        ${selectField("Engine Layout", "engine.layout", car.engine?.layout || "Front", [["Front","Front"],["Mid","Mid"],["Rear","Rear"]])}
-
         ${inputField("Peak HP", "base.hp", car.base?.hp, "number", { min: 1, step: 1 })}
         ${inputField("HP RPM", "engine.peakHpRpm", car.engine?.peakHpRpm, "number", { min: 500, step: 50 })}
         ${inputField("Peak Torque", "base.torque", car.base?.torque, "number", { min: 1, step: 1 })}
         ${inputField("TQ RPM", "engine.peakTorqueRpm", car.engine?.peakTorqueRpm, "number", { min: 500, step: 50 })}
+        ${inputField("Redline RPM", "engine.redlineRpm", car.engine?.redlineRpm, "number", { min: 1000, step: 100 })}
+        ${inputField("Rev Cut RPM", "engine.revCutRpm", car.engine?.revCutRpm, "number", { min: 1000, step: 100 })}
+      </div>`;
 
+  return `
+    <section class="content-studio__section">
+      <header><div><small>PHYSICS ENGINE</small><strong>Factory engine link & chassis inputs</strong></div></header>
+      <div class="studio-form-grid studio-form-grid--4">
+        <label class="studio-field studio-field--wide">
+          <span>Factory Engine</span>
+          <select data-factory-engine>
+            ${engineOptions.map(([id, text]) => `<option value="${escapeHtml(id)}" ${String(id) === String(car.factoryEngineId || "") ? "selected" : ""}>${escapeHtml(text)}</option>`).join("")}
+          </select>
+        </label>
+        ${selectField("Engine Location", "engine.layout", car.engine?.layout || "Front", [["Front","Front"],["Mid","Mid"],["Rear","Rear"]])}
         ${inputField("Curb Weight (lb)", "base.weight", car.base?.weight, "number", { min: 500, step: 1 })}
         ${inputField("Grip", "base.grip", car.base?.grip, "number", { min: 0.5, max: 2, step: 0.01 })}
         ${selectField("Drivetrain", "base.drivetrain", car.base?.drivetrain || "RWD", [["FWD","FWD"],["RWD","RWD"],["AWD","AWD"]])}
-        ${inputField("Redline RPM", "engine.redlineRpm", car.engine?.redlineRpm, "number", { min: 1000, step: 100 })}
-        ${inputField("Rev Cut RPM", "engine.revCutRpm", car.engine?.revCutRpm, "number", { min: 1000, step: 100 })}
+      </div>
+      ${engineFields}
+      <div class="content-studio__engine-note">
+        ${linked
+          ? "This car is engine-linked. Engine output/spec fields come from Engine Creator; Car Creator owns the chassis weight, grip, drivetrain and engine location."
+          : "Legacy/custom mode keeps engine specs inside the car. Select a Factory Engine before release if you want engine-specific parts and future engine swaps to follow the engine catalog."}
       </div>
     </section>`;
 }
