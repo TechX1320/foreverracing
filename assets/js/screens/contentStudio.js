@@ -488,6 +488,7 @@ function finalizedCar(source, racingConfig, catalogCars) {
   car.starter = Boolean(car.starter);
   car.market.classifieds = Boolean(car.market.classifieds);
   car.market.showroom = Boolean(car.market.showroom);
+  car.release = normalizeReleaseForSave(car.release);
   car.visual.paintPalette = normalizePaintPalette(car.visual.paintPalette);
   if (car.visual.paintColor) car.visual.paintColor = paintValue(car.visual.paintColor);
   car.engine.peakHp = Math.max(1, Number(car.base.hp || 1));
@@ -566,6 +567,7 @@ function createBlankCar(stockId) {
     },
     base: { hp: 200, torque: 180, weight: 3000, grip: 1, drivetrain: "RWD" },
     pricing: { status: "content-studio" },
+    release: { mode: "draft", publishAt: null },
     visual: {
       paintColor: null,
       paintPalette: [...DEFAULT_PAINT_PALETTE],
@@ -600,6 +602,7 @@ function ensureDraftShape(car) {
   car.engine ||= {};
   car.base ||= {};
   car.market ||= {};
+  car.release = normalizeRelease(car.release, { legacyReleased: false });
   car.visual ||= {};
   car.visual.paintPalette = normalizePaintPalette(car.visual.paintPalette);
   car.visual.layered ||= {};
