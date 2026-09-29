@@ -1617,6 +1617,10 @@ dialog.fr-dialog:has(.garage-inventory-dialog){
   background:transparent;
   cursor:pointer;
 }
+.studio-paint-swatch.is-selected{
+  border-color:var(--accent-2);
+  box-shadow:0 0 0 1px var(--accent-2) inset;
+}
 .studio-paint-swatch span{
   position:absolute;
   right:4px;
