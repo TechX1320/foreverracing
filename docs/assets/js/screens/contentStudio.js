@@ -145,7 +145,8 @@ export async function renderContentStudio(ctx) {
         setDraftValue(draft, input.dataset.studioField, readInputValue(input));
         if (input.dataset.studioField === "base.hp") draft.engine.peakHp = Number(draft.base.hp || 0);
         if (input.dataset.studioField === "base.torque") draft.engine.peakTorque = Number(draft.base.torque || 0);
-        if (String(input.dataset.studioField || "").startsWith("visual.layered.layers.")) draft.visual.renderMode = "layers";
+        const field = String(input.dataset.studioField || "");
+        if (field.startsWith("visual.layered.layers.") || field === "visual.paintColor") draft.visual.renderMode = "layers";
         refreshLivePreview();
       });
       input.addEventListener("change", refreshLivePreview);
@@ -153,6 +154,7 @@ export async function renderContentStudio(ctx) {
 
     host.querySelector("[data-studio-paint]")?.addEventListener("input", (event) => {
       draft.visual.paintColor = String(event.currentTarget.value || "");
+      draft.visual.renderMode = "layers";
       const text = host.querySelector('[data-studio-field="visual.paintColor"]');
       if (text) text.value = draft.visual.paintColor;
       refreshLivePreview();
@@ -350,7 +352,6 @@ function layerRow(key, layer) {
 function previewMarkup(car) {
   ensureDraftShape(car);
   const layered = car.visual.layered;
-  const hasLayers = Object.values(layered.layers || {}).some((layer) => Boolean(layer?.src));
   const width = Math.max(1, Number(layered.canvas?.width || 1));
   const height = Math.max(1, Number(layered.canvas?.height || 1));
   const a = layered.anchors || {};
@@ -360,7 +361,7 @@ function previewMarkup(car) {
   };
   return `
     <div class="content-studio__vehicle-wrap">
-      ${renderVehicle(car, { view: "sideProfile", className: "content-studio__vehicle", forceLayers: hasLayers })}
+      ${renderVehicle(car, { view: "sideProfile", className: "content-studio__vehicle" })}
       <div class="content-studio__anchors" aria-hidden="true">
         ${marker("Rear wheel", a.rearWheelCenter, "is-rear")}
         ${marker("Front wheel", a.frontWheelCenter, "is-front")}
@@ -429,6 +430,7 @@ function artToDraft(art, stockId) {
     };
   }
   const car = createBlankCar(stockId);
+  car.visual.renderMode = "";
   car.model = art.displayName || art.sourceName || art.assetId || "";
   car.displayName = art.displayName || art.assetId || "";
   car.catalogId = art.assetId || slugify(car.displayName);
