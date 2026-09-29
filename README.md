@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.5.0-a.3 playable direction
+## V0.5.0-b playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,16 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.5B release system + Parts Creator foundation
+
+- Car Creator now has a per-car **Release** section with **Draft**, **Release Immediately**, and **Schedule Release** modes.
+- Scheduled cars remain hidden from Classifieds, Showroom, and random opponents until their release timestamp; the Classifieds cache expires at the next scheduled release so the car becomes eligible without waiting for the normal market refresh.
+- Existing catalog cars remain backward-compatible and are treated as already released unless release metadata is explicitly authored.
+- Factory paint swatches are now clickable preview selectors: clicking an existing color immediately repaints the Car Creator preview, while the native color picker still edits that swatch.
+- Added a reusable content-release lifecycle intended for cars now and later for parts, wheels, wraps, and limited/collector content.
+- Added **design/PARTS_CREATOR.md** defining engine-first compatibility, per-build-stage choices, requirements/conflicts, event-rule tags, generated baseline parts, custom parts, and deprecation/replacement behavior.
+- Parts Tool is now marked **NEXT** in Content Studio.
 
 ### V0.5A.3 coordinate polish
 
