@@ -39,6 +39,8 @@ Rules:
 4. Stage 3/4 engine swaps carry the installed engine ID with them, so the parts list follows the engine rather than magically following the original car.
 5. Compatibility should support explicit exclusions because oddball cars/engines will need exceptions.
 
+Engine swap fitment should stay simple: use displacement allowances from the car/build stage as the default rule, then explicit allow/block exceptions where needed. Forever Racing does not need engine orientation or a generic physical-size class just to make swaps work.
+
 ## Build stages
 
 ### Stage 1 — Street Car

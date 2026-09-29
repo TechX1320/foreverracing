@@ -1,3 +1,100 @@
+export const ENGINE_CURVE_PROFILES = Object.freeze([
+  {
+    id: "small_economy",
+    label: "Small / Economy",
+    description: "Modest low-end torque with a smooth, early everyday powerband.",
+    startTorqueRatio: 0.54,
+    risePower: 0.72,
+    midPower: 0.9,
+    tailRatio: 0.48,
+    startRpm: 1000,
+  },
+  {
+    id: "turbo_street",
+    label: "Turbo Street",
+    description: "Quick torque rise, broad midrange plateau, then a stronger top-end taper.",
+    startTorqueRatio: 0.55,
+    risePower: 0.34,
+    midPower: 1.7,
+    tailRatio: 0.42,
+    startRpm: 1000,
+  },
+  {
+    id: "muscle_v8",
+    label: "Muscle / Big V8",
+    description: "Strong torque almost everywhere with an earlier, wider powerband.",
+    startTorqueRatio: 0.76,
+    risePower: 0.48,
+    midPower: 0.88,
+    tailRatio: 0.5,
+    startRpm: 750,
+  },
+  {
+    id: "jdm_vtec",
+    label: "JDM VTEC / Cam Change",
+    description: "Softer low RPM, then a more aggressive climb into the upper powerband.",
+    startTorqueRatio: 0.4,
+    risePower: 1.75,
+    midPower: 0.72,
+    tailRatio: 0.72,
+    startRpm: 1000,
+  },
+  {
+    id: "high_rev_na",
+    label: "High-Rev Naturally Aspirated",
+    description: "Progressive torque build with strong breathing and power held near redline.",
+    startTorqueRatio: 0.46,
+    risePower: 1.18,
+    midPower: 0.82,
+    tailRatio: 0.7,
+    startRpm: 1000,
+  },
+  {
+    id: "motorbike",
+    label: "Motorbike / Ultra High-Rev",
+    description: "Very little low-end output with a steep climb and strong high-RPM carry.",
+    startTorqueRatio: 0.26,
+    risePower: 1.7,
+    midPower: 0.78,
+    tailRatio: 0.8,
+    startRpm: 2000,
+  },
+  {
+    id: "diesel_torque",
+    label: "Diesel / Low-RPM Torque",
+    description: "Very early torque peak with a short usable rev range and heavy top-end falloff.",
+    startTorqueRatio: 0.74,
+    risePower: 0.28,
+    midPower: 1.15,
+    tailRatio: 0.26,
+    startRpm: 750,
+  },
+  {
+    id: "rotary",
+    label: "Rotary / Smooth High-Rev",
+    description: "Lower low-end torque with a smooth climb and broad upper-RPM powerband.",
+    startTorqueRatio: 0.42,
+    risePower: 1.08,
+    midPower: 0.9,
+    tailRatio: 0.68,
+    startRpm: 1000,
+  },
+  {
+    id: "broad_torque",
+    label: "Broad Performance",
+    description: "Balanced modern performance curve with good low-end and a wide usable midrange.",
+    startTorqueRatio: 0.64,
+    risePower: 0.52,
+    midPower: 1.25,
+    tailRatio: 0.56,
+    startRpm: 1000,
+  },
+]);
+
+export function curveProfileDefinition(profileId) {
+  return ENGINE_CURVE_PROFILES.find((profile) => profile.id === String(profileId || "")) || ENGINE_CURVE_PROFILES[8];
+}
+
 export function deriveHorsepower(rpm, torqueLbFt) {
   const r = Math.max(0, Number(rpm || 0));
   const t = Math.max(0, Number(torqueLbFt || 0));
@@ -40,10 +137,6 @@ export function normalizeEngineDefinition(engine = {}) {
     displacementLiters: displacement > 0 ? displacement : 0,
     configuration: String(engine.configuration || "").trim(),
     aspiration,
-    compressionRatio: engine.compressionRatio == null || engine.compressionRatio === "" ? null : Number(engine.compressionRatio),
-    engineWeightLb: engine.engineWeightLb == null || engine.engineWeightLb === "" ? null : Number(engine.engineWeightLb),
-    sizeClass: Math.max(1, Number(engine.sizeClass || 1)),
-    orientations: normalizeStringArray(engine.orientations),
     peakHp: peakHp > 0 ? peakHp : 0,
     peakHpRpm: peakHpRpm > 0 ? peakHpRpm : 0,
     peakTorque: peakTorque > 0 ? peakTorque : 0,
@@ -51,7 +144,7 @@ export function normalizeEngineDefinition(engine = {}) {
     redlineRpm: redlineRpm > 0 ? redlineRpm : 0,
     revCutRpm: revCutRpm > 0 ? revCutRpm : 0,
     tags: normalizeStringArray(engine.tags),
-    curveType: String(engine.curveType || "estimated").trim() || "estimated",
+    curveProfile: normalizeCurveProfile(engine.curveProfile || inferCurveProfile(engine)),
     curveNotes: String(engine.curveNotes || "").trim(),
     powerCurve: curve,
     sourceStatus: String(engine.sourceStatus || (curve.length ? "engine-tool" : "legacy")).trim(),
@@ -88,14 +181,18 @@ export function engineToCarSnapshot(engine, existing = {}) {
 
 export function generateBaselineCurve(engine) {
   const row = normalizeEngineDefinition(engine);
+  const profile = curveProfileDefinition(row.curveProfile);
   const limiter = Math.max(row.revCutRpm || 0, row.redlineRpm || 0, row.peakHpRpm || 0, row.peakTorqueRpm || 0, 6500);
-  const start = Math.min(1000, Math.max(500, Math.floor((row.peakTorqueRpm || 3000) / 4 / 250) * 250));
+  const start = Math.min(
+    Math.max(500, Number(profile.startRpm || 1000)),
+    Math.max(500, Math.floor((row.peakTorqueRpm || 3000) / 3))
+  );
   const rpms = new Set();
-  for (let rpm = start; rpm <= limiter; rpm += 500) rpms.add(rpm);
+  for (let rpm = Math.round(start / 250) * 250; rpm <= limiter; rpm += 500) rpms.add(rpm);
   [row.peakTorqueRpm, row.peakHpRpm, row.redlineRpm, row.revCutRpm].filter((rpm) => rpm > 0).forEach((rpm) => rpms.add(Math.round(rpm)));
 
   const peakTorque = Math.max(1, row.peakTorque || (row.peakHp > 0 && row.peakHpRpm > 0 ? (row.peakHp * 5252) / row.peakHpRpm : 150));
-  const tqRpm = Math.max(1000, row.peakTorqueRpm || Math.round(limiter * 0.55));
+  const tqRpm = Math.max(start, row.peakTorqueRpm || Math.round(limiter * 0.55));
   const hpRpm = Math.max(tqRpm, row.peakHpRpm || Math.round(limiter * 0.85));
   const requiredTorqueAtHp = row.peakHp > 0 && hpRpm > 0 ? (row.peakHp * 5252) / hpRpm : peakTorque * 0.82;
 
@@ -103,14 +200,22 @@ export function generateBaselineCurve(engine) {
     let torque;
     if (rpm <= tqRpm) {
       const ratio = Math.max(0, Math.min(1, (rpm - start) / Math.max(1, tqRpm - start)));
-      torque = peakTorque * (0.52 + (0.48 * Math.pow(ratio, 0.55)));
+      torque = peakTorque * (
+        profile.startTorqueRatio +
+        ((1 - profile.startTorqueRatio) * Math.pow(ratio, profile.risePower))
+      );
     } else if (rpm <= hpRpm) {
       const ratio = (rpm - tqRpm) / Math.max(1, hpRpm - tqRpm);
-      torque = peakTorque + ((requiredTorqueAtHp - peakTorque) * ratio);
+      const shaped = Math.pow(Math.max(0, Math.min(1, ratio)), profile.midPower);
+      torque = peakTorque + ((requiredTorqueAtHp - peakTorque) * shaped);
     } else {
-      const endTorque = Math.max(requiredTorqueAtHp * 0.72, peakTorque * 0.48);
+      const endTorque = Math.max(1, requiredTorqueAtHp * profile.tailRatio);
       const ratio = (rpm - hpRpm) / Math.max(1, limiter - hpRpm);
       torque = requiredTorqueAtHp + ((endTorque - requiredTorqueAtHp) * Math.min(1, ratio));
+    }
+
+    if (row.peakHp > 0 && rpm > 0) {
+      torque = Math.min(torque, (row.peakHp * 5252) / rpm);
     }
     if (rpm === tqRpm) torque = peakTorque;
     if (rpm === hpRpm) torque = requiredTorqueAtHp;
@@ -145,6 +250,29 @@ export function validateEngineCurve(engine) {
   }
 
   return issues;
+}
+
+export function normalizeCurveProfile(value) {
+  const id = String(value || "").trim();
+  return ENGINE_CURVE_PROFILES.some((profile) => profile.id === id) ? id : "broad_torque";
+}
+
+export function inferCurveProfile(engine = {}) {
+  const tags = normalizeStringArray(engine.tags).map((tag) => tag.toLowerCase());
+  const aspiration = normalizeAspiration(engine.aspiration).toLowerCase();
+  const configuration = String(engine.configuration || "").toLowerCase();
+  const redline = Number(engine.redlineRpm ?? engine.output?.redlineRpm ?? 0);
+  const displacement = Number(engine.displacementLiters ?? engine.displacement ?? 0);
+
+  if (tags.some((tag) => tag.includes("rotary")) || configuration.includes("rotary")) return "rotary";
+  if (tags.some((tag) => tag.includes("diesel")) || aspiration.includes("diesel")) return "diesel_torque";
+  if (tags.some((tag) => tag.includes("motorbike") || tag.includes("motorcycle")) || redline >= 11000) return "motorbike";
+  if (tags.some((tag) => tag.includes("vtec") || tag.includes("cam_change"))) return "jdm_vtec";
+  if (tags.some((tag) => tag.includes("muscle")) || (configuration.includes("v8") && displacement >= 4)) return "muscle_v8";
+  if (aspiration.includes("turbo")) return "turbo_street";
+  if (tags.some((tag) => tag.includes("high_rpm")) || redline >= 7800) return "high_rev_na";
+  if (displacement > 0 && displacement <= 2) return "small_economy";
+  return "broad_torque";
 }
 
 export function normalizeAspiration(value) {

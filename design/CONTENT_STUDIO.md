@@ -38,9 +38,9 @@ Engine Creator is the second active Content Studio module and provides the engin
 
 - Create or edit engine definitions.
 - Separate engine **family** from engine **variant**.
-- Author manufacturer/name, displacement, configuration, aspiration, compression ratio, engine weight, fitment orientations and tags.
+- Author manufacturer/name, displacement, configuration, aspiration and tags.
 - Author peak horsepower/torque anchors, redline and rev limiter.
-- Build a torque-first RPM curve with horsepower derived mathematically from torque.
+- Choose a curve profile such as Small / Economy, Turbo Street, Muscle / Big V8, JDM VTEC, High-Rev NA, Motorbike, Diesel or Rotary, then build a torque-first RPM curve with horsepower derived mathematically from torque.
 - Live dyno-style HP/TQ preview.
 - Generate a rough baseline curve from the current peak anchors, then edit it point-by-point.
 - Save local drafts, activate local engines, export JSON or copy JSON.
@@ -53,6 +53,10 @@ Engine Creator owns engine output/spec identity. Car Creator continues to own ch
 For compatibility with the current runtime, the selected Factory Engine is still copied into the car's engine/base snapshot when the car is saved. The durable relationship is the car's `factoryEngineId`, which is what Parts Creator can use for engine-specific compatibility.
 
 The three current playable cars have been migrated to full Engine Creator definitions. Existing future-swap engine stubs remain visible as legacy-fitment entries so they can be completed rather than discarded.
+
+### Engine swap fitment direction
+
+Forever Racing does not need a physical engine CAD model. Engine swaps should start with displacement allowance from the car/build stage, then use explicit allow/block compatibility rules for special cases. Size Class, engine orientation, compression ratio and engine weight are intentionally not Engine Creator requirements.
 
 ## Planned modules
 

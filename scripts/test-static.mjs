@@ -77,7 +77,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.5.0-c"')) throw new Error('Static index is missing the V0.5C build marker.');
+if (!html.includes('data-build="0.5.0-c.1"')) throw new Error('Static index is missing the V0.5C.1 build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -451,7 +451,7 @@ if (!appSource.includes("renderEngineStudio") ||
     !contentStudioSource.includes('EDIT ENGINE') ||
     !engineStudioSource.includes('ENGINE CREATOR') ||
     !engineStudioSource.includes('Torque-first power curve') ||
-    !engineStudioSource.includes('GENERATE BASELINE') ||
+    !engineStudioSource.includes('GENERATE FROM PROFILE') ||
     !engineStudioSource.includes('SAVE ENGINE DRAFT') ||
     !engineStudioSource.includes('ACTIVATE ENGINE LOCALLY') ||
     !engineDomainSource.includes('deriveHorsepower') ||
@@ -474,5 +474,34 @@ for (const engine of engineCatalogV05c.filter((row) => row.sourceStatus === 'eng
   }
 }
 console.log('V0.5C Engine Creator + linked Factory Engine checks passed.');
+
+const curveProfileIds = new Set([
+  'small_economy','turbo_street','muscle_v8','jdm_vtec','high_rev_na',
+  'motorbike','diesel_torque','rotary','broad_torque'
+]);
+if (!engineDomainSource.includes('ENGINE_CURVE_PROFILES') ||
+    !engineDomainSource.includes('curveProfileDefinition') ||
+    !engineDomainSource.includes('inferCurveProfile') ||
+    !engineStudioSource.includes('Curve Profile') ||
+    !engineStudioSource.includes('GENERATE FROM PROFILE') ||
+    !engineStudioSource.includes('Only what Forever Racing actually needs') ||
+    engineStudioSource.includes('Compression Ratio') ||
+    engineStudioSource.includes('Engine Weight (lb)') ||
+    engineStudioSource.includes('Size Class') ||
+    engineStudioSource.includes('Orientations') ||
+    !cssV04b.includes('V0.5C.1 Engine Creator simplification')) {
+  throw new Error('V0.5C.1 simplified Engine Creator / curve-profile workflow is incomplete.');
+}
+for (const engine of engineCatalogV05c) {
+  if (!curveProfileIds.has(String(engine.curveProfile || ''))) {
+    throw new Error(`V0.5C.1 engine is missing a valid Curve Profile: ${engine.engineId || 'unknown'}.`);
+  }
+  for (const obsolete of ['compressionRatio','engineWeightLb','sizeClass','orientations','curveType']) {
+    if (Object.prototype.hasOwnProperty.call(engine, obsolete)) {
+      throw new Error(`V0.5C.1 obsolete engine field ${obsolete} remains on ${engine.engineId || 'unknown'}.`);
+    }
+  }
+}
+console.log('V0.5C.1 simplified Engine Creator checks passed.');
 
 

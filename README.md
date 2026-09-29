@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.5.0-c playable direction
+## V0.5.0-c.1 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,14 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.5C.1 Engine Creator simplification
+
+- Removed Compression Ratio, Engine Weight, Size Class and Orientation from the Engine Creator workflow.
+- Engine swap fitment direction is now deliberately simple: displacement allowance first, with explicit compatibility exceptions later.
+- Replaced **Curve Evidence** with selectable **Curve Profiles** that shape generated baselines: Small / Economy, Turbo Street, Muscle / Big V8, JDM VTEC / Cam Change, High-Rev NA, Motorbike, Diesel, Rotary and Broad Performance.
+- Curve Profile affects **Generate From Profile** only; the authored torque points remain fully editable afterward.
+- Existing engine data was migrated to a profile while keeping the same peak anchors and authored curves.
 
 ### V0.5C Engine Creator
 

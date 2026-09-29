@@ -1,5 +1,7 @@
 import { bindHome, escapeHtml, pageShell } from "../ui/components.js";
 import {
+  ENGINE_CURVE_PROFILES,
+  curveProfileDefinition,
   deriveHorsepower,
   engineLabel,
   generateBaselineCurve,
@@ -157,6 +159,8 @@ export async function renderEngineStudio(ctx) {
       input.addEventListener("change", refresh);
     });
 
+    host.querySelector('[data-engine-field="curveProfile"]')?.addEventListener("change", () => render());
+
     host.querySelectorAll("[data-curve-rpm],[data-curve-torque]").forEach((input) => {
       input.addEventListener("input", () => {
         const index = Number(input.dataset.curveIndex || 0);
@@ -187,10 +191,10 @@ export async function renderEngineStudio(ctx) {
 
     host.querySelector("[data-generate-curve]")?.addEventListener("click", () => {
       draft.powerCurve = generateBaselineCurve(draft);
-      draft.curveType = "estimated";
-      draft.curveNotes = draft.curveNotes || "Generated baseline from peak anchors; refine with research/dyno evidence before final release.";
+      const profile = curveProfileDefinition(draft.curveProfile);
+      draft.curveNotes = draft.curveNotes || `Generated from the ${profile.label} profile and current peak anchors; refine the torque points as needed.`;
       render();
-      ctx.toast("Baseline curve generated", "Torque points were created around the current peak HP/TQ anchors.");
+      ctx.toast("Baseline curve generated", `${profile.label} shaping was applied around the current peak HP/TQ anchors.`);
     });
 
     host.querySelector("[data-engine-save]")?.addEventListener("click", () => save(false));
@@ -274,25 +278,23 @@ function identitySection(engine) {
 function specSection(engine) {
   return `
     <section class="content-studio__section">
-      <header><div><small>HARDWARE</small><strong>Core engine specifications & fitment</strong></div></header>
+      <header><div><small>ENGINE BASICS</small><strong>Only what Forever Racing actually needs</strong></div></header>
       <div class="studio-form-grid studio-form-grid--4">
         ${field("Displacement (L)", "displacementLiters", engine.displacementLiters, "number", { min: 0.1, step: 0.1 })}
         ${field("Configuration", "configuration", engine.configuration, "text", { placeholder: "I4 / V6 / V8 / Rotary" })}
         ${select("Aspiration", "aspiration", engine.aspiration, [
           ["Naturally Aspirated","Naturally Aspirated"],["Turbo","Turbo"],["Twin Turbo","Twin Turbo"],["Supercharged","Supercharged"],["Turbo Diesel","Turbo Diesel"]
         ])}
-        ${field("Compression Ratio", "compressionRatio", engine.compressionRatio ?? "", "number", { min: 1, step: 0.1 })}
-        ${field("Engine Weight (lb)", "engineWeightLb", engine.engineWeightLb ?? "", "number", { min: 1, step: 1 })}
-        ${field("Size Class", "sizeClass", engine.sizeClass, "number", { min: 1, max: 8, step: 1 })}
-        ${field("Orientations", "orientations", engine.orientations.join(", "), "text", { placeholder: "transverse, longitudinal" })}
       </div>
+      <p class="muted engine-studio__simple-note">Engine swaps can use displacement limits plus explicit compatibility exceptions later. Compression ratio, engine weight, size classes and orientation are intentionally not part of the authoring workflow.</p>
     </section>`;
 }
 
 function outputSection(engine) {
+  const profile = curveProfileDefinition(engine.curveProfile);
   return `
     <section class="content-studio__section">
-      <header><div><small>POWER ANCHORS</small><strong>OEM-style output references</strong></div></header>
+      <header><div><small>POWER & CURVE PROFILE</small><strong>Peak anchors + engine character</strong></div></header>
       <div class="studio-form-grid studio-form-grid--4">
         ${field("Peak HP", "peakHp", engine.peakHp, "number", { min: 1, step: 1 })}
         ${field("Peak HP RPM", "peakHpRpm", engine.peakHpRpm, "number", { min: 500, step: 50 })}
@@ -300,10 +302,12 @@ function outputSection(engine) {
         ${field("Peak TQ RPM", "peakTorqueRpm", engine.peakTorqueRpm, "number", { min: 500, step: 50 })}
         ${field("Redline RPM", "redlineRpm", engine.redlineRpm, "number", { min: 1000, step: 100 })}
         ${field("Limiter / Rev Cut", "revCutRpm", engine.revCutRpm, "number", { min: 1000, step: 100 })}
-        ${select("Curve Evidence", "curveType", engine.curveType, [
-          ["estimated","Estimated / Reconstructed"],["measured","Measured Dyno"],["oem","OEM Supplied"],["game-baseline","Game Baseline"]
-        ])}
-        ${field("Curve Notes", "curveNotes", engine.curveNotes, "text", { placeholder: "Source/shape notes..." })}
+        ${select("Curve Profile", "curveProfile", engine.curveProfile, ENGINE_CURVE_PROFILES.map((row) => [row.id, row.label]))}
+        ${field("Curve Notes", "curveNotes", engine.curveNotes, "text", { placeholder: "Optional source / shape notes..." })}
+      </div>
+      <div class="engine-studio__profile-note">
+        <b>${escapeHtml(profile.label)}</b>
+        <span>${escapeHtml(profile.description)}</span>
       </div>
     </section>`;
 }
@@ -315,7 +319,7 @@ function curveSection(engine) {
       <header>
         <div><small>DYNO CURVE</small><strong>Torque-first power curve</strong></div>
         <div class="engine-studio__header-actions">
-          <button class="button button--small" type="button" data-generate-curve>GENERATE BASELINE</button>
+          <button class="button button--small" type="button" data-generate-curve>GENERATE FROM PROFILE</button>
           <button class="button button--small" type="button" data-add-curve>ADD POINT</button>
         </div>
       </header>
@@ -386,7 +390,6 @@ function finalizeEngine(source, { strict = true } = {}) {
   engine.variantName = String(engine.variantName || "").trim();
   engine.name = String(engine.name || [engine.manufacturer, engine.familyName, engine.variantName].filter(Boolean).join(" ")).trim();
   engine.tags = uniqueList(source.tags);
-  engine.orientations = uniqueList(source.orientations);
   engine.powerCurve = normalizePowerCurve(source.powerCurve);
 
   if (!engine.engineId) throw new Error("Engine ID or Display Name is required before saving.");
@@ -410,10 +413,6 @@ function createBlankEngine() {
     displacementLiters: 2,
     configuration: "I4",
     aspiration: "Naturally Aspirated",
-    compressionRatio: null,
-    engineWeightLb: null,
-    sizeClass: 3,
-    orientations: ["longitudinal"],
     peakHp: 200,
     peakHpRpm: 6000,
     peakTorque: 180,
@@ -421,7 +420,7 @@ function createBlankEngine() {
     redlineRpm: 6500,
     revCutRpm: 7000,
     tags: [],
-    curveType: "estimated",
+    curveProfile: "broad_torque",
     curveNotes: "",
     powerCurve: [],
     sourceStatus: "engine-tool",
@@ -464,7 +463,7 @@ function setValue(target, path, value) {
     if (!cursor[key] || typeof cursor[key] !== "object") cursor[key] = {};
     cursor = cursor[key];
   }
-  if (parts.at(-1) === "tags" || parts.at(-1) === "orientations") cursor[parts.at(-1)] = uniqueList(value);
+  if (parts.at(-1) === "tags") cursor[parts.at(-1)] = uniqueList(value);
   else cursor[parts.at(-1)] = value;
 }
 
