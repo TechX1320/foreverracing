@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.4.0-h.0 playable direction
+## V0.4.0-h.2 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -109,6 +109,16 @@ Completing the tutorial no longer opens every system at once. The initial progre
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
 
+### V0.4H.2 race animation pass
+
+- The original CSS drag tree is back; the purchased tree sprite is no longer used for active race playback.
+- The road texture is vertically aligned so its native white stripe sits at the track midpoint, and both cars ride the darker rubbered-in grooves.
+- Quick Race uses race-only layered PNGs for the three playable cars so tire/rim layers can animate independently while the certified composites remain unchanged elsewhere.
+- Wheel rotation follows track travel. Calculated launch slip adds extra rotation only to the driven axle.
+- Both JS and PHP race simulation now expose deterministic traction telemetry: grip loss, wheel slip and smoke level.
+- Tire smoke uses the purchased smoke sprite and appears only when calculated launch grip loss is high enough; FWD uses the front tire, RWD the rear tire, AWD both.
+- Performance classes now extend through **X Class**: D < 450, C < 600, B < 750, A < 900, S < 1100, X >= 1100.
+
 ### V0.4H.0 race visual pass
 
 - Quick Race now uses the purchased road texture instead of the placeholder grid strip.
@@ -123,7 +133,7 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - The three current starters keep direct certified PNGs and received another wheel-position correction: the total wheel drop is now **10px** from the detected wheel-opening center.
 - Settings -> **Car Art Debug** now shows the entire 57-car roster and labels each entry **PLAYABLE** or **ART READY**.
 - Artwork availability and gameplay availability are separate. The current gameplay catalog remains Golf GTI Mk6, RX-8 and Clio V6 Sport until additional vehicle specs are researched/approved.
-- Performance Index now maps into temporary letter classes: **D < 450, C < 600, B < 750, A < 900, S >= 900**.
+- Performance Index maps into temporary letter classes: **D < 450, C < 600, B < 750, A < 900, S < 1100, X >= 1100**.
 - All three current starter cars are **D Class**. An owned car's performance class updates when its PI changes.
 
 ### V0.4F.1 visual hotfix
