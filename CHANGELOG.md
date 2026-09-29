@@ -1,5 +1,13 @@
 # Changelog
 
+## V0.5.0-a.1 — Content Studio preview hotfix
+
+- Fixed playable cars being forced into raw layer rendering when first opened in Car Creator.
+- Fixed art-roster-only cars disappearing because editable mode was enabled before layer PNGs existed.
+- Editable previews now prefer the known-good race PNG layer set for current playable cars while applying authored X/Y/Z transforms.
+- Added certified/atlas fallback when editable layer sources are unavailable.
+- Added a site favicon to stop the default missing-favicon request.
+
 ## V0.5.0-a — Content Studio / Car Creator
 
 - Added the first Content Studio developer surface with Car Creator.
