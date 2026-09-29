@@ -2,6 +2,12 @@ import { bindHome, escapeHtml, pageShell } from "../ui/components.js";
 import { renderVehicle } from "../ui/vehicleRenderer.js";
 import { benchmarkPerformance, performanceClassFromIndex } from "../domain/PerformanceIndex.js";
 import {
+  normalizeRelease,
+  normalizeReleaseForSave,
+  releaseState,
+  toDatetimeLocalValue,
+} from "../domain/ContentRelease.js";
+import {
   deleteContentStudioCar,
   findContentStudioCar,
   findContentStudioRecord,
@@ -11,7 +17,7 @@ import {
 
 const BUILD_MODULES = [
   { id: "cars", label: "CAR CREATOR", state: "ACTIVE" },
-  { id: "parts", label: "PARTS TOOL", state: "PLANNED" },
+  { id: "parts", label: "PARTS TOOL", state: "NEXT" },
   { id: "wheels", label: "WHEELS TOOL", state: "PLANNED" },
 ];
 
@@ -119,6 +125,7 @@ export async function renderContentStudio(ctx) {
 
           <div class="content-studio__editor">
             ${identitySection(draft)}
+            ${releaseSection(draft)}
             ${physicsSection(draft)}
             ${artSection(draft)}
           </div>
@@ -132,10 +139,14 @@ export async function renderContentStudio(ctx) {
     host.querySelector("[data-studio-load]")?.addEventListener("change", (event) => {
       const id = String(event.currentTarget.value || "");
       if (!id) return;
-      const local = findContentStudioCar(id);
+      const localRecord = findContentStudioRecord(id);
+      const local = localRecord?.car || null;
       const catalog = catalogCars.find((car) => String(car.catalogId) === id);
       const art = artCars.find((car) => String(car.assetId) === id);
       draft = local || (catalog ? structuredClone(catalog) : artToDraft(art, nextStockId(catalogCars)));
+      draft.release = normalizeRelease(draft.release, {
+        legacyReleased: Boolean(catalog || (localRecord && localRecord.enabled !== false)),
+      });
       lastLoadedId = id;
       ensureDraftShape(draft);
       renderWorkspace();
@@ -307,7 +318,7 @@ function identitySection(car) {
       </div>
       <div class="content-studio__market-note">
         <b>${marketPlacementLabel(car)}</b>
-        <span>Classifieds = used-market pool. Showroom = new-car dealer floor. Both may be enabled; Hidden/Hidden keeps the car playable but out of both stores.</span>
+        <span>Classifieds = used-market pool. Showroom = new-car dealer floor. Release status below is the final gate for both stores. Both markets may be enabled; Hidden/Hidden keeps the car out of both.</span>
       </div>
     </section>`;
 }
