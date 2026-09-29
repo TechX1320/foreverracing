@@ -94,6 +94,7 @@ function carRow(player, car, catalog, tutorialStep) {
         <div class="garage-entry__title">
           <div>
             <span class="stage-name-tag">${escapeHtml(buildName(stage))}</span>
+            <span class="performance-class-tag">${escapeHtml(car.performanceClass || car.stockClass || "—")}</span>
             <strong>${escapeHtml(carLabel(car))}</strong>
             <small>${escapeHtml(car.displayName)} • ${escapeHtml(car.base?.drivetrain || "")}</small>
           </div>
@@ -102,6 +103,7 @@ function carRow(player, car, catalog, tutorialStep) {
         <div class="stat-line">
           <span><b>${number(car.derived?.hp)}</b> HP</span>
           <span><b>${number(car.derived?.torque)}</b> LB-FT</span>
+          <span><b>${escapeHtml(car.performanceClass || car.stockClass || "—")}</b> CLASS</span>
           <span><b>PI ${number(car.performanceIndex || car.benchmark?.performanceIndex || 0)}</b> PERFORMANCE</span>
           <span><b>${number(car.derived?.weight)}</b> LB</span>
           <span><b>${number(car.mileage)}</b> MI</span>
