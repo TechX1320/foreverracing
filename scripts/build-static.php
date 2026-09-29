@@ -82,7 +82,7 @@ Build: {$build}
 Storage mode: local
 Offline service worker: disabled in static development mode
 Race presentation: persistent two-phase start/finish with blocking real-time playback
-V0.5C: Engine Creator with torque-first dyno curves, engine families/variants and Factory Engine links
+V0.5C.1: Simplified Engine Creator with selectable curve profiles and displacement-based swap direction
 Do not edit docs/ by hand; run php scripts/build-static.php.
 ");
 
