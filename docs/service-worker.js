@@ -1,8 +1,15 @@
-const CACHE = 'forever-racing-shell-v0.4.0-g';
+const CACHE = 'forever-racing-shell-v0.4.0-h.0';
 const SHELL = [
   './',
   './manifest.webmanifest',
   './assets/css/app.css',
+  './assets/art/race/road.jpg',
+  './assets/art/race/race_track.png',
+  './assets/art/race/start.png',
+  './assets/art/race/finish.png',
+  './assets/art/race/divider.png',
+  './assets/art/race/shadow.png',
+  './assets/art/race/xmas.png',
   './assets/art/cars/atlas/cars-1.png',
   './assets/art/cars/atlas/cars-2.png',
   './assets/art/cars/atlas/cars-3.png',
