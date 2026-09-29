@@ -1,5 +1,15 @@
 # Changelog
 
+## V0.5.0-a.2 — Content Studio polish
+
+- Fixed Content Studio wheel-anchor markers so certified and atlas previews use the same rendered coordinate space as the visible car.
+- Added five editable factory paint colors per car.
+- Classifieds can now generate different paint colors for separate listings of the same model and preserve that color after purchase.
+- Added default paint palettes to Golf GTI, Mazda RX-8 and Renault Clio.
+- Split local authoring into saved drafts versus activated local gameplay cars.
+- Activating a car now clears the local used-lot cache so Classifieds regenerate from the updated catalog.
+- Clarified Classifieds versus Showroom placement directly in Car Creator.
+
 ## V0.5.0-a.1 — Content Studio preview hotfix
 
 - Fixed playable cars being forced into raw layer rendering when first opened in Car Creator.
