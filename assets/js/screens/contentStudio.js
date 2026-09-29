@@ -1,6 +1,7 @@
 import { bindHome, escapeHtml, pageShell } from "../ui/components.js";
 import { renderVehicle } from "../ui/vehicleRenderer.js";
 import { benchmarkPerformance, performanceClassFromIndex } from "../domain/PerformanceIndex.js";
+import { engineLabel, engineToCarSnapshot, normalizeEngineDefinition } from "../domain/EngineCatalog.js";
 import {
   normalizeRelease,
   normalizeReleaseForSave,
@@ -14,9 +15,11 @@ import {
   listContentStudioCars,
   saveContentStudioCar,
 } from "../content/ContentStudioCatalog.js";
+import { mergeContentStudioEngines } from "../content/ContentStudioEngineCatalog.js";
 
 const BUILD_MODULES = [
   { id: "cars", label: "CAR CREATOR", state: "ACTIVE" },
+  { id: "engines", label: "ENGINE CREATOR", state: "ACTIVE" },
   { id: "parts", label: "PARTS TOOL", state: "NEXT" },
   { id: "wheels", label: "WHEELS TOOL", state: "PLANNED" },
 ];
@@ -28,24 +31,27 @@ const USED_LOT_KEY = "foreverRacing.v02.usedLot";
 export async function renderContentStudio(ctx) {
   const build = String(document.documentElement.dataset.build || "").trim();
   const suffix = build ? `?v=${encodeURIComponent(build)}` : "";
-  const [catalogData, artResponse, racingResponse] = await Promise.all([
+  const [catalogData, artResponse, racingResponse, engineResponse] = await Promise.all([
     ctx.storage.carCatalog(),
     fetch(`data/catalog/car-art.json${suffix}`, { cache: "no-store" }),
     fetch(`data/config/racing.json${suffix}`, { cache: "no-store" }),
+    fetch(`data/catalog/engines.json${suffix}`, { cache: "no-store" }),
   ]);
   if (!artResponse.ok) throw new Error(`Unable to load car art catalog (${artResponse.status}).`);
   if (!racingResponse.ok) throw new Error(`Unable to load racing config (${racingResponse.status}).`);
+  if (!engineResponse.ok) throw new Error(`Unable to load engine catalog (${engineResponse.status}).`);
 
   const catalogCars = Array.isArray(catalogData?.cars) ? catalogData.cars : [];
   const artData = await artResponse.json();
   const artCars = Array.isArray(artData?.cars) ? artData.cars : [];
   const racingConfig = await racingResponse.json();
+  const engineCatalog = mergeContentStudioEngines(await engineResponse.json()).map(normalizeEngineDefinition);
   const root = ctx.screenRoot;
 
   root.innerHTML = pageShell({
     title: "Content Studio",
     eyebrow: "DEVELOPMENT / CONTENT TOOLS",
-    hint: "Cars now • parts and wheels next",
+    hint: "Cars + engines now • Parts Tool next",
     trail: "Browser-local authoring workspace",
     body: '<div data-content-studio></div>',
   });
