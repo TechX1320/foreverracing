@@ -82,7 +82,7 @@ export class LocalGameService {
     if (!spec) throw new LocalGameError('That showroom car does not exist.', 404);
     return this.mutate(inputPlayer, (player) => {
       if (player.tutorial?.status === 'active' && player.tutorial?.step === 'buy_first_car') {
-        throw new LocalGameError('Your first car comes from the Classifieds. Start with a D Class used car and work your way up.');
+        throw new LocalGameError('Your first car comes from the Classifieds. Pick one of the starter cars and work your way up.');
       }
       if (player.tutorial?.status !== 'active' && Number(player.progression?.level || 1) < 5) {
         throw new LocalGameError('The Showroom unlocks at Level 5. Keep building through Classifieds first.');
@@ -473,7 +473,7 @@ export class LocalGameService {
       if (draft.tutorial?.status === 'active' && draft.tutorial?.step === 'first_race') {
         draft.wallet.credits += this.config.tutorialCompletionCredits;
         draft.progression.rep += this.config.tutorialCompletionRep;
-        this.addTransaction(draft, 'tutorial_reward', this.config.tutorialCompletionCredits, 'FTUE completion reward');
+        this.addTransaction(draft, 'tutorial_reward', this.config.tutorialCompletionCredits, 'Tutorial completion reward');
         this.completeTutorialStep(draft, 'first_race', null);
         draft.tutorial.status = 'complete';
         draft.tutorial.step = 'complete';
