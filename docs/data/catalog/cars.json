@@ -115,7 +115,8 @@
       "classifieds": true,
       "showroom": false
     },
-    "class": "D"
+    "class": "D",
+    "factoryEngineId": "vw_ea888_20t_mk6_gti_200"
   },
   {
     "stockId": 2,
@@ -233,7 +234,8 @@
       "classifieds": true,
       "showroom": false
     },
-    "class": "D"
+    "class": "D",
+    "factoryEngineId": "mazda_13b_msp_renesis_238"
   },
   {
     "stockId": 3,
@@ -351,6 +353,7 @@
       "classifieds": true,
       "showroom": false
     },
-    "class": "D"
+    "class": "D",
+    "factoryEngineId": "renault_clio_v6_29_255"
   }
 ]

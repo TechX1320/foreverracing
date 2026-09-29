@@ -30,6 +30,30 @@ That makes iterative content testing possible without modifying production/serve
 
 Uploaded PNGs are stored as data URLs inside the local authoring record for the current prototype. Permanent content should replace those data URLs with normal asset paths when committed.
 
+## V0.5C: Engine Creator
+
+Engine Creator is the second active Content Studio module and provides the engine identity layer needed before Parts Creator becomes engine-specific.
+
+### Supported now
+
+- Create or edit engine definitions.
+- Separate engine **family** from engine **variant**.
+- Author manufacturer/name, displacement, configuration, aspiration, compression ratio, engine weight, fitment orientations and tags.
+- Author peak horsepower/torque anchors, redline and rev limiter.
+- Build a torque-first RPM curve with horsepower derived mathematically from torque.
+- Live dyno-style HP/TQ preview.
+- Generate a rough baseline curve from the current peak anchors, then edit it point-by-point.
+- Save local drafts, activate local engines, export JSON or copy JSON.
+- Link Car Creator vehicles to a Factory Engine definition.
+
+### Car/engine responsibility split
+
+Engine Creator owns engine output/spec identity. Car Creator continues to own chassis-specific information such as curb weight, grip, drivetrain, engine location, pricing, visuals, market placement and release scheduling.
+
+For compatibility with the current runtime, the selected Factory Engine is still copied into the car's engine/base snapshot when the car is saved. The durable relationship is the car's `factoryEngineId`, which is what Parts Creator can use for engine-specific compatibility.
+
+The three current playable cars have been migrated to full Engine Creator definitions. Existing future-swap engine stubs remain visible as legacy-fitment entries so they can be completed rather than discarded.
+
 ## Planned modules
 
 ### Parts Tool

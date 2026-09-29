@@ -14,6 +14,7 @@ import { renderRoguelike } from './screens/roguelike.js';
 import { renderEvents, renderTeams, renderLeaderboards, renderMultiplayer } from './screens/placeholders.js';
 import { loadSettings, renderSettings } from './screens/settings.js';
 import { renderContentStudio } from './screens/contentStudio.js';
+import { renderEngineStudio } from './screens/engineStudio.js';
 
 const storage = createStorageProvider();
 const store = new Store();
@@ -33,13 +34,13 @@ document.addEventListener('error', (event) => {
 }, true);
 
 const TUTORIAL_ROUTES = {
-  welcome: ['home', 'settings', 'content-studio'],
-  buy_first_car: ['home', 'usedlot', 'settings', 'content-studio'],
-  visit_garage: ['home', 'garage', 'settings', 'content-studio'],
-  buy_first_upgrade: ['home', 'garage', 'parts', 'settings', 'content-studio'],
-  install_first_upgrade: ['home', 'garage', 'settings', 'content-studio'],
-  build_stages: ['home', 'quick-race', 'settings', 'content-studio'],
-  first_race: ['home', 'quick-race', 'settings', 'content-studio']
+  welcome: ['home', 'settings', 'content-studio', 'engine-studio'],
+  buy_first_car: ['home', 'usedlot', 'settings', 'content-studio', 'engine-studio'],
+  visit_garage: ['home', 'garage', 'settings', 'content-studio', 'engine-studio'],
+  buy_first_upgrade: ['home', 'garage', 'parts', 'settings', 'content-studio', 'engine-studio'],
+  install_first_upgrade: ['home', 'garage', 'settings', 'content-studio', 'engine-studio'],
+  build_stages: ['home', 'quick-race', 'settings', 'content-studio', 'engine-studio'],
+  first_race: ['home', 'quick-race', 'settings', 'content-studio', 'engine-studio']
 };
 
 const ROUTE_UNLOCK_LEVELS = {
@@ -55,7 +56,8 @@ const ROUTE_UNLOCK_LEVELS = {
   events: 7,
   multiplayer: 10,
   settings: 1,
-  'content-studio': 1
+  'content-studio': 1,
+  'engine-studio': 1
 };
 
 const ctx = { storage, store, screenRoot, router: null, toast };
@@ -75,6 +77,7 @@ router
   .register('leaderboards', feature(renderLeaderboards))
   .register('multiplayer', feature(renderMultiplayer))
   .register('content-studio', feature(renderContentStudio))
+  .register('engine-studio', feature(renderEngineStudio))
   .register('settings', feature(renderSettings));
 
 store.onPlayer((player) => {

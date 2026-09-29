@@ -53,10 +53,13 @@ const required = [
   'assets/js/domain/RaceSimulator.js',
   'assets/js/domain/PerformanceIndex.js',
   'assets/js/domain/ContentRelease.js',
+  'assets/js/domain/EngineCatalog.js',
   'assets/js/ui/vehicleRenderer.js',
   'assets/js/ui/racePresentation.js',
   'assets/js/content/ContentStudioCatalog.js',
+  'assets/js/content/ContentStudioEngineCatalog.js',
   'assets/js/screens/contentStudio.js',
+  'assets/js/screens/engineStudio.js',
   'data/catalog/cars.json',
   'data/catalog/car-art.json',
   'data/catalog/parts.json',
@@ -74,11 +77,12 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.5.0-b"')) throw new Error('Static index is missing the V0.5B build marker.');
+if (!html.includes('data-build="0.5.0-c"')) throw new Error('Static index is missing the V0.5C build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
 const artCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/car-art.json', docs), 'utf8'));
+const engineCatalogV05c = JSON.parse(await fs.readFile(new URL('data/catalog/engines.json', docs), 'utf8'));
 const starters = carCatalog.filter((car) => car.starter);
 if (carCatalog.length !== 3 || starters.length !== 3) throw new Error('V0.4G gameplay catalog must keep exactly the three spec-validated starters for now.');
 if (!starters.every((car) => car.class === 'D')) throw new Error('All three current starter cars must begin in D class.');
@@ -103,6 +107,11 @@ for (const expected of expectedStarters) {
   if (!(car.visual.layered.anchors.frontBumperX > car.visual.layered.anchors.frontWheelCenter.x)) throw new Error(`${expected.id} front-bumper anchor is invalid.`);
   if (!(car.visual.layered.anchors.frontWheelCenter.y + car.visual.layered.layers.wheel.height / 2 >= car.visual.layered.anchors.groundY - 2)) throw new Error(`${expected.id} wheels still sit too high in the arches.`);
   if (!(car.benchmark?.passes === 51 && car.benchmark?.performanceIndex > 0 && car.benchmark?.quarterMileEt > 0)) throw new Error(`${expected.id} benchmark / PI metadata is missing.`);
+  if (!car.factoryEngineId) throw new Error(`V0.5C starter cars must link to a Factory Engine: ${expected.id}.`);
+  const linkedEngine = engineCatalogV05c.find((engine) => engine.engineId === car.factoryEngineId);
+  if (!linkedEngine || !(Number(linkedEngine.peakHp) > 0) || !(Number(linkedEngine.peakTorque) > 0) || !Array.isArray(linkedEngine.powerCurve) || linkedEngine.powerCurve.length < 6) {
+    throw new Error(`V0.5C Factory Engine definition is incomplete for ${expected.id}.`);
+  }
 }
 
 for (const file of [
@@ -161,6 +170,7 @@ const modules = [
   'assets/js/domain/LocalGameService.js',
   'assets/js/domain/PerformanceIndex.js',
   'assets/js/domain/ContentRelease.js',
+  'assets/js/domain/EngineCatalog.js',
   'assets/js/ui/vehicleRenderer.js',
   'assets/js/ui/racePresentation.js',
   'assets/js/storage/StorageProvider.js',
@@ -175,7 +185,9 @@ const modules = [
   'assets/js/screens/roguelike.js',
   'assets/js/screens/settings.js',
   'assets/js/content/ContentStudioCatalog.js',
+  'assets/js/content/ContentStudioEngineCatalog.js',
   'assets/js/screens/contentStudio.js',
+  'assets/js/screens/engineStudio.js',
 ];
 
 for (const file of modules) {
@@ -428,5 +440,39 @@ if (!contentStudioSource.includes('Publishing & schedule') ||
   throw new Error('V0.5B release scheduler / paint preview polish is incomplete.');
 }
 console.log('V0.5B release scheduler + clickable paint preview checks passed.');
+
+const engineStudioSource = await fs.readFile(new URL('assets/js/screens/engineStudio.js', root), 'utf8');
+const engineDomainSource = await fs.readFile(new URL('assets/js/domain/EngineCatalog.js', root), 'utf8');
+const engineStudioCatalogSource = await fs.readFile(new URL('assets/js/content/ContentStudioEngineCatalog.js', root), 'utf8');
+if (!appSource.includes("renderEngineStudio") ||
+    !appSource.includes(".register('engine-studio'") ||
+    !contentStudioSource.includes('data-factory-engine') ||
+    !contentStudioSource.includes('applyEngineToCarDraft') ||
+    !contentStudioSource.includes('EDIT ENGINE') ||
+    !engineStudioSource.includes('ENGINE CREATOR') ||
+    !engineStudioSource.includes('Torque-first power curve') ||
+    !engineStudioSource.includes('GENERATE BASELINE') ||
+    !engineStudioSource.includes('SAVE ENGINE DRAFT') ||
+    !engineStudioSource.includes('ACTIVATE ENGINE LOCALLY') ||
+    !engineDomainSource.includes('deriveHorsepower') ||
+    !engineDomainSource.includes('/ 5252') ||
+    !engineDomainSource.includes('generateBaselineCurve') ||
+    !engineStudioCatalogSource.includes('foreverRacing.contentStudio.engines.v1') ||
+    !cssV04b.includes('V0.5C Engine Creator')) {
+  throw new Error('V0.5C Engine Creator / Car Creator engine-link workflow is incomplete.');
+}
+if (engineCatalogV05c.length < 10) throw new Error('V0.5C engine catalog migration is missing expected entries.');
+for (const engine of engineCatalogV05c.filter((row) => row.sourceStatus === 'engine-tool')) {
+  if (!engine.engineId || !engine.familyId || !(engine.peakHp > 0) || !(engine.peakTorque > 0) || !Array.isArray(engine.powerCurve) || engine.powerCurve.length < 6) {
+    throw new Error(`V0.5C Engine Creator definition is incomplete: ${engine.engineId || 'unknown'}.`);
+  }
+  const hpPeak = Math.max(...engine.powerCurve.map((point) => Number(point.torqueLbFt || 0) * Number(point.rpm || 0) / 5252));
+  const tqPeak = Math.max(...engine.powerCurve.map((point) => Number(point.torqueLbFt || 0)));
+  if (Math.abs(hpPeak - Number(engine.peakHp)) > Math.max(5, Number(engine.peakHp) * 0.04) ||
+      Math.abs(tqPeak - Number(engine.peakTorque)) > Math.max(5, Number(engine.peakTorque) * 0.04)) {
+    throw new Error(`V0.5C engine curve peak anchors are inconsistent: ${engine.engineId}.`);
+  }
+}
+console.log('V0.5C Engine Creator + linked Factory Engine checks passed.');
 
 

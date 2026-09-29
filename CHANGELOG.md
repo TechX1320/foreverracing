@@ -1,5 +1,15 @@
 # Changelog
 
+## V0.5.0-c — Engine Creator
+
+- Added Engine Creator as a second active Content Studio module.
+- Added engine family/variant identity, hardware specs, fitment, tags, peak output anchors, redline/limiter and torque-first power curves.
+- Added live dyno-style HP/TQ graphing and deterministic horsepower derivation from torque.
+- Added baseline curve generation, validation, local draft/activation and JSON export/copy.
+- Linked Car Creator to complete Engine Creator definitions through Factory Engine IDs.
+- Migrated the three playable cars to dedicated engine variants and migrated the existing swap-fitment engine catalog into the new schema.
+- Preserved the current car physics snapshot for compatibility while establishing engine IDs as the basis for the upcoming Parts Creator compatibility system.
+
 ## V0.5.0-b — release scheduling + Parts Creator foundation
 
 - Added per-car Draft / Release Immediately / Scheduled Release controls to Car Creator.
