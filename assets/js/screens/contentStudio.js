@@ -95,22 +95,25 @@ export async function renderContentStudio(ctx) {
             </section>
 
             <section class="content-studio__preview-card">
-              <div class="content-studio__preview-head"><div><small>PAINT TEST</small><strong>Layer 1 body mask</strong></div></div>
+              <div class="content-studio__preview-head"><div><small>FACTORY PAINT</small><strong>5-color palette + preview</strong></div></div>
               <div class="content-studio__paint-row">
                 <input type="color" value="${paintValue(draft.visual?.paintColor)}" data-studio-paint>
                 <input type="text" value="${escapeHtml(draft.visual?.paintColor || "")}" placeholder="#ffffff or blank" data-studio-field="visual.paintColor">
                 <button class="button button--small" type="button" data-clear-paint>CLEAR</button>
               </div>
-              <p class="muted">This is the first pass at player paint. It tints the lowest body layer while keeping detail, wheel and disk layers separate.</p>
+              <div class="content-studio__palette" aria-label="Factory paint palette">
+                ${paintPaletteMarkup(draft.visual?.paintPalette)}
+              </div>
+              <p class="muted">These colors can be assigned to Classifieds listings so the same model does not always appear in one color. Paint needs a usable body layer; atlas-only cars stay on their authored color until layered PNGs are added.</p>
             </section>
 
             <section class="content-studio__actions">
-              <button class="button button--primary" type="button" data-save-car>SAVE CAR LOCALLY</button>
-              <button class="button" type="button" data-save-reload>SAVE + RELOAD</button>
+              <button class="button" type="button" data-save-car>SAVE DRAFT LOCALLY</button>
+              <button class="button button--primary" type="button" data-save-reload>ACTIVATE LOCALLY + RELOAD</button>
               <button class="button" type="button" data-export-car>EXPORT CAR JSON</button>
               <button class="button" type="button" data-copy-car>COPY JSON</button>
               ${currentLocal ? '<button class="button button--quiet" type="button" data-delete-override>REMOVE LOCAL OVERRIDE</button>' : ""}
-              <p>Saved cars become a browser-local catalog overlay. Reloading injects them into the local game catalog for playtesting. Export JSON is the handoff for committing permanent content.</p>
+              <p><b>Draft</b> keeps the car in Content Studio only. <b>Activate Locally</b> injects it into this browser\'s game catalog and refreshes Classifieds data. Permanent activation still means committing the exported definition and final art into the repository.</p>
             </section>
           </aside>
 
