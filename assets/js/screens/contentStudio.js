@@ -695,9 +695,9 @@ function paintValue(value) {
 }
 
 function paintPaletteMarkup(palette, activeColor = null) {
-  const selected = paintValue(activeColor);
+  const selected = activeColor ? paintValue(activeColor) : null;
   return normalizePaintPalette(palette).map((color, index) => `
-    <label class="studio-paint-swatch ${paintValue(color) === selected ? "is-selected" : ""}" title="Click to preview factory paint ${index + 1}">
+    <label class="studio-paint-swatch ${selected && paintValue(color) === selected ? "is-selected" : ""}" title="Click to preview factory paint ${index + 1}">
       <input type="color" value="${escapeHtml(color)}" data-paint-palette="${index}">
       <span>${index + 1}</span>
     </label>`).join("");
