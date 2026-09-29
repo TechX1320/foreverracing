@@ -82,7 +82,7 @@ Build: {$build}
 Storage mode: local
 Offline service worker: disabled in static development mode
 Race presentation: persistent two-phase start/finish with blocking real-time playback
-V0.5B: Car Creator release scheduling, clickable paint previews and Parts Creator architecture foundation
+V0.5C: Engine Creator with torque-first dyno curves, engine families/variants and Factory Engine links
 Do not edit docs/ by hand; run php scripts/build-static.php.
 ");
 
