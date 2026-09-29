@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.5.0-a.1 playable direction
+## V0.5.0-a.2 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,15 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.5A.2 Content Studio polish
+
+- Wheel anchor dots now account for certified image fitting and atlas cell offsets instead of always using raw source-canvas percentages.
+- Added a five-color factory paint palette to Car Creator. Selecting a swatch previews that color through the body paint layer when layered artwork is available.
+- Classifieds listings now receive a paint color from the authored palette; purchased cars retain that color, and race opponents can vary through the same palette.
+- Added starter palettes to the three currently playable cars.
+- Local authoring now distinguishes **Save Draft Locally** from **Activate Locally + Reload**. Draft cars stay out of gameplay; activation merges the car into the browser-local catalog and invalidates the current used-lot cache.
+- Classifieds and Showroom controls remain separate but now explain their exact market behavior in the editor.
 
 ### V0.5A.1 Content Studio preview hotfix
 
