@@ -124,7 +124,7 @@ function runPresentation(ctx, activeRace) {
       setSideProgress(playerCar, playerBar, playerProgress, playerGeometry, strip, startLine, finishLine);
       setSideProgress(opponentCar, opponentBar, opponentProgress, opponentGeometry, strip, startLine, finishLine);
       updateWheelMotion(playerCar, playerRun, race.playerDrivetrain, playerProgress, now, playerStart, race.distanceFeet, timeScale);
-      updateWheelMotion(opponentCar, opponentRun, opponent.drivetrain, opponentProgress, now, opponentStart, race.distanceFeet, timeScale);
+      updateWheelMotion(opponentCar, opponentRun, opponentRun.drivetrain, opponentProgress, now, opponentStart, race.distanceFeet, timeScale);
 
       // The visible timer belongs to the player's pass. It freezes at the exact
       // instant the player's front-bumper anchor reaches the finish timing plane.
