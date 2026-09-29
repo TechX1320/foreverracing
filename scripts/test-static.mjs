@@ -5,6 +5,7 @@ const root = new URL('../', import.meta.url);
 const docs = new URL('../docs/', import.meta.url);
 const required = [
   'index.html',
+  'favicon.svg',
   'assets/css/app.css',
   'assets/art/race/road.jpg',
   'assets/art/race/race_track.png',
@@ -72,7 +73,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.5.0-a"')) throw new Error('Static index is missing the V0.5A build marker.');
+if (!html.includes('data-build="0.5.0-a.1"')) throw new Error('Static index is missing the V0.5A.1 build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -368,5 +369,15 @@ if (!cssV04b.includes('V0.5A Content Studio / Car Creator') ||
   throw new Error('V0.5A Content Studio styling is incomplete.');
 }
 console.log('V0.5A Content Studio / Car Creator checks passed.');
+
+if (!html.includes('rel="icon" href="favicon.svg"') ||
+    !rendererSource.includes('resolveLayers') ||
+    !rendererSource.includes('hasLayerSource') ||
+    !rendererSource.includes('wantsEditableLayers') ||
+    !contentStudioSource.includes('car.visual.renderMode = ""') ||
+    contentStudioSource.includes('forceLayers: hasLayers')) {
+  throw new Error('V0.5A.1 Content Studio certified/atlas preview fallback is incomplete.');
+}
+console.log('V0.5A.1 Content Studio preview checks passed.');
 
 
