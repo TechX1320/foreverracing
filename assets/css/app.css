@@ -1493,3 +1493,10 @@ dialog.fr-dialog:has(.garage-inventory-dialog){
   .race-strip__tree--side{width:auto;height:auto}
   .race-strip__tree--side .tree-bulb{width:9px;height:9px}
 }
+
+/* V0.4H.3 race-lane vertical centering */
+.race-side-lane .race-side-car{
+  top:50%;
+  bottom:auto;
+  transform:translateY(-50%);
+}
