@@ -41,11 +41,11 @@ export async function renderSettings(ctx) {
           <input type="checkbox" data-setting="reduceMotion" ${settings.reduceMotion ? "checked" : ""}>
         </label>
         <div class="game-card">
-          <div class="split"><div><h3>Vehicle Rendering</h3><p>Certified starter composites are used in gameplay while the original body / wheel / rim / detail metadata stays available for future visual customization.</p></div><span class="pill pill--accent">CERTIFIED ART</span></div>
+          <div class="split"><div><h3>Vehicle Rendering</h3><p>All 57 purchased cars now have certified PNG artwork. Gameplay still enables only cars whose specs have been validated.</p></div><span class="pill pill--accent">57 ART READY</span></div>
           <div class="game-card__actions"><button class="button button--small" type="button" data-car-art-debug>CAR ART DEBUG</button></div>
         </div>
         <div class="game-card">
-          <div class="split"><div><h3>Build & Cached Assets</h3><p>Current build: <strong>${document.documentElement.dataset.build || "unknown"}</strong>. GitHub Pages development mode disables the offline service-worker cache so refreshes pull current assets.</p></div><span class="pill pill--accent">V0.4F.1</span></div>
+          <div class="split"><div><h3>Build & Cached Assets</h3><p>Current build: <strong>${document.documentElement.dataset.build || "unknown"}</strong>. GitHub Pages development mode disables the offline service-worker cache so refreshes pull current assets.</p></div><span class="pill pill--accent">V0.4G</span></div>
           <div class="game-card__actions"><button class="button button--small" type="button" data-clear-assets>CLEAR CACHED ASSETS</button></div>
         </div>
         <div class="game-card">
@@ -71,21 +71,44 @@ export async function renderSettings(ctx) {
 
   ctx.screenRoot.querySelector("[data-car-art-debug]")?.addEventListener("click", async () => {
     try {
-      const data = await ctx.storage.carCatalog();
-      const cars = (data.cars || []).filter((car) => car.starter);
+      const build = String(document.documentElement.dataset.build || "").trim();
+      const separator = build ? `?v=${encodeURIComponent(build)}` : "";
+      const [catalogData, artResponse] = await Promise.all([
+        ctx.storage.carCatalog(),
+        fetch(`data/catalog/car-art.json${separator}`, { cache: "no-store" }),
+      ]);
+      if (!artResponse.ok) throw new Error(`Unable to load car art catalog (${artResponse.status}).`);
+      const artData = await artResponse.json();
+      const playableIds = new Set((catalogData.cars || []).map((car) => String(car.catalogId || car.visual?.layered?.assetId || "")));
+      const cars = (artData.cars || []).map((art) => ({
+        catalogId: art.assetId,
+        displayName: art.displayName,
+        visual: {
+          layered: {
+            assetId: art.assetId,
+            canvas: art.canvas,
+            layers: art.layers,
+            anchors: art.anchors,
+            certifiedSrc: art.certifiedSrc || null,
+            certifiedAtlas: art.certifiedAtlas || null,
+          },
+        },
+      }));
       const dialog = showDialog(`
         <div class="dialog-body car-art-debug-dialog">
-          <span class="section-label">DEVELOPMENT / STARTER ART</span>
-          <h2>Car Art Debug</h2>
-          <p>These are the exact certified composites currently used by gameplay.</p>
-          <div class="car-art-debug-grid">
+          <span class="section-label">DEVELOPMENT / VEHICLE ROSTER</span>
+          <h2>57-Car Art Roster</h2>
+          <p>Every purchased asset below is runtime-ready. PLAYABLE means its vehicle specs are also validated in the gameplay catalog.</p>
+          <div class="car-art-debug-grid car-art-debug-grid--roster">
             ${cars.map((car) => {
-              const art = car.visual?.layered || {};
+              const art = car.visual.layered;
               const a = art.anchors || {};
+              const playable = playableIds.has(String(car.catalogId));
               return `<article class="car-art-debug-card">
                 <div class="car-art-debug-card__visual">${renderVehicle(car, { view: "sideProfile" })}</div>
                 <strong>${escapeHtml(car.displayName || car.catalogId)}</strong>
                 <small>${escapeHtml(art.assetId || "")}</small>
+                <div class="car-art-debug-card__status"><span class="pill ${playable ? "pill--accent" : ""}">${playable ? "PLAYABLE" : "ART READY"}</span><span>PNG</span></div>
                 <code>rear ${a.rearWheelCenter?.x ?? "?"},${a.rearWheelCenter?.y ?? "?"} • front ${a.frontWheelCenter?.x ?? "?"},${a.frontWheelCenter?.y ?? "?"} • bumper ${a.frontBumperX ?? "?"}</code>
               </article>`;
             }).join("")}

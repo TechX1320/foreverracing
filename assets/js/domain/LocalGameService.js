@@ -1,5 +1,5 @@
 import { RaceSimulator } from './RaceSimulator.js';
-import { benchmarkPerformance } from './PerformanceIndex.js';
+import { benchmarkPerformance, performanceClassFromIndex } from './PerformanceIndex.js';
 const clone = (value) => value == null ? value : structuredClone(value);
 const now = () => Math.floor(Date.now() / 1000);
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -387,12 +387,14 @@ export class LocalGameService {
         carName: this.carName(car),
         playerVisual: clone(car.visual || {}),
         playerPerformanceIndex: Number(car.performanceIndex || benchmarkPerformance(car.derived || car.base, this.racingConfig).performanceIndex),
+        playerPerformanceClass: String(car.performanceClass || performanceClassFromIndex(car.performanceIndex)),
         player: playerRun,
         opponent: {
           name: opponentProfile.name,
           carName: opponentProfile.carName,
           visual: opponentVisual,
           performanceIndex: opponentProfile.performanceIndex,
+          performanceClass: opponentProfile.performanceClass,
           drivetrain: opponentProfile.drivetrain,
           buildType: opponentProfile.buildType,
           level: opponentLevel,
@@ -595,6 +597,7 @@ export class LocalGameService {
     if (car.derived?.hp && car.derived?.weight) {
       const benchmark = benchmarkPerformance(car.derived, this.racingConfig);
       car.performanceIndex = benchmark.performanceIndex;
+      car.performanceClass = performanceClassFromIndex(benchmark.performanceIndex);
       car.benchmarkEt = benchmark.quarterMileEt;
     }
     return car;
@@ -615,7 +618,9 @@ export class LocalGameService {
       engine: clone(spec.engine || {}),
       visual: clone(spec.visual || {}),
       benchmark: clone(spec.benchmark || benchmark),
+      stockClass: String(spec.class || performanceClassFromIndex(spec.benchmark?.performanceIndex ?? benchmark.performanceIndex)),
       performanceIndex: benchmark.performanceIndex,
+      performanceClass: performanceClassFromIndex(benchmark.performanceIndex),
       benchmarkEt: benchmark.quarterMileEt,
       base: { hp: Number(base.hp), torque: Number(base.torque), weight: Number(base.weight), grip: Number(base.grip || 1), drivetrain: String(base.drivetrain || 'FWD') },
       derived,
@@ -645,6 +650,7 @@ export class LocalGameService {
     car.derived = { hp: Math.round(Math.max(1, derived.hp)), torque: Math.round(Math.max(1, derived.torque)), weight: Math.round(Math.max(500, derived.weight)), grip: Math.round(Math.max(0.5, derived.grip) * 1000) / 1000 };
     const benchmark = benchmarkPerformance(car.derived, this.racingConfig);
     car.performanceIndex = benchmark.performanceIndex;
+    car.performanceClass = performanceClassFromIndex(benchmark.performanceIndex);
     car.benchmarkEt = benchmark.quarterMileEt;
     car.installedParts = installedParts;
     return car;
@@ -790,6 +796,7 @@ export class LocalGameService {
       carName: String(spec.displayName || [spec.year, spec.make, spec.model].filter(Boolean).join(' ') || 'Opponent'),
       visual: clone(spec.visual || {}),
       performanceIndex: pi,
+      performanceClass: performanceClassFromIndex(pi),
       drivetrain: String(base.drivetrain || '-'),
       buildType: 'Street Car',
       level: opponentLevel,
@@ -809,6 +816,7 @@ export class LocalGameService {
       carName: profile.carName,
       visual: clone(profile.visual || {}),
       performanceIndex: Number(profile.performanceIndex || 0),
+      performanceClass: String(profile.performanceClass || performanceClassFromIndex(profile.performanceIndex)),
       drivetrain: profile.drivetrain,
       buildType: profile.buildType,
       level: Number(profile.level || 1),

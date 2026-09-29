@@ -41,7 +41,7 @@
         "sourceName": "Golf_GTI",
         "canvas": {
           "width": 281,
-          "height": 117
+          "height": 122
         },
         "layers": {
           "body": {
@@ -68,15 +68,15 @@
         "anchors": {
           "rearWheelCenter": {
             "x": 46,
-            "y": 90
+            "y": 95
           },
           "frontWheelCenter": {
             "x": 224.5,
-            "y": 90
+            "y": 95
           },
           "frontBumperX": 280,
           "rearBumperX": 0,
-          "groundY": 115
+          "groundY": 120
         },
         "certifiedSrc": "assets/art/cars/layered/golf_gti/certified.png"
       }
@@ -85,7 +85,8 @@
     "market": {
       "classifieds": true,
       "showroom": false
-    }
+    },
+    "class": "D"
   },
   {
     "stockId": 2,
@@ -129,7 +130,7 @@
         "sourceName": "Mazda_RX8",
         "canvas": {
           "width": 311,
-          "height": 117
+          "height": 122
         },
         "layers": {
           "body": {
@@ -156,15 +157,15 @@
         "anchors": {
           "rearWheelCenter": {
             "x": 63.5,
-            "y": 89
+            "y": 94
           },
           "frontWheelCenter": {
             "x": 254.5,
-            "y": 89
+            "y": 94
           },
           "frontBumperX": 307,
           "rearBumperX": 3,
-          "groundY": 115
+          "groundY": 120
         },
         "certifiedSrc": "assets/art/cars/layered/mazda_rx8/certified.png"
       }
@@ -173,7 +174,8 @@
     "market": {
       "classifieds": true,
       "showroom": false
-    }
+    },
+    "class": "D"
   },
   {
     "stockId": 3,
@@ -217,7 +219,7 @@
         "sourceName": "Renault_Clio",
         "canvas": {
           "width": 252,
-          "height": 114
+          "height": 119
         },
         "layers": {
           "body": {
@@ -244,15 +246,15 @@
         "anchors": {
           "rearWheelCenter": {
             "x": 34.5,
-            "y": 88
+            "y": 93
           },
           "frontWheelCenter": {
             "x": 207.5,
-            "y": 88
+            "y": 93
           },
           "frontBumperX": 248,
           "rearBumperX": 2,
-          "groundY": 112
+          "groundY": 117
         },
         "certifiedSrc": "assets/art/cars/layered/renault_clio/certified.png"
       }
@@ -261,6 +263,7 @@
     "market": {
       "classifieds": true,
       "showroom": false
-    }
+    },
+    "class": "D"
   }
 ]

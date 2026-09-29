@@ -64,6 +64,16 @@ final class PerformanceIndex
         return max(0, (int)round($value));
     }
 
+    public static function classFromIndex(int $index): string
+    {
+        $pi = max(0, $index);
+        if ($pi < 450) return 'D';
+        if ($pi < 600) return 'C';
+        if ($pi < 750) return 'B';
+        if ($pi < 900) return 'A';
+        return 'S';
+    }
+
     private static function median(array $values): float
     {
         $count = count($values);

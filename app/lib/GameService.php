@@ -517,12 +517,14 @@ final class GameService
                 'carName' => self::carName($car),
                 'playerVisual' => is_array($car['visual'] ?? null) ? $car['visual'] : [],
                 'playerPerformanceIndex' => (int)($car['performanceIndex'] ?? PerformanceIndex::forCar($car, $racingConfig)['performanceIndex']),
+                'playerPerformanceClass' => (string)($car['performanceClass'] ?? PerformanceIndex::classFromIndex((int)($car['performanceIndex'] ?? 0))),
                 'player' => $playerRun,
                 'opponent' => [
                     'name' => (string)$opponentProfile['name'],
                     'carName' => (string)$opponentProfile['carName'],
                     'visual' => $opponentVisual,
                     'performanceIndex' => (int)$opponentProfile['performanceIndex'],
+                    'performanceClass' => (string)$opponentProfile['performanceClass'],
                     'drivetrain' => (string)$opponentProfile['drivetrain'],
                     'buildType' => (string)$opponentProfile['buildType'],
                     'level' => $opponentLevel,
@@ -791,6 +793,7 @@ final class GameService
         if (!empty($car['derived']['hp']) && !empty($car['derived']['weight'])) {
             $benchmark = PerformanceIndex::forCar($car, self::racingConfig());
             $car['performanceIndex'] = (int)$benchmark['performanceIndex'];
+            $car['performanceClass'] = PerformanceIndex::classFromIndex((int)$benchmark['performanceIndex']);
             $car['benchmarkEt'] = (float)$benchmark['quarterMileEt'];
         }
         return $car;
@@ -829,7 +832,9 @@ final class GameService
             'engine' => is_array($spec['engine'] ?? null) ? $spec['engine'] : [],
             'visual' => is_array($spec['visual'] ?? null) ? $spec['visual'] : [],
             'benchmark' => is_array($spec['benchmark'] ?? null) ? $spec['benchmark'] : $benchmark,
+            'stockClass' => (string)($spec['class'] ?? PerformanceIndex::classFromIndex((int)($spec['benchmark']['performanceIndex'] ?? $benchmark['performanceIndex']))),
             'performanceIndex' => (int)$benchmark['performanceIndex'],
+            'performanceClass' => PerformanceIndex::classFromIndex((int)$benchmark['performanceIndex']),
             'benchmarkEt' => (float)$benchmark['quarterMileEt'],
             'base' => [
                 'hp' => (int)($base['hp'] ?? 1), 'torque' => (int)($base['torque'] ?? 1), 'weight' => (int)($base['weight'] ?? 500),
@@ -884,6 +889,7 @@ final class GameService
         ];
         $benchmark = PerformanceIndex::forCar($car, self::racingConfig());
         $car['performanceIndex'] = (int)$benchmark['performanceIndex'];
+        $car['performanceClass'] = PerformanceIndex::classFromIndex((int)$benchmark['performanceIndex']);
         $car['benchmarkEt'] = (float)$benchmark['quarterMileEt'];
         $car['installedParts'] = array_values(array_filter($installedParts));
         return $car;
@@ -1154,6 +1160,7 @@ final class GameService
             'carName' => trim((string)($spec['displayName'] ?? '')) ?: trim(implode(' ', array_filter([$spec['year'] ?? null, $spec['make'] ?? null, $spec['model'] ?? null]))) ?: 'Opponent',
             'visual' => is_array($spec['visual'] ?? null) ? $spec['visual'] : [],
             'performanceIndex' => $pi,
+            'performanceClass' => PerformanceIndex::classFromIndex($pi),
             'drivetrain' => (string)($base['drivetrain'] ?? '-'),
             'buildType' => 'Street Car',
             'level' => $opponentLevel,
@@ -1174,6 +1181,7 @@ final class GameService
             'carName' => (string)($profile['carName'] ?? 'Opponent'),
             'visual' => is_array($profile['visual'] ?? null) ? $profile['visual'] : [],
             'performanceIndex' => (int)($profile['performanceIndex'] ?? 0),
+            'performanceClass' => (string)($profile['performanceClass'] ?? PerformanceIndex::classFromIndex((int)($profile['performanceIndex'] ?? 0))),
             'drivetrain' => (string)($profile['drivetrain'] ?? '-'),
             'buildType' => (string)($profile['buildType'] ?? 'Street Car'),
             'level' => (int)($profile['level'] ?? 1),

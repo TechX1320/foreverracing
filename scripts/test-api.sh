@@ -87,7 +87,8 @@ fi
 STARTER_BODY="$(jq -nc --arg listingId "$STARTER_LISTING_ID" '{listingId:$listingId}')"
 PLAYER="$(post usedlot/purchase.php "$STARTER_BODY")"
 CAR_ID="$(echo "$PLAYER" | jq -r '.player.selectedCarId')"
-echo "$PLAYER" | jq -e '.player.garage[0].buildStage == 1 and .player.garage[0].source == "used" and .player.garage[0].mileage >= 105000 and .player.tutorial.step == "visit_garage"' >/dev/null
+echo "$PLAYER" | jq -e '.player.garage[0].buildStage == 1 and .player.garage[0].source == "used" and .player.garage[0].mileage >= 105000 and .player.garage[0].stockClass == "D" and .player.garage[0].performanceClass == "D"' >/dev/null
+echo "$PLAYER" | jq -e '.player.tutorial.step == "visit_garage" and .player.garage[0].visual.layered.anchors.frontWheelCenter.y == 95' >/dev/null
 
 PLAYER="$(post tutorial/advance.php '{"action":"garage_explained"}')"
 echo "$PLAYER" | jq -e '.player.tutorial.step == "buy_first_upgrade"' >/dev/null
@@ -107,16 +108,16 @@ PART_ID="$(echo "$PLAYER" | jq -r '.player.inventory.parts[] | select(.catalogId
 echo "$PLAYER" | jq -e --arg carId "$CAR_ID" '.player.tutorial.step == "install_first_upgrade" and (.player.inventory.parts[] | select(.catalogId=="s1_intake_1") | .purchasedForCarId) == $carId' >/dev/null
 
 PLAYER="$(post parts/install.php "{\"inventoryId\":\"$PART_ID\",\"carId\":\"$CAR_ID\"}")"
-echo "$PLAYER" | jq -e '.player.garage[0].derived.hp == 203 and .player.garage[0].performanceIndex > 0 and .player.tutorial.step == "first_race"' >/dev/null
+echo "$PLAYER" | jq -e '.player.garage[0].derived.hp == 203 and .player.garage[0].performanceIndex > 0 and .player.garage[0].performanceClass == "D" and .player.tutorial.step == "first_race"' >/dev/null
 
 PREVIEW="$(curl -sS -b "$COOKIE" "http://127.0.0.1:$PORT/api/race/preview.php")"
-echo "$PREVIEW" | jq -e '.preview.opponent.name == "Test Mule" and .preview.performanceIndex > 0 and .preview.benchmarkEt > 0 and .preview.opponent.performanceIndex > 0 and (.preview.opponent.visual.layered.layers.body.src | length) > 0 and (.preview.opponent | has("hp") | not) and (.preview.opponent | has("torque") | not) and (.preview.opponent | has("weight") | not)' >/dev/null
+echo "$PREVIEW" | jq -e '.preview.opponent.name == "Test Mule" and .preview.performanceIndex > 0 and .preview.benchmarkEt > 0 and .preview.opponent.performanceIndex > 0 and .preview.opponent.performanceClass == "D" and (.preview.opponent.visual.layered.layers.body.src | length) > 0 and (.preview.opponent | has("hp") | not) and (.preview.opponent | has("torque") | not) and (.preview.opponent | has("weight") | not)' >/dev/null
 
 PLAYER="$(post race/start.php '{"distance":"1/4"}')"
 RACE_ID="$(echo "$PLAYER" | jq -r '.activeRace.raceId')"
 echo "$PLAYER" | jq -e '.player.tutorial.step == "first_race" and .player.stats.races == 0 and .player.progression.exp == 0 and (.player.raceHistory | length) == 0' >/dev/null
 echo "$PLAYER" | jq -e '.activeRace.distance == "1/4" and .activeRace.race.player.trapSpeed > 0 and .activeRace.race.location.name == "Local Test & Tune" and .activeRace.race.weather.name == "Cool & Cloudy" and .activeRace.race.player.foul == false and .activeRace.race.opponent.foul == false and .activeRace.race.won == true' >/dev/null
-echo "$PLAYER" | jq -e --argjson preview "$PREVIEW" '.activeRace.race.opponent.name == $preview.preview.opponent.name and .activeRace.race.opponent.carName == $preview.preview.opponent.carName and .activeRace.race.opponent.performanceIndex == $preview.preview.opponent.performanceIndex and (.activeRace.race.playerVisual.layered.layers.body.src | length) > 0 and (.activeRace.race.opponent.visual.layered.layers.body.src | length) > 0 and (.activeRace.race.opponent | has("hp") | not) and (.activeRace.race.opponent | has("torque") | not) and (.activeRace.race.opponent | has("weight") | not)' >/dev/null
+echo "$PLAYER" | jq -e --argjson preview "$PREVIEW" '.activeRace.race.playerPerformanceClass == "D" and .activeRace.race.opponent.name == $preview.preview.opponent.name and .activeRace.race.opponent.carName == $preview.preview.opponent.carName and .activeRace.race.opponent.performanceIndex == $preview.preview.opponent.performanceIndex and .activeRace.race.opponent.performanceClass == $preview.preview.opponent.performanceClass and (.activeRace.race.playerVisual.layered.layers.body.src | length) > 0 and (.activeRace.race.opponent.visual.layered.layers.body.src | length) > 0 and (.activeRace.race.opponent | has("hp") | not) and (.activeRace.race.opponent | has("torque") | not) and (.activeRace.race.opponent | has("weight") | not)' >/dev/null
 
 DUP_RACE="$(post race/start.php '{"distance":"1/2"}')"
 echo "$DUP_RACE" | jq -e --arg raceId "$RACE_ID" '.activeRace.raceId == $raceId and .activeRace.distance == "1/4" and .player.stats.races == 0' >/dev/null
@@ -157,4 +158,4 @@ if [[ "$FRESH_STATUS" != "200" ]]; then
 fi
 jq -e '.authenticated == true and .player.tutorial.step == "welcome" and ((.player.garage | length) == 0) and .player.progression.exp == 0' "$LOGIN2" >/dev/null
 
-echo "Authenticated PHP API V0.4F layered starter + PI race smoke test passed."
+echo "Authenticated PHP API V0.4G D-class + PI race smoke test passed."

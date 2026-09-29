@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { LocalGameService } from '../assets/js/domain/LocalGameService.js';
+import { performanceClassFromIndex } from '../assets/js/domain/PerformanceIndex.js';
 
 const [cars, parts, config, buildStageConfig, racingConfig] = await Promise.all([
   fs.readFile(new URL('../data/catalog/cars.json', import.meta.url), 'utf8').then(JSON.parse),
@@ -15,6 +16,12 @@ assert.equal(buildStageConfig.stages[0].name, 'Street Car');
 assert.equal(buildStageConfig.stages[1].name, 'Street Race Car');
 assert.equal(buildStageConfig.stages[2].name, 'Front-Half Race Car');
 assert.equal(buildStageConfig.stages[3].name, 'Full Race Car');
+assert.equal(performanceClassFromIndex(0), 'D');
+assert.equal(performanceClassFromIndex(449), 'D');
+assert.equal(performanceClassFromIndex(450), 'C');
+assert.equal(performanceClassFromIndex(600), 'B');
+assert.equal(performanceClassFromIndex(750), 'A');
+assert.equal(performanceClassFromIndex(900), 'S');
 let player = game.defaultPlayer();
 
 assert.equal(player.wallet.credits, 75000);
@@ -50,7 +57,9 @@ assert.equal(player.garage[0].visual.layered.layers.wheel.src, 'assets/art/cars/
 assert.equal(player.garage[0].visual.layered.layers.disk.src, 'assets/art/cars/layered/golf_gti/disk.webp');
 assert.equal(player.garage[0].visual.layered.layers.detail.src, 'assets/art/cars/layered/golf_gti/detail.webp');
 assert.equal(player.garage[0].visual.layered.anchors.frontBumperX, 280);
-assert.equal(player.garage[0].visual.layered.anchors.frontWheelCenter.y, 90);
+assert.equal(player.garage[0].visual.layered.anchors.frontWheelCenter.y, 95);
+assert.equal(player.garage[0].stockClass, 'D');
+assert.equal(player.garage[0].performanceClass, 'D');
 assert.ok(player.garage[0].performanceIndex > 0);
 assert.ok(player.garage[0].benchmarkEt > 0);
 assert.equal(player.selectedCarId, player.garage[0].carId);
@@ -79,12 +88,14 @@ player = game.installPart(player, intake1.inventoryId, player.selectedCarId);
 assert.equal(player.garage[0].derived.hp, 203);
 assert.equal(player.tutorial.step, 'first_race');
 assert.ok(player.garage[0].performanceIndex > 0);
+assert.equal(player.garage[0].performanceClass, 'D');
 
 const firstPreview = game.quickRacePreview(player);
 assert.equal(firstPreview.opponent.name, 'Test Mule');
 assert.ok(firstPreview.performanceIndex > 0);
 assert.ok(firstPreview.benchmarkEt > 0);
 assert.ok(firstPreview.opponent.performanceIndex > 0);
+assert.equal(firstPreview.opponent.performanceClass, 'D');
 assert.ok(firstPreview.opponent.visual?.layered?.layers?.body?.src);
 assert.equal('hp' in firstPreview.opponent, false);
 assert.equal('torque' in firstPreview.opponent, false);
@@ -103,7 +114,9 @@ assert.equal(firstStart.activeRace.race.opponent?.foul, false);
 assert.equal(firstStart.activeRace.race.won, true);
 assert.equal(firstStart.activeRace.race.opponent?.name, firstPreview.opponent.name);
 assert.equal(firstStart.activeRace.race.opponent?.carName, firstPreview.opponent.carName);
+assert.equal(firstStart.activeRace.race.playerPerformanceClass, 'D');
 assert.equal(firstStart.activeRace.race.opponent?.performanceIndex, firstPreview.opponent.performanceIndex);
+assert.equal(firstStart.activeRace.race.opponent?.performanceClass, firstPreview.opponent.performanceClass);
 assert.ok(firstStart.activeRace.race.playerVisual?.layered?.layers?.body?.src);
 assert.ok(firstStart.activeRace.race.opponent?.visual?.layered?.layers?.body?.src);
 assert.equal('hp' in firstStart.activeRace.race.opponent, false);
@@ -223,4 +236,4 @@ assert.ok(player.roguelike.activeRun);
 const step = game.roguelikeStep(player, 'safe');
 assert.ok(step.step && typeof step.step.won === 'boolean');
 
-console.log('V0.4F layered starters + PI + side-view race local game flow test passed.');
+console.log('V0.4G D-class starters + PI classes + side-view race local game flow test passed.');

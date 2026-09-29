@@ -82,7 +82,7 @@ Build: {$build}
 Storage mode: local
 Offline service worker: disabled in static development mode
 Race presentation: persistent two-phase start/finish with blocking real-time playback
-V0.4F.1: certified starter car visuals and direct Buy + Install parts flow
+V0.4G: 57-car PNG art roster, lower wheel stance and PI-based letter classes
 Do not edit docs/ by hand; run php scripts/build-static.php.
 ");
 

@@ -14,10 +14,10 @@ export async function renderShowroom(ctx) {
     title: "Showroom",
     eyebrow: "DEALER INVENTORY",
     hint: `${money(player?.wallet?.credits)} CR`,
-    trail: "V0.4F catalog reset",
+    trail: "V0.4G validated vehicle catalog",
     body: cars.length
       ? `<div class="classifieds-grid showroom-grid">${cars.map((car) => showroomCard(car, player)).join("")}</div>`
-      : `<div class="empty-state"><strong>The dealer floor is empty right now.</strong><span>V0.4F is launching from the validated layered-asset starter catalog. New dealer cars return as more of the 57-car art pack receives gameplay data.</span><div class="cluster" style="justify-content:center;margin-top:12px"><button class="button button--primary" data-go-classifieds>OPEN CLASSIFIEDS</button></div></div>`
+      : `<div class="empty-state"><strong>The dealer floor is empty right now.</strong><span>V0.4G keeps gameplay limited to spec-validated cars while the full 57-car PNG roster is prepared. New dealer cars return as more of the 57-car art pack receives gameplay data.</span><div class="cluster" style="justify-content:center;margin-top:12px"><button class="button button--primary" data-go-classifieds>OPEN CLASSIFIEDS</button></div></div>`
   });
 
   bindHome(ctx.screenRoot, ctx.router);
@@ -34,7 +34,7 @@ function showroomCard(car, player) {
       <div class="classified-card__visual">${renderVehicle(car, { view: "showroom" })}</div>
       <div class="classified-card__body">
         <div class="classified-card__title">
-          <div><strong>${escapeHtml(catalogName(car))}</strong><small>PI ${number(car.benchmark?.performanceIndex || 0)} • ${escapeHtml(car.base?.drivetrain || "")}</small></div>
+          <div><strong>${escapeHtml(catalogName(car))}</strong><small>${escapeHtml(car.class || "—")} CLASS • PI ${number(car.benchmark?.performanceIndex || 0)} • ${escapeHtml(car.base?.drivetrain || "")}</small></div>
           <span class="condition-badge is-excellent">NEW</span>
         </div>
         <div class="showroom-card__specs">
@@ -55,7 +55,7 @@ function confirmPurchase(ctx, stockId) {
     <div class="dialog-body classified-detail-dialog">
       <div class="classified-detail-dialog__hero">
         <div class="dialog-vehicle">${renderVehicle(car, { view: "showroom" })}</div>
-        <div><span class="section-label">SHOWROOM / NEW CAR</span><h2>${escapeHtml(catalogName(car))}</h2><p>PI ${number(car.benchmark?.performanceIndex || 0)} • ${escapeHtml(car.base?.drivetrain || "")}</p><strong class="classified-detail-price">${money(car.price)} cr</strong></div>
+        <div><span class="section-label">SHOWROOM / ${escapeHtml(car.class || "UNRATED")} CLASS</span><h2>${escapeHtml(catalogName(car))}</h2><p>PI ${number(car.benchmark?.performanceIndex || 0)} • ${escapeHtml(car.base?.drivetrain || "")}</p><strong class="classified-detail-price">${money(car.price)} cr</strong></div>
       </div>
       <div class="form-error" data-purchase-error></div>
       <div class="dialog-actions">
