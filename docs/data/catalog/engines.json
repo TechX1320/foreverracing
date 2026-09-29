@@ -2,64 +2,452 @@
   {
     "engineId": "honda_d16y7_16",
     "name": "Honda D16Y7",
-    "displacement": 1.6,
     "configuration": "I4",
     "sizeClass": 2,
-    "orientations": ["transverse"],
-    "aspiration": "NA"
+    "orientations": [
+      "transverse"
+    ],
+    "aspiration": "NA",
+    "manufacturer": "Honda",
+    "familyId": "honda_d_series",
+    "familyName": "D-Series",
+    "variantName": "D16Y7 1.6L",
+    "tags": [
+      "honda",
+      "i4",
+      "na",
+      "sohc"
+    ],
+    "displacementLiters": 1.6,
+    "compressionRatio": null,
+    "engineWeightLb": null,
+    "peakHp": 0,
+    "peakHpRpm": 0,
+    "peakTorque": 0,
+    "peakTorqueRpm": 0,
+    "redlineRpm": 0,
+    "revCutRpm": 0,
+    "curveType": "game-baseline",
+    "curveNotes": "Legacy swap-fitment definition. Output curve has not been authored in Engine Creator yet.",
+    "powerCurve": [],
+    "sourceStatus": "legacy-fitment"
   },
   {
     "engineId": "ford_modular_46_3v",
     "name": "Ford 4.6L Modular 3V",
-    "displacement": 4.6,
     "configuration": "V8",
     "sizeClass": 5,
-    "orientations": ["longitudinal"],
-    "aspiration": "NA"
+    "orientations": [
+      "longitudinal"
+    ],
+    "aspiration": "NA",
+    "manufacturer": "Ford",
+    "familyId": "ford_modular",
+    "familyName": "Modular",
+    "variantName": "4.6L 3V",
+    "tags": [
+      "ford",
+      "v8",
+      "na"
+    ],
+    "displacementLiters": 4.6,
+    "compressionRatio": null,
+    "engineWeightLb": null,
+    "peakHp": 0,
+    "peakHpRpm": 0,
+    "peakTorque": 0,
+    "peakTorqueRpm": 0,
+    "redlineRpm": 0,
+    "revCutRpm": 0,
+    "curveType": "game-baseline",
+    "curveNotes": "Legacy swap-fitment definition. Output curve has not been authored in Engine Creator yet.",
+    "powerCurve": [],
+    "sourceStatus": "legacy-fitment"
   },
   {
     "engineId": "nissan_vq35de_35",
     "name": "Nissan VQ35DE",
-    "displacement": 3.5,
     "configuration": "V6",
     "sizeClass": 4,
-    "orientations": ["longitudinal"],
-    "aspiration": "NA"
+    "orientations": [
+      "longitudinal"
+    ],
+    "aspiration": "NA",
+    "manufacturer": "Nissan",
+    "familyId": "nissan_vq",
+    "familyName": "VQ",
+    "variantName": "VQ35DE 3.5L",
+    "tags": [
+      "nissan",
+      "v6",
+      "na"
+    ],
+    "displacementLiters": 3.5,
+    "compressionRatio": null,
+    "engineWeightLb": null,
+    "peakHp": 0,
+    "peakHpRpm": 0,
+    "peakTorque": 0,
+    "peakTorqueRpm": 0,
+    "redlineRpm": 0,
+    "revCutRpm": 0,
+    "curveType": "game-baseline",
+    "curveNotes": "Legacy swap-fitment definition. Output curve has not been authored in Engine Creator yet.",
+    "powerCurve": [],
+    "sourceStatus": "legacy-fitment"
   },
   {
     "engineId": "fiat_multiair_14t",
     "name": "Fiat 1.4 MultiAir Turbo",
-    "displacement": 1.4,
     "configuration": "I4",
     "sizeClass": 2,
-    "orientations": ["transverse", "longitudinal"],
-    "aspiration": "Turbo"
+    "orientations": [
+      "transverse",
+      "longitudinal"
+    ],
+    "aspiration": "Turbo",
+    "manufacturer": "Fiat",
+    "familyId": "fiat_fire_multiair",
+    "familyName": "FIRE MultiAir",
+    "variantName": "1.4L Turbo",
+    "tags": [
+      "fiat",
+      "i4",
+      "turbo"
+    ],
+    "displacementLiters": 1.4,
+    "compressionRatio": null,
+    "engineWeightLb": null,
+    "peakHp": 0,
+    "peakHpRpm": 0,
+    "peakTorque": 0,
+    "peakTorqueRpm": 0,
+    "redlineRpm": 0,
+    "revCutRpm": 0,
+    "curveType": "game-baseline",
+    "curveNotes": "Legacy swap-fitment definition. Output curve has not been authored in Engine Creator yet.",
+    "powerCurve": [],
+    "sourceStatus": "legacy-fitment"
   },
   {
     "engineId": "vw_19_tdi",
     "name": "Volkswagen 1.9 TDI",
-    "displacement": 1.9,
     "configuration": "I4",
     "sizeClass": 2,
-    "orientations": ["transverse", "longitudinal"],
-    "aspiration": "Turbo Diesel"
+    "orientations": [
+      "transverse",
+      "longitudinal"
+    ],
+    "aspiration": "Turbo Diesel",
+    "manufacturer": "Volkswagen",
+    "familyId": "vw_ea180_19_tdi",
+    "familyName": "1.9 TDI",
+    "variantName": "1.9L TDI",
+    "tags": [
+      "volkswagen",
+      "i4",
+      "turbo_diesel"
+    ],
+    "displacementLiters": 1.9,
+    "compressionRatio": null,
+    "engineWeightLb": null,
+    "peakHp": 0,
+    "peakHpRpm": 0,
+    "peakTorque": 0,
+    "peakTorqueRpm": 0,
+    "redlineRpm": 0,
+    "revCutRpm": 0,
+    "curveType": "game-baseline",
+    "curveNotes": "Legacy swap-fitment definition. Output curve has not been authored in Engine Creator yet.",
+    "powerCurve": [],
+    "sourceStatus": "legacy-fitment"
   },
   {
     "engineId": "ford_ecoboost_23",
     "name": "Ford 2.3 EcoBoost",
-    "displacement": 2.3,
     "configuration": "I4",
     "sizeClass": 3,
-    "orientations": ["longitudinal"],
-    "aspiration": "Turbo"
+    "orientations": [
+      "longitudinal"
+    ],
+    "aspiration": "Turbo",
+    "manufacturer": "Ford",
+    "familyId": "ford_ecoboost",
+    "familyName": "EcoBoost",
+    "variantName": "2.3L EcoBoost",
+    "tags": [
+      "ford",
+      "i4",
+      "turbo"
+    ],
+    "displacementLiters": 2.3,
+    "compressionRatio": null,
+    "engineWeightLb": null,
+    "peakHp": 0,
+    "peakHpRpm": 0,
+    "peakTorque": 0,
+    "peakTorqueRpm": 0,
+    "redlineRpm": 0,
+    "revCutRpm": 0,
+    "curveType": "game-baseline",
+    "curveNotes": "Legacy swap-fitment definition. Output curve has not been authored in Engine Creator yet.",
+    "powerCurve": [],
+    "sourceStatus": "legacy-fitment"
   },
   {
     "engineId": "ford_coyote_50",
     "name": "Ford 5.0 Coyote",
-    "displacement": 5.0,
     "configuration": "V8",
     "sizeClass": 5,
-    "orientations": ["longitudinal"],
-    "aspiration": "NA"
+    "orientations": [
+      "longitudinal"
+    ],
+    "aspiration": "NA",
+    "manufacturer": "Ford",
+    "familyId": "ford_coyote",
+    "familyName": "Coyote",
+    "variantName": "5.0L",
+    "tags": [
+      "ford",
+      "v8",
+      "na"
+    ],
+    "displacementLiters": 5,
+    "compressionRatio": null,
+    "engineWeightLb": null,
+    "peakHp": 0,
+    "peakHpRpm": 0,
+    "peakTorque": 0,
+    "peakTorqueRpm": 0,
+    "redlineRpm": 0,
+    "revCutRpm": 0,
+    "curveType": "game-baseline",
+    "curveNotes": "Legacy swap-fitment definition. Output curve has not been authored in Engine Creator yet.",
+    "powerCurve": [],
+    "sourceStatus": "legacy-fitment"
+  },
+  {
+    "engineId": "vw_ea888_20t_mk6_gti_200",
+    "familyId": "vw_ea888_20t",
+    "manufacturer": "Volkswagen",
+    "familyName": "EA888 2.0 TSI",
+    "variantName": "Mk6 GTI 200 hp",
+    "name": "Volkswagen EA888 2.0 TSI — Mk6 GTI 200 hp",
+    "displacementLiters": 2,
+    "configuration": "I4",
+    "aspiration": "Turbo",
+    "compressionRatio": null,
+    "engineWeightLb": null,
+    "sizeClass": 3,
+    "orientations": [
+      "transverse"
+    ],
+    "peakHp": 200,
+    "peakHpRpm": 5100,
+    "peakTorque": 207,
+    "peakTorqueRpm": 1800,
+    "redlineRpm": 6000,
+    "revCutRpm": 6500,
+    "tags": [
+      "volkswagen",
+      "ea888",
+      "i4",
+      "turbo",
+      "street"
+    ],
+    "curveType": "game-baseline",
+    "curveNotes": "Forever Racing baseline reconstructed from the current playable Golf GTI peak anchors; refine with source-backed engine research later.",
+    "powerCurve": [
+      {
+        "rpm": 1000,
+        "torqueLbFt": 150
+      },
+      {
+        "rpm": 1500,
+        "torqueLbFt": 195
+      },
+      {
+        "rpm": 1800,
+        "torqueLbFt": 207
+      },
+      {
+        "rpm": 2500,
+        "torqueLbFt": 207
+      },
+      {
+        "rpm": 3500,
+        "torqueLbFt": 205
+      },
+      {
+        "rpm": 4500,
+        "torqueLbFt": 205
+      },
+      {
+        "rpm": 5100,
+        "torqueLbFt": 206
+      },
+      {
+        "rpm": 5500,
+        "torqueLbFt": 185
+      },
+      {
+        "rpm": 6000,
+        "torqueLbFt": 160
+      },
+      {
+        "rpm": 6500,
+        "torqueLbFt": 130
+      }
+    ],
+    "sourceStatus": "engine-tool"
+  },
+  {
+    "engineId": "mazda_13b_msp_renesis_238",
+    "familyId": "mazda_13b_msp",
+    "manufacturer": "Mazda",
+    "familyName": "13B-MSP Renesis",
+    "variantName": "238 hp",
+    "name": "Mazda 13B-MSP Renesis — 238 hp",
+    "displacementLiters": 1.3,
+    "configuration": "Rotary",
+    "aspiration": "Naturally Aspirated",
+    "compressionRatio": null,
+    "engineWeightLb": null,
+    "sizeClass": 2,
+    "orientations": [
+      "longitudinal"
+    ],
+    "peakHp": 238,
+    "peakHpRpm": 8500,
+    "peakTorque": 159,
+    "peakTorqueRpm": 5500,
+    "redlineRpm": 9000,
+    "revCutRpm": 9500,
+    "tags": [
+      "mazda",
+      "13b",
+      "rotary",
+      "na",
+      "high_rpm"
+    ],
+    "curveType": "game-baseline",
+    "curveNotes": "Forever Racing baseline reconstructed from the current playable RX-8 peak anchors; refine with source-backed engine research later.",
+    "powerCurve": [
+      {
+        "rpm": 1000,
+        "torqueLbFt": 95
+      },
+      {
+        "rpm": 2000,
+        "torqueLbFt": 110
+      },
+      {
+        "rpm": 3000,
+        "torqueLbFt": 125
+      },
+      {
+        "rpm": 4000,
+        "torqueLbFt": 145
+      },
+      {
+        "rpm": 5500,
+        "torqueLbFt": 159
+      },
+      {
+        "rpm": 6500,
+        "torqueLbFt": 157
+      },
+      {
+        "rpm": 7500,
+        "torqueLbFt": 154
+      },
+      {
+        "rpm": 8500,
+        "torqueLbFt": 147
+      },
+      {
+        "rpm": 9000,
+        "torqueLbFt": 133
+      },
+      {
+        "rpm": 9500,
+        "torqueLbFt": 100
+      }
+    ],
+    "sourceStatus": "engine-tool"
+  },
+  {
+    "engineId": "renault_clio_v6_29_255",
+    "familyId": "renault_clio_v6_29",
+    "manufacturer": "Renault",
+    "familyName": "Clio V6 2.9",
+    "variantName": "255 hp",
+    "name": "Renault Clio V6 2.9 — 255 hp",
+    "displacementLiters": 2.9,
+    "configuration": "V6",
+    "aspiration": "Naturally Aspirated",
+    "compressionRatio": null,
+    "engineWeightLb": null,
+    "sizeClass": 4,
+    "orientations": [
+      "transverse"
+    ],
+    "peakHp": 255,
+    "peakHpRpm": 7150,
+    "peakTorque": 221,
+    "peakTorqueRpm": 4650,
+    "redlineRpm": 7200,
+    "revCutRpm": 7700,
+    "tags": [
+      "renault",
+      "v6",
+      "na",
+      "mid_engine"
+    ],
+    "curveType": "game-baseline",
+    "curveNotes": "Forever Racing baseline reconstructed from the current playable Clio V6 peak anchors; refine with source-backed engine research later.",
+    "powerCurve": [
+      {
+        "rpm": 1000,
+        "torqueLbFt": 150
+      },
+      {
+        "rpm": 2000,
+        "torqueLbFt": 185
+      },
+      {
+        "rpm": 3000,
+        "torqueLbFt": 205
+      },
+      {
+        "rpm": 4000,
+        "torqueLbFt": 218
+      },
+      {
+        "rpm": 4650,
+        "torqueLbFt": 221
+      },
+      {
+        "rpm": 5500,
+        "torqueLbFt": 215
+      },
+      {
+        "rpm": 6500,
+        "torqueLbFt": 200
+      },
+      {
+        "rpm": 7150,
+        "torqueLbFt": 187.3
+      },
+      {
+        "rpm": 7200,
+        "torqueLbFt": 185
+      },
+      {
+        "rpm": 7700,
+        "torqueLbFt": 150
+      }
+    ],
+    "sourceStatus": "engine-tool"
   }
 ]
