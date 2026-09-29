@@ -22,7 +22,7 @@ export async function renderEngineStudio(ctx) {
   if (!response.ok) throw new Error(`Unable to load engine catalog (${response.status}).`);
 
   const baseEngines = await response.json();
-  const engines = mergeContentStudioEngines(Array.isArray(baseEngines) ? baseEngines : []);
+  let engines = mergeContentStudioEngines(Array.isArray(baseEngines) ? baseEngines : []);
   const root = ctx.screenRoot;
 
   root.innerHTML = pageShell({
@@ -238,6 +238,7 @@ export async function renderEngineStudio(ctx) {
     try {
       const engine = finalizeEngine(draft);
       saveContentStudioEngine(engine, { enabled });
+      engines = mergeContentStudioEngines(Array.isArray(baseEngines) ? baseEngines : []);
       draft = structuredClone(engine);
       loadedId = engine.engineId;
       ctx.toast(
