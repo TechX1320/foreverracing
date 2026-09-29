@@ -1438,21 +1438,8 @@ dialog.fr-dialog:has(.garage-inventory-dialog){
 
 /* V0.4H.1-H.2 wheel motion, groove alignment and grip smoke */
 .race-strip__surface{
-  background-size:auto,100% 128%;
+  background-size:auto,100% 133.333%;
   background-position:center,center top;
-}
-.race-strip--side::before{
-  content:"";
-  position:absolute;
-  left:0;
-  right:0;
-  top:50%;
-  z-index:2;
-  height:2px;
-  transform:translateY(-50%);
-  background:#e8e8e8a8;
-  box-shadow:0 0 3px #fff3;
-  pointer-events:none;
 }
 .race-side-lane--player .race-side-car{top:24px}
 .race-side-lane--opponent .race-side-car{bottom:8px}
