@@ -425,6 +425,8 @@ function finalizedCar(source, racingConfig, catalogCars) {
   car.starter = Boolean(car.starter);
   car.market.classifieds = Boolean(car.market.classifieds);
   car.market.showroom = Boolean(car.market.showroom);
+  car.visual.paintPalette = normalizePaintPalette(car.visual.paintPalette);
+  if (car.visual.paintColor) car.visual.paintColor = paintValue(car.visual.paintColor);
   car.engine.peakHp = Math.max(1, Number(car.base.hp || 1));
   car.engine.peakTorque = Math.max(1, Number(car.base.torque || 1));
   car.base.hp = Math.max(1, Number(car.base.hp || 1));
@@ -503,6 +505,7 @@ function createBlankCar(stockId) {
     pricing: { status: "content-studio" },
     visual: {
       paintColor: null,
+      paintPalette: [...DEFAULT_PAINT_PALETTE],
       renderMode: "layers",
       layered: {
         assetId: "",
@@ -535,6 +538,7 @@ function ensureDraftShape(car) {
   car.base ||= {};
   car.market ||= {};
   car.visual ||= {};
+  car.visual.paintPalette = normalizePaintPalette(car.visual.paintPalette);
   car.visual.layered ||= {};
   car.visual.layered.canvas ||= { width: 320, height: 130 };
   car.visual.layered.layers ||= {};
@@ -613,6 +617,77 @@ function setDraftValue(target, path, value) {
 function paintValue(value) {
   const text = String(value || "").trim();
   return /^#[0-9a-f]{6}$/i.test(text) ? text : "#ffffff";
+}
+
+function paintPaletteMarkup(palette) {
+  return normalizePaintPalette(palette).map((color, index) => `
+    <label class="studio-paint-swatch" title="Factory paint ${index + 1}">
+      <input type="color" value="${escapeHtml(color)}" data-paint-palette="${index}">
+      <span>${index + 1}</span>
+    </label>`).join("");
+}
+
+function normalizePaintPalette(palette) {
+  const source = Array.isArray(palette) ? palette : [];
+  return DEFAULT_PAINT_PALETTE.map((fallback, index) => {
+    const value = String(source[index] || "").trim();
+    return /^#[0-9a-f]{6}$/i.test(value) ? value.toLowerCase() : fallback;
+  });
+}
+
+function marketPlacementLabel(car) {
+  const classifieds = car?.market?.classifieds !== false;
+  const showroom = car?.market?.showroom === true;
+  if (classifieds && showroom) return "MARKET: CLASSIFIEDS + SHOWROOM";
+  if (showroom) return "MARKET: SHOWROOM ONLY";
+  if (classifieds) return "MARKET: CLASSIFIEDS ONLY";
+  return "MARKET: HIDDEN";
+}
+
+function previewAnchorRatio(car, point) {
+  if (point?.x == null || point?.y == null) return null;
+  const layered = car?.visual?.layered || {};
+  const canvasWidth = Math.max(1, Number(layered.canvas?.width || 1));
+  const canvasHeight = Math.max(1, Number(layered.canvas?.height || 1));
+  const px = Number(point.x);
+  const py = Number(point.y);
+  const editingLayers = String(car?.visual?.renderMode || "") === "layers" || Boolean(String(car?.visual?.paintColor || "").trim());
+
+  if (editingLayers) {
+    return { x: clampRatio(px / canvasWidth), y: clampRatio(py / canvasHeight) };
+  }
+
+  if (layered.certifiedSrc) {
+    const atlas = layered.certifiedAtlas;
+    const rootWidth = Math.max(1, Number(atlas?.cellWidth || canvasWidth));
+    const rootHeight = Math.max(1, Number(atlas?.cellHeight || canvasHeight));
+    const scale = Math.min(rootWidth / canvasWidth, rootHeight / canvasHeight);
+    const imageWidth = canvasWidth * scale;
+    const imageHeight = canvasHeight * scale;
+    const offsetX = (rootWidth - imageWidth) / 2;
+    const offsetY = (rootHeight - imageHeight) / 2;
+    return {
+      x: clampRatio((offsetX + (px * scale)) / rootWidth),
+      y: clampRatio((offsetY + (py * scale)) / rootHeight),
+    };
+  }
+
+  const atlas = layered.certifiedAtlas;
+  if (atlas?.src) {
+    const cellWidth = Math.max(1, Number(atlas.cellWidth || 360));
+    const cellHeight = Math.max(1, Number(atlas.cellHeight || 150));
+    const scale = Math.max(0.01, Number(atlas.scale || 1));
+    return {
+      x: clampRatio((Number(atlas.carX || 0) + (px * scale)) / cellWidth),
+      y: clampRatio((Number(atlas.carY || 0) + (py * scale)) / cellHeight),
+    };
+  }
+
+  return { x: clampRatio(px / canvasWidth), y: clampRatio(py / canvasHeight) };
+}
+
+function clampRatio(value) {
+  return Math.max(0, Math.min(1, Number.isFinite(Number(value)) ? Number(value) : 0));
 }
 
 function sourceName(src) {
