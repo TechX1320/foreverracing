@@ -819,7 +819,10 @@ export class LocalGameService {
     return {
       name,
       carName: String(spec.displayName || [spec.year, spec.make, spec.model].filter(Boolean).join(' ') || 'Opponent'),
-      visual: clone(spec.visual || {}),
+      visual: withPaintColor(
+        clone(spec.visual || {}),
+        paintPalette(spec).length ? paintPalette(spec)[Math.min(paintPalette(spec).length - 1, Math.floor(rng() * paintPalette(spec).length))] : firstPaintColor(spec)
+      ),
       performanceIndex: pi,
       performanceClass: performanceClassFromIndex(pi),
       drivetrain: String(base.drivetrain || '-'),
