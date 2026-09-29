@@ -70,10 +70,15 @@ export async function renderContentStudio(ctx) {
     host.innerHTML = `
       <div class="content-studio">
         <div class="content-studio__modules">
-          ${BUILD_MODULES.map((module) => `
-            <button type="button" class="content-studio__module ${module.id === "cars" ? "is-active" : ""}" ${module.id === "cars" ? "" : "disabled"}>
+          ${BUILD_MODULES.map((module) => {
+            const active = module.id === "cars";
+            const enabled = module.id === "cars" || module.id === "engines";
+            const routeAttr = module.id === "engines" ? ' data-open-engine-creator' : "";
+            return `
+            <button type="button" class="content-studio__module ${active ? "is-active" : ""}"${routeAttr} ${enabled ? "" : "disabled"}>
               <b>${module.label}</b><span>${module.state}</span>
-            </button>`).join("")}
+            </button>`;
+          }).join("")}
         </div>
 
         <div class="content-studio__toolbar">
@@ -132,7 +137,7 @@ export async function renderContentStudio(ctx) {
           <div class="content-studio__editor">
             ${identitySection(draft)}
             ${releaseSection(draft)}
-            ${physicsSection(draft)}
+            ${physicsSection(draft, engineCatalog)}
             ${artSection(draft)}
           </div>
         </div>
@@ -142,6 +147,8 @@ export async function renderContentStudio(ctx) {
   };
 
   const bindWorkspace = () => {
+    host.querySelector("[data-open-engine-creator]")?.addEventListener("click", () => ctx.router.navigate("engine-studio"));
+
     host.querySelector("[data-studio-load]")?.addEventListener("change", (event) => {
       const id = String(event.currentTarget.value || "");
       if (!id) return;
