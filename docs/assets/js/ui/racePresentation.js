@@ -170,17 +170,12 @@ function playbackMarkup(activeRace) {
 
       <div class="race-stage race-stage--side">
         <div class="race-strip race-strip--side" data-race-strip>
+          <div class="race-strip__surface" aria-hidden="true"></div>
+          <div class="race-strip__track-rail race-strip__track-rail--top" aria-hidden="true"></div>
+          <div class="race-strip__track-rail race-strip__track-rail--bottom" aria-hidden="true"></div>
           <div class="race-strip__timing-line race-strip__timing-line--start" data-race-start-line><span>START</span></div>
           <div class="race-strip__timing-line race-strip__timing-line--finish" data-race-finish-line><span>FINISH</span></div>
-          <div class="race-strip__tree race-strip__tree--side" data-race-tree aria-label="Drag racing starting tree">
-            <i class="tree-bulb tree-bulb--pre" data-tree-pre></i>
-            <i class="tree-bulb tree-bulb--stage" data-tree-stage></i>
-            <i class="tree-bulb tree-bulb--amber" data-tree-amber="1"></i>
-            <i class="tree-bulb tree-bulb--amber" data-tree-amber="2"></i>
-            <i class="tree-bulb tree-bulb--amber" data-tree-amber="3"></i>
-            <i class="tree-bulb tree-bulb--green" data-tree-green></i>
-            <i class="tree-bulb tree-bulb--red" data-tree-red></i>
-          </div>
+          <div class="race-strip__tree race-strip__tree--side" data-race-tree data-tree-state="idle" aria-label="Drag racing starting tree"></div>
 
           <div class="race-side-lane race-side-lane--player">
             <span class="race-side-lane__label">YOU • ${escapeHtml(race.carName || "Current Car")} • PI ${number(race.playerPerformanceIndex || 0)}</span>
@@ -207,40 +202,30 @@ function playbackMarkup(activeRace) {
 }
 
 function raceCar(car, attr) {
-  return `<div class="race-side-car" ${attr}>${renderVehicle(car, { view: "raceSide", className: "race-side-car__vehicle" })}</div>`;
+  return `<div class="race-side-car" ${attr}><span class="race-side-car__shadow" aria-hidden="true"></span>${renderVehicle(car, { view: "raceSide", className: "race-side-car__vehicle" })}</div>`;
 }
 
 function updateTree(tree, phase, now, startedAt, greenAt, playerStart, race) {
   const span = Math.max(1, greenAt - startedAt);
   const ratio = (now - startedAt) / span;
-  const pre = tree.querySelector("[data-tree-pre]");
-  const stage = tree.querySelector("[data-tree-stage]");
-  const amber1 = tree.querySelector('[data-tree-amber="1"]');
-  const amber2 = tree.querySelector('[data-tree-amber="2"]');
-  const amber3 = tree.querySelector('[data-tree-amber="3"]');
-  const green = tree.querySelector("[data-tree-green]");
-  const red = tree.querySelector("[data-tree-red]");
-
   const playerFoul = Boolean(race.player?.foul);
   const foulShown = playerFoul && now >= playerStart;
 
-  setLamp(pre, ratio >= 0.08);
-  setLamp(stage, ratio >= 0.28);
-  setLamp(amber1, ratio >= 0.52 && ratio < 0.68);
-  setLamp(amber2, ratio >= 0.68 && ratio < 0.84);
-  setLamp(amber3, ratio >= 0.84 && ratio < 1);
-  setLamp(green, now >= greenAt && !playerFoul);
-  setLamp(red, foulShown);
+  let state = "idle";
+  if (foulShown) state = "red";
+  else if (now >= greenAt) state = "green";
+  else if (ratio >= 0.84) state = "amber3";
+  else if (ratio >= 0.68) state = "amber2";
+  else if (ratio >= 0.52) state = "amber1";
+  else if (ratio >= 0.28) state = "stage";
+  else if (ratio >= 0.08) state = "pre";
+  if (tree) tree.dataset.treeState = state;
 
   if (foulShown) phase.textContent = "RED LIGHT";
   else if (now < startedAt + span * 0.28) phase.textContent = "PRE-STAGE";
   else if (now < startedAt + span * 0.52) phase.textContent = "STAGED";
   else if (now < greenAt) phase.textContent = "TREE";
   else phase.textContent = "GREEN";
-}
-
-function setLamp(node, on) {
-  node?.classList.toggle("is-on", Boolean(on));
 }
 
 export function raceVisualProgress(now, startAt, finishAt, visualFinishAt, exponent = 1.38) {
