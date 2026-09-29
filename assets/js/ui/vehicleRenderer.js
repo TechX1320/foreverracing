@@ -36,6 +36,23 @@ function renderLayeredVehicle(car, layered, { compact, view, className }) {
     `--ground-ratio:${geometry?.groundRatio ?? 1}`,
   ].join(";");
 
+  const certifiedSrc = String(layered.certifiedSrc || "").trim();
+  if (certifiedSrc) {
+    return `
+    <div class="vehicle-visual vehicle-visual--layered vehicle-visual--certified vehicle-visual--${escapeAttr(view)} ${compact ? "vehicle-visual--compact" : ""} ${escapeAttr(className)}"
+         role="img"
+         aria-label="${escapeAttr(car?.displayName || "Vehicle")} side profile"
+         data-layered-car
+         data-certified-car
+         data-asset-id="${escapeAttr(layered.assetId || "")}"
+         data-front-bumper-ratio="${geometry?.frontBumperRatio ?? 1}"
+         style="${escapeAttr(rootStyle)}">
+      <div class="layered-car layered-car--certified" aria-hidden="true">
+        <img data-vehicle-image class="layered-car__certified" src="${escapeAttr(versionedAsset(certifiedSrc))}" alt="">
+      </div>
+    </div>`;
+  }
+
   const paintColor = String(car?.visual?.paintColor || "").trim();
   const body = imageLayer(layers.body, "body", canvasWidth, canvasHeight, { x: 0, y: 0 });
   const detail = imageLayer(layers.detail, "detail", canvasWidth, canvasHeight, { x: 0, y: 0 });

@@ -1356,7 +1356,8 @@
         "wheelDropPx": 5,
         "wheelDropPercent": 0.1,
         "method": "transparent-wheel-opening-v2"
-      }
+      },
+      "certifiedSrc": "assets/art/cars/layered/golf_gti/certified.png"
     },
     {
       "assetId": "gumpert_apollo_sport",
@@ -2110,7 +2111,8 @@
         "wheelDropPx": 5,
         "wheelDropPercent": 0.1,
         "method": "transparent-wheel-opening-v2"
-      }
+      },
+      "certifiedSrc": "assets/art/cars/layered/mazda_rx8/certified.png"
     },
     {
       "assetId": "mclaren_f1",
@@ -2514,7 +2516,8 @@
         "wheelDropPx": 5,
         "wheelDropPercent": 0.1,
         "method": "transparent-wheel-opening-v2"
-      }
+      },
+      "certifiedSrc": "assets/art/cars/layered/renault_clio/certified.png"
     },
     {
       "assetId": "ssc_ultimate_aero_tt",

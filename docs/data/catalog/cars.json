@@ -77,7 +77,8 @@
           "frontBumperX": 280,
           "rearBumperX": 0,
           "groundY": 115
-        }
+        },
+        "certifiedSrc": "assets/art/cars/layered/golf_gti/certified.png"
       }
     },
     "catalogId": "golf_gti",
@@ -164,7 +165,8 @@
           "frontBumperX": 307,
           "rearBumperX": 3,
           "groundY": 115
-        }
+        },
+        "certifiedSrc": "assets/art/cars/layered/mazda_rx8/certified.png"
       }
     },
     "catalogId": "mazda_rx8",
@@ -251,7 +253,8 @@
           "frontBumperX": 248,
           "rearBumperX": 2,
           "groundY": 112
-        }
+        },
+        "certifiedSrc": "assets/art/cars/layered/renault_clio/certified.png"
       }
     },
     "catalogId": "renault_clio",

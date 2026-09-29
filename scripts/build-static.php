@@ -82,7 +82,7 @@ Build: {$build}
 Storage mode: local
 Offline service worker: disabled in static development mode
 Race presentation: persistent two-phase start/finish with blocking real-time playback
-V0.4F: layered side-profile cars, sideways bumper-timed racing, validated starter catalog and deterministic Performance Index
+V0.4F.1: certified starter car visuals and direct Buy + Install parts flow
 Do not edit docs/ by hand; run php scripts/build-static.php.
 ");
 

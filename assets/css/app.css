@@ -1221,6 +1221,8 @@ dialog.fr-dialog:has(.garage-inventory-dialog){
   mix-blend-mode:multiply;
 }
 .layered-car__detail{z-index:5}
+.layered-car--certified{display:flex;align-items:center;justify-content:center}
+.layered-car__certified{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none}
 .classified-card__visual .layered-car{width:min(92%,330px)}
 .dialog-vehicle .layered-car{width:min(100%,390px)}
 .garage-entry__visual .layered-car{width:min(94%,330px)}
@@ -1356,3 +1358,15 @@ dialog.fr-dialog:has(.garage-inventory-dialog){
   font-size:12px;
   line-height:1.45;
 }
+
+
+/* V0.4F.1 starter visual certification + direct install */
+.parts-shop-row__buy-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.car-art-debug-dialog{width:min(980px,calc(100vw - 30px))}
+.car-art-debug-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.car-art-debug-card{border:1px solid var(--border);background:#101214;padding:10px;min-width:0}
+.car-art-debug-card__visual{height:150px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--border);margin-bottom:8px}
+.car-art-debug-card strong,.car-art-debug-card small,.car-art-debug-card code{display:block}
+.car-art-debug-card small{color:var(--muted);margin-top:2px}
+.car-art-debug-card code{margin-top:7px;color:var(--faint);font-size:10px;white-space:normal}
+@media(max-width:760px){.car-art-debug-grid{grid-template-columns:1fr}.car-art-debug-card__visual{height:125px}}
