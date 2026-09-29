@@ -13,7 +13,7 @@ export function listContentStudioEngines() {
   }
 }
 
-export function mergeContentStudioEngines(baseEngines = []) {
+export function mergeContentStudioEngines(baseEngines = [], { includeDrafts = false } = {}) {
   const merged = new Map(
     (Array.isArray(baseEngines) ? baseEngines : [])
       .filter((engine) => engine?.engineId)
@@ -21,7 +21,7 @@ export function mergeContentStudioEngines(baseEngines = []) {
   );
 
   for (const row of listContentStudioEngines()) {
-    if (row.enabled === false || !row.engine?.engineId) continue;
+    if ((!includeDrafts && row.enabled === false) || !row.engine?.engineId) continue;
     merged.set(String(row.engine.engineId), structuredClone(row.engine));
   }
 
