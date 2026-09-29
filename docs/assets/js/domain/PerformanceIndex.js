@@ -18,6 +18,7 @@ export function benchmarkPerformance(context, racingConfig = {}, { passes = PERF
       torque: Number(context?.torque || 1),
       weight: Number(context?.weight || context?.weightLbs || 500),
       grip: Number(context?.grip || 1),
+      drivetrain: String(context?.drivetrain || ""),
       level: 100,
       allowFoul: false,
       reactionOffset: 0,
