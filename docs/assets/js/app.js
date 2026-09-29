@@ -192,7 +192,7 @@ function showWelcomeTutorial() {
     <div class="dialog-body ftue-welcome">
       <span class="section-label">FIRST TIME IN FOREVER RACING</span>
       <h2>Start at the bottom. Build your way up.</h2>
-      <p>Your first goal is simple: find a cheap D Class car, make one upgrade, and take it down the 1/4 mile.</p>
+      <p>Your first goal is simple: find a starter car, make one upgrade, and take it down the 1/4 mile.</p>
       <div class="ftue-points">
         <div><b>1</b><span><strong>Find a beater</strong>Your first car comes from the Classifieds, not a new-car showroom.</span></div>
         <div><b>2</b><span><strong>Make it yours</strong>Buy and install one guided Intake upgrade.</span></div>
@@ -278,7 +278,7 @@ function renderHomeOverview(player) {
 
   if (visual) visual.innerHTML = current ? renderVehicle(current, { stage: Number(current.buildStage || 1), view: 'showroom' }) : '<div class="no-car-visual">NO CURRENT CAR</div>';
   if (name) name.textContent = current ? carLabel(current) : 'No current car';
-  if (factory) factory.textContent = current ? current.displayName : 'Find a D Class starter in Classifieds to begin your first build.';
+  if (factory) factory.textContent = current ? current.displayName : 'Find a starter in Classifieds to begin your first build.';
   if (stats) stats.innerHTML = current
     ? `<span><b>${current.derived?.hp || 0}</b> HP</span><span><b>${current.derived?.torque || 0}</b> LB-FT</span><span><b>${current.derived?.weight || 0}</b> LB</span><span><b>${current.base?.drivetrain || '-'}</b> DRIVE</span>`
     : '<span><b>-</b> HP</span><span><b>-</b> LB-FT</span><span><b>-</b> LB</span><span><b>-</b> DRIVE</span>';
@@ -348,7 +348,7 @@ function applyNavigationVisibility(player) {
 function objectiveInfo(step) {
   const map = {
     welcome: { code: 'STEP 1/6', title: 'Start the tutorial', copy: 'A short introduction will explain the core loop.', action: '', route: '' },
-    buy_first_car: { code: 'STEP 2/6', title: 'Choose your first car', copy: 'Pick a highlighted D Class starter from the Classifieds.', action: 'OPEN CLASSIFIEDS', route: 'usedlot' },
+    buy_first_car: { code: 'STEP 2/6', title: 'Choose your first car', copy: 'Pick one of the highlighted starter cars from the Classifieds.', action: 'OPEN CLASSIFIEDS', route: 'usedlot' },
     visit_garage: { code: 'STEP 3/6', title: 'Read your car', copy: 'Visit the Garage and learn the car stats and Build Type.', action: 'OPEN GARAGE', route: 'garage' },
     buy_first_upgrade: { code: 'STEP 4/6', title: 'Buy the Intake', copy: 'The tutorial locks you to Intake. Buy the Stage 1 Intake to continue.', action: 'OPEN PARTS', route: 'parts' },
     install_first_upgrade: { code: 'STEP 5/6', title: 'Install the Intake', copy: 'Open Garage Inventory and install the Intake you just bought.', action: 'OPEN GARAGE', route: 'garage' },
