@@ -174,6 +174,21 @@ export async function renderContentStudio(ctx) {
       refreshLivePreview();
     });
 
+    host.querySelectorAll("[data-paint-palette]").forEach((input) => {
+      input.addEventListener("input", () => {
+        const index = Number(input.dataset.paintPalette || 0);
+        draft.visual.paintPalette ||= [...DEFAULT_PAINT_PALETTE];
+        draft.visual.paintPalette[index] = paintValue(input.value);
+        draft.visual.paintColor = draft.visual.paintPalette[index];
+        draft.visual.renderMode = "layers";
+        const previewColor = host.querySelector("[data-studio-paint]");
+        const text = host.querySelector('[data-studio-field="visual.paintColor"]');
+        if (previewColor) previewColor.value = draft.visual.paintColor;
+        if (text) text.value = draft.visual.paintColor;
+        refreshLivePreview();
+      });
+    });
+
     host.querySelectorAll("[data-layer-upload]").forEach((input) => {
       input.addEventListener("change", async () => {
         const file = input.files?.[0];
@@ -205,8 +220,8 @@ export async function renderContentStudio(ctx) {
       });
     });
 
-    host.querySelector("[data-save-car]")?.addEventListener("click", () => saveDraft(false));
-    host.querySelector("[data-save-reload]")?.addEventListener("click", () => saveDraft(true));
+    host.querySelector("[data-save-car]")?.addEventListener("click", () => saveDraft(false, false));
+    host.querySelector("[data-save-reload]")?.addEventListener("click", () => saveDraft(true, true));
     host.querySelector("[data-export-car]")?.addEventListener("click", () => {
       try {
         const car = finalizedCar(draft, racingConfig, catalogCars);
@@ -249,13 +264,19 @@ export async function renderContentStudio(ctx) {
     if (trap) trap.textContent = `${score.quarterMileTrap.toFixed(1)} mph`;
   };
 
-  const saveDraft = (reload) => {
+  const saveDraft = (reload, enabled) => {
     try {
       const car = finalizedCar(draft, racingConfig, catalogCars);
-      saveContentStudioCar(car, { enabled: true });
+      saveContentStudioCar(car, { enabled });
       draft = structuredClone(car);
       lastLoadedId = car.catalogId;
-      ctx.toast("Car saved", reload ? "Reloading with the local catalog override enabled." : "Reload when you want the game catalog to use this version.");
+      if (enabled) localStorage.removeItem(USED_LOT_KEY);
+      ctx.toast(
+        enabled ? "Car activated locally" : "Draft saved",
+        enabled
+          ? "Reloading with the car in the local game catalog. Classifieds will regenerate from the updated market pool."
+          : "The car stays in Content Studio and will not enter gameplay until activated."
+      );
       if (reload) {
         setTimeout(() => location.reload(), 120);
       } else {
