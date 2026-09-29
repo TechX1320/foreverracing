@@ -13,6 +13,8 @@ export function vehicleGeometry(car) {
   return {
     canvasWidth: width,
     canvasHeight: Math.max(1, Number(layered.canvas.height || 1)),
+    frontWheelRatio: clamp01(Number(layered.anchors.frontWheelCenter?.x ?? width) / width),
+    rearWheelRatio: clamp01(Number(layered.anchors.rearWheelCenter?.x ?? 0) / width),
     frontBumperRatio: clamp01(Number(layered.anchors.frontBumperX ?? width) / width),
     rearBumperRatio: clamp01(Number(layered.anchors.rearBumperX ?? 0) / width),
     groundRatio: clamp01(Number(layered.anchors.groundY ?? layered.canvas.height) / Math.max(1, Number(layered.canvas.height || 1))),
