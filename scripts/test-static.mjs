@@ -73,7 +73,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.5.0-a.2"')) throw new Error('Static index is missing the V0.5A.2 build marker.');
+if (!html.includes('data-build="0.5.0-a.3"')) throw new Error('Static index is missing the V0.5A.3 build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -397,5 +397,15 @@ if (!carCatalog.every((car) => Array.isArray(car.visual?.paintPalette) && car.vi
   throw new Error('V0.5A.2 playable cars must have five factory paint colors.');
 }
 console.log('V0.5A.2 Content Studio market/paint polish checks passed.');
+
+if (!contentStudioSource.includes('X OFFSET') ||
+    !contentStudioSource.includes('Y OFFSET') ||
+    !contentStudioSource.includes('Default centers: rear') ||
+    !contentStudioSource.includes('layerPositionHint') ||
+    contentStudioSource.includes('content-studio__anchor-key') ||
+    !cssV04b.includes('V0.5A.3 coordinate polish')) {
+  throw new Error('V0.5A.3 Content Studio coordinate polish is incomplete.');
+}
+console.log('V0.5A.3 Content Studio coordinate polish checks passed.');
 
 
