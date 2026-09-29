@@ -13,6 +13,7 @@ import { renderQuickRace } from './screens/quickRace.js';
 import { renderRoguelike } from './screens/roguelike.js';
 import { renderEvents, renderTeams, renderLeaderboards, renderMultiplayer } from './screens/placeholders.js';
 import { loadSettings, renderSettings } from './screens/settings.js';
+import { renderContentStudio } from './screens/contentStudio.js';
 
 const storage = createStorageProvider();
 const store = new Store();
@@ -32,13 +33,13 @@ document.addEventListener('error', (event) => {
 }, true);
 
 const TUTORIAL_ROUTES = {
-  welcome: ['home', 'settings'],
-  buy_first_car: ['home', 'usedlot', 'settings'],
-  visit_garage: ['home', 'garage', 'settings'],
-  buy_first_upgrade: ['home', 'garage', 'parts', 'settings'],
-  install_first_upgrade: ['home', 'garage', 'settings'],
-  build_stages: ['home', 'quick-race', 'settings'],
-  first_race: ['home', 'quick-race', 'settings']
+  welcome: ['home', 'settings', 'content-studio'],
+  buy_first_car: ['home', 'usedlot', 'settings', 'content-studio'],
+  visit_garage: ['home', 'garage', 'settings', 'content-studio'],
+  buy_first_upgrade: ['home', 'garage', 'parts', 'settings', 'content-studio'],
+  install_first_upgrade: ['home', 'garage', 'settings', 'content-studio'],
+  build_stages: ['home', 'quick-race', 'settings', 'content-studio'],
+  first_race: ['home', 'quick-race', 'settings', 'content-studio']
 };
 
 const ROUTE_UNLOCK_LEVELS = {
@@ -53,7 +54,8 @@ const ROUTE_UNLOCK_LEVELS = {
   teams: 5,
   events: 7,
   multiplayer: 10,
-  settings: 1
+  settings: 1,
+  'content-studio': 1
 };
 
 const ctx = { storage, store, screenRoot, router: null, toast };
@@ -72,6 +74,7 @@ router
   .register('teams', feature(renderTeams))
   .register('leaderboards', feature(renderLeaderboards))
   .register('multiplayer', feature(renderMultiplayer))
+  .register('content-studio', feature(renderContentStudio))
   .register('settings', feature(renderSettings));
 
 store.onPlayer((player) => {
@@ -341,8 +344,13 @@ function applyTutorialNavigation(player) {
 
 function applyNavigationVisibility(player) {
   const showroom = document.querySelector('.nav-rail button[data-nav="showroom"]');
-  if (!showroom) return;
-  showroom.hidden = player?.tutorial?.status === 'active';
+  if (showroom) showroom.hidden = player?.tutorial?.status === 'active';
+
+  const studio = document.querySelector('.nav-rail button[data-nav="content-studio"]');
+  if (studio) {
+    const username = String(player?.user?.username || "").toLowerCase();
+    studio.hidden = storage.mode !== 'local' && username !== 'admin';
+  }
 }
 
 function objectiveInfo(step) {
