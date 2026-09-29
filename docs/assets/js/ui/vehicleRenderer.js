@@ -1,9 +1,9 @@
-export function renderVehicle(car, { stage = null, compact = false, view = "sideProfile", className = "", animatedWheels = false } = {}) {
+export function renderVehicle(car, { stage = null, compact = false, view = "sideProfile", className = "", animatedWheels = false, forceLayers = false } = {}) {
   const layered = car?.visual?.layered;
   if (!layered?.canvas || !layered?.layers || !layered?.anchors) {
     return renderMissingArt(car, { compact, view });
   }
-  return renderLayeredVehicle(car, layered, { stage, compact, view, className, animatedWheels });
+  return renderLayeredVehicle(car, layered, { stage, compact, view, className, animatedWheels, forceLayers });
 }
 
 export function vehicleGeometry(car) {
@@ -39,7 +39,7 @@ export function vehicleGeometry(car) {
   };
 }
 
-function renderLayeredVehicle(car, layered, { compact, view, className, animatedWheels }) {
+function renderLayeredVehicle(car, layered, { compact, view, className, animatedWheels, forceLayers }) {
   const canvasWidth = Math.max(1, Number(layered.canvas.width || 1));
   const canvasHeight = Math.max(1, Number(layered.canvas.height || 1));
   const layers = animatedWheels && layered.raceLayers ? layered.raceLayers : (layered.layers || {});
@@ -57,7 +57,7 @@ function renderLayeredVehicle(car, layered, { compact, view, className, animated
   ].join(";");
 
   const certifiedSrc = String(layered.certifiedSrc || "").trim();
-  if (!animatedWheels && certifiedSrc) {
+  if (!animatedWheels && !forceLayers && certifiedSrc) {
     return `
     <div class="vehicle-visual vehicle-visual--layered vehicle-visual--certified vehicle-visual--${escapeAttr(view)} ${compact ? "vehicle-visual--compact" : ""} ${escapeAttr(className)}"
          role="img"
@@ -74,7 +74,7 @@ function renderLayeredVehicle(car, layered, { compact, view, className, animated
   }
 
   const atlas = layered.certifiedAtlas;
-  if (!animatedWheels && atlas?.src) {
+  if (!animatedWheels && !forceLayers && atlas?.src) {
     const columns = Math.max(1, Number(atlas.columns || 1));
     const rows = Math.max(1, Number(atlas.rows || 1));
     const col = Math.max(0, Number(atlas.col || 0));
@@ -107,7 +107,7 @@ function renderLayeredVehicle(car, layered, { compact, view, className, animated
   const frontWheel = centeredLayer(layers.wheel, "wheel front-wheel", front, canvasWidth, canvasHeight);
   const frontDisk = centeredLayer(layers.disk, "disk front-disk", front, canvasWidth, canvasHeight);
   const paint = paintColor && layers.body?.src
-    ? `<span class="layered-car__paint" style="${escapeAttr(paintStyle(layers.body.src, paintColor))}" aria-hidden="true"></span>`
+    ? paintLayer(layers.body, paintColor, canvasWidth, canvasHeight)
     : "";
 
   const rearSmoke = animatedWheels
@@ -151,11 +151,14 @@ function imageLayer(layer, className, canvasWidth, canvasHeight, origin) {
   if (!layer?.src) return "";
   const width = Math.max(1, Number(layer.width || canvasWidth));
   const height = Math.max(1, Number(layer.height || canvasHeight));
-  const left = (Number(origin.x || 0) / canvasWidth) * 100;
-  const top = (Number(origin.y || 0) / canvasHeight) * 100;
+  const x = Number(origin.x || 0) + Number(layer.x || 0);
+  const y = Number(origin.y || 0) + Number(layer.y || 0);
+  const left = (x / canvasWidth) * 100;
+  const top = (y / canvasHeight) * 100;
   const widthPct = (width / canvasWidth) * 100;
   const heightPct = (height / canvasHeight) * 100;
-  return `<img data-vehicle-image class="layered-car__layer layered-car__${escapeAttr(className)}" src="${escapeAttr(versionedAsset(layer.src))}" alt="" style="left:${left}%;top:${top}%;width:${widthPct}%;height:${heightPct}%">`;
+  const z = Number.isFinite(Number(layer.z)) ? `;z-index:${Number(layer.z)}` : "";
+  return `<img data-vehicle-image class="layered-car__layer layered-car__${escapeAttr(className)}" src="${escapeAttr(versionedAsset(layer.src))}" alt="" style="left:${left}%;top:${top}%;width:${widthPct}%;height:${heightPct}%${z}">`;
 }
 
 function centeredLayer(layer, className, center, canvasWidth, canvasHeight) {
@@ -168,9 +171,23 @@ function centeredLayer(layer, className, center, canvasWidth, canvasHeight) {
   });
 }
 
-function paintStyle(bodySrc, color) {
-  const src = versionedAsset(bodySrc);
-  return [
+function paintLayer(layer, color, canvasWidth, canvasHeight) {
+  const width = Math.max(1, Number(layer.width || canvasWidth));
+  const height = Math.max(1, Number(layer.height || canvasHeight));
+  const x = Number(layer.x || 0);
+  const y = Number(layer.y || 0);
+  const left = (x / canvasWidth) * 100;
+  const top = (y / canvasHeight) * 100;
+  const widthPct = (width / canvasWidth) * 100;
+  const heightPct = (height / canvasHeight) * 100;
+  const z = Number.isFinite(Number(layer.z)) ? Number(layer.z) + 1 : 4;
+  const src = versionedAsset(layer.src);
+  const style = [
+    `left:${left}%`,
+    `top:${top}%`,
+    `width:${widthPct}%`,
+    `height:${heightPct}%`,
+    `z-index:${z}`,
     `background:${color}`,
     `-webkit-mask-image:url("${src}")`,
     `mask-image:url("${src}")`,
@@ -179,6 +196,7 @@ function paintStyle(bodySrc, color) {
     "-webkit-mask-repeat:no-repeat",
     "mask-repeat:no-repeat",
   ].join(";");
+  return `<span class="layered-car__paint" style="${escapeAttr(style)}" aria-hidden="true"></span>`;
 }
 
 function renderMissingArt(car, { compact = false, view = "sideProfile" } = {}) {
@@ -189,10 +207,12 @@ function renderMissingArt(car, { compact = false, view = "sideProfile" } = {}) {
 }
 
 function versionedAsset(path) {
+  const value = String(path || "");
+  if (!value || value.startsWith("data:") || value.startsWith("blob:")) return value;
   const build = String(document.documentElement?.dataset?.build || "").trim();
-  if (!build || !path) return path;
-  const separator = path.includes("?") ? "&" : "?";
-  return `${path}${separator}v=${encodeURIComponent(build)}`;
+  if (!build) return value;
+  const separator = value.includes("?") ? "&" : "?";
+  return `${value}${separator}v=${encodeURIComponent(build)}`;
 }
 
 function clamp01(value) {
