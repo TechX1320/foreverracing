@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.4.0-g playable direction
+## V0.4.0-h.0 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,14 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.4H.0 race visual pass
+
+- Quick Race now uses the purchased road texture instead of the placeholder grid strip.
+- Purchased track-rail, start/finish and Christmas-tree artwork are used during race playback.
+- Each car gets a purchased under-car shadow that travels with it.
+- Existing race geometry is unchanged: front wheel stages the car, front bumper stops timing, then the car visually flies through the traps.
+- Wheel rotation and smoke from grip loss are intentionally the next race-animation passes.
 
 ### V0.4G roster art and performance classes
 

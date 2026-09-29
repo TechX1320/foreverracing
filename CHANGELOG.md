@@ -1,5 +1,15 @@
 # Changelog
 
+## V0.4.0-h.0 — purchased drag-strip visual pass
+
+- Replaced the placeholder Quick Race strip with the purchased road texture.
+- Added purchased track-rail artwork at the strip edges.
+- Replaced generated start/finish timing markers with purchased timing-line artwork.
+- Replaced the CSS bulb tree with the purchased Christmas-tree sprite sheet and preserved pre-stage / stage / amber / green / red timing states.
+- Added purchased under-car shadows that travel with each car.
+- Preserved front-wheel staging, front-bumper finish timing and post-finish visual fly-through.
+- Wheel rotation and grip-loss smoke remain the next visual passes.
+
 ## V0.4.0-g — 57-car art roster and PI classes
 
 - Imported five certified PNG atlas pages covering all 57 purchased vehicle assets.

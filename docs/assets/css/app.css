@@ -1232,7 +1232,7 @@ dialog.fr-dialog:has(.garage-inventory-dialog){
 .vehicle-visual--raceSide .layered-car{width:100%;height:auto}
 .vehicle-visual--raceSide{height:auto}
 
-/* The old vertical/top-down strip is fully superseded in V0.4F. */
+/* V0.4H.0 purchased drag-strip visual pass */
 .race-playback-dialog--side{width:min(1080px,calc(100vw - 28px))}
 .race-playback--side{width:100%}
 .race-stage--side{padding:8px 10px 10px}
@@ -1241,46 +1241,71 @@ dialog.fr-dialog:has(.garage-inventory-dialog){
   height:300px;
   overflow:hidden;
   border:1px solid #343a3f;
-  background:
-    linear-gradient(180deg,#171a1d 0 49.5%,#0e1012 49.5% 50.5%,#171a1d 50.5% 100%);
+  background:#171a1d;
+  isolation:isolate;
 }
-.race-strip--side::before{
-  content:"";
+.race-strip__surface{
   position:absolute;
   inset:0;
+  z-index:0;
   background:
-    repeating-linear-gradient(90deg,transparent 0 46px,#ffffff08 46px 47px),
-    linear-gradient(180deg,transparent 0 12%,#ffffff08 12% 12.5%,transparent 12.5% 87.5%,#ffffff08 87.5% 88%,transparent 88%);
+    linear-gradient(90deg,#050607b8 0 3%,transparent 10% 90%,#050607b8 97% 100%),
+    url("../art/race/road.jpg") center/100% 100% no-repeat;
+  filter:saturate(.82) brightness(.92);
+}
+.race-strip__track-rail{
+  position:absolute;
+  left:0;
+  right:0;
+  z-index:2;
+  height:16px;
+  background:url("../art/race/race_track.png") center/100% 100% no-repeat;
+  opacity:.9;
   pointer-events:none;
 }
+.race-strip__track-rail--top{top:0}
+.race-strip__track-rail--bottom{bottom:0;transform:scaleY(-1)}
 .race-strip--side::after{
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(90deg,#090b0dcc,transparent 12%,transparent 88%,#090b0dcc);
+  z-index:1;
+  background:
+    repeating-linear-gradient(90deg,transparent 0 55px,#ffffff07 55px 56px),
+    linear-gradient(90deg,#090b0db5,transparent 13%,transparent 87%,#090b0db5);
   pointer-events:none;
 }
 .race-strip__timing-line{
   position:absolute;
   top:0;
   bottom:0;
-  z-index:3;
-  width:8px;
-  border-inline:2px solid #eee;
-  background:repeating-linear-gradient(180deg,#eee 0 10px,#222 10px 20px);
+  z-index:4;
+  width:18px;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:100% 100%;
+  filter:drop-shadow(0 0 2px #000);
 }
-.race-strip__timing-line--start{left:8%}
-.race-strip__timing-line--finish{left:88%}
+.race-strip__timing-line--start{
+  left:8%;
+  background-image:url("../art/race/start.png");
+}
+.race-strip__timing-line--finish{
+  left:88%;
+  width:22px;
+  background-image:url("../art/race/finish.png");
+}
 .race-strip__timing-line span{
   position:absolute;
   top:8px;
-  left:12px;
+  left:calc(100% + 5px);
   padding:2px 5px;
-  background:#090b0d;
-  color:#e6e9eb;
+  background:#090b0ddd;
+  color:#f3f5f6;
   font-size:10px;
   font-weight:950;
   letter-spacing:.1em;
+  white-space:nowrap;
 }
 .race-side-lane{
   position:absolute;
@@ -1295,7 +1320,9 @@ dialog.fr-dialog:has(.garage-inventory-dialog){
   position:absolute;
   left:10px;
   z-index:9;
-  color:#d9dde0;
+  padding:2px 5px;
+  background:#090b0da8;
+  color:#f1f3f4;
   font-size:11px;
   font-weight:900;
   letter-spacing:.04em;
@@ -1309,20 +1336,46 @@ dialog.fr-dialog:has(.garage-inventory-dialog){
   z-index:8;
   width:190px;
   will-change:left;
-  filter:drop-shadow(0 6px 5px #000a);
 }
+.race-side-car__shadow{
+  position:absolute;
+  z-index:0;
+  left:7%;
+  right:7%;
+  bottom:-2px;
+  height:34px;
+  background:url("../art/race/shadow.png") center/100% 100% no-repeat;
+  opacity:.72;
+  pointer-events:none;
+}
+.race-side-car>.vehicle-visual{position:relative;z-index:1}
 .race-side-lane--player .race-side-car{top:34px}
 .race-side-lane--opponent .race-side-car{bottom:30px}
 .race-side-car .layered-car{width:190px}
 .race-strip__tree--side{
+  position:absolute;
   left:8%;
-  bottom:auto;
   top:50%;
-  transform:translate(-50%,-50%);
   z-index:12;
+  width:52px;
+  height:113px;
+  transform:translate(-50%,-50%);
+  background-image:url("../art/race/xmas.png");
+  background-repeat:no-repeat;
+  background-size:400% 200%;
+  background-position:0% 0%;
+  filter:drop-shadow(0 4px 5px #000d);
 }
+.race-strip__tree--side[data-tree-state="idle"]{background-position:0% 0%}
+.race-strip__tree--side[data-tree-state="pre"]{background-position:33.333% 0%}
+.race-strip__tree--side[data-tree-state="stage"]{background-position:66.666% 0%}
+.race-strip__tree--side[data-tree-state="amber1"]{background-position:100% 0%}
+.race-strip__tree--side[data-tree-state="amber2"]{background-position:0% 100%}
+.race-strip__tree--side[data-tree-state="amber3"]{background-position:33.333% 100%}
+.race-strip__tree--side[data-tree-state="red"]{background-position:66.666% 100%}
+.race-strip__tree--side[data-tree-state="green"]{background-position:100% 100%}
 .race-playback.is-finished .race-strip--side{border-color:#646e74}
-.race-playback.has-results .race-strip--side{opacity:.86}
+.race-playback.has-results .race-strip--side{opacity:.9}
 .race-progress-board i{transition:none}
 .race-preview-driver__stats--pi{grid-template-columns:repeat(3,minmax(0,1fr))}
 .race-preview-driver__stats .pi-value{color:var(--accent-2);font-size:16px}
@@ -1343,10 +1396,12 @@ dialog.fr-dialog:has(.garage-inventory-dialog){
   .race-playback-dialog--side{width:calc(100vw - 8px)}
   .race-strip--side{height:250px}
   .race-side-car,.race-side-car .layered-car{width:145px}
+  .race-side-car__shadow{height:27px}
   .race-side-lane--player .race-side-car{top:40px}
   .race-side-lane--opponent .race-side-car{bottom:34px}
   .race-side-lane__label{font-size:9px}
   .race-strip__timing-line span{font-size:8px}
+  .race-strip__tree--side{width:44px;height:96px}
 }
 
 
