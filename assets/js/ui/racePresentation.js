@@ -285,7 +285,8 @@ function updateWheelMotion(car, run, drivetrain, progress, now, startAt, distanc
   if (!car) return;
   const travelFeet = Math.max(0, Number(distanceFeet || 1320)) * Math.max(0, Number(progress || 0));
   const rollingDegrees = ((travelFeet / 6.6) * 360) % 360;
-  const elapsed = Math.max(0, (now - startAt) / Math.max(1, 1000 * timeScale));
+  const rawElapsed = (now - startAt) / Math.max(1, 1000 * timeScale);
+  const elapsed = Math.max(0, rawElapsed);
   const slip = Math.max(0, Math.min(1, Number(run?.traction?.wheelSlip || 0)));
   const slipWindow = Math.max(0, 1 - (elapsed / Math.max(0.45, 0.65 + (slip * 1.7))));
   const angle = (rollingDegrees + (elapsed * 900 * slip * slipWindow)) % 360;
@@ -294,7 +295,7 @@ function updateWheelMotion(car, run, drivetrain, progress, now, startAt, distanc
     node.style.transform = `rotate(${angle.toFixed(2)}deg)`;
   });
 
-  updateTireSmoke(car, run, drivetrain, elapsed, progress);
+  updateTireSmoke(car, run, drivetrain, rawElapsed, progress);
 }
 
 function updateTireSmoke(car, run, drivetrain, elapsed, progress) {
