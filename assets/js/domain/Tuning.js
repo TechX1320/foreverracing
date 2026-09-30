@@ -69,6 +69,60 @@ export function defaultTuneProfile(car, hardware = {}) {
   };
 }
 
+export function baseMapProfile(car, untunedStats, hardware = {}) {
+  const fingerprint = tuningFingerprint(car);
+  const base = {
+    hp: Math.max(1, Number(untunedStats?.hp || car?.untunedDerived?.hp || car?.derived?.hp || car?.base?.hp || 1)),
+    torque: Math.max(1, Number(untunedStats?.torque || car?.untunedDerived?.torque || car?.derived?.torque || car?.base?.torque || 1)),
+    weight: Math.max(500, Number(untunedStats?.weight || car?.untunedDerived?.weight || car?.derived?.weight || car?.base?.weight || 500)),
+    grip: Math.max(0.5, Number(untunedStats?.grip || car?.untunedDerived?.grip || car?.derived?.grip || car?.base?.grip || 1)),
+    drivetrain: String(untunedStats?.drivetrain || car?.base?.drivetrain || ""),
+  };
+  const seed = defaultTuneProfile(car, hardware);
+  if (hardware.boosted) {
+    seed.boostPsi = round(clamp(
+      Math.min(Number(hardware.baseBoostPsi || 0) - 1.5, Number(hardware.safeBoostPsi || 0) - 2),
+      Number(hardware.minBoostPsi || 0),
+      Number(hardware.maxBoostPsi || 0)
+    ), 1);
+    seed.boostByGear = [70, 80, 90, 100, 100, 100];
+  }
+
+  const tuneTargets = (boostPsi) => {
+    const boostDelta = hardware.boosted ? boostPsi - Number(hardware.baseBoostPsi || 0) : 0;
+    const fuelTarget = clamp(1.2 + Math.max(0, boostDelta) * 0.34 + fingerprint.fuelBias, -2, 10);
+    const timingTarget = clamp(0.7 - Math.max(0, boostDelta) * 0.11 + fingerprint.timingBias, -2.5, 2.5);
+    return { fuelTarget, timingTarget };
+  };
+
+  const targets = tuneTargets(seed.boostPsi);
+  seed.fuelTrimPct = round(clamp(targets.fuelTarget + 1.4, -10, 18), 1);
+  seed.ignitionAdvanceDeg = round(clamp(targets.timingTarget - 1.35, -5, 7), 1);
+
+  const tire = tireEvaluation(car, base, seed, fingerprint);
+  seed.tirePsiFront = round(clamp(tire.targetFront + 1.0, 12, 42), 1);
+  seed.tirePsiRear = round(clamp(tire.targetRear + 1.0, 12, 42), 1);
+
+  const launch = launchEvaluation(car, base, seed, fingerprint);
+  seed.launchRpm = Math.round(clamp(launch.target - 250, 1800, Math.max(2200, Number(car?.engine?.redlineRpm || 7000))) / 100) * 100;
+  const shift = shiftEvaluation(car, seed, fingerprint);
+  seed.shiftRpm = Math.round(clamp(shift.target - 250, 3000, Math.max(4000, Number(car?.engine?.revCutRpm || 8000))) / 100) * 100;
+
+  let candidate = normalizeTuneProfile(seed, car, hardware);
+  if (hardware.boosted) {
+    for (let attempts = 0; attempts < 24; attempts += 1) {
+      const evaluation = evaluateTune(car, base, candidate, hardware);
+      if (evaluation.diagnostics.powerState === "HEADROOM" && evaluation.diagnostics.riskPct <= 20) break;
+      if (candidate.boostPsi <= Number(hardware.minBoostPsi || 0) + 0.01) break;
+      candidate.boostPsi = round(Math.max(Number(hardware.minBoostPsi || 0), candidate.boostPsi - 0.5), 1);
+      const recalculated = tuneTargets(candidate.boostPsi);
+      candidate.fuelTrimPct = round(clamp(recalculated.fuelTarget + 1.4, -10, 18), 1);
+      candidate.ignitionAdvanceDeg = round(clamp(recalculated.timingTarget - 1.35, -5, 7), 1);
+    }
+  }
+  return normalizeTuneProfile(candidate, car, hardware);
+}
+
 export function normalizeTuneProfile(input, car, hardware = {}) {
   const defaults = defaultTuneProfile(car, hardware);
   const source = input && typeof input === "object" ? input : {};
@@ -167,8 +221,16 @@ export function evaluateTune(car, untunedStats, inputProfile, hardware = {}) {
     drivetrain: preLimit.drivetrain,
   };
 
-  const stability = clamp(1 - (stress * 0.65) - (Math.max(0, Math.abs(fuelError) - 3) * 0.025) - (Math.max(0, timingError - 1.2) * 0.04), 0.35, 1);
-  const hints = buildHints({ profile, hardware, fuelError, timingError, tire, launch, shift, gear, stress, powerLimited: Boolean(limited.powerLimit?.hpLimited) });
+  const capacityHp = Math.max(1, Number(limited.powerLimit?.capacityHp || hardware.powerEnvelope?.capacityHp || preLimit.hp));
+  const engineLoadRatio = Number(limited.powerLimit?.rawHp || preLimit.hp) / capacityHp;
+  const engineStress = clamp((engineLoadRatio - 0.88) / 0.18, 0, 1);
+  const calibrationRisk = clamp((stress * 0.78) + (engineStress * 0.22), 0, 1);
+  const failureChance = calibrationRisk <= 0.35
+    ? 0
+    : Math.pow((calibrationRisk - 0.35) / 0.65, 2) * 0.18;
+  const powerState = engineLoadRatio >= 0.98 ? "ENGINE-LIMITED" : engineLoadRatio >= 0.90 ? "NEAR LIMIT" : "HEADROOM";
+  const stability = clamp(1 - (calibrationRisk * 0.65) - (Math.max(0, Math.abs(fuelError) - 3) * 0.025) - (Math.max(0, timingError - 1.2) * 0.04), 0.35, 1);
+  const hints = buildHints({ profile, hardware, fuelError, timingError, tire, launch, shift, gear, stress: calibrationRisk, powerLimited: powerState === "ENGINE-LIMITED" });
 
   return {
     profile,
@@ -176,21 +238,24 @@ export function evaluateTune(car, untunedStats, inputProfile, hardware = {}) {
     fingerprint,
     derived,
     diagnostics: {
-      riskPct: Math.round(stress * 100),
+      riskPct: Math.round(calibrationRisk * 100),
       stabilityPct: Math.round(stability * 100),
       fuelState: fuelError < -1.2 ? "LEAN" : fuelError > 2.2 ? "RICH" : "IN RANGE",
       timingState: timingError > 1.1 ? "AGGRESSIVE" : timingError < -1.8 ? "CONSERVATIVE" : "IN RANGE",
       tireState: tire.state,
       launchState: launch.state,
       shiftState: shift.state,
-      powerState: limited.powerLimit?.hpLimited ? "ENGINE-LIMITED" : "HEADROOM",
+      powerState,
+      engineLoadPct: Math.round(engineLoadRatio * 100),
+      failureChancePct: round(failureChance * 100, 2),
       powerLimit: limited.powerLimit || null,
       hints,
     },
     race: {
       active: true,
       stability,
-      stress,
+      stress: calibrationRisk,
+      failureChance,
       boostPsi: profile.boostPsi,
       boostByGear: profile.boostByGear,
       launchPowerFactor: gear.launchPowerFactor,
@@ -199,7 +264,7 @@ export function evaluateTune(car, untunedStats, inputProfile, hardware = {}) {
       shiftPenaltySec: shift.penaltySec,
       rollingPenaltySec: tire.rollingPenaltySec,
       tractionMultiplier: gear.tractionMultiplier,
-      tuneLabel: stress >= 0.72 ? "ON THE EDGE" : stress >= 0.4 ? "AGGRESSIVE" : "STABLE",
+      tuneLabel: calibrationRisk >= 0.72 ? "ON THE EDGE" : calibrationRisk >= 0.4 ? "AGGRESSIVE" : "STABLE",
     },
   };
 }
