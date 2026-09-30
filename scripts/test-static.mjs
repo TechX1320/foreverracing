@@ -54,6 +54,7 @@ const required = [
   'assets/js/domain/PerformanceIndex.js',
   'assets/js/domain/ContentRelease.js',
   'assets/js/domain/EngineCatalog.js',
+  'assets/js/domain/ForcedInduction.js',
   'assets/js/ui/vehicleRenderer.js',
   'assets/js/ui/racePresentation.js',
   'assets/js/content/ContentStudioCatalog.js',
@@ -77,7 +78,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.5.0-c.3"')) throw new Error('Static index is missing the V0.5C.3 build marker.');
+if (!html.includes('data-build="0.5.0-d"')) throw new Error('Static index is missing the V0.5D build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -527,5 +528,44 @@ if (!rendererSource.includes('vehicleVisualCapabilities') ||
   throw new Error('V0.5C.3 composite race-art / fixed-livery fallback is incomplete.');
 }
 console.log('V0.5C.3 composite race-art fallback checks passed.');
+
+const forcedInductionSource = await fs.readFile(new URL('assets/js/domain/ForcedInduction.js', root), 'utf8');
+const garageSourceV05d = await fs.readFile(new URL('assets/js/screens/garage.js', root), 'utf8');
+const forcedParts = JSON.parse(await fs.readFile(new URL('data/catalog/parts.json', docs), 'utf8'))
+  .filter((part) => part.categoryKey === 'forced_induction');
+if (forcedParts.length < 25 ||
+    !forcedParts.some((part) => part.forcedInduction?.role === 'kit' && part.forcedInduction?.system === 'turbo') ||
+    !forcedParts.some((part) => part.forcedInduction?.role === 'kit' && part.forcedInduction?.system === 'supercharger') ||
+    !forcedParts.some((part) => part.forcedInduction?.shot === 50) ||
+    !forcedParts.some((part) => part.forcedInduction?.shot === 300) ||
+    !forcedParts.some((part) => part.forcedInduction?.role === 'twin_kit') ||
+    forcedParts.some((part) => part.requiredForStageProgression !== false)) {
+  throw new Error('V0.5D forced-induction catalog is incomplete.');
+}
+if (!forcedInductionSource.includes('forcedInductionState') ||
+    !forcedInductionSource.includes('forcedInductionCompatibility') ||
+    !forcedInductionSource.includes('twin_kit') ||
+    !partsSourceV04b.includes('FORCED INDUCTION') ||
+    !partsSourceV04b.includes('TWIN CHARGE') ||
+    !partsSourceV04b.includes('UPGRADE TO FRONT-HALF RACE CAR') ||
+    !partsSourceV04b.includes('UPGRADE TO FULL RACE CAR') ||
+    !localGameSource.includes('forcedInductionCompatibility') ||
+    !localGameSource.includes("car.buildStage = 3") ||
+    !localGameSource.includes("car.buildStage = 4") ||
+    !serverGameSourceV04c.includes('forcedInductionCompatibility') ||
+    !garageSourceV05d.includes('forcedInductionSwapNeeded') ||
+    !contentStudioSource.includes('REFRESH ENGINES') ||
+    !contentStudioSource.includes('Engine list refreshed') ||
+    !cssV04b.includes('V0.5D forced-induction shop')) {
+  throw new Error('V0.5D forced-induction UI / rules / progression workflow is incomplete.');
+}
+if (buildStages.version < 4 ||
+    buildStages.stages?.[1]?.forcedInduction?.nitrousMaxShot !== 50 ||
+    buildStages.stages?.[2]?.forcedInduction?.nitrousMaxShot !== 150 ||
+    buildStages.stages?.[3]?.forcedInduction?.nitrousMaxShot !== 300 ||
+    buildStages.stages?.[3]?.forcedInduction?.twinCharge !== true) {
+  throw new Error('V0.5D build-stage forced-induction capabilities are incomplete.');
+}
+console.log('V0.5D forced-induction / progression checks passed.');
 
 
