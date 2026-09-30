@@ -51,8 +51,8 @@
         "weather": "Cool & Cloudy",
         "recommendation": {
           "class": "D",
-          "performanceIndex": 335,
-          "etSeconds": 15.8
+          "performanceIndex": 300,
+          "etSeconds": 16.3
         },
         "opponent": {
           "name": "Mia",
@@ -82,8 +82,8 @@
         "weather": "Cool & Cloudy",
         "recommendation": {
           "class": "D",
-          "performanceIndex": 365,
-          "etSeconds": 15.4
+          "performanceIndex": 360,
+          "etSeconds": 15.5
         },
         "opponent": {
           "name": "Trey",
@@ -113,7 +113,7 @@
         "weather": "Cold & Dry",
         "recommendation": {
           "class": "D",
-          "performanceIndex": 395,
+          "performanceIndex": 398,
           "etSeconds": 15
         },
         "opponent": {
@@ -144,8 +144,8 @@
         "weather": "Cold & Dry",
         "recommendation": {
           "class": "D",
-          "performanceIndex": 425,
-          "etSeconds": 14.7
+          "performanceIndex": 418,
+          "etSeconds": 14.8
         },
         "opponent": {
           "name": "Luc",
@@ -175,7 +175,7 @@
         "weather": "Cool & Cloudy",
         "recommendation": {
           "class": "D",
-          "performanceIndex": 445,
+          "performanceIndex": 438,
           "etSeconds": 14.5
         },
         "opponent": {
@@ -257,8 +257,8 @@
         "weather": "Cool & Cloudy",
         "recommendation": {
           "class": "C",
-          "performanceIndex": 478,
-          "etSeconds": 14
+          "performanceIndex": 466,
+          "etSeconds": 14.2
         },
         "opponent": {
           "name": "Mia",
@@ -288,8 +288,8 @@
         "weather": "Cold & Dry",
         "recommendation": {
           "class": "C",
-          "performanceIndex": 516,
-          "etSeconds": 13.6
+          "performanceIndex": 504,
+          "etSeconds": 13.7
         },
         "opponent": {
           "name": "Nori",
@@ -319,8 +319,8 @@
         "weather": "Cool & Cloudy",
         "recommendation": {
           "class": "C",
-          "performanceIndex": 545,
-          "etSeconds": 13.2
+          "performanceIndex": 534,
+          "etSeconds": 13.3
         },
         "opponent": {
           "name": "Luc",
@@ -350,8 +350,8 @@
         "weather": "Hot & Dry",
         "recommendation": {
           "class": "C",
-          "performanceIndex": 572,
-          "etSeconds": 12.9
+          "performanceIndex": 561,
+          "etSeconds": 13
         },
         "opponent": {
           "name": "Trey",
@@ -381,8 +381,8 @@
         "weather": "Cold & Dry",
         "recommendation": {
           "class": "C",
-          "performanceIndex": 593,
-          "etSeconds": 12.6
+          "performanceIndex": 582,
+          "etSeconds": 12.7
         },
         "opponent": {
           "name": "Vega",
@@ -463,8 +463,8 @@
         "weather": "Cool & Cloudy",
         "recommendation": {
           "class": "B",
-          "performanceIndex": 626,
-          "etSeconds": 12.2
+          "performanceIndex": 616,
+          "etSeconds": 12.3
         },
         "opponent": {
           "name": "Trey",
@@ -494,8 +494,8 @@
         "weather": "Cold & Dry",
         "recommendation": {
           "class": "B",
-          "performanceIndex": 654,
-          "etSeconds": 11.8
+          "performanceIndex": 645,
+          "etSeconds": 11.9
         },
         "opponent": {
           "name": "Luc",
@@ -525,8 +525,8 @@
         "weather": "Cool & Cloudy",
         "recommendation": {
           "class": "B",
-          "performanceIndex": 690,
-          "etSeconds": 11.4
+          "performanceIndex": 681,
+          "etSeconds": 11.5
         },
         "opponent": {
           "name": "Nori",
@@ -556,8 +556,8 @@
         "weather": "Hot & Dry",
         "recommendation": {
           "class": "B",
-          "performanceIndex": 719,
-          "etSeconds": 11
+          "performanceIndex": 710,
+          "etSeconds": 11.1
         },
         "opponent": {
           "name": "Mia",
@@ -587,8 +587,8 @@
         "weather": "Cold & Dry",
         "recommendation": {
           "class": "B",
-          "performanceIndex": 746,
-          "etSeconds": 10.7
+          "performanceIndex": 737,
+          "etSeconds": 10.8
         },
         "opponent": {
           "name": "Cipher",
@@ -669,8 +669,8 @@
         "weather": "Cool & Cloudy",
         "recommendation": {
           "class": "A",
-          "performanceIndex": 774,
-          "etSeconds": 10.3
+          "performanceIndex": 766,
+          "etSeconds": 10.4
         },
         "opponent": {
           "name": "Luc",
@@ -700,8 +700,8 @@
         "weather": "Cold & Dry",
         "recommendation": {
           "class": "A",
-          "performanceIndex": 805,
-          "etSeconds": 9.9
+          "performanceIndex": 798,
+          "etSeconds": 10
         },
         "opponent": {
           "name": "Trey",
@@ -731,8 +731,8 @@
         "weather": "Cool & Cloudy",
         "recommendation": {
           "class": "A",
-          "performanceIndex": 835,
-          "etSeconds": 9.6
+          "performanceIndex": 827,
+          "etSeconds": 9.7
         },
         "opponent": {
           "name": "Nori",
@@ -762,8 +762,8 @@
         "weather": "Hot & Dry",
         "recommendation": {
           "class": "A",
-          "performanceIndex": 865,
-          "etSeconds": 9.2
+          "performanceIndex": 858,
+          "etSeconds": 9.3
         },
         "opponent": {
           "name": "Vega",
@@ -793,8 +793,8 @@
         "weather": "Cold & Dry",
         "recommendation": {
           "class": "A",
-          "performanceIndex": 895,
-          "etSeconds": 8.8
+          "performanceIndex": 889,
+          "etSeconds": 8.9
         },
         "opponent": {
           "name": "Marlowe",
@@ -875,8 +875,8 @@
         "weather": "Cool & Cloudy",
         "recommendation": {
           "class": "S",
-          "performanceIndex": 920,
-          "etSeconds": 8.5
+          "performanceIndex": 914,
+          "etSeconds": 8.6
         },
         "opponent": {
           "name": "Luc",
@@ -906,7 +906,7 @@
         "weather": "Cold & Dry",
         "recommendation": {
           "class": "S",
-          "performanceIndex": 940,
+          "performanceIndex": 934,
           "etSeconds": 8.3
         },
         "opponent": {
@@ -937,8 +937,8 @@
         "weather": "Cool & Cloudy",
         "recommendation": {
           "class": "S",
-          "performanceIndex": 960,
-          "etSeconds": 8
+          "performanceIndex": 954,
+          "etSeconds": 8.1
         },
         "opponent": {
           "name": "Nori",
@@ -968,7 +968,7 @@
         "weather": "Hot & Dry",
         "recommendation": {
           "class": "S",
-          "performanceIndex": 980,
+          "performanceIndex": 978,
           "etSeconds": 7.8
         },
         "opponent": {
@@ -999,7 +999,7 @@
         "weather": "Cold & Dry",
         "recommendation": {
           "class": "S",
-          "performanceIndex": 995,
+          "performanceIndex": 992,
           "etSeconds": 7.6
         },
         "opponent": {
@@ -1081,8 +1081,8 @@
         "weather": "Cool & Cloudy",
         "recommendation": {
           "class": "X",
-          "performanceIndex": 1005,
-          "etSeconds": 7.4
+          "performanceIndex": 1003,
+          "etSeconds": 7.5
         },
         "opponent": {
           "name": "Nori",
@@ -1112,7 +1112,7 @@
         "weather": "Cold & Dry",
         "recommendation": {
           "class": "X",
-          "performanceIndex": 1020,
+          "performanceIndex": 1017,
           "etSeconds": 7.3
         },
         "opponent": {
@@ -1143,7 +1143,7 @@
         "weather": "Cool & Cloudy",
         "recommendation": {
           "class": "X",
-          "performanceIndex": 1040,
+          "performanceIndex": 1038,
           "etSeconds": 7
         },
         "opponent": {
@@ -1174,7 +1174,7 @@
         "weather": "Hot & Dry",
         "recommendation": {
           "class": "X",
-          "performanceIndex": 1055,
+          "performanceIndex": 1052,
           "etSeconds": 6.8
         },
         "opponent": {
@@ -1205,7 +1205,7 @@
         "weather": "Cold & Dry",
         "recommendation": {
           "class": "X",
-          "performanceIndex": 1060,
+          "performanceIndex": 1058,
           "etSeconds": 6.8
         },
         "opponent": {
