@@ -82,7 +82,7 @@ Build: {$build}
 Storage mode: local
 Offline service worker: disabled in static development mode
 Race presentation: persistent two-phase start/finish with blocking real-time playback
-V0.5C.3: Composite/atlas cars stay visible in races and fixed-livery paint limits are explicit
+V0.5D: Forced Induction gameplay foundation, Stage 3/4 progression and live Engine Creator refresh
 Do not edit docs/ by hand; run php scripts/build-static.php.
 ");
 

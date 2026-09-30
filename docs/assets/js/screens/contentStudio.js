@@ -45,7 +45,8 @@ export async function renderContentStudio(ctx) {
   const artData = await artResponse.json();
   const artCars = Array.isArray(artData?.cars) ? artData.cars : [];
   const racingConfig = await racingResponse.json();
-  const engineCatalog = mergeContentStudioEngines(await engineResponse.json()).map(normalizeEngineDefinition);
+  const baseEngineCatalog = await engineResponse.json();
+  let engineCatalog = mergeContentStudioEngines(baseEngineCatalog).map(normalizeEngineDefinition);
   const root = ctx.screenRoot;
 
   root.innerHTML = pageShell({
@@ -183,6 +184,17 @@ export async function renderContentStudio(ctx) {
     host.querySelector("[data-studio-new]")?.addEventListener("click", () => {
       draft = createBlankCar(nextStockId(catalogCars));
       lastLoadedId = "";
+      renderWorkspace();
+    });
+
+    host.querySelector("[data-refresh-engines]")?.addEventListener("click", () => {
+      const selectedEngineId = String(draft.factoryEngineId || "");
+      engineCatalog = mergeContentStudioEngines(baseEngineCatalog).map(normalizeEngineDefinition);
+      if (selectedEngineId) {
+        const refreshed = engineCatalog.find((row) => String(row.engineId) === selectedEngineId);
+        if (refreshed) applyEngineToCarDraft(draft, refreshed);
+      }
+      ctx.toast("Engine list refreshed", `${engineCatalog.length} active engine definitions are available without reloading the page.`);
       renderWorkspace();
     });
 
@@ -474,9 +486,12 @@ function physicsSection(car, engines = []) {
       <div class="studio-form-grid studio-form-grid--4">
         <label class="studio-field studio-field--wide">
           <span>Factory Engine</span>
-          <select data-factory-engine>
-            ${engineOptions.map(([id, text]) => `<option value="${escapeHtml(id)}" ${String(id) === String(car.factoryEngineId || "") ? "selected" : ""}>${escapeHtml(text)}</option>`).join("")}
-          </select>
+          <div class="studio-engine-select-row">
+            <select data-factory-engine>
+              ${engineOptions.map(([id, text]) => `<option value="${escapeHtml(id)}" ${String(id) === String(car.factoryEngineId || "") ? "selected" : ""}>${escapeHtml(text)}</option>`).join("")}
+            </select>
+            <button class="button button--small" type="button" data-refresh-engines>REFRESH ENGINES</button>
+          </div>
         </label>
         ${selectField("Engine Location", "engine.layout", car.engine?.layout || "Front", [["Front","Front"],["Mid","Mid"],["Rear","Rear"]])}
         ${inputField("Curb Weight (lb)", "base.weight", car.base?.weight, "number", { min: 500, step: 1 })}

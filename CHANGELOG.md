@@ -1,5 +1,16 @@
 # Changelog
 
+## V0.5.0-d — forced-induction foundation
+
+- Added staged Turbo, Supercharger and NOS gameplay systems starting at Street Race Car.
+- Added factory-boosted upgrade paths, aftermarket kit swapping, Stage 3 component upgrades and Stage 4 twin charging.
+- Added 50 through 300 shot NOS progression by build type.
+- Added confirmation and automatic uninstall behavior when swapping primary forced-induction systems.
+- Enabled Street Race Car → Front-Half Race Car → Full Race Car progression.
+- Added live Car Creator engine-list refresh without a full page reload.
+- Added matching local/server compatibility rules and regression coverage.
+
+
 ## V0.5.0-c.3 — composite race-art fallback
 
 - Fixed certified/atlas-only cars disappearing in side-view race playback.

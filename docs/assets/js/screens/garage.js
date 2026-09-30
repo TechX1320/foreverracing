@@ -1,6 +1,7 @@
 import { bindHome, carLabel, escapeHtml, number, pageShell } from "../ui/components.js";
 import { renderVehicle } from "../ui/vehicleRenderer.js";
 import { showDialog, closeDialog } from "../ui/modal.js";
+import { forcedInductionMeta, forcedInductionState, forcedInductionSwapNeeded, systemLabel } from "../domain/ForcedInduction.js";
 
 let partsCache = null;
 const REQUIRED = ["intake", "exhaust", "ecu", "fuel", "drivetrain", "suspension", "tires", "weight"];
@@ -178,6 +179,14 @@ function openInventory(ctx, carId) {
 
   dialog.querySelectorAll("[data-install-owned]").forEach((button) => {
     button.addEventListener("click", async () => {
+      const inventoryId = String(button.dataset.installOwned || "");
+      const item = player?.inventory?.parts?.find((row) => String(row.inventoryId) === inventoryId);
+      const spec = partsCache.find((row) => String(row.catalogId) === String(item?.catalogId || ""));
+      if (spec && forcedInductionSwapNeeded(car, player?.inventory?.parts || [], spec, partsCache)) {
+        const state = forcedInductionState(car, player?.inventory?.parts || [], partsCache);
+        const confirmed = globalThis.confirm?.(`Swap ${systemLabel(state.primarySystem)} to ${systemLabel(forcedInductionMeta(spec)?.system)}? Existing parts for the old system will be uninstalled but remain owned.`) ?? true;
+        if (!confirmed) return;
+      }
       button.disabled = true;
       try {
         const data = await ctx.storage.installPart(button.dataset.installOwned, carId);

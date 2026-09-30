@@ -890,5 +890,1002 @@
         "value": -3
       }
     ]
+  },
+  {
+    "catalogId": "s2_fi_turbo_kit",
+    "name": "Street Turbo Kit",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "forced_induction_primary",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": false,
+    "price": 7200,
+    "description": "Complete entry-level turbo conversion with manifold, turbo, intercooler and supporting hardware.",
+    "forcedInduction": {
+      "system": "turbo",
+      "role": "kit",
+      "step": 0
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.28
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.25
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 42
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_fi_supercharger_kit",
+    "name": "Street Supercharger Kit",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "forced_induction_primary",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": false,
+    "price": 6800,
+    "description": "Complete street supercharger conversion with drive hardware, charge cooling and baseline calibration.",
+    "forcedInduction": {
+      "system": "supercharger",
+      "role": "kit",
+      "step": 0
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.22
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.28
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 50
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_fi_turbo_upgrade_1",
+    "name": "Turbo Kit Upgrade 1",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "forced_induction_primary",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": false,
+    "price": 2600,
+    "description": "Stage 2 turbo kit calibration and hardware upgrade 1.",
+    "forcedInduction": {
+      "system": "turbo",
+      "role": "kit_upgrade",
+      "step": 1
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.34
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.3
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 44
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_fi_turbo_upgrade_2",
+    "name": "Turbo Kit Upgrade 2",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "forced_induction_primary",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": false,
+    "price": 3300,
+    "description": "Stage 2 turbo kit calibration and hardware upgrade 2.",
+    "forcedInduction": {
+      "system": "turbo",
+      "role": "kit_upgrade",
+      "step": 2
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.41
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.36
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 46
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_fi_turbo_upgrade_3",
+    "name": "Turbo Kit Upgrade 3",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "forced_induction_primary",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": false,
+    "price": 4200,
+    "description": "Stage 2 turbo kit calibration and hardware upgrade 3.",
+    "forcedInduction": {
+      "system": "turbo",
+      "role": "kit_upgrade",
+      "step": 3
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.48
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.42
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 48
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_fi_supercharger_upgrade_1",
+    "name": "Supercharger Kit Upgrade 1",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "forced_induction_primary",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": false,
+    "price": 2400,
+    "description": "Stage 2 supercharger kit calibration and hardware upgrade 1.",
+    "forcedInduction": {
+      "system": "supercharger",
+      "role": "kit_upgrade",
+      "step": 1
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.28
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.33
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 52
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_fi_supercharger_upgrade_2",
+    "name": "Supercharger Kit Upgrade 2",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "forced_induction_primary",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": false,
+    "price": 3100,
+    "description": "Stage 2 supercharger kit calibration and hardware upgrade 2.",
+    "forcedInduction": {
+      "system": "supercharger",
+      "role": "kit_upgrade",
+      "step": 2
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.34
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.38
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 54
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_fi_supercharger_upgrade_3",
+    "name": "Supercharger Kit Upgrade 3",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "forced_induction_primary",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": false,
+    "price": 3900,
+    "description": "Stage 2 supercharger kit calibration and hardware upgrade 3.",
+    "forcedInduction": {
+      "system": "supercharger",
+      "role": "kit_upgrade",
+      "step": 3
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.4
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.43
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 56
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_fi_factory_turbo_1",
+    "name": "Factory Turbo Upgrade 1",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "forced_induction_factory_upgrade",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": false,
+    "price": 2200,
+    "description": "Upgrade 1 for an engine that came from the factory with a turbocharger.",
+    "forcedInduction": {
+      "system": "turbo",
+      "role": "factory_upgrade",
+      "step": 1
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.07
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.09
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 3
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_fi_factory_turbo_2",
+    "name": "Factory Turbo Upgrade 2",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "forced_induction_factory_upgrade",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": false,
+    "price": 3000,
+    "description": "Upgrade 2 for an engine that came from the factory with a turbocharger.",
+    "forcedInduction": {
+      "system": "turbo",
+      "role": "factory_upgrade",
+      "step": 2
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.12
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.14
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 5
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_fi_factory_turbo_3",
+    "name": "Factory Turbo Upgrade 3",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "forced_induction_factory_upgrade",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": false,
+    "price": 3900,
+    "description": "Upgrade 3 for an engine that came from the factory with a turbocharger.",
+    "forcedInduction": {
+      "system": "turbo",
+      "role": "factory_upgrade",
+      "step": 3
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.18
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.2
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 7
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_fi_factory_supercharger_1",
+    "name": "Factory Supercharger Upgrade 1",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "forced_induction_factory_upgrade",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": false,
+    "price": 2200,
+    "description": "Upgrade 1 for an engine that came from the factory with a supercharger.",
+    "forcedInduction": {
+      "system": "supercharger",
+      "role": "factory_upgrade",
+      "step": 1
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.06
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.08
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_fi_factory_supercharger_2",
+    "name": "Factory Supercharger Upgrade 2",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "forced_induction_factory_upgrade",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": false,
+    "price": 3000,
+    "description": "Upgrade 2 for an engine that came from the factory with a supercharger.",
+    "forcedInduction": {
+      "system": "supercharger",
+      "role": "factory_upgrade",
+      "step": 2
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.11
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.13
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 3
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_fi_factory_supercharger_3",
+    "name": "Factory Supercharger Upgrade 3",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "forced_induction_factory_upgrade",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": false,
+    "price": 3900,
+    "description": "Upgrade 3 for an engine that came from the factory with a supercharger.",
+    "forcedInduction": {
+      "system": "supercharger",
+      "role": "factory_upgrade",
+      "step": 3
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.16
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.18
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 4
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_fi_nos_50",
+    "name": "50 Shot NOS Kit",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "nitrous",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": false,
+    "price": 2100,
+    "description": "Single-bottle 50 shot. +50 hp with roughly 25 lb of bottle, brackets and plumbing.",
+    "forcedInduction": {
+      "system": "nitrous",
+      "role": "nitrous",
+      "shot": 50,
+      "step": 0
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 50
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 25
+      }
+    ]
+  },
+  {
+    "catalogId": "s3_fi_turbo_intercooler",
+    "name": "Large Front-Mount Intercooler",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "fi_turbo_intercooler",
+    "buildStage": 3,
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "price": 3600,
+    "description": "Larger charge cooler for more consistent boosted power, with a modest weight penalty.",
+    "forcedInduction": {
+      "system": "turbo",
+      "role": "component"
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.05
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.04
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 8
+      }
+    ]
+  },
+  {
+    "catalogId": "s3_fi_turbo_upgrade",
+    "name": "Larger Turbocharger",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "fi_turbo_turbo",
+    "buildStage": 3,
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "price": 6200,
+    "description": "Larger turbo frame with substantially more airflow and a little more hardware mass.",
+    "forcedInduction": {
+      "system": "turbo",
+      "role": "component"
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.12
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.1
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 3
+      }
+    ]
+  },
+  {
+    "catalogId": "s3_fi_turbo_bov",
+    "name": "High-Flow Blow-Off Valve",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "fi_turbo_bov",
+    "buildStage": 3,
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "price": 950,
+    "description": "Improves boost-control hardware and transient reliability. It is not a magic peak-power part.",
+    "forcedInduction": {
+      "system": "turbo",
+      "role": "component"
+    },
+    "effects": [
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "catalogId": "s3_fi_turbo_piping",
+    "name": "Low-Restriction Charge Piping",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "fi_turbo_piping",
+    "buildStage": 3,
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "price": 2400,
+    "description": "Larger, smoother charge piping with better flow and a small mass penalty.",
+    "forcedInduction": {
+      "system": "turbo",
+      "role": "component"
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.03
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.02
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 4
+      }
+    ]
+  },
+  {
+    "catalogId": "s3_fi_supercharger_upgrade",
+    "name": "High-Flow Supercharger",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "fi_supercharger_headunit",
+    "buildStage": 3,
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "price": 6100,
+    "description": "Higher-capacity supercharger head unit for substantially more airflow.",
+    "forcedInduction": {
+      "system": "supercharger",
+      "role": "component"
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.1
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.09
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 6
+      }
+    ]
+  },
+  {
+    "catalogId": "s3_fi_supercharger_pulley",
+    "name": "Smaller Supercharger Pulley",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "fi_supercharger_pulley",
+    "buildStage": 3,
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "price": 2300,
+    "description": "Spins the supercharger faster for more boost and stronger torque.",
+    "forcedInduction": {
+      "system": "supercharger",
+      "role": "component"
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.08
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.1
+      }
+    ]
+  },
+  {
+    "catalogId": "s3_fi_nos_75",
+    "name": "75 Shot NOS Fogger",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "nitrous",
+    "buildStage": 3,
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "price": 2600,
+    "description": "Stage 3 nitrous fogger calibrated for a 75 hp shot. Bottle hardware remains roughly 25 lb.",
+    "forcedInduction": {
+      "system": "nitrous",
+      "role": "nitrous",
+      "shot": 75,
+      "step": 1
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 75
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 25
+      }
+    ]
+  },
+  {
+    "catalogId": "s3_fi_nos_100",
+    "name": "100 Shot NOS Fogger",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "nitrous",
+    "buildStage": 3,
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "price": 3300,
+    "description": "Stage 3 nitrous fogger calibrated for a 100 hp shot. Bottle hardware remains roughly 25 lb.",
+    "forcedInduction": {
+      "system": "nitrous",
+      "role": "nitrous",
+      "shot": 100,
+      "step": 2
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 100
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 25
+      }
+    ]
+  },
+  {
+    "catalogId": "s3_fi_nos_150",
+    "name": "150 Shot NOS Fogger",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "nitrous",
+    "buildStage": 3,
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "price": 4700,
+    "description": "Stage 3 nitrous fogger calibrated for a 150 hp shot. Bottle hardware remains roughly 25 lb.",
+    "forcedInduction": {
+      "system": "nitrous",
+      "role": "nitrous",
+      "shot": 150,
+      "step": 3
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 150
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 25
+      }
+    ]
+  },
+  {
+    "catalogId": "s4_fi_twin_turbo",
+    "name": "Twin-Charge Turbo Add-On",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "forced_induction_secondary",
+    "buildStage": 4,
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "price": 9800,
+    "description": "Adds a turbo system alongside an existing supercharger on a Full Race Car.",
+    "forcedInduction": {
+      "system": "turbo",
+      "role": "twin_kit",
+      "requiresSystem": "supercharger"
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.18
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.16
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 35
+      }
+    ]
+  },
+  {
+    "catalogId": "s4_fi_twin_supercharger",
+    "name": "Twin-Charge Supercharger Add-On",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "forced_induction_secondary",
+    "buildStage": 4,
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "price": 9400,
+    "description": "Adds a supercharger alongside an existing turbo system on a Full Race Car.",
+    "forcedInduction": {
+      "system": "supercharger",
+      "role": "twin_kit",
+      "requiresSystem": "turbo"
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.15
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.18
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 45
+      }
+    ]
+  },
+  {
+    "catalogId": "s4_fi_nos_175",
+    "name": "175 Shot NOS Fogger",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "nitrous",
+    "buildStage": 4,
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "price": 5600,
+    "description": "Full Race Car nitrous fogger calibrated for a 175 hp shot. Bottle hardware remains roughly 25 lb.",
+    "forcedInduction": {
+      "system": "nitrous",
+      "role": "nitrous",
+      "shot": 175,
+      "step": 4
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 175
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 25
+      }
+    ]
+  },
+  {
+    "catalogId": "s4_fi_nos_200",
+    "name": "200 Shot NOS Fogger",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "nitrous",
+    "buildStage": 4,
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "price": 6500,
+    "description": "Full Race Car nitrous fogger calibrated for a 200 hp shot. Bottle hardware remains roughly 25 lb.",
+    "forcedInduction": {
+      "system": "nitrous",
+      "role": "nitrous",
+      "shot": 200,
+      "step": 5
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 200
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 25
+      }
+    ]
+  },
+  {
+    "catalogId": "s4_fi_nos_250",
+    "name": "250 Shot NOS Fogger",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "nitrous",
+    "buildStage": 4,
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "price": 7900,
+    "description": "Full Race Car nitrous fogger calibrated for a 250 hp shot. Bottle hardware remains roughly 25 lb.",
+    "forcedInduction": {
+      "system": "nitrous",
+      "role": "nitrous",
+      "shot": 250,
+      "step": 6
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 250
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 25
+      }
+    ]
+  },
+  {
+    "catalogId": "s4_fi_nos_300",
+    "name": "300 Shot NOS Fogger",
+    "category": "Forced Induction",
+    "categoryKey": "forced_induction",
+    "slot": "nitrous",
+    "buildStage": 4,
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "price": 9400,
+    "description": "Full Race Car nitrous fogger calibrated for a 300 hp shot. Bottle hardware remains roughly 25 lb.",
+    "forcedInduction": {
+      "system": "nitrous",
+      "role": "nitrous",
+      "shot": 300,
+      "step": 7
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "add",
+        "value": 300
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 25
+      }
+    ]
   }
 ]

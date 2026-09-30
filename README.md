@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.5.0-c.3 playable direction
+## V0.5.0-d playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,16 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.5D forced-induction foundation
+
+- Added a dedicated **Forced Induction** Parts category for Street Race Car and later builds.
+- Stage 2 supports Turbo Kit, Supercharger Kit and a 50-shot NOS kit. Factory turbo/supercharged cars treat their factory system as already installed.
+- Stage 2 turbo/supercharger systems get three progressive kit upgrades. Switching primary kits asks for confirmation and uninstalls the old system's parts without deleting them.
+- Stage 3 unlocks individual turbo hardware (intercooler, turbo, BOV, piping), supercharger hardware (head unit, pulley), and 75 / 100 / 150-shot NOS progression.
+- Stage 4 unlocks **twin charging** plus 175 / 200 / 250 / 300-shot NOS.
+- Added Stage 2 → 3 and Stage 3 → 4 conversion flow; Stage 2 requires one installed choice in every core category while Forced Induction remains optional.
+- Car Creator now has **REFRESH ENGINES** so a newly activated Engine Creator definition can appear without reloading the whole site.
 
 ### V0.5C.3 composite/trophy art fallback
 
