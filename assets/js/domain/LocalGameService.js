@@ -339,7 +339,10 @@ export class LocalGameService {
       const spec = this.findBy(this.parts, 'catalogId', String(item.catalogId || ''));
       if (!spec) continue;
       const compatibility = partCompatibility(spec, car);
-      if (compatibility.ok) candidates.push({ item, spec });
+      const stage = Number(car?.buildStage || 1);
+      const stageOk = Number(spec?.buildStage || 1) <= stage
+        && Number(spec?.persistentFromStage || spec?.buildStage || 1) <= stage;
+      if (compatibility.ok && stageOk) candidates.push({ item, spec });
       else item.installedOnCarId = null;
     }
 
