@@ -871,6 +871,10 @@ final class GameService
             is_array($savedLayered['anchors'] ?? null) ? $savedLayered['anchors'] : []
         );
         $car['raceRecords'] = array_replace(self::emptyRaceRecords(), is_array($car['raceRecords'] ?? null) ? $car['raceRecords'] : []);
+        $car['tune'] = is_array($car['tune'] ?? null) ? $car['tune'] : null;
+        $car['tuningRuntime'] = is_array($car['tuningRuntime'] ?? null) ? $car['tuningRuntime'] : null;
+        $car['tuningDiagnostics'] = is_array($car['tuningDiagnostics'] ?? null) ? $car['tuningDiagnostics'] : null;
+        $car['untunedDerived'] = is_array($car['untunedDerived'] ?? null) ? $car['untunedDerived'] : null;
         if (!empty($car['derived']['hp']) && !empty($car['derived']['weight'])) {
             $benchmark = PerformanceIndex::forCar($car, self::racingConfig());
             $car['performanceIndex'] = (int)$benchmark['performanceIndex'];
