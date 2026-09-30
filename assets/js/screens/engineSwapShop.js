@@ -104,7 +104,7 @@ export async function renderEngineSwapShop(ctx) {
       </section>` : ""}
 
       <div class="engine-swap-footnote">
-        Engine-bound Intake, Exhaust, Fuel, ECU, Drivetrain, Forced Induction, Engine Kit and Engine parts travel with the engine assembly. Tires, suspension and weight-reduction hardware stay with the chassis. Parts that the destination Build Type cannot support remain attached but dormant until the chassis is upgraded.
+        Build Type belongs to the chassis and survives an engine swap. Engine-bound Intake, Exhaust, Fuel, ECU, Drivetrain, Forced Induction, Engine Kit and Engine parts travel with the engine assembly. Tires, suspension and weight-reduction hardware stay with the chassis. A newly purchased engine arrives as a complete factory assembly; compatible Stage 2/3/4 performance parts can then be added without redoing earlier Build Types.
       </div>`,
     trail: `${carLabel(car)} • ${engineLabel(currentEngine)}`,
   });
@@ -208,6 +208,11 @@ function openSwapDialog(ctx, carId, engineId) {
           <small>CALIBRATION</small>
           <b>RESET / NONE</b>
           <p>Engine swaps clear the active ECU calibration. If compatible Standalone ECU + Laptop hardware is attached, tuning is available again from a fresh base map.</p>
+        </div>
+        <div>
+          <small>CHASSIS / BUILD TYPE</small>
+          <b>BUILD TYPE ${number(car.buildStage || 1)} STAYS</b>
+          <p>The chassis does not downgrade. A replacement engine is a complete runnable factory assembly; earlier performance stages do not need to be rebuilt just to run it.</p>
         </div>
       </div>
 
