@@ -535,7 +535,7 @@ export class LocalGameService {
         distanceFeet: Number(distanceConfig.feet || 1320),
         location,
         weather,
-        margin: round3(Math.abs(playerRun.totalTime - opponentRun.totalTime)),
+        margin: playerDnf ? null : round3(Math.abs(playerRun.totalTime - opponentRun.totalTime)),
         reward,
         expReward,
         repReward,
