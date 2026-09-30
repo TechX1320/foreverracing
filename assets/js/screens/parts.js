@@ -645,11 +645,12 @@ function forcedInductionPartVisible(part, state, stage) {
   return false;
 }
 
-function forcedInductionPartRow(player, car, part) {
+function forcedInductionPartRow(player, car, part, selectedCatalogId = null) {
   const owned = findInventory(player, part.catalogId, car.carId);
   const installed = owned && String(owned.installedOnCarId || "") === String(car.carId);
   const purchaseCompatibility = forcedInductionCompatibility(car, player?.inventory?.parts || [], part, catalogCache, { purchasing: true });
   const installCompatibility = forcedInductionCompatibility(car, player?.inventory?.parts || [], part, catalogCache, { purchasing: false });
+  const engineRequirement = engineKitRequirementReason(player, car, part);
   const projected = projectStats(player, car, part);
   const canAfford = Number(player.wallet?.credits || 0) >= Number(part.price || 0);
   const meta = forcedInductionMeta(part) || {};
@@ -658,13 +659,13 @@ function forcedInductionPartRow(player, car, part) {
   if (installed) {
     action = '<span class="status-text status-text--good">INSTALLED</span>';
   } else if (owned) {
-    action = installCompatibility.ok
+    action = installCompatibility.ok && !engineRequirement
       ? `<button class="button button--primary button--small" data-install-shop-part="${escapeHtml(owned.inventoryId)}">INSTALL</button>`
-      : `<span class="status-text">${escapeHtml(installCompatibility.reason || "LOCKED")}</span>`;
-  } else if (purchaseCompatibility.ok) {
+      : `<span class="status-text">${escapeHtml(engineRequirement || installCompatibility.reason || "LOCKED")}</span>`;
+  } else if (purchaseCompatibility.ok && !engineRequirement) {
     action = `<div class="parts-shop-row__buy-actions"><button class="button button--primary button--small" data-buy-install-part="${escapeHtml(part.catalogId)}" ${canAfford ? "" : "disabled"}>BUY + INSTALL • ${money(part.price)} CR</button><button class="button button--small" data-buy-part="${escapeHtml(part.catalogId)}" ${canAfford ? "" : "disabled"}>BUY ONLY</button></div>`;
   } else {
-    action = `<span class="status-text">${escapeHtml(purchaseCompatibility.reason || "LOCKED")}</span>`;
+    action = `<span class="status-text">${escapeHtml(engineRequirement || purchaseCompatibility.reason || "LOCKED")}</span>`;
   }
 
   const kicker = meta.role === "nitrous"
@@ -676,7 +677,8 @@ function forcedInductionPartRow(player, car, part) {
         : meta.step ? `UPGRADE ${number(meta.step)}` : "BASE KIT";
 
   return `<article class="parts-shop-row ${installed ? "is-complete" : ""}">
-    <div class="parts-shop-row__title"><span>${escapeHtml(kicker)}</span><strong>${escapeHtml(part.name)}</strong><small>${escapeHtml(part.description || "")}</small></div>
+    <button class="parts-shop-row__dyno-select ${String(selectedCatalogId || "") === String(part.catalogId) ? "is-selected" : ""}" type="button" data-fi-dyno-part="${escapeHtml(part.catalogId)}" title="Show before/after dyno preview"><span>DYNO</span></button>
+    <div class="parts-shop-row__title"><span>${escapeHtml(kicker)}${Number(part.requiredEngineKit || 0) ? ` • ENGINE KIT ${Number(part.requiredEngineKit)}` : ""}</span><strong>${escapeHtml(part.name)}</strong><small>${escapeHtml(part.description || "")}</small></div>
     <div class="parts-shop-row__delta">
       <span>HP <b>${number(car.derived?.hp)} → ${number(projected.hp)}</b></span>
       <span>TQ <b>${number(car.derived?.torque)} → ${number(projected.torque)}</b></span>
