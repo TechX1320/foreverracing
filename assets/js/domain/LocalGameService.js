@@ -485,6 +485,9 @@ export class LocalGameService {
       const partIndex = this.requireOwnedPartIndex(player, inventoryId);
       const instance = player.inventory.parts[partIndex];
       const previousCarId = instance.installedOnCarId || null;
+      if (instance.installedOnEngineInventoryId && !previousCarId) {
+        throw new LocalGameError('That part is attached to a stored engine assembly. Install the engine assembly or remove the part from that engine first.');
+      }
       const spec = this.findBy(this.parts, 'catalogId', String(instance.catalogId || ''));
       if (!spec) throw new LocalGameError('Part catalog entry is missing.', 500);
       const car = player.garage[carIndex];
@@ -502,7 +505,10 @@ export class LocalGameService {
           const installedSpec = this.findBy(this.parts, 'catalogId', String(ownedPart.catalogId || ''));
           const installedMeta = forcedInductionMeta(installedSpec);
           if (!installedMeta || String(installedMeta.role || '') === 'nitrous') continue;
-          if (String(installedMeta.system || '') === previousSystem) ownedPart.installedOnCarId = null;
+          if (String(installedMeta.system || '') === previousSystem) {
+            ownedPart.installedOnCarId = null;
+            this.detachPartFromEngineAssembly(player, ownedPart);
+          }
         }
       }
 
@@ -515,10 +521,20 @@ export class LocalGameService {
       for (const ownedPart of player.inventory.parts) {
         if (ownedPart.installedOnCarId !== carId) continue;
         const installedSpec = this.findBy(this.parts, 'catalogId', String(ownedPart.catalogId || ''));
-        if (installedSpec && String(installedSpec.slot || '') === slot) ownedPart.installedOnCarId = null;
+        if (installedSpec && String(installedSpec.slot || '') === slot) {
+          ownedPart.installedOnCarId = null;
+          if (isEngineBoundPart(installedSpec)) this.detachPartFromEngineAssembly(player, ownedPart);
+        }
       }
 
       player.inventory.parts[partIndex].installedOnCarId = carId;
+      if (isEngineBoundPart(spec)) {
+        const assembly = this.engineAssemblyForCar(player, car);
+        if (assembly) {
+          player.inventory.parts[partIndex].installedOnEngineInventoryId = assembly.inventoryId;
+          assembly.attachedPartInventoryIds = [...new Set([...(assembly.attachedPartInventoryIds || []), player.inventory.parts[partIndex].inventoryId])];
+        }
+      }
       player.garage[carIndex] = this.recalculateCar(player.garage[carIndex], player.inventory.parts);
       if (previousCarId && previousCarId !== carId) {
         const previousIndex = this.requireOwnedCarIndex(player, previousCarId);
@@ -540,6 +556,7 @@ export class LocalGameService {
         if (Number(car.buildStage || 1) === 1) throw new LocalGameError('Street Car upgrades are permanent progression and cannot be downgraded.');
       }
       player.inventory.parts[partIndex].installedOnCarId = null;
+      this.detachPartFromEngineAssembly(player, player.inventory.parts[partIndex]);
       if (carId) {
         const carIndex = this.requireOwnedCarIndex(player, carId);
         player.garage[carIndex] = this.recalculateCar(player.garage[carIndex], player.inventory.parts);
@@ -564,6 +581,7 @@ export class LocalGameService {
           const partSpec = this.findBy(this.parts, 'catalogId', String(ownedPart.catalogId || ''));
           if (partSpec?.simpleTier) ownedPart.installedOnCarId = null;
         }
+        this.activateEngineAssemblyParts(player, car);
         player.garage[index] = this.recalculateCar(car, player.inventory.parts);
         this.addTransaction(player, 'stage_conversion', 0, `${this.carName(car)} converted to Street Race Car`);
         return;
@@ -589,6 +607,7 @@ export class LocalGameService {
         if (missing.length) throw new LocalGameError(`Install a Street Race Car part in every core category before moving to Front-Half Race Car. Missing: ${missing.join(', ')}.`);
 
         car.buildStage = 3;
+        this.activateEngineAssemblyParts(player, car);
         player.garage[index] = this.recalculateCar(car, player.inventory.parts);
         this.addTransaction(player, 'stage_conversion', 0, `${this.carName(car)} converted to Front-Half Race Car`);
         return;
@@ -596,6 +615,7 @@ export class LocalGameService {
 
       if (stage === 3) {
         car.buildStage = 4;
+        this.activateEngineAssemblyParts(player, car);
         player.garage[index] = this.recalculateCar(car, player.inventory.parts);
         this.addTransaction(player, 'stage_conversion', 0, `${this.carName(car)} converted to Full Race Car`);
         return;
