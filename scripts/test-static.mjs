@@ -82,7 +82,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.5.0-e"')) throw new Error('Static index is missing the V0.5E build marker.');
+if (!html.includes('data-build="0.5.0-f"')) throw new Error('Static index is missing the V0.5F build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -623,5 +623,45 @@ if (!partCatalogSourceV05e.includes('partCompatibility') ||
   throw new Error('V0.5E Parts Creator authoring / compatibility workflow is incomplete.');
 }
 console.log('V0.5E Parts Creator checks passed.');
+
+const deepPartsV05f = JSON.parse(await fs.readFile(new URL('data/catalog/parts.json', docs), 'utf8'));
+const stage3PartsV05f = deepPartsV05f.filter((part) => Number(part.buildStage || 1) === 3);
+const stage4PartsV05f = deepPartsV05f.filter((part) => Number(part.buildStage || 1) === 4);
+const stage3CategoriesV05f = new Set(stage3PartsV05f.map((part) => part.categoryKey));
+const stage4CategoriesV05f = new Set(stage4PartsV05f.map((part) => part.categoryKey));
+if (stage3PartsV05f.length < 30 || stage4PartsV05f.length < 35) {
+  throw new Error('V0.5F Stage 3/4 catalog depth is too shallow.');
+}
+for (const category of ['intake','exhaust','ecu','fuel','drivetrain','suspension','tires','weight','forced_induction','engine_kit']) {
+  if (!stage3CategoriesV05f.has(category)) throw new Error(`V0.5F Stage 3 is missing category depth: ${category}`);
+}
+for (const category of ['intake','exhaust','ecu','fuel','drivetrain','suspension','tires','weight','forced_induction','engine']) {
+  if (!stage4CategoriesV05f.has(category)) throw new Error(`V0.5F Stage 4 is missing category depth: ${category}`);
+}
+if (!stage4PartsV05f.some((part) => part.catalogId === 's4_rotary_bridgeport' && part.compatibility?.engineConfigurations?.includes('Rotary')) ||
+    !stage4PartsV05f.some((part) => part.catalogId === 's4_engine_pistons' && !part.compatibility?.engineConfigurations?.includes('Rotary')) ||
+    !stage4PartsV05f.some((part) => part.catalogId === 's4_ecu_standalone' && part.tuning?.homeGarage === true)) {
+  throw new Error('V0.5F engine-internals / standalone tuning groundwork is incomplete.');
+}
+if (deepPartsV05f.filter((part) => Number(part.buildStage || 1) >= 2).some((part) => !String(part.subCategory || '').trim())) {
+  throw new Error('V0.5F Stage 2+ parts must have a shop subcategory.');
+}
+if (!partsSourceV04b.includes('parts-shop-subnav') ||
+    !partsSourceV04b.includes('pageSize = 3') ||
+    !partsSourceV04b.includes('data-parts-page') ||
+    !partsSourceV04b.includes('data-fi-page') ||
+    !partsStudioSourceV05e.includes('Shop Subcategory') ||
+    !partCatalogSourceV05e.includes('subCategory') ||
+    !cssV04b.includes('V0.5F deep parts navigation')) {
+  throw new Error('V0.5F subcategory / pagination UI is incomplete.');
+}
+if (buildStages.version < 5 ||
+    buildStages.stages?.[2]?.engineSwapPlanned !== true ||
+    buildStages.stages?.[3]?.engineSwapPlanned !== true ||
+    buildStages.stages?.[2]?.engineSwaps !== false ||
+    buildStages.stages?.[3]?.engineSwaps !== false) {
+  throw new Error('V0.5F build-stage engine-swap status is misleading or stale.');
+}
+console.log('V0.5F Stage 3/4 parts depth + pagination checks passed.');
 
 
