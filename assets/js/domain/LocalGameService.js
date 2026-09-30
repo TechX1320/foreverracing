@@ -23,6 +23,7 @@ import {
   tuningHardwareProfile,
 } from './Tuning.js';
 import { engineToCarSnapshot, normalizeEngineDefinition } from './EngineCatalog.js';
+import { circuitEntryStatus, normalizeCircuitDefinition } from './CircuitCatalog.js';
 import {
   engineSwapEligible,
   engineSwapFitment,
@@ -68,10 +69,11 @@ export class LocalGameError extends Error {
 }
 
 export class LocalGameService {
-  constructor({ cars, parts, engines = [], config, buildStages = [], racingConfig = {} }) {
+  constructor({ cars, parts, engines = [], circuits = [], config, buildStages = [], racingConfig = {} }) {
     this.cars = clone(cars || []);
     this.parts = clone(parts || []);
     this.engines = clone(engines || []).map((engine) => normalizeEngineDefinition(engine));
+    this.circuits = clone(circuits || []).map((circuit) => normalizeCircuitDefinition(circuit));
     this.buildStages = clone(buildStages || []);
     this.racingConfig = clone(racingConfig || {});
     this.raceSimulator = new RaceSimulator(this.racingConfig);
@@ -93,12 +95,13 @@ export class LocalGameService {
       schemaVersion: this.config.schemaVersion,
       user: { id: 1, username: 'Admin', createdAt: timestamp },
       wallet: { credits: this.config.startingCredits },
-      progression: { level: 1, exp: 0, rep: 0 },
+      progression: { level: 1, exp: 0, rep: 0, unlockedClasses: ['D'] },
       tutorial: { version: this.config.tutorialVersion, status: 'active', step: 'welcome', completedSteps: [] },
       stats: { races: 0, wins: 0, losses: 0, bestReaction: null, showroomPurchases: 0, usedPurchases: 0, partsPurchased: 0, enginesPurchased: 0, engineSwaps: 0 },
       selectedCarId: null,
       garage: [],
       inventory: { parts: [], engines: [] },
+      circuits: { activeRun: null, progress: {} },
       roguelike: { activeRun: null, bestStage: 0, runsStarted: 0, runsCompleted: 0 },
       activeRace: null,
       raceHistory: [],
@@ -118,6 +121,9 @@ export class LocalGameService {
       player.wallet.credits = Math.max(Number(player.wallet.credits || 0), this.config.localDevCredits);
     }
     player.progression = { ...defaults.progression, ...(player.progression || {}) };
+    player.progression.unlockedClasses = [...new Set((Array.isArray(player.progression.unlockedClasses) ? player.progression.unlockedClasses : ['D'])
+      .map((value) => String(value || '').toUpperCase()).filter(Boolean))];
+    if (!player.progression.unlockedClasses.includes('D')) player.progression.unlockedClasses.unshift('D');
     player.tutorial = { ...defaults.tutorial, ...(player.tutorial || {}) };
     player.tutorial.completedSteps = Array.isArray(player.tutorial.completedSteps) ? player.tutorial.completedSteps : [];
     if (player.tutorial.status === 'active' && player.tutorial.step === 'build_stages') player.tutorial.step = 'first_race';
@@ -223,6 +229,9 @@ export class LocalGameService {
         torque: Math.max(1, Math.round(Number(car.derived?.torque || car.base?.torque || 1))),
       };
     }
+    player.circuits = { ...defaults.circuits, ...(player.circuits || {}) };
+    player.circuits.activeRun = player.circuits.activeRun && typeof player.circuits.activeRun === 'object' ? player.circuits.activeRun : null;
+    player.circuits.progress = player.circuits.progress && typeof player.circuits.progress === 'object' ? player.circuits.progress : {};
     player.roguelike = { ...defaults.roguelike, ...(player.roguelike || {}) };
     player.activeRace = player.activeRace && typeof player.activeRace === 'object' ? player.activeRace : null;
     player.raceHistory = Array.isArray(player.raceHistory) ? player.raceHistory : [];
@@ -436,7 +445,7 @@ export class LocalGameService {
       outgoingAssembly.engineId = outgoingEngineId;
       outgoingAssembly.installedOnCarId = null;
       outgoingAssembly.condition = normalizedStoredEngineCondition(car.engineCondition || {});
-      outgoingAssembly.tune = car.tune ? clone(car.tune) : null;
+      outgoingAssembly.tune = null;
       outgoingAssembly.storedStats = {
         hp: Math.max(1, Math.round(Number(car.derived?.hp || car.base?.hp || 1))),
         torque: Math.max(1, Math.round(Number(car.derived?.torque || car.base?.torque || 1))),
@@ -473,12 +482,15 @@ export class LocalGameService {
         player.inventory.engines.push(incomingAssembly);
       }
       incomingAssembly.installedOnCarId = carId;
+      incomingAssembly.tune = null;
 
       const candidate = swappedCarSnapshot(car, engine);
       candidate.engineInventoryId = incomingAssembly.inventoryId;
       candidate.engineSwapFitment = clone(car.engineSwapFitment || {});
       candidate.engineCondition = normalizedStoredEngineCondition(incomingAssembly.condition || {});
-      candidate.tune = incomingAssembly.tune ? clone(incomingAssembly.tune) : null;
+      candidate.tune = null;
+      candidate.tuningRuntime = null;
+      candidate.tuningDiagnostics = null;
       candidate.engineSwap = {
         count: Number(car.engineSwap?.count || 0) + 1,
         lastFromEngineId: outgoingEngineId || null,
@@ -1000,6 +1012,326 @@ export class LocalGameService {
 
   quickRace(inputPlayer, distance = '1/4', timestampMs = Date.now()) {
     return this.startQuickRace(inputPlayer, distance, timestampMs);
+  }
+
+
+  circuitCatalog() {
+    return clone(this.circuits);
+  }
+
+  circuitStart(inputPlayer, circuitId) {
+    return this.mutate(inputPlayer, (player) => {
+      if (player.activeRace) throw new LocalGameError('Finish the active race first.');
+      if (player.circuits.activeRun) throw new LocalGameError('Finish or leave the current Circuit before entering another.');
+      const circuit = this.findBy(this.circuits, 'circuitId', String(circuitId || ''));
+      if (!circuit) throw new LocalGameError('That Circuit does not exist.', 404);
+      const car = this.selectedCar(player);
+      const entry = circuitEntryStatus(circuit, player, car);
+      if (!entry.ok) throw new LocalGameError(entry.reasons[0] || 'Current car is not eligible.');
+      const progress = player.circuits.progress[circuit.circuitId] || {};
+      if (!circuit.repeatable && progress.completed) throw new LocalGameError('That Circuit has already been completed.');
+      player.circuits.activeRun = {
+        runId: this.id('circuit'),
+        circuitId: circuit.circuitId,
+        carId: car.carId,
+        raceIndex: 0,
+        wins: 0,
+        losses: 0,
+        runCredits: 0,
+        startedAt: now(),
+      };
+    });
+  }
+
+  circuitAbandon(inputPlayer) {
+    return this.mutate(inputPlayer, (player) => {
+      if (player.activeRace) throw new LocalGameError('Finish the active race first.');
+      player.circuits.activeRun = null;
+    });
+  }
+
+  startCircuitRace(inputPlayer, circuitId, timestampMs = Date.now()) {
+    let activeRace = null;
+    const player = this.mutate(inputPlayer, (player) => {
+        if (player.activeRace) {
+          activeRace = player.activeRace;
+          return;
+        }
+        const run = player.circuits.activeRun;
+        if (!run || String(run.circuitId || '') !== String(circuitId || '')) throw new LocalGameError('Enter this Circuit first.');
+        const circuit = this.findBy(this.circuits, 'circuitId', String(run.circuitId));
+        if (!circuit) throw new LocalGameError('Circuit definition is missing.', 404);
+        const raceDef = circuit.races[Number(run.raceIndex || 0)];
+        if (!raceDef) throw new LocalGameError('This Circuit has no race at the current position.');
+
+        const carIndex = this.requireOwnedCarIndex(player, String(run.carId || ''));
+        const car = player.garage[carIndex];
+        if (car.engineCondition?.failed) throw new LocalGameError('ENGINE FAILED — rebuild it in Garage before racing again.');
+        const entry = circuitEntryStatus(circuit, player, car);
+        if (!entry.ok) throw new LocalGameError(entry.reasons[0] || 'The Circuit car is no longer eligible.');
+
+        const distance = raceDef.distance;
+        const distanceConfig = this.raceSimulator.distance(distance);
+        const weather = this.circuitWeather(raceDef.weather);
+        const location = { name: raceDef.location || 'The Circuit', weight: 1 };
+        const opponent = this.circuitOpponentProfile(raceDef);
+        const level = Math.max(1, Number(player.progression?.level || 1));
+        const playerRun = this.raceSimulator.simulate({
+          hp: Math.max(1, Number(car.derived?.hp || 1)),
+          torque: Math.max(1, Number(car.derived?.torque || 1)),
+          weight: Math.max(500, Number(car.derived?.weight || 500)),
+          grip: Math.max(0.5, Number(car.derived?.grip || 1)),
+          drivetrain: String(car.derived?.drivetrain || car.base?.drivetrain || '-'),
+          level,
+          tuning: car.tuningRuntime || null,
+        }, distance, weather);
+        const opponentRun = this.raceSimulator.simulate({
+          ...opponent.sim,
+          level: opponent.level,
+        }, distance, weather);
+        const playerDnf = Boolean(playerRun.dnf);
+        const won = !playerDnf && playerRun.totalTime < opponentRun.totalTime;
+        const reward = won ? Number(raceDef.rewards?.credits || 0) : 0;
+        const expReward = won ? Number(raceDef.rewards?.exp || 0) : 0;
+        const repReward = won ? Number(raceDef.rewards?.rep || 0) : 0;
+        const timeScale = Math.max(0.01, Number(this.racingConfig?.presentation?.timeScale || 1));
+        const stagingMs = Math.max(1800, Number(this.racingConfig?.presentation?.stagingMs || 2800)) * timeScale;
+        const greenAt = Number(timestampMs) + stagingMs;
+        const playerFinishSeconds = Math.max(0.1, Number(playerRun.reactionTime || 0) + Number(playerRun.elapsedTime || 0));
+        const opponentFinishSeconds = Math.max(0.1, Number(opponentRun.reactionTime || 0) + Number(opponentRun.elapsedTime || 0));
+        const finishAt = greenAt + (Math.max(playerFinishSeconds, opponentFinishSeconds) * 1000 * timeScale);
+        const race = {
+          raceId: this.id('race'),
+          origin: 'circuit',
+          circuitId: circuit.circuitId,
+          circuitRaceId: raceDef.raceId,
+          circuitRaceIndex: Number(run.raceIndex || 0),
+          circuitRaceName: raceDef.name,
+          circuitRaceType: raceDef.type,
+          won,
+          distance,
+          distanceLabel: String(distanceConfig.label || distance),
+          distanceFeet: Number(distanceConfig.feet || 1320),
+          location,
+          weather,
+          margin: playerDnf ? null : round3(Math.abs(playerRun.totalTime - opponentRun.totalTime)),
+          reward,
+          expReward,
+          repReward,
+          newBest: false,
+          playerCarId: car.carId,
+          carName: this.carName(car),
+          playerVisual: clone(car.visual || {}),
+          playerDrivetrain: String(car.base?.drivetrain || '-'),
+          playerPerformanceIndex: Number(car.performanceIndex || benchmarkPerformance(car.derived || car.base, this.racingConfig).performanceIndex),
+          playerPerformanceClass: String(car.performanceClass || performanceClassFromIndex(car.performanceIndex)),
+          player: playerRun,
+          opponent: {
+            name: opponent.name,
+            carName: opponent.carName,
+            visual: clone(opponent.visual || {}),
+            performanceIndex: opponent.performanceIndex,
+            performanceClass: opponent.performanceClass,
+            drivetrain: opponent.drivetrain,
+            buildType: opponent.buildType,
+            level: opponent.level,
+            ...opponentRun,
+          },
+          reaction: playerRun.reactionTime,
+          playerEt: playerRun.elapsedTime,
+          opponentEt: opponentRun.elapsedTime,
+        };
+        activeRace = {
+          raceId: race.raceId,
+          origin: 'circuit',
+          circuitId: circuit.circuitId,
+          status: 'running',
+          startedAt: Number(timestampMs),
+          greenAt,
+          finishAt,
+          timeScale,
+          revealDelayMs: Math.max(0, Number(this.racingConfig?.presentation?.revealDelayMs || 650)),
+          progressExponent: Math.max(1, Number(this.racingConfig?.presentation?.progressExponent || 1.38)),
+          distance,
+          race,
+        };
+        player.activeRace = clone(activeRace);
+      });
+    return { player, activeRace };
+  }
+
+  finishCircuitRace(inputPlayer, raceId, timestampMs = Date.now()) {
+    let race = null;
+    let circuitResult = null;
+    const player = this.mutate(inputPlayer, (draft) => {
+      const active = draft.activeRace;
+      if (!active || active.origin !== 'circuit') {
+        const prior = [...(draft.raceHistory || [])].reverse().find((row) => String(row.raceId) === String(raceId));
+        if (prior) {
+          race = clone(prior);
+          circuitResult = prior.circuitResult || null;
+          return;
+        }
+        throw new LocalGameError('No Circuit race is currently in progress.', 409);
+      }
+      if (String(active.raceId) !== String(raceId)) throw new LocalGameError('That Circuit race is no longer active.', 409);
+      if (Number(timestampMs) < Number(active.finishAt || 0)) throw new LocalGameError('The race is still in progress.', 409);
+
+      race = clone(active.race || {});
+      const run = draft.circuits.activeRun;
+      const circuit = run ? this.findBy(this.circuits, 'circuitId', String(run.circuitId || '')) : null;
+      if (!run || !circuit) throw new LocalGameError('Circuit run state is missing.', 409);
+      const carIndex = this.requireOwnedCarIndex(draft, race.playerCarId);
+      const car = draft.garage[carIndex];
+      const playerRun = race.player || {};
+      const won = Boolean(race.won);
+
+      if (won) {
+        draft.wallet.credits += Number(race.reward || 0);
+        draft.progression.exp += Number(race.expReward || 0);
+        draft.progression.rep += Number(race.repReward || 0);
+        draft.progression.level = this.levelFromExp(draft.progression.exp);
+        run.wins = Number(run.wins || 0) + 1;
+        run.runCredits = Number(run.runCredits || 0) + Number(race.reward || 0);
+        run.raceIndex = Number(run.raceIndex || 0) + 1;
+        this.addTransaction(draft, 'circuit_race_reward', Number(race.reward || 0), `${circuit.name}: ${race.circuitRaceName}`);
+      } else {
+        run.losses = Number(run.losses || 0) + 1;
+        if (circuit.lossRule === 'reset_circuit') run.raceIndex = 0;
+      }
+
+      draft.stats.races = Number(draft.stats.races || 0) + 1;
+      draft.stats[won ? 'wins' : 'losses'] = Number(draft.stats[won ? 'wins' : 'losses'] || 0) + 1;
+      this.commitRaceRecord(draft, carIndex, race);
+
+      if (playerRun.dnf && playerRun.mechanicalFailure === 'ENGINE FAILURE') {
+        const previousFailures = Number(car.engineCondition?.failures || 0);
+        draft.garage[carIndex].engineCondition = {
+          healthPct: 0,
+          failed: true,
+          failures: previousFailures + 1,
+          lastFailureAt: now(),
+          repairedAt: car.engineCondition?.repairedAt || null,
+        };
+        const assembly = this.engineAssemblyForCar(draft, draft.garage[carIndex]);
+        if (assembly) assembly.condition = normalizedStoredEngineCondition(draft.garage[carIndex].engineCondition);
+        race.engineFailure = true;
+        race.engineRepairCost = this.engineRepairCost(draft.garage[carIndex]);
+      }
+
+      const completed = won && Number(run.raceIndex || 0) >= circuit.races.length;
+      if (completed) {
+        const completion = circuit.completion || {};
+        const firstClear = !draft.circuits.progress[circuit.circuitId]?.completed;
+        draft.wallet.credits += Number(completion.credits || 0);
+        draft.progression.exp += Number(completion.exp || 0);
+        draft.progression.rep += Number(completion.rep || 0);
+        draft.progression.level = this.levelFromExp(draft.progression.exp);
+        if (completion.unlockClass && !draft.progression.unlockedClasses.includes(completion.unlockClass)) {
+          draft.progression.unlockedClasses.push(completion.unlockClass);
+        }
+        if (Number(completion.credits || 0) > 0) {
+          this.addTransaction(draft, 'circuit_completion', Number(completion.credits || 0), `${circuit.name} completion`);
+        }
+        draft.circuits.progress[circuit.circuitId] = {
+          ...(draft.circuits.progress[circuit.circuitId] || {}),
+          completed: true,
+          completions: Number(draft.circuits.progress[circuit.circuitId]?.completions || 0) + 1,
+          highestRace: circuit.races.length,
+          firstClearedAt: draft.circuits.progress[circuit.circuitId]?.firstClearedAt || now(),
+          lastClearedAt: now(),
+        };
+        circuitResult = {
+          completed: true,
+          firstClear,
+          unlockClass: completion.unlockClass || null,
+          completionCredits: Number(completion.credits || 0),
+          completionExp: Number(completion.exp || 0),
+          completionRep: Number(completion.rep || 0),
+        };
+        draft.circuits.activeRun = null;
+      } else {
+        const currentProgress = draft.circuits.progress[circuit.circuitId] || {};
+        draft.circuits.progress[circuit.circuitId] = {
+          ...currentProgress,
+          completed: currentProgress.completed === true,
+          completions: Number(currentProgress.completions || 0),
+          highestRace: Math.max(Number(currentProgress.highestRace || 0), Number(run.raceIndex || 0)),
+          lastPlayedAt: now(),
+        };
+        draft.circuits.activeRun = run;
+        circuitResult = {
+          completed: false,
+          nextRaceIndex: Number(run.raceIndex || 0),
+          lossRule: circuit.lossRule,
+        };
+      }
+
+      race.circuitResult = circuitResult;
+      race.completedAt = now();
+      draft.raceHistory.push(clone(race));
+      const historyLimit = Math.max(5, Number(this.racingConfig.historyLimit || 25));
+      if (draft.raceHistory.length > historyLimit) draft.raceHistory = draft.raceHistory.slice(-historyLimit);
+      draft.activeRace = null;
+    });
+    return { player, race, circuitResult };
+  }
+
+  commitRaceRecord(player, carIndex, race) {
+    const car = player.garage[carIndex];
+    const distance = String(race.distance || '1/4');
+    const playerRun = race.player || {};
+    const records = car.raceRecords || this.emptyRaceRecords();
+    const record = records[distance] || { races: 0, bestEt: null, bestTrap: null };
+    record.races = Number(record.races || 0) + 1;
+    let newBest = false;
+    if (!playerRun.foul && !playerRun.dnf && (record.bestEt == null || Number(playerRun.elapsedTime) < Number(record.bestEt))) {
+      record.bestEt = Number(playerRun.elapsedTime);
+      newBest = true;
+    }
+    if (!playerRun.dnf && (record.bestTrap == null || Number(playerRun.trapSpeed) > Number(record.bestTrap))) {
+      record.bestTrap = Number(playerRun.trapSpeed);
+    }
+    records[distance] = record;
+    player.garage[carIndex].raceRecords = records;
+    race.newBest = newBest;
+  }
+
+  circuitWeather(name) {
+    const match = (this.racingConfig?.weather || []).find((row) => String(row.name || '') === String(name || ''));
+    return match ? clone(match) : { name: String(name || 'Cool & Cloudy'), etModifier: 0, mphModifier: 0, weight: 1 };
+  }
+
+  circuitOpponentProfile(raceDef) {
+    const opponent = raceDef.opponent || {};
+    const spec = this.findBy(this.cars, 'catalogId', String(opponent.carCatalogId || '')) || {};
+    const stats = opponent.stats || {};
+    const benchmark = benchmarkPerformance({
+      hp: stats.hp,
+      torque: stats.torque,
+      weight: stats.weight,
+      grip: stats.grip,
+      drivetrain: stats.drivetrain,
+    }, this.racingConfig);
+    const visual = clone(spec.visual || {});
+    if (opponent.paintColor) visual.paintColor = opponent.paintColor;
+    return {
+      name: opponent.name || 'Opponent',
+      carName: spec.displayName || opponent.carCatalogId || 'Opponent',
+      visual,
+      performanceIndex: benchmark.performanceIndex,
+      performanceClass: performanceClassFromIndex(benchmark.performanceIndex),
+      drivetrain: stats.drivetrain || spec.base?.drivetrain || '-',
+      buildType: `Build Type ${Number(opponent.buildType || 1)}`,
+      level: Math.max(1, Number(opponent.level || 1)),
+      sim: {
+        hp: Math.max(1, Number(stats.hp || 1)),
+        torque: Math.max(1, Number(stats.torque || 1)),
+        weight: Math.max(500, Number(stats.weight || 500)),
+        grip: Math.max(0.5, Number(stats.grip || 1)),
+        drivetrain: String(stats.drivetrain || spec.base?.drivetrain || '-'),
+      },
+    };
   }
 
   roguelikeStart(inputPlayer) {

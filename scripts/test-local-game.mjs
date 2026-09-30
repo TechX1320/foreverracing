@@ -8,16 +8,17 @@ import { applyBuildPartEffect, enginePowerEnvelope, limitEngineOutput, suggested
 import { baseMapProfile, defaultTuneProfile, evaluateTune, tuningFingerprint, tuningHardwareProfile } from '../assets/js/domain/Tuning.js';
 import { CHASSIS_BOUND_CATEGORIES, engineSwapEligible, engineSwapQuote, isEngineBoundPart } from '../assets/js/domain/EngineSwap.js';
 
-const [cars, parts, engines, config, buildStageConfig, racingConfig] = await Promise.all([
+const [cars, parts, engines, circuits, config, buildStageConfig, racingConfig] = await Promise.all([
   fs.readFile(new URL('../data/catalog/cars.json', import.meta.url), 'utf8').then(JSON.parse),
   fs.readFile(new URL('../data/catalog/parts.json', import.meta.url), 'utf8').then(JSON.parse),
   fs.readFile(new URL('../data/catalog/engines.json', import.meta.url), 'utf8').then(JSON.parse),
+  fs.readFile(new URL('../data/catalog/circuits.json', import.meta.url), 'utf8').then(JSON.parse),
   fs.readFile(new URL('../data/config/game.json', import.meta.url), 'utf8').then(JSON.parse),
   fs.readFile(new URL('../data/config/build-stages.json', import.meta.url), 'utf8').then(JSON.parse),
   fs.readFile(new URL('../data/config/racing.json', import.meta.url), 'utf8').then(JSON.parse),
 ]);
 
-const game = new LocalGameService({ cars, parts, engines, config, buildStages: buildStageConfig.stages, racingConfig });
+const game = new LocalGameService({ cars, parts, engines, circuits, config, buildStages: buildStageConfig.stages, racingConfig });
 const compatibilityFixture = {
   catalogId: 'test_engine_specific_part',
   compatibility: { engineIds: ['vw_ea888_20t_200'], buildStages: [2,3,4] },
@@ -601,7 +602,7 @@ assert.ok(storedRenesis.attachedPartInventoryIds.includes('swap-ecu'));
 for (const id of ['swap-tire', 'swap-suspension', 'swap-weight']) {
   assert.equal(storedRenesis.attachedPartInventoryIds.includes(id), false, `${id} must not be stored with the Renesis.`);
 }
-assert.ok(storedRenesis.tune, 'Saved calibration should travel with the stored engine assembly.');
+assert.equal(storedRenesis.tune, null, 'Removing an engine must clear its active ECU calibration.');
 assert.ok(Number(storedRenesis.storedStats?.hp || 0) > 0);
 
 const installedEa888 = swapPlayer.inventory.engines.find((item) => item.engineId === ea888.engineId && item.installedOnCarId === swapRx8.carId);
@@ -620,7 +621,7 @@ assert.equal(swapPlayer.inventory.parts.find((part) => part.inventoryId === 'swa
   'Stage 2-compatible engine parts should reactivate automatically with their stored engine.');
 assert.equal(swapPlayer.inventory.parts.find((part) => part.inventoryId === 'swap-ecu').installedOnCarId, null,
   'Later-stage engine parts should remain dormant after the assembly returns to a Stage 2 chassis.');
-assert.ok(returnedRx8.tune, 'The stored engine calibration should return with the assembly.');
+assert.equal(returnedRx8.tune, null, 'Reinstalling an owned engine must start with no active calibration.');
 assert.ok(swapPlayer.inventory.engines.some((item) => item.engineId === ea888.engineId && !item.installedOnCarId));
 assert.ok(swapPlayer.inventory.engines.some((item) => item.engineId === renesis.engineId && item.installedOnCarId === swapRx8.carId));
 
@@ -653,3 +654,51 @@ const failedStoredRenesis = failedSwapPlayer.inventory.engines.find((item) => it
 assert.equal(failedStoredRenesis.condition.failed, true, 'The failed outgoing Renesis assembly should keep its failure state.');
 
 console.log('V0.5H.1 engine assembly + Stage 2 swap flow test passed.');
+
+// V0.6A Circuit progression regression
+assert.equal(circuits.length >= 1, true);
+const streetRoots = circuits.find((row) => row.circuitId === 'street_roots_d');
+assert.ok(streetRoots);
+assert.equal(streetRoots.required, true);
+assert.equal(streetRoots.races.length, 5);
+assert.equal(streetRoots.races.at(-1).type, 'boss');
+assert.equal(streetRoots.completion.unlockClass, 'C');
+
+let circuitPlayer = game.defaultPlayer();
+circuitPlayer.user = { ...circuitPlayer.user, username: 'CircuitTester' };
+circuitPlayer.wallet.credits = 100000;
+circuitPlayer.tutorial = { ...circuitPlayer.tutorial, status: 'complete', step: 'complete' };
+const circuitCar = game.createOwnedCar(deepRx8, 'used', 90000, 80, 5000);
+circuitPlayer.garage = [circuitCar];
+circuitPlayer.selectedCarId = circuitCar.carId;
+circuitPlayer = game.normalizePlayer(circuitPlayer);
+assert.deepEqual(circuitPlayer.progression.unlockedClasses, ['D']);
+
+circuitPlayer = game.circuitStart(circuitPlayer, 'street_roots_d');
+assert.equal(circuitPlayer.circuits.activeRun.circuitId, 'street_roots_d');
+assert.equal(circuitPlayer.circuits.activeRun.raceIndex, 0);
+
+let finalCircuitResult = null;
+for (let raceIndex = 0; raceIndex < 5; raceIndex += 1) {
+  const started = game.startCircuitRace(circuitPlayer, 'street_roots_d', 1000 + (raceIndex * 100));
+  circuitPlayer = started.player;
+  assert.equal(started.activeRace.origin, 'circuit');
+  assert.equal(started.activeRace.race.circuitRaceIndex, raceIndex);
+  circuitPlayer.activeRace.finishAt = 0;
+  circuitPlayer.activeRace.race.won = true;
+  circuitPlayer.activeRace.race.player.foul = false;
+  circuitPlayer.activeRace.race.player.dnf = false;
+  circuitPlayer.activeRace.race.player.elapsedTime = 14.5 - (raceIndex * 0.1);
+  circuitPlayer.activeRace.race.player.trapSpeed = 95 + raceIndex;
+  const finished = game.finishCircuitRace(circuitPlayer, started.activeRace.raceId, 999999);
+  circuitPlayer = finished.player;
+  finalCircuitResult = finished.circuitResult;
+  if (raceIndex < 4) assert.equal(circuitPlayer.circuits.activeRun.raceIndex, raceIndex + 1);
+}
+assert.equal(circuitPlayer.circuits.activeRun, null);
+assert.equal(finalCircuitResult.completed, true);
+assert.equal(finalCircuitResult.unlockClass, 'C');
+assert.ok(circuitPlayer.progression.unlockedClasses.includes('C'));
+assert.equal(circuitPlayer.circuits.progress.street_roots_d.completed, true);
+console.log('V0.6A Circuit five-race progression + boss unlock test passed.');
+

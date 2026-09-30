@@ -82,7 +82,7 @@ Build: {$build}
 Storage mode: local
 Offline service worker: disabled in static development mode
 Race presentation: persistent two-phase start/finish with blocking real-time playback
-V0.5H.2: Engine Swap modal sizing and chassis-only part guards
+V0.6A: Circuit PvE event framework, Street Roots progression and Circuit Creator
 Do not edit docs/ by hand; run php scripts/build-static.php.
 ");
 

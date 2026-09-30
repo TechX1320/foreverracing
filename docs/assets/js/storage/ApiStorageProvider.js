@@ -37,6 +37,11 @@ export class ApiStorageProvider extends StorageProvider {
   startQuickRace(distance = '1/4') { return this.#api.startQuickRace(distance); }
   finishQuickRace(raceId) { return this.#api.finishQuickRace(raceId); }
   quickRace(distance = '1/4') { return this.#api.startQuickRace(distance); }
+  circuitCatalog() { return this.#api.circuitCatalog(); }
+  circuitStart(circuitId) { return this.#api.circuitStart(circuitId); }
+  circuitAbandon() { return this.#api.circuitAbandon(); }
+  startCircuitRace(circuitId) { return this.#api.startCircuitRace(circuitId); }
+  finishCircuitRace(raceId) { return this.#api.finishCircuitRace(raceId); }
   roguelikeStart() { return this.#api.roguelikeStart(); }
   roguelikeStep(choice) { return this.#api.roguelikeStep(choice); }
 }

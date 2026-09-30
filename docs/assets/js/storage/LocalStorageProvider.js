@@ -3,6 +3,7 @@ import { LocalGameService } from '../domain/LocalGameService.js';
 import { mergeContentStudioCars } from '../content/ContentStudioCatalog.js';
 import { mergeContentStudioEngines } from '../content/ContentStudioEngineCatalog.js';
 import { mergeContentStudioParts } from '../content/ContentStudioPartCatalog.js';
+import { mergeContentStudioCircuits } from '../content/ContentStudioCircuitCatalog.js';
 
 const PLAYER_KEY = 'foreverRacing.v02.player';
 const SESSION_KEY = 'foreverRacing.v02.session';
@@ -21,10 +22,11 @@ export class LocalStorageProvider extends StorageProvider {
 
   async #ready() {
     if (this.#service) return;
-    const [cars, parts, engines, config, buildStages, racingConfig] = await Promise.all([
+    const [cars, parts, engines, circuits, config, buildStages, racingConfig] = await Promise.all([
       fetchJson('data/catalog/cars.json'),
       fetchJson('data/catalog/parts.json'),
       fetchJson('data/catalog/engines.json'),
+      fetchJson('data/catalog/circuits.json'),
       fetchJson('data/config/game.json'),
       fetchJson('data/config/build-stages.json'),
       fetchJson('data/config/racing.json'),
@@ -33,7 +35,8 @@ export class LocalStorageProvider extends StorageProvider {
     const authoredCars = mergeContentStudioCars(cars);
     const authoredParts = mergeContentStudioParts(parts);
     const authoredEngines = mergeContentStudioEngines(engines);
-    this.#service = new LocalGameService({ cars: authoredCars, parts: authoredParts, engines: authoredEngines, config, buildStages: buildStages.stages || buildStages, racingConfig });
+    const authoredCircuits = mergeContentStudioCircuits(circuits);
+    this.#service = new LocalGameService({ cars: authoredCars, parts: authoredParts, engines: authoredEngines, circuits: authoredCircuits, config, buildStages: buildStages.stages || buildStages, racingConfig });
   }
 
   async session() {
@@ -206,6 +209,39 @@ export class LocalStorageProvider extends StorageProvider {
 
   async quickRace(distance = '1/4') {
     return this.startQuickRace(distance);
+  }
+
+  async circuitCatalog() {
+    await this.#ready();
+    return { ok: true, circuits: this.#service.circuitCatalog() };
+  }
+
+  async circuitStart(circuitId) {
+    await this.#ready();
+    const player = this.#service.circuitStart(this.#loadPlayer(), circuitId);
+    this.#savePlayer(player);
+    return { ok: true, player };
+  }
+
+  async circuitAbandon() {
+    await this.#ready();
+    const player = this.#service.circuitAbandon(this.#loadPlayer());
+    this.#savePlayer(player);
+    return { ok: true, player };
+  }
+
+  async startCircuitRace(circuitId) {
+    await this.#ready();
+    const result = this.#service.startCircuitRace(this.#loadPlayer(), circuitId, Date.now());
+    this.#savePlayer(result.player);
+    return { ok: true, ...result };
+  }
+
+  async finishCircuitRace(raceId) {
+    await this.#ready();
+    const result = this.#service.finishCircuitRace(this.#loadPlayer(), raceId, Date.now());
+    this.#savePlayer(result.player);
+    return { ok: true, ...result };
   }
 
   async roguelikeStart() {

@@ -55,6 +55,7 @@ const required = [
   'assets/js/domain/ContentRelease.js',
   'assets/js/domain/EngineCatalog.js',
   'assets/js/domain/EngineSwap.js',
+  'assets/js/domain/CircuitCatalog.js',
   'assets/js/domain/ForcedInduction.js',
   'assets/js/domain/PartCatalog.js',
   'assets/js/domain/PowerModel.js',
@@ -65,14 +66,17 @@ const required = [
   'assets/js/content/ContentStudioCatalog.js',
   'assets/js/content/ContentStudioEngineCatalog.js',
   'assets/js/content/ContentStudioPartCatalog.js',
+  'assets/js/content/ContentStudioCircuitCatalog.js',
   'assets/js/screens/contentStudio.js',
   'assets/js/screens/engineStudio.js',
   'assets/js/screens/engineSwapShop.js',
   'assets/js/screens/partsStudio.js',
+  'assets/js/screens/circuitStudio.js',
   'data/catalog/cars.json',
   'data/catalog/car-art.json',
   'data/catalog/parts.json',
   'data/catalog/engines.json',
+  'data/catalog/circuits.json',
   'data/config/game.json',
   'data/config/build-stages.json',
   'data/config/racing.json',
@@ -86,12 +90,13 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.5.0-h.2"')) throw new Error('Static index is missing the V0.5H.2 build marker.');
+if (!html.includes('data-build="0.6.0-a"')) throw new Error('Static index is missing the V0.6A build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
 const artCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/car-art.json', docs), 'utf8'));
 const engineCatalogV05c = JSON.parse(await fs.readFile(new URL('data/catalog/engines.json', docs), 'utf8'));
+const circuitCatalogV06a = JSON.parse(await fs.readFile(new URL('data/catalog/circuits.json', docs), 'utf8'));
 const starters = carCatalog.filter((car) => car.starter);
 if (carCatalog.length !== 3 || starters.length !== 3) throw new Error('V0.4G gameplay catalog must keep exactly the three spec-validated starters for now.');
 if (!starters.every((car) => car.class === 'D')) throw new Error('All three current starter cars must begin in D class.');
@@ -163,6 +168,7 @@ if (!localProviderSource.includes('already logged in in this browser')) throw ne
 if (!localProviderSource.includes('quickRacePreview') || !localProviderSource.includes('startQuickRace') || !localProviderSource.includes('finishQuickRace')) throw new Error('Local race preview / two-phase storage lifecycle is missing.');
 if (!localProviderSource.includes('mergeContentStudioCars')) throw new Error('Content Studio local catalog overlay is missing.');
 if (!localProviderSource.includes('mergeContentStudioParts')) throw new Error('Parts Creator local catalog overlay is missing.');
+if (!localProviderSource.includes('mergeContentStudioCircuits') || !localProviderSource.includes('startCircuitRace') || !localProviderSource.includes('finishCircuitRace')) throw new Error('V0.6A Circuit local runtime / authoring overlay is missing.');
 
 const localGameSource = await fs.readFile(new URL('assets/js/domain/LocalGameService.js', root), 'utf8');
 if (!localGameSource.includes('quickRacePreview') || !localGameSource.includes('nextOpponentProfile') || !localGameSource.includes('activeRace') || !localGameSource.includes('finishQuickRace')) throw new Error('Deterministic preview / persistent active race lifecycle is missing.');
@@ -182,6 +188,7 @@ const modules = [
   'assets/js/domain/ContentRelease.js',
   'assets/js/domain/EngineCatalog.js',
   'assets/js/domain/EngineSwap.js',
+  'assets/js/domain/CircuitCatalog.js',
   'assets/js/domain/PowerModel.js',
   'assets/js/domain/Tuning.js',
   'assets/js/ui/vehicleRenderer.js',
@@ -200,8 +207,10 @@ const modules = [
   'assets/js/screens/settings.js',
   'assets/js/content/ContentStudioCatalog.js',
   'assets/js/content/ContentStudioEngineCatalog.js',
+  'assets/js/content/ContentStudioCircuitCatalog.js',
   'assets/js/screens/contentStudio.js',
   'assets/js/screens/engineStudio.js',
+  'assets/js/screens/circuitStudio.js',
 ];
 
 for (const file of modules) {
@@ -841,5 +850,52 @@ if (!html.includes('data-nav="engine-swap-shop"') ||
   throw new Error('V0.5H.2 Engine Assembly runtime / authoring workflow is incomplete.');
 }
 console.log('V0.5H.2 Engine Assembly checks passed.');
+
+const circuitDomainV06a = await fs.readFile(new URL('assets/js/domain/CircuitCatalog.js', root), 'utf8');
+const circuitScreenV06a = await fs.readFile(new URL('assets/js/screens/roguelike.js', root), 'utf8');
+const circuitStudioV06a = await fs.readFile(new URL('assets/js/screens/circuitStudio.js', root), 'utf8');
+const circuitContentV06a = await fs.readFile(new URL('assets/js/content/ContentStudioCircuitCatalog.js', root), 'utf8');
+const circuitApiCatalogV06a = await fs.readFile(new URL('api/circuit/catalog.php', root), 'utf8');
+const circuitApiStartV06a = await fs.readFile(new URL('api/circuit/race-start.php', root), 'utf8');
+const circuitApiFinishV06a = await fs.readFile(new URL('api/circuit/race-finish.php', root), 'utf8');
+const streetRootsV06a = circuitCatalogV06a.find((row) => row.circuitId === 'street_roots_d');
+if (runtimeConfig.schemaVersion < 12 ||
+    !streetRootsV06a ||
+    streetRootsV06a.races?.length !== 5 ||
+    streetRootsV06a.races?.[4]?.type !== 'boss' ||
+    streetRootsV06a.completion?.unlockClass !== 'C') {
+  throw new Error('V0.6A starter Circuit progression definition is incomplete.');
+}
+if (!circuitDomainV06a.includes('CIRCUIT_SCHEMA_VERSION') ||
+    !circuitDomainV06a.includes('CIRCUIT_MAX_RACES = 50') ||
+    !circuitDomainV06a.includes('validateCircuitDefinition') ||
+    !circuitScreenV06a.includes('PVE MINI-ROGUELITE EVENTS') ||
+    !circuitScreenV06a.includes('RACE THE RIVAL') ||
+    circuitScreenV06a.includes('Safe Line') ||
+    !circuitStudioV06a.includes('COPY LLM PROMPT') ||
+    !circuitStudioV06a.includes('ACTIVATE LOCALLY + RELOAD') ||
+    !circuitContentV06a.includes('mergeContentStudioCircuits') ||
+    !appSource.includes("renderCircuitStudio") ||
+    !appSource.includes(".register('circuit-studio'") ||
+    !localGameSource.includes('startCircuitRace') ||
+    !localGameSource.includes('finishCircuitRace') ||
+    !serverGameSourceV04c.includes('startCircuitRace') ||
+    !serverGameSourceV04c.includes('finishCircuitRace') ||
+    !racePresentationSource.includes('finishCircuitRace') ||
+    !circuitApiCatalogV06a.includes('GameService::circuitCatalog') ||
+    !circuitApiStartV06a.includes('GameService::startCircuitRace') ||
+    !circuitApiFinishV06a.includes('GameService::finishCircuitRace') ||
+    !serviceWorkerV05h.includes('CircuitCatalog.js') ||
+    !serviceWorkerV05h.includes('circuitStudio.js') ||
+    !serviceWorkerV05h.includes('circuits.json')) {
+  throw new Error('V0.6A Circuit runtime / Creator Studio workflow is incomplete.');
+}
+if (!engineSwapShopV05h.includes('RESET / NONE') ||
+    !localGameSource.includes('incomingAssembly.tune = null') ||
+    !serverGameSourceV04c.includes("$incoming['tune']=null")) {
+  throw new Error('V0.6A engine swaps must clear active ECU calibration.');
+}
+console.log('V0.6A Circuit progression, creator and tune-reset checks passed.');
+
 
 

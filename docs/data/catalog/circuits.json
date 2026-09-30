@@ -1,0 +1,203 @@
+[
+  {
+    "schemaVersion": 1,
+    "circuitId": "street_roots_d",
+    "name": "Street Roots",
+    "description": "Five local races. Four regulars, then the rival. Clear the boss to unlock C Class progression.",
+    "category": "progression",
+    "required": true,
+    "repeatable": true,
+    "lossRule": "retry_race",
+    "unlock": {
+      "requiresClasses": [
+        "D"
+      ],
+      "requiresCircuitIds": []
+    },
+    "entryRules": {
+      "allowedClasses": [
+        "D"
+      ],
+      "minPerformanceIndex": null,
+      "maxPerformanceIndex": 449,
+      "buildTypes": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "drivetrains": [],
+      "allowedCarIds": []
+    },
+    "recommendation": {
+      "class": "D",
+      "performanceIndex": 410,
+      "etSeconds": 14.9
+    },
+    "completion": {
+      "credits": 3500,
+      "exp": 180,
+      "rep": 35,
+      "unlockClass": "C",
+      "unlockCircuitIds": []
+    },
+    "races": [
+      {
+        "raceId": "parking_lot_warmup",
+        "name": "Parking Lot Warm-Up",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Local Industrial Strip",
+        "weather": "Cool & Cloudy",
+        "recommendation": {
+          "class": "D",
+          "performanceIndex": 335,
+          "etSeconds": 15.8
+        },
+        "opponent": {
+          "name": "Mia",
+          "carCatalogId": "golf_gti",
+          "level": 3,
+          "buildType": 1,
+          "stats": {
+            "hp": 190,
+            "torque": 200,
+            "weight": 3050,
+            "grip": 0.98,
+            "drivetrain": "FWD"
+          }
+        },
+        "rewards": {
+          "credits": 650,
+          "exp": 35,
+          "rep": 4
+        }
+      },
+      {
+        "raceId": "dockside_pull",
+        "name": "Dockside Pull",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Local Industrial Strip",
+        "weather": "Cool & Cloudy",
+        "recommendation": {
+          "class": "D",
+          "performanceIndex": 365,
+          "etSeconds": 15.4
+        },
+        "opponent": {
+          "name": "Trey",
+          "carCatalogId": "golf_gti",
+          "level": 4,
+          "buildType": 1,
+          "stats": {
+            "hp": 215,
+            "torque": 220,
+            "weight": 3000,
+            "grip": 1.01,
+            "drivetrain": "FWD"
+          }
+        },
+        "rewards": {
+          "credits": 800,
+          "exp": 42,
+          "rep": 5
+        }
+      },
+      {
+        "raceId": "rotary_night",
+        "name": "Rotary Night",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Local Industrial Strip",
+        "weather": "Cold & Dry",
+        "recommendation": {
+          "class": "D",
+          "performanceIndex": 395,
+          "etSeconds": 15
+        },
+        "opponent": {
+          "name": "Nori",
+          "carCatalogId": "mazda_rx8",
+          "level": 5,
+          "buildType": 1,
+          "stats": {
+            "hp": 238,
+            "torque": 159,
+            "weight": 3029,
+            "grip": 1.02,
+            "drivetrain": "RWD"
+          }
+        },
+        "rewards": {
+          "credits": 950,
+          "exp": 50,
+          "rep": 6
+        }
+      },
+      {
+        "raceId": "midnight_v6",
+        "name": "Midnight V6",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Local Industrial Strip",
+        "weather": "Cold & Dry",
+        "recommendation": {
+          "class": "D",
+          "performanceIndex": 425,
+          "etSeconds": 14.7
+        },
+        "opponent": {
+          "name": "Luc",
+          "carCatalogId": "renault_clio",
+          "level": 6,
+          "buildType": 1,
+          "stats": {
+            "hp": 255,
+            "torque": 221,
+            "weight": 3086,
+            "grip": 1.04,
+            "drivetrain": "RWD"
+          }
+        },
+        "rewards": {
+          "credits": 1150,
+          "exp": 60,
+          "rep": 8
+        }
+      },
+      {
+        "raceId": "boss_redline",
+        "name": "Rival: Redline",
+        "type": "boss",
+        "distance": "1/4",
+        "location": "Local Industrial Strip",
+        "weather": "Cool & Cloudy",
+        "recommendation": {
+          "class": "D",
+          "performanceIndex": 445,
+          "etSeconds": 14.5
+        },
+        "opponent": {
+          "name": "Redline",
+          "carCatalogId": "mazda_rx8",
+          "level": 8,
+          "buildType": 2,
+          "paintColor": "#b52b32",
+          "stats": {
+            "hp": 260,
+            "torque": 180,
+            "weight": 3000,
+            "grip": 1.06,
+            "drivetrain": "RWD"
+          }
+        },
+        "rewards": {
+          "credits": 1750,
+          "exp": 90,
+          "rep": 12
+        }
+      }
+    ]
+  }
+]
