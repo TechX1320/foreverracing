@@ -1965,3 +1965,97 @@ dialog.fr-dialog:has(.garage-inventory-dialog){
   .forced-induction-note{display:grid}
   .studio-engine-select-row{grid-template-columns:1fr}
 }
+
+/* V0.5D.1 parts depth + dyno polish */
+.parts-category-grid--race{grid-template-columns:repeat(3,minmax(0,1fr))}
+dialog.fr-dialog:has(.forced-induction-dialog){
+  width:min(900px,calc(100vw - 32px));
+  max-height:calc(100dvh - 32px);
+  overflow:hidden;
+}
+dialog.fr-dialog:has(.forced-induction-parts-dialog){
+  width:min(1060px,calc(100vw - 32px));
+  max-height:calc(100dvh - 32px);
+  overflow:hidden;
+}
+.forced-induction-dialog{width:100%;max-width:none;overflow:visible}
+.forced-induction-card{min-width:0;cursor:pointer}
+.forced-induction-card em{
+  margin-top:5px;
+  color:#9ca7af;
+  font-size:9px;
+  font-style:normal;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.forced-induction-card.is-active em{color:#7fc690}
+.forced-induction-workspace{
+  display:grid;
+  grid-template-columns:minmax(0,1.15fr) minmax(330px,.85fr);
+  gap:10px;
+  align-items:start;
+}
+.forced-induction-parts-list{display:grid;gap:6px;align-content:start}
+.forced-induction-parts-list .parts-shop-row{
+  grid-template-columns:54px minmax(175px,1fr) minmax(190px,.85fr) 165px;
+  min-height:72px;
+}
+.parts-shop-row__dyno-select{
+  border:0;
+  border-right:1px solid var(--border);
+  background:#0c0f11;
+  color:var(--faint);
+  font:inherit;
+  cursor:pointer;
+  display:grid;
+  place-items:center;
+  padding:6px;
+}
+.parts-shop-row__dyno-select span{
+  writing-mode:vertical-rl;
+  transform:rotate(180deg);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+.parts-shop-row__dyno-select:hover,.parts-shop-row__dyno-select:focus{background:#171b1e;color:var(--text)}
+.parts-shop-row__dyno-select.is-selected{background:#20150f;color:var(--accent-2)}
+.part-dyno{
+  min-width:0;
+  border:1px solid var(--border);
+  background:#0d1012;
+  padding:9px;
+}
+.part-dyno__title{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.part-dyno__title strong{font-size:13px}
+.part-dyno__title span{font-size:9px;color:var(--faint)}
+.part-dyno__legend{display:flex;gap:12px;margin:7px 0 3px;color:var(--muted);font-size:9px}
+.part-dyno__legend span{display:flex;gap:5px;align-items:center}
+.part-dyno__swatch{display:inline-block;width:16px;height:2px;background:#69727a}
+.part-dyno__swatch--hp{background:#f17c38}
+.part-dyno__swatch--tq{background:#77a6d8}
+.part-dyno svg{display:block;width:100%;height:auto;max-height:265px}
+.part-dyno-line{fill:none;stroke-width:2.7;stroke-linecap:round;stroke-linejoin:round}
+.part-dyno-line--before{stroke:#69727a;stroke-width:1.6;stroke-dasharray:5 5;opacity:.65}
+.part-dyno-line--hp{stroke:#f17c38}
+.part-dyno-line--tq{stroke:#77a6d8}
+.part-dyno__note,.part-dyno__empty{margin:5px 0 0;color:var(--faint);font-size:9px;line-height:1.35}
+.forced-induction-factory-row{min-height:64px}
+
+@media(max-width:980px){
+  .forced-induction-workspace{grid-template-columns:1fr}
+  .part-dyno{display:none}
+  .forced-induction-parts-list .parts-shop-row{grid-template-columns:46px minmax(170px,1fr) minmax(170px,.8fr) 150px}
+}
+@media(max-width:760px){
+  .parts-category-grid--race{grid-template-columns:1fr}
+  dialog.fr-dialog:has(.forced-induction-dialog),
+  dialog.fr-dialog:has(.forced-induction-parts-dialog){
+    width:calc(100vw - 10px);
+    max-height:calc(100dvh - 10px);
+    overflow:auto;
+  }
+  .forced-induction-parts-list .parts-shop-row{grid-template-columns:42px 1fr}
+  .forced-induction-parts-list .parts-shop-row__delta,
+  .forced-induction-parts-list .parts-shop-row__action{grid-column:2}
+}
