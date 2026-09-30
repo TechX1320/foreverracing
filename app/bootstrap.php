@@ -32,5 +32,6 @@ require_once __DIR__ . '/lib/Api.php';
 require_once __DIR__ . '/lib/RaceSimulator.php';
 require_once __DIR__ . '/lib/PerformanceIndex.php';
 require_once __DIR__ . '/lib/PowerModel.php';
+require_once __DIR__ . '/lib/EngineSwap.php';
 require_once __DIR__ . '/lib/Tuning.php';
 require_once __DIR__ . '/lib/GameService.php';
