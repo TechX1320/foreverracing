@@ -1,3 +1,4 @@
+import { enginePowerEnvelope, limitEngineOutput } from "./PowerModel.js";
 const clamp = (value, min, max) => Math.min(max, Math.max(min, Number(value || 0)));
 const round = (value, digits = 3) => {
   const scale = 10 ** digits;
@@ -40,6 +41,7 @@ export function tuningHardwareProfile(car, installedSpecs = []) {
     boosted,
     systems,
     engineKitLevel,
+    powerEnvelope: enginePowerEnvelope(car, specs),
     baseBoostPsi: round(baseBoostPsi, 1),
     safeBoostPsi: round(safeBoostPsi, 1),
     minBoostPsi: round(minBoostPsi, 1),
@@ -149,16 +151,24 @@ export function evaluateTune(car, untunedStats, inputProfile, hardware = {}) {
   const shift = shiftEvaluation(car, profile, fingerprint);
   const gear = gearEvaluation(profile, base, tire.gripMultiplier);
 
-  const derived = {
+  const preLimit = {
     hp: Math.round(Math.max(1, base.hp * powerMultiplier)),
     torque: Math.round(Math.max(1, base.torque * torqueMultiplier)),
     weight: Math.round(base.weight),
     grip: round(Math.max(0.5, base.grip * tire.gripMultiplier), 3),
     drivetrain: base.drivetrain,
   };
+  const limited = limitEngineOutput(preLimit, hardware.powerEnvelope || enginePowerEnvelope(car, []), { overdrive: stress * 0.04 });
+  const derived = {
+    hp: limited.hp,
+    torque: limited.torque,
+    weight: preLimit.weight,
+    grip: preLimit.grip,
+    drivetrain: preLimit.drivetrain,
+  };
 
   const stability = clamp(1 - (stress * 0.65) - (Math.max(0, Math.abs(fuelError) - 3) * 0.025) - (Math.max(0, timingError - 1.2) * 0.04), 0.35, 1);
-  const hints = buildHints({ profile, hardware, fuelError, timingError, tire, launch, shift, gear, stress });
+  const hints = buildHints({ profile, hardware, fuelError, timingError, tire, launch, shift, gear, stress, powerLimited: Boolean(limited.powerLimit?.hpLimited) });
 
   return {
     profile,
@@ -173,6 +183,8 @@ export function evaluateTune(car, untunedStats, inputProfile, hardware = {}) {
       tireState: tire.state,
       launchState: launch.state,
       shiftState: shift.state,
+      powerState: limited.powerLimit?.hpLimited ? "ENGINE-LIMITED" : "HEADROOM",
+      powerLimit: limited.powerLimit || null,
       hints,
     },
     race: {
@@ -249,9 +261,10 @@ function gearEvaluation(profile, stats, tireGripMultiplier) {
   return { launchPowerFactor, averagePowerFactor, idealLaunch, tractionMultiplier };
 }
 
-function buildHints({ profile, hardware, fuelError, timingError, tire, launch, shift, gear, stress }) {
+function buildHints({ profile, hardware, fuelError, timingError, tire, launch, shift, gear, stress, powerLimited = false }) {
   const hints = [];
   if (hardware.boosted && profile.boostPsi > Number(hardware.safeBoostPsi || 0)) hints.push("Boost is above the engine hardware's comfortable window. It may make more power, but repeatability falls.");
+  if (powerLimited) hints.push("The engine is near its current power envelope. More boost now gives diminishing returns; stronger engine hardware or a larger engine is the meaningful next step.");
   if (fuelError < -1.2) hints.push("Fueling is lean for the current boost. Add fuel before asking for more boost or timing.");
   else if (fuelError > 2.2) hints.push("Fueling is rich enough to start giving power away.");
   else hints.push("Fueling is in a usable window for this car.");

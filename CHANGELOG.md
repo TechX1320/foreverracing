@@ -1,5 +1,18 @@
 # Changelog
 
+## V0.5.0-g.1 — Engine-specific power model
+
+- Replaced runaway percentage stacking with an engine-aware power-envelope model.
+- Fuel systems, Engine Kits, standalone ECU hardware and structural internals now behave primarily as supporting hardware instead of multiplying already-modified horsepower.
+- Intake, exhaust, airflow engine work and forced-induction hardware still create meaningful direct output, but their effects are damped by role.
+- Added soft engine-specific HP/TQ envelopes with diminishing returns instead of a hard cliff.
+- Current max-effort envelopes: Mk6 GTI EA888 1000 hp, RX-8 Renesis 1100 hp, Clio V6 1250 hp.
+- Engine Creator can author Stock / Engine Kit 1–4 power envelopes for future engines; larger engines receive higher fallback envelopes when not manually authored.
+- Engine Kit shop rows now display the selected car/engine's actual projected capacity rather than generic 600/950/1400/2200 hp numbers.
+- Tuning can push slightly into the edge of an engine's envelope, but extra boost near the limit increasingly stops producing useful power.
+- Existing saved cars automatically recalculate once on schema migration so previously inflated builds do not retain impossible HP.
+
+
 ## V0.5.0-g — Garage tuning
 
 - Standalone ECU + Laptop now unlocks a dedicated TUNING action in the Home Garage for that car.

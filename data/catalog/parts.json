@@ -2000,19 +2000,9 @@
     "description": "Forged pistons and rods for moderate boost and nitrous. First durability step for serious power adders.",
     "engineKit": {
       "level": 1,
-      "powerCapacityHp": 600
+      "capacityModel": "engine_specific"
     },
     "effects": [
-      {
-        "stat": "hp",
-        "op": "mul",
-        "value": 1.02
-      },
-      {
-        "stat": "torque",
-        "op": "mul",
-        "value": 1.03
-      },
       {
         "stat": "weight",
         "op": "add",
@@ -2035,19 +2025,9 @@
     "description": "Forged rotating assembly, bearings and fasteners for substantially more cylinder pressure.",
     "engineKit": {
       "level": 2,
-      "powerCapacityHp": 950
+      "capacityModel": "engine_specific"
     },
     "effects": [
-      {
-        "stat": "hp",
-        "op": "mul",
-        "value": 1.04
-      },
-      {
-        "stat": "torque",
-        "op": "mul",
-        "value": 1.05
-      },
       {
         "stat": "weight",
         "op": "add",
@@ -2070,19 +2050,9 @@
     "description": "Reinforced block, head hardware and race valvetrain for extreme Stage 3 power.",
     "engineKit": {
       "level": 3,
-      "powerCapacityHp": 1400
+      "capacityModel": "engine_specific"
     },
     "effects": [
-      {
-        "stat": "hp",
-        "op": "mul",
-        "value": 1.06
-      },
-      {
-        "stat": "torque",
-        "op": "mul",
-        "value": 1.07
-      },
       {
         "stat": "weight",
         "op": "add",
@@ -2105,19 +2075,9 @@
     "description": "Full race engine preparation intended for four-digit power, twin charging and the largest nitrous systems.",
     "engineKit": {
       "level": 4,
-      "powerCapacityHp": 2200
+      "capacityModel": "engine_specific"
     },
     "effects": [
-      {
-        "stat": "hp",
-        "op": "mul",
-        "value": 1.08
-      },
-      {
-        "stat": "torque",
-        "op": "mul",
-        "value": 1.1
-      },
       {
         "stat": "weight",
         "op": "add",
@@ -3471,19 +3431,8 @@
     "slot": "ecu",
     "buildStage": 4,
     "price": 14000,
-    "description": "Full standalone engine management. This is the hardware foundation for the upcoming home-laptop tuning system.",
-    "effects": [
-      {
-        "stat": "hp",
-        "op": "mul",
-        "value": 1.11
-      },
-      {
-        "stat": "torque",
-        "op": "mul",
-        "value": 1.09
-      }
-    ],
+    "description": "Full standalone engine management and laptop interface. Unlocks home-garage tuning; power comes from the calibration and supporting hardware rather than the ECU box itself.",
+    "effects": [],
     "tuning": {
       "homeGarage": true,
       "mode": "standalone"

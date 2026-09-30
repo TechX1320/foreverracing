@@ -3,6 +3,7 @@ import { renderVehicle } from "../ui/vehicleRenderer.js";
 import { showDialog, closeDialog } from "../ui/modal.js";
 import { renderPartDynoChart } from "../ui/partDyno.js";
 import { partCompatibility, partStoreAvailable } from "../domain/PartCatalog.js";
+import { applyBuildPartEffect, enginePowerEnvelope, limitEngineOutput } from "../domain/PowerModel.js";
 import {
   forcedInductionCompatibility,
   forcedInductionMeta,
@@ -451,7 +452,7 @@ function engineKitRows(player, car, specs) {
         <div class="parts-shop-row__delta">
           <span>HP <b>${number(car.derived?.hp)} → ${number(projected.hp)}</b></span>
           <span>TQ <b>${number(car.derived?.torque)} → ${number(projected.torque)}</b></span>
-          <span>CAP <b>${number(part.engineKit?.powerCapacityHp || 0)} hp</b></span>
+          <span>ENGINE CAP <b>${number(projected.capacityHp || 0)} hp</b></span>
         </div>
         <div class="parts-shop-row__action">${action}</div>
       </article>`;
@@ -922,6 +923,7 @@ function projectStats(player, car, candidate) {
     weight: Number(seed.weight),
     grip: Number(seed.grip || 1)
   };
+  const installedSpecs = [];
 
   const swapState = forcedInductionSwapNeeded(car, player?.inventory?.parts || [], candidate, catalogCache)
     ? forcedInductionState(car, player?.inventory?.parts || [], catalogCache)
@@ -935,15 +937,21 @@ function projectStats(player, car, candidate) {
       const meta = forcedInductionMeta(spec);
       if (meta && String(meta.role || "") !== "nitrous" && String(meta.system || "") === String(swapState.primarySystem || "")) continue;
     }
-    applyEffects(stats, spec.effects || []);
+    installedSpecs.push(spec);
+    for (const effect of spec.effects || []) applyBuildPartEffect(stats, effect, spec);
   }
 
-  applyEffects(stats, candidate.effects || []);
+  installedSpecs.push(candidate);
+  for (const effect of candidate.effects || []) applyBuildPartEffect(stats, effect, candidate);
+  const envelope = enginePowerEnvelope(car, installedSpecs);
+  const limited = limitEngineOutput(stats, envelope);
   return {
-    hp: Math.round(stats.hp),
-    torque: Math.round(stats.torque),
+    hp: limited.hp,
+    torque: limited.torque,
     weight: Math.round(stats.weight),
-    grip: Math.round(stats.grip * 1000) / 1000
+    grip: Math.round(stats.grip * 1000) / 1000,
+    capacityHp: envelope.capacityHp,
+    powerLimited: Boolean(limited.powerLimit?.hpLimited),
   };
 }
 

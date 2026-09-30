@@ -56,6 +56,7 @@ const required = [
   'assets/js/domain/EngineCatalog.js',
   'assets/js/domain/ForcedInduction.js',
   'assets/js/domain/PartCatalog.js',
+  'assets/js/domain/PowerModel.js',
   'assets/js/domain/Tuning.js',
   'assets/js/ui/vehicleRenderer.js',
   'assets/js/ui/partDyno.js',
@@ -83,7 +84,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.5.0-g"')) throw new Error('Static index is missing the V0.5G build marker.');
+if (!html.includes('data-build="0.5.0-g.1"')) throw new Error('Static index is missing the V0.5G.1 build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -178,6 +179,7 @@ const modules = [
   'assets/js/domain/PerformanceIndex.js',
   'assets/js/domain/ContentRelease.js',
   'assets/js/domain/EngineCatalog.js',
+  'assets/js/domain/PowerModel.js',
   'assets/js/domain/Tuning.js',
   'assets/js/ui/vehicleRenderer.js',
   'assets/js/ui/racePresentation.js',
@@ -692,5 +694,44 @@ if (!garageSource.includes('data-tune-car') ||
   throw new Error('V0.5G garage tuning / data-log workflow is incomplete.');
 }
 console.log('V0.5G garage tuning checks passed.');
+
+const powerModelSourceV05g1 = await fs.readFile(new URL('assets/js/domain/PowerModel.js', root), 'utf8');
+const serverPowerModelSourceV05g1 = await fs.readFile(new URL('app/lib/PowerModel.php', root), 'utf8');
+const renesisV05g1 = engineCatalogV05c.find((engine) => engine.engineId === 'mazda_13b_msp_renesis_238');
+const gtiEngineV05g1 = engineCatalogV05c.find((engine) => engine.engineId === 'vw_ea888_20t_mk6_gti_200');
+const clioEngineV05g1 = engineCatalogV05c.find((engine) => engine.engineId === 'renault_clio_v6_29_255');
+if (runtimeConfig.schemaVersion < 8 ||
+    renesisV05g1?.powerLimits?.kit4Hp !== 1100 ||
+    gtiEngineV05g1?.powerLimits?.kit4Hp !== 1000 ||
+    clioEngineV05g1?.powerLimits?.kit4Hp !== 1250) {
+  throw new Error('V0.5G.1 playable-engine power envelopes are missing or stale.');
+}
+const engineKitsV05g1 = deepPartsV05f.filter((part) => part.engineKit);
+if (!engineKitsV05g1.length ||
+    engineKitsV05g1.some((part) => part.engineKit?.powerCapacityHp != null) ||
+    engineKitsV05g1.some((part) => (part.effects || []).some((effect) => ['hp','torque'].includes(effect.stat)))) {
+  throw new Error('V0.5G.1 Engine Kits must use engine-specific capacity rather than generic HP multipliers/caps.');
+}
+const standaloneV05g1 = deepPartsV05f.find((part) => part.catalogId === 's4_ecu_standalone');
+if ((standaloneV05g1?.effects || []).some((effect) => ['hp','torque'].includes(effect.stat))) {
+  throw new Error('V0.5G.1 standalone ECU hardware should not directly create HP/TQ.');
+}
+if (!powerModelSourceV05g1.includes('enginePowerEnvelope') ||
+    !powerModelSourceV05g1.includes('applyBuildPartEffect') ||
+    !powerModelSourceV05g1.includes('softLimit') ||
+    !powerModelSourceV05g1.includes("category === \"fuel\"") ||
+    !serverPowerModelSourceV05g1.includes('final class PowerModel') ||
+    !localGameSource.includes('needsPowerMigration') ||
+    !serverGameSourceV04c.includes('needsPowerMigration') ||
+    !partsSourceV04b.includes('applyBuildPartEffect') ||
+    !partsSourceV04b.includes('ENGINE CAP') ||
+    !partsStudioSourceV05e.includes('limitEngineOutput') ||
+    !engineStudioSource.includes('Stock Internals HP Limit') ||
+    !engineStudioSource.includes('Engine Kit 4 / Max HP') ||
+    !garageSource.includes('ENGINE ENVELOPE') ||
+    !garageSource.includes('RAW REQUEST')) {
+  throw new Error('V0.5G.1 engine-capacity workflow is incomplete.');
+}
+console.log('V0.5G.1 realistic power-model checks passed.');
 
 

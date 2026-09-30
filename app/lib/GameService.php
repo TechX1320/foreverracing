@@ -67,7 +67,9 @@ final class GameService
     public static function normalizePlayer(array $player): array
     {
         $default = self::defaultPlayer();
-        $player['schemaVersion'] = (int)app_config()['schema_version'];
+        $previousSchemaVersion = (int)($player['schemaVersion'] ?? 0);
+        $currentSchemaVersion = (int)app_config()['schema_version'];
+        $player['schemaVersion'] = $currentSchemaVersion;
         $player['user'] = array_replace($default['user'], is_array($player['user'] ?? null) ? $player['user'] : []);
         $player['wallet'] = array_replace($default['wallet'], is_array($player['wallet'] ?? null) ? $player['wallet'] : []);
         if (strcasecmp((string)($player['user']['username'] ?? ''), (string)(app_config()['admin_username'] ?? 'Admin')) === 0) {
@@ -84,6 +86,22 @@ final class GameService
         $player['garage'] = array_map(fn(array $car): array => self::normalizeCar($car), $garage);
         $player['inventory'] = is_array($player['inventory'] ?? null) ? $player['inventory'] : $default['inventory'];
         $player['inventory']['parts'] = array_values(is_array($player['inventory']['parts'] ?? null) ? $player['inventory']['parts'] : []);
+        $needsPowerMigration = $previousSchemaVersion < $currentSchemaVersion;
+        if (!$needsPowerMigration) {
+            foreach ($player['garage'] as $savedCar) {
+                if (!is_array($savedCar['powerEnvelope'] ?? null)) {
+                    $needsPowerMigration = true;
+                    break;
+                }
+            }
+        }
+        if ($needsPowerMigration && count($player['garage'])) {
+            $catalog = self::partsCatalog();
+            $player['garage'] = array_map(
+                fn(array $savedCar): array => self::recalculateCar($savedCar, $player['inventory']['parts'], $catalog),
+                $player['garage']
+            );
+        }
         $player['roguelike'] = array_replace($default['roguelike'], is_array($player['roguelike'] ?? null) ? $player['roguelike'] : []);
         $player['activeRace'] = is_array($player['activeRace'] ?? null) ? $player['activeRace'] : null;
         $player['raceHistory'] = array_values(is_array($player['raceHistory'] ?? null) ? $player['raceHistory'] : []);
@@ -952,20 +970,25 @@ final class GameService
             $installedParts[] = $instance['inventoryId'] ?? '';
             $installedSpecs[] = $spec;
             foreach (($spec['effects'] ?? []) as $effect) {
-                $stat = (string)($effect['stat'] ?? '');
-                if (!array_key_exists($stat, $derived)) continue;
-                $value = (float)($effect['value'] ?? 0);
-                if ((string)($effect['op'] ?? 'add') === 'mul') $derived[$stat] *= $value;
-                else $derived[$stat] += $value;
+                PowerModel::applyBuildPartEffect($derived, $effect, $spec);
             }
         }
 
+        $envelope = PowerModel::enginePowerEnvelope($car, $installedSpecs);
+        $limitedBuild = PowerModel::limitEngineOutput([
+            'hp' => max(1, $derived['hp']),
+            'torque' => max(1, $derived['torque']),
+            'weight' => max(500, $derived['weight']),
+            'grip' => max(0.5, $derived['grip']),
+        ], $envelope);
         $untuned = [
-            'hp' => (int)round(max(1, $derived['hp'])),
-            'torque' => (int)round(max(1, $derived['torque'])),
+            'hp' => (int)$limitedBuild['hp'],
+            'torque' => (int)$limitedBuild['torque'],
             'weight' => (int)round(max(500, $derived['weight'])),
             'grip' => round(max(0.5, $derived['grip']), 3),
         ];
+        $car['powerEnvelope'] = $envelope;
+        $car['powerLimit'] = $limitedBuild['powerLimit'] ?? null;
         $car['untunedDerived'] = $untuned;
         $hardware = Tuning::hardwareProfile($car, $installedSpecs);
 

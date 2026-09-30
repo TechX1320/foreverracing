@@ -9,6 +9,7 @@ import {
   normalizePowerCurve,
   validateEngineCurve,
 } from "../domain/EngineCatalog.js";
+import { suggestedPowerLimits } from "../domain/PowerModel.js";
 import {
   deleteContentStudioEngine,
   findContentStudioEngineRecord,
@@ -307,8 +308,17 @@ function outputSection(engine) {
         ${field("Peak TQ RPM", "peakTorqueRpm", engine.peakTorqueRpm, "number", { min: 500, step: 50 })}
         ${field("Redline RPM", "redlineRpm", engine.redlineRpm, "number", { min: 1000, step: 100 })}
         ${field("Limiter / Rev Cut", "revCutRpm", engine.revCutRpm, "number", { min: 1000, step: 100 })}
+        ${field("Stock Internals HP Limit", "powerLimits.stockHp", engine.powerLimits?.stockHp, "number", { min: 1, step: 10 })}
+        ${field("Engine Kit 1 HP Limit", "powerLimits.kit1Hp", engine.powerLimits?.kit1Hp, "number", { min: 1, step: 10 })}
+        ${field("Engine Kit 2 HP Limit", "powerLimits.kit2Hp", engine.powerLimits?.kit2Hp, "number", { min: 1, step: 10 })}
+        ${field("Engine Kit 3 HP Limit", "powerLimits.kit3Hp", engine.powerLimits?.kit3Hp, "number", { min: 1, step: 10 })}
+        ${field("Engine Kit 4 / Max HP", "powerLimits.kit4Hp", engine.powerLimits?.kit4Hp, "number", { min: 1, step: 10 })}
         ${select("Curve Profile", "curveProfile", engine.curveProfile, ENGINE_CURVE_PROFILES.map((row) => [row.id, row.label]))}
         ${field("Curve Notes", "curveNotes", engine.curveNotes, "text", { placeholder: "Optional source / shape notes..." })}
+      </div>
+      <div class="engine-studio__profile-note">
+        <b>POWER ENVELOPE</b>
+        <span>These are soft crank-HP support limits, not guaranteed output. Power begins tapering before the limit instead of hard-clipping. Engine swaps can therefore matter naturally.</span>
       </div>
       <div class="engine-studio__profile-note">
         <b>${escapeHtml(profile.label)}</b>
@@ -429,6 +439,7 @@ function createBlankEngine() {
     curveProfile: "broad_torque",
     curveNotes: "",
     powerCurve: [],
+    powerLimits: suggestedPowerLimits({ displacementLiters: 2, configuration: "I4", aspiration: "Naturally Aspirated", peakHp: 200 }, 200),
     sourceStatus: "engine-tool",
   };
 }

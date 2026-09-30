@@ -13,6 +13,11 @@ import {
   forcedInductionSwapNeeded,
 } from './ForcedInduction.js';
 import {
+  applyBuildPartEffect,
+  enginePowerEnvelope,
+  limitEngineOutput,
+} from './PowerModel.js';
+import {
   evaluateTune,
   normalizeTuneProfile,
   tuningHardwareProfile,
@@ -93,6 +98,7 @@ export class LocalGameService {
   normalizePlayer(input) {
     const defaults = this.defaultPlayer();
     const player = clone(input && typeof input === 'object' ? input : {});
+    const previousSchemaVersion = Number(player.schemaVersion || 0);
     player.schemaVersion = this.config.schemaVersion;
     player.user = { ...defaults.user, ...(player.user || {}) };
     player.wallet = { ...defaults.wallet, ...(player.wallet || {}) };
@@ -107,6 +113,11 @@ export class LocalGameService {
     player.garage = Array.isArray(player.garage) ? player.garage.map((car) => this.normalizeCar(car)) : [];
     player.inventory = player.inventory && typeof player.inventory === 'object' ? player.inventory : clone(defaults.inventory);
     player.inventory.parts = Array.isArray(player.inventory.parts) ? player.inventory.parts : [];
+    const needsPowerMigration = previousSchemaVersion < Number(this.config.schemaVersion || 0)
+      || player.garage.some((car) => !car?.powerEnvelope);
+    if (needsPowerMigration && player.garage.length) {
+      player.garage = player.garage.map((car) => this.recalculateCar(car, player.inventory.parts));
+    }
     player.roguelike = { ...defaults.roguelike, ...(player.roguelike || {}) };
     player.activeRace = player.activeRace && typeof player.activeRace === 'object' ? player.activeRace : null;
     player.raceHistory = Array.isArray(player.raceHistory) ? player.raceHistory : [];
@@ -764,20 +775,25 @@ export class LocalGameService {
       installedParts.push(instance.inventoryId);
       installedSpecs.push(spec);
       for (const effect of spec.effects || []) {
-        const stat = String(effect.stat || '');
-        if (!(stat in derived)) continue;
-        const value = Number(effect.value || 0);
-        if (String(effect.op || 'add') === 'mul') derived[stat] *= value;
-        else derived[stat] += value;
+        applyBuildPartEffect(derived, effect, spec);
       }
     }
 
+    const envelope = enginePowerEnvelope(car, installedSpecs);
+    const limitedBuild = limitEngineOutput({
+      hp: Math.max(1, derived.hp),
+      torque: Math.max(1, derived.torque),
+      weight: Math.max(500, derived.weight),
+      grip: Math.max(0.5, derived.grip),
+    }, envelope);
     const untuned = {
-      hp: Math.round(Math.max(1, derived.hp)),
-      torque: Math.round(Math.max(1, derived.torque)),
+      hp: limitedBuild.hp,
+      torque: limitedBuild.torque,
       weight: Math.round(Math.max(500, derived.weight)),
       grip: Math.round(Math.max(0.5, derived.grip) * 1000) / 1000,
     };
+    car.powerEnvelope = clone(envelope);
+    car.powerLimit = clone(limitedBuild.powerLimit || null);
     car.untunedDerived = clone(untuned);
     const hardware = tuningHardwareProfile(car, installedSpecs);
     let benchmarkContext = untuned;

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { LocalGameService } from '../assets/js/domain/LocalGameService.js';
 import { benchmarkPerformance, performanceClassFromIndex } from '../assets/js/domain/PerformanceIndex.js';
 import { applyPartEffects, partCompatibility, partStoreAvailable } from '../assets/js/domain/PartCatalog.js';
+import { applyBuildPartEffect, enginePowerEnvelope, limitEngineOutput, suggestedPowerLimits } from '../assets/js/domain/PowerModel.js';
 import { defaultTuneProfile, evaluateTune, tuningFingerprint, tuningHardwareProfile } from '../assets/js/domain/Tuning.js';
 
 const [cars, parts, config, buildStageConfig, racingConfig] = await Promise.all([
@@ -45,41 +46,66 @@ const lowEightBuildIds = [
   's3_weight_lexan','s4_weight_full_chassis',
   's3_fi_turbo_intercooler','s3_fi_turbo_upgrade','s3_fi_turbo_piping',
 ];
-const effectsFor = (ids) => ids.flatMap((id) => {
+const partFor = (id) => {
   const part = parts.find((row) => row.catalogId === id);
-  assert.ok(part, `Missing V0.5F balance part: ${id}`);
-  return part.effects || [];
-});
-const applyBuildEffects = (base, effects) => {
+  assert.ok(part, `Missing balance part: ${id}`);
+  return part;
+};
+const applyBuildParts = (base, ids) => {
   const stats = {
     hp: Number(base.hp || 1),
     torque: Number(base.torque || 1),
     weight: Number(base.weight || 500),
     grip: Number(base.grip || 1),
   };
-  for (const effect of effects) {
-    const stat = String(effect.stat || '');
-    if (!(stat in stats)) continue;
-    const value = Number(effect.value || 0);
-    if (String(effect.op || 'add') === 'mul') stats[stat] *= value;
-    else stats[stat] += value;
+  const specs = ids.map(partFor);
+  for (const part of specs) {
+    for (const effect of part.effects || []) applyBuildPartEffect(stats, effect, part);
   }
   return {
-    hp: Math.round(stats.hp),
-    torque: Math.round(stats.torque),
-    weight: Math.round(stats.weight),
-    grip: Math.round(stats.grip * 1000) / 1000,
+    stats: {
+      hp: Math.round(stats.hp),
+      torque: Math.round(stats.torque),
+      weight: Math.round(stats.weight),
+      grip: Math.round(stats.grip * 1000) / 1000,
+    },
+    specs,
   };
 };
-const rx8StageBaseline = applyBuildEffects(deepRx8.base, effectsFor(stageOneMaxIds));
+const stageOneBuild = applyBuildParts(deepRx8.base, stageOneMaxIds);
+const rx8StageBaseline = stageOneBuild.stats;
+const deepBuild = applyBuildParts(rx8StageBaseline, lowEightBuildIds);
+const rx8Kit3Envelope = enginePowerEnvelope({ ...deepRx8, buildStage: 4 }, deepBuild.specs);
+const rx8LimitedBuild = limitEngineOutput(deepBuild.stats, rx8Kit3Envelope);
 const rx8LowEightStats = {
-  ...applyBuildEffects(rx8StageBaseline, effectsFor(lowEightBuildIds)),
+  hp: rx8LimitedBuild.hp,
+  torque: rx8LimitedBuild.torque,
+  weight: deepBuild.stats.weight,
+  grip: deepBuild.stats.grip,
   drivetrain: 'RWD',
 };
-const rx8LowEightBenchmark = benchmarkPerformance(rx8LowEightStats, racingConfig);
-assert.ok(rx8LowEightBenchmark.quarterMileEt >= 7.75 && rx8LowEightBenchmark.quarterMileEt <= 8.45,
-  `V0.5F RX-8 deep Stage 4 build should land in the low-8-second neighborhood; got ${rx8LowEightBenchmark.quarterMileEt}s.`);
-assert.ok(rx8LowEightStats.hp >= 950 && rx8LowEightStats.weight <= 2600);
+
+assert.equal(rx8Kit3Envelope.capacityHp, 930);
+assert.ok(rx8LowEightStats.hp >= 600 && rx8LowEightStats.hp < 900,
+  `Support-part scaling should stop the old multiplicative RX-8 build from jumping straight to four-digit power; got ${rx8LowEightStats.hp} hp.`);
+
+const rx8Kit4 = partFor('s4_engine_kit_4');
+const rx8MaxEnvelope = enginePowerEnvelope({ ...deepRx8, buildStage: 4 }, [rx8Kit4]);
+assert.equal(rx8MaxEnvelope.capacityHp, 1100);
+const impossibleRx8 = limitEngineOutput({ hp: 2400, torque: 1600, weight: 2500, grip: 2 }, rx8MaxEnvelope);
+assert.ok(impossibleRx8.hp >= 1050 && impossibleRx8.hp <= 1100,
+  `A 2400-hp Renesis request should compress into the ~1100-hp max-effort envelope; got ${impossibleRx8.hp} hp.`);
+assert.equal(impossibleRx8.powerLimit.hpLimited, true);
+
+const bigV8Limits = suggestedPowerLimits({ displacementLiters: 5, configuration: 'V8', aspiration: 'Naturally Aspirated', peakHp: 480 }, 480);
+assert.ok(bigV8Limits.kit4Hp >= 1500 && bigV8Limits.kit4Hp > rx8MaxEnvelope.capacityHp,
+  'Larger engines need materially higher fallback power envelopes than the Renesis.');
+
+const rx8MaxEffortBenchmark = benchmarkPerformance({
+  hp: 1080, torque: 700, weight: 2350, grip: 2.2, drivetrain: 'RWD',
+}, racingConfig);
+assert.ok(rx8MaxEffortBenchmark.quarterMileEt >= 7.5 && rx8MaxEffortBenchmark.quarterMileEt <= 8.6,
+  `A max-effort ~1100-hp lightweight RX-8 should still be capable of the low-8-second neighborhood; got ${rx8MaxEffortBenchmark.quarterMileEt}s.`);
 
 
 const tuningCar = {

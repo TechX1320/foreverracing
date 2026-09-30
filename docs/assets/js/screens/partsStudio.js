@@ -1,6 +1,7 @@
 import { bindHome, escapeHtml, pageShell } from "../ui/components.js";
 import { benchmarkPerformance, performanceClassFromIndex } from "../domain/PerformanceIndex.js";
-import { normalizePartDefinition, applyPartEffects, partCompatibility, partLifecycleState } from "../domain/PartCatalog.js";
+import { normalizePartDefinition, partCompatibility, partLifecycleState } from "../domain/PartCatalog.js";
+import { applyBuildPartEffect, enginePowerEnvelope, limitEngineOutput } from "../domain/PowerModel.js";
 import {
   deleteContentStudioPart,
   findContentStudioPartRecord,
@@ -406,7 +407,11 @@ function previewPart(part, car, racingConfig) {
     weight: Math.round(Number(car?.base?.weight || 500)),
     grip: Number(car?.base?.grip || 1),
   };
-  const after = applyPartEffects(before, part.effects);
+  const rawAfter = { ...before };
+  for (const effect of part.effects || []) applyBuildPartEffect(rawAfter, effect, part);
+  const envelope = enginePowerEnvelope(testCarLike(car), [part]);
+  const limited = limitEngineOutput(rawAfter, envelope);
+  const after = { hp: limited.hp, torque: limited.torque, weight: Math.round(rawAfter.weight), grip: Math.round(rawAfter.grip * 1000) / 1000 };
   const beforeBench = benchmarkPerformance(before, racingConfig);
   const afterBench = benchmarkPerformance(after, racingConfig);
   return {
@@ -415,6 +420,16 @@ function previewPart(part, car, racingConfig) {
     afterPi: afterBench.performanceIndex,
     beforeClass: performanceClassFromIndex(beforeBench.performanceIndex),
     afterClass: performanceClassFromIndex(afterBench.performanceIndex),
+  };
+}
+
+function testCarLike(car) {
+  if (!car) return { base: { hp: 1, torque: 1 }, engine: {} };
+  return {
+    ...car,
+    base: { ...(car.base || {}), drivetrain: car.base?.drivetrain || "RWD" },
+    engine: { ...(car.engine || {}) },
+    buildStage: Number(car.buildStage || 4),
   };
 }
 

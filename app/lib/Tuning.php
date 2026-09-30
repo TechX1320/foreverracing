@@ -60,6 +60,7 @@ final class Tuning
             'boosted' => $boosted,
             'systems' => $systems,
             'engineKitLevel' => $engineKitLevel,
+            'powerEnvelope' => PowerModel::enginePowerEnvelope($car, $installedSpecs),
             'baseBoostPsi' => round($baseBoost, 1),
             'safeBoostPsi' => round($safeBoost, 1),
             'minBoostPsi' => round($minBoost, 1),
@@ -173,16 +174,28 @@ final class Tuning
         $shift = self::shiftEvaluation($car,$profile,$fp);
         $gear = self::gearEvaluation($profile,$base,(float)$tire['gripMultiplier']);
 
-        $derived = [
+        $preLimit = [
             'hp'=>(int)round(max(1,$base['hp']*$powerMultiplier)),
             'torque'=>(int)round(max(1,$base['torque']*$torqueMultiplier)),
             'weight'=>(int)round($base['weight']),
             'grip'=>round(max(0.5,$base['grip']*(float)$tire['gripMultiplier']),3),
             'drivetrain'=>$base['drivetrain'],
         ];
+        $limited = PowerModel::limitEngineOutput(
+            $preLimit,
+            is_array($hardware['powerEnvelope'] ?? null) ? $hardware['powerEnvelope'] : PowerModel::enginePowerEnvelope($car, []),
+            $stress * 0.04
+        );
+        $derived = [
+            'hp'=>(int)$limited['hp'],
+            'torque'=>(int)$limited['torque'],
+            'weight'=>$preLimit['weight'],
+            'grip'=>$preLimit['grip'],
+            'drivetrain'=>$preLimit['drivetrain'],
+        ];
 
         $stability = self::clamp(1-($stress*0.65)-(max(0,abs($fuelError)-3)*0.025)-(max(0,$timingError-1.2)*0.04),0.35,1);
-        $hints = self::buildHints($profile,$hardware,$fuelError,$timingError,$tire,$launch,$shift,$gear,$stress);
+        $hints = self::buildHints($profile,$hardware,$fuelError,$timingError,$tire,$launch,$shift,$gear,$stress,!empty($limited['powerLimit']['hpLimited']));
         return [
             'profile'=>$profile,
             'hardware'=>$hardware,
@@ -196,6 +209,8 @@ final class Tuning
                 'tireState'=>$tire['state'],
                 'launchState'=>$launch['state'],
                 'shiftState'=>$shift['state'],
+                'powerState'=>!empty($limited['powerLimit']['hpLimited']) ? 'ENGINE-LIMITED' : 'HEADROOM',
+                'powerLimit'=>$limited['powerLimit'] ?? null,
                 'hints'=>$hints,
             ],
             'race'=>[
@@ -268,10 +283,11 @@ final class Tuning
         return ['launchPowerFactor'=>$launch,'averagePowerFactor'=>$avg,'tractionMultiplier'=>self::clamp($launch/max(0.5,$ideal),0.65,1.35)];
     }
 
-    private static function buildHints(array $profile,array $hardware,float $fuelError,float $timingError,array $tire,array $launch,array $shift,array $gear,float $stress): array
+    private static function buildHints(array $profile,array $hardware,float $fuelError,float $timingError,array $tire,array $launch,array $shift,array $gear,float $stress,bool $powerLimited=false): array
     {
         $h=[];
         if(!empty($hardware['boosted']) && (float)$profile['boostPsi']>(float)($hardware['safeBoostPsi']??0))$h[]="Boost is above the engine hardware's comfortable window. It may make more power, but repeatability falls.";
+        if($powerLimited)$h[]='The engine is near its current power envelope. More boost now gives diminishing returns; stronger engine hardware or a larger engine is the meaningful next step.';
         if($fuelError<-1.2)$h[]='Fueling is lean for the current boost. Add fuel before asking for more boost or timing.';
         elseif($fuelError>2.2)$h[]='Fueling is rich enough to start giving power away.';
         else $h[]='Fueling is in a usable window for this car.';
