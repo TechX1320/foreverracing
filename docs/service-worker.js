@@ -1,4 +1,4 @@
-const CACHE = 'forever-racing-shell-v0.5.0-h.2';
+const CACHE = 'forever-racing-shell-v0.6.0-a';
 const SHELL = [
   './',
   './manifest.webmanifest',
@@ -54,15 +54,18 @@ const SHELL = [
   './assets/js/domain/ContentRelease.js',
   './assets/js/domain/EngineCatalog.js',
   './assets/js/domain/EngineSwap.js',
+  './assets/js/domain/CircuitCatalog.js',
   './assets/js/domain/ForcedInduction.js',
   './assets/js/domain/PartCatalog.js',
   './assets/js/domain/PowerModel.js',
   './assets/js/domain/Tuning.js',
   './assets/js/content/ContentStudioEngineCatalog.js',
   './assets/js/content/ContentStudioPartCatalog.js',
+  './assets/js/content/ContentStudioCircuitCatalog.js',
   './assets/js/screens/engineStudio.js',
   './assets/js/screens/engineSwapShop.js',
   './assets/js/screens/partsStudio.js',
+  './assets/js/screens/circuitStudio.js',
   './assets/js/storage/StorageProvider.js',
   './assets/js/storage/ApiStorageProvider.js',
   './assets/js/storage/LocalStorageProvider.js',
@@ -87,6 +90,7 @@ const SHELL = [
   './data/catalog/car-art.json',
   './data/catalog/parts.json',
   './data/catalog/engines.json',
+  './data/catalog/circuits.json',
   './data/config/game.json',
   './data/config/build-stages.json',
   './data/config/racing.json'
