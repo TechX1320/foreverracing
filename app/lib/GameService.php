@@ -315,6 +315,14 @@ final class GameService
             $tune['savedAt'] = time();
             $car['tune'] = $tune;
             $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'] ?? [], $catalog);
+            $assemblyIndex = self::engineAssemblyIndexForCar($player, $player['garage'][$index]);
+            if ($assemblyIndex !== null) {
+                $player['inventory']['engines'][$assemblyIndex]['tune'] = $player['garage'][$index]['tune'];
+                $player['inventory']['engines'][$assemblyIndex]['storedStats'] = [
+                    'hp'=>(int)$player['garage'][$index]['derived']['hp'],
+                    'torque'=>(int)$player['garage'][$index]['derived']['torque'],
+                ];
+            }
             return $player;
         });
     }
@@ -339,6 +347,14 @@ final class GameService
                 'repairedAt' => time(),
             ];
             $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'] ?? [], $catalog);
+            $assemblyIndex = self::engineAssemblyIndexForCar($player, $player['garage'][$index]);
+            if ($assemblyIndex !== null) {
+                $player['inventory']['engines'][$assemblyIndex]['condition'] = EngineSwap::storedCondition($player['garage'][$index]['engineCondition']);
+                $player['inventory']['engines'][$assemblyIndex]['storedStats'] = [
+                    'hp'=>(int)$player['garage'][$index]['derived']['hp'],
+                    'torque'=>(int)$player['garage'][$index]['derived']['torque'],
+                ];
+            }
             self::addTransaction($player, 'engine_rebuild', -$cost, self::carName($car) . ' engine rebuild');
             return $player;
         });
@@ -1015,6 +1031,10 @@ final class GameService
                     'lastFailureAt' => time(),
                     'repairedAt' => $car['engineCondition']['repairedAt'] ?? null,
                 ];
+                $assemblyIndex = self::engineAssemblyIndexForCar($player, $player['garage'][$carIndex]);
+                if ($assemblyIndex !== null) {
+                    $player['inventory']['engines'][$assemblyIndex]['condition'] = EngineSwap::storedCondition($player['garage'][$carIndex]['engineCondition']);
+                }
                 $result['engineFailure'] = true;
                 $result['engineRepairCost'] = self::engineRepairCost($player['garage'][$carIndex]);
             }
