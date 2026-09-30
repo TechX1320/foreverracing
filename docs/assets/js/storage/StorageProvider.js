@@ -39,6 +39,11 @@ export class StorageProvider {
   async startQuickRace(_distance = '1/4') { throw new Error('startQuickRace() is not implemented.'); }
   async finishQuickRace(_raceId) { throw new Error('finishQuickRace() is not implemented.'); }
   async quickRace(_distance = '1/4') { throw new Error('quickRace() is not implemented.'); }
+  async circuitCatalog() { throw new Error('circuitCatalog() is not implemented.'); }
+  async circuitStart(_circuitId) { throw new Error('circuitStart() is not implemented.'); }
+  async circuitAbandon() { throw new Error('circuitAbandon() is not implemented.'); }
+  async startCircuitRace(_circuitId) { throw new Error('startCircuitRace() is not implemented.'); }
+  async finishCircuitRace(_raceId) { throw new Error('finishCircuitRace() is not implemented.'); }
   async roguelikeStart() { throw new Error('roguelikeStart() is not implemented.'); }
   async roguelikeStep(_choice) { throw new Error('roguelikeStep() is not implemented.'); }
 }
