@@ -15,6 +15,7 @@ import { renderEvents, renderTeams, renderLeaderboards, renderMultiplayer } from
 import { loadSettings, renderSettings } from './screens/settings.js';
 import { renderContentStudio } from './screens/contentStudio.js';
 import { renderEngineStudio } from './screens/engineStudio.js';
+import { renderPartsStudio } from './screens/partsStudio.js';
 
 const storage = createStorageProvider();
 const store = new Store();
@@ -34,13 +35,13 @@ document.addEventListener('error', (event) => {
 }, true);
 
 const TUTORIAL_ROUTES = {
-  welcome: ['home', 'settings', 'content-studio', 'engine-studio'],
-  buy_first_car: ['home', 'usedlot', 'settings', 'content-studio', 'engine-studio'],
-  visit_garage: ['home', 'garage', 'settings', 'content-studio', 'engine-studio'],
-  buy_first_upgrade: ['home', 'garage', 'parts', 'settings', 'content-studio', 'engine-studio'],
-  install_first_upgrade: ['home', 'garage', 'settings', 'content-studio', 'engine-studio'],
-  build_stages: ['home', 'quick-race', 'settings', 'content-studio', 'engine-studio'],
-  first_race: ['home', 'quick-race', 'settings', 'content-studio', 'engine-studio']
+  welcome: ['home', 'settings', 'content-studio', 'engine-studio', 'parts-studio'],
+  buy_first_car: ['home', 'usedlot', 'settings', 'content-studio', 'engine-studio', 'parts-studio'],
+  visit_garage: ['home', 'garage', 'settings', 'content-studio', 'engine-studio', 'parts-studio'],
+  buy_first_upgrade: ['home', 'garage', 'parts', 'settings', 'content-studio', 'engine-studio', 'parts-studio'],
+  install_first_upgrade: ['home', 'garage', 'settings', 'content-studio', 'engine-studio', 'parts-studio'],
+  build_stages: ['home', 'quick-race', 'settings', 'content-studio', 'engine-studio', 'parts-studio'],
+  first_race: ['home', 'quick-race', 'settings', 'content-studio', 'engine-studio', 'parts-studio']
 };
 
 const ROUTE_UNLOCK_LEVELS = {
@@ -57,7 +58,8 @@ const ROUTE_UNLOCK_LEVELS = {
   multiplayer: 10,
   settings: 1,
   'content-studio': 1,
-  'engine-studio': 1
+  'engine-studio': 1,
+  'parts-studio': 1
 };
 
 const ctx = { storage, store, screenRoot, router: null, toast };
@@ -78,6 +80,7 @@ router
   .register('multiplayer', feature(renderMultiplayer))
   .register('content-studio', feature(renderContentStudio))
   .register('engine-studio', feature(renderEngineStudio))
+  .register('parts-studio', feature(renderPartsStudio))
   .register('settings', feature(renderSettings));
 
 store.onPlayer((player) => {
