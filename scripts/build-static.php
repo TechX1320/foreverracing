@@ -82,7 +82,7 @@ Build: {$build}
 Storage mode: local
 Offline service worker: disabled in static development mode
 Race presentation: persistent two-phase start/finish with blocking real-time playback
-V0.5H: Engine Swap Shop and engine-aware parts compatibility
+V0.5H.1: Stage 2 engine swaps and complete stored engine assemblies
 Do not edit docs/ by hand; run php scripts/build-static.php.
 ");
 

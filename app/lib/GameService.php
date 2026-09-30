@@ -86,18 +86,100 @@ final class GameService
         $garage = array_values(is_array($player['garage'] ?? null) ? $player['garage'] : []);
         $player['garage'] = array_map(fn(array $car): array => self::normalizeCar($car), $garage);
         $player['inventory'] = is_array($player['inventory'] ?? null) ? $player['inventory'] : $default['inventory'];
-        $player['inventory']['parts'] = array_values(is_array($player['inventory']['parts'] ?? null) ? $player['inventory']['parts'] : []);
+        $partInventory = array_values(is_array($player['inventory']['parts'] ?? null) ? $player['inventory']['parts'] : []);
+        $player['inventory']['parts'] = array_values(array_filter(array_map(function ($item): array {
+            $item = is_array($item) ? $item : [];
+            $item['inventoryId'] = (string)($item['inventoryId'] ?? self::id('part'));
+            $item['catalogId'] = (string)($item['catalogId'] ?? '');
+            $item['installedOnCarId'] = !empty($item['installedOnCarId']) ? (string)$item['installedOnCarId'] : null;
+            $item['installedOnEngineInventoryId'] = !empty($item['installedOnEngineInventoryId']) ? (string)$item['installedOnEngineInventoryId'] : null;
+            return $item;
+        }, $partInventory), fn(array $item): bool => $item['catalogId'] !== ''));
+
         $engineInventory = array_values(is_array($player['inventory']['engines'] ?? null) ? $player['inventory']['engines'] : []);
         $player['inventory']['engines'] = array_values(array_filter(array_map(function ($item): array {
-            $item = is_array($item) ? $item : [];
-            return [
-                'inventoryId' => (string)($item['inventoryId'] ?? self::id('engine')),
-                'engineId' => (string)($item['engineId'] ?? ''),
-                'acquiredAt' => (int)($item['acquiredAt'] ?? time()),
-                'source' => (string)($item['source'] ?? 'owned'),
-                'condition' => EngineSwap::storedCondition(is_array($item['condition'] ?? null) ? $item['condition'] : []),
-            ];
+            $normalized = EngineSwap::normalizeAssembly(is_array($item) ? $item : []);
+            if ($normalized['inventoryId'] === '') $normalized['inventoryId'] = self::id('engine');
+            if ((int)$normalized['acquiredAt'] <= 0) $normalized['acquiredAt'] = time();
+            return $normalized;
         }, $engineInventory), fn(array $item): bool => $item['engineId'] !== ''));
+
+        if ($previousSchemaVersion > 0 && $previousSchemaVersion < 11) {
+            foreach ($player['garage'] as $car) {
+                $previousEngineId = (string)($car['engineSwap']['lastFromEngineId'] ?? '');
+                $previousNames = array_values(array_map('strval', is_array($car['engineSwap']['lastUninstalledParts'] ?? null) ? $car['engineSwap']['lastUninstalledParts'] : []));
+                if ($previousEngineId === '' || !$previousNames) continue;
+                $storedIndex = null;
+                foreach ($player['inventory']['engines'] as $idx => $storedEngine) {
+                    if (!empty($storedEngine['installedOnCarId'])) continue;
+                    if ((string)$storedEngine['engineId'] !== $previousEngineId) continue;
+                    if (!empty($storedEngine['attachedPartInventoryIds'])) continue;
+                    $storedIndex = $idx;
+                    break;
+                }
+                if ($storedIndex === null) continue;
+                $attached = [];
+                foreach ($player['inventory']['parts'] as &$part) {
+                    if (!empty($part['installedOnCarId']) || !empty($part['installedOnEngineInventoryId'])) continue;
+                    if ((string)($part['purchasedForCarId'] ?? '') !== (string)($car['carId'] ?? '')) continue;
+                    $spec = self::findBy(self::partsCatalog(), 'catalogId', (string)($part['catalogId'] ?? ''));
+                    if (!$spec || !EngineSwap::isEngineBoundPart($spec)) continue;
+                    $name = (string)($spec['name'] ?? $spec['catalogId'] ?? '');
+                    if (!in_array($name, $previousNames, true)) continue;
+                    $part['installedOnEngineInventoryId'] = $player['inventory']['engines'][$storedIndex]['inventoryId'];
+                    $attached[] = (string)$part['inventoryId'];
+                }
+                unset($part);
+                $player['inventory']['engines'][$storedIndex]['attachedPartInventoryIds'] = array_values(array_unique(array_merge(
+                    $player['inventory']['engines'][$storedIndex]['attachedPartInventoryIds'] ?? [],
+                    $attached
+                )));
+            }
+        }
+
+        foreach ($player['garage'] as &$car) {
+            $assemblyIndex = null;
+            foreach ($player['inventory']['engines'] as $idx => $assembly) {
+                if ((string)($assembly['inventoryId'] ?? '') === (string)($car['engineInventoryId'] ?? '')
+                    || (string)($assembly['installedOnCarId'] ?? '') === (string)($car['carId'] ?? '')) {
+                    $assemblyIndex = $idx;
+                    break;
+                }
+            }
+            if ($assemblyIndex === null) {
+                $assembly = EngineSwap::normalizeAssembly([
+                    'inventoryId'=>self::id('engine'),
+                    'engineId'=>(string)($car['engineId'] ?? $car['factoryEngineId'] ?? ''),
+                    'installedOnCarId'=>(string)($car['carId'] ?? ''),
+                    'acquiredAt'=>(int)($car['createdAt'] ?? time()),
+                    'source'=>'installed_migration',
+                    'condition'=>$car['engineCondition'] ?? [],
+                    'tune'=>$car['tune'] ?? null,
+                    'storedStats'=>$car['derived'] ?? $car['base'] ?? null,
+                ]);
+                $player['inventory']['engines'][] = $assembly;
+                $assemblyIndex = count($player['inventory']['engines']) - 1;
+            }
+            $player['inventory']['engines'][$assemblyIndex]['installedOnCarId'] = (string)($car['carId'] ?? '');
+            $player['inventory']['engines'][$assemblyIndex]['engineId'] = (string)($car['engineId'] ?? $car['factoryEngineId'] ?? '');
+            $player['inventory']['engines'][$assemblyIndex]['condition'] = EngineSwap::storedCondition(is_array($car['engineCondition'] ?? null) ? $car['engineCondition'] : []);
+            $player['inventory']['engines'][$assemblyIndex]['tune'] = is_array($car['tune'] ?? null) ? $car['tune'] : ($player['inventory']['engines'][$assemblyIndex]['tune'] ?? null);
+            $car['engineInventoryId'] = $player['inventory']['engines'][$assemblyIndex]['inventoryId'];
+
+            $attached = $player['inventory']['engines'][$assemblyIndex]['attachedPartInventoryIds'] ?? [];
+            foreach ($player['inventory']['parts'] as &$part) {
+                if ((string)($part['installedOnCarId'] ?? '') !== (string)($car['carId'] ?? '')) continue;
+                $spec = self::findBy(self::partsCatalog(), 'catalogId', (string)($part['catalogId'] ?? ''));
+                if (!$spec || !EngineSwap::isEngineBoundPart($spec)) continue;
+                $part['installedOnEngineInventoryId'] = $player['inventory']['engines'][$assemblyIndex]['inventoryId'];
+                $attached[] = (string)$part['inventoryId'];
+            }
+            unset($part);
+            $player['inventory']['engines'][$assemblyIndex]['attachedPartInventoryIds'] = array_values(array_unique($attached));
+            self::activateEngineAssemblyParts($player, $car);
+        }
+        unset($car);
+
         $needsPowerMigration = $previousSchemaVersion < $currentSchemaVersion;
         if (!$needsPowerMigration) {
             foreach ($player['garage'] as $savedCar) {
@@ -113,6 +195,16 @@ final class GameService
                 fn(array $savedCar): array => self::recalculateCar($savedCar, $player['inventory']['parts'], $catalog),
                 $player['garage']
             );
+        }
+        foreach ($player['garage'] as $car) {
+            $assemblyIndex = self::engineAssemblyIndexForCar($player, $car);
+            if ($assemblyIndex === null) continue;
+            $player['inventory']['engines'][$assemblyIndex]['condition'] = EngineSwap::storedCondition(is_array($car['engineCondition'] ?? null) ? $car['engineCondition'] : []);
+            $player['inventory']['engines'][$assemblyIndex]['tune'] = is_array($car['tune'] ?? null) ? $car['tune'] : ($player['inventory']['engines'][$assemblyIndex]['tune'] ?? null);
+            $player['inventory']['engines'][$assemblyIndex]['storedStats'] = [
+                'hp'=>max(1,(int)round((float)($car['derived']['hp'] ?? $car['base']['hp'] ?? 1))),
+                'torque'=>max(1,(int)round((float)($car['derived']['torque'] ?? $car['base']['torque'] ?? 1))),
+            ];
         }
         $player['roguelike'] = array_replace($default['roguelike'], is_array($player['roguelike'] ?? null) ? $player['roguelike'] : []);
         $player['activeRace'] = is_array($player['activeRace'] ?? null) ? $player['activeRace'] : null;
@@ -223,6 +315,14 @@ final class GameService
             $tune['savedAt'] = time();
             $car['tune'] = $tune;
             $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'] ?? [], $catalog);
+            $assemblyIndex = self::engineAssemblyIndexForCar($player, $player['garage'][$index]);
+            if ($assemblyIndex !== null) {
+                $player['inventory']['engines'][$assemblyIndex]['tune'] = $player['garage'][$index]['tune'];
+                $player['inventory']['engines'][$assemblyIndex]['storedStats'] = [
+                    'hp'=>(int)$player['garage'][$index]['derived']['hp'],
+                    'torque'=>(int)$player['garage'][$index]['derived']['torque'],
+                ];
+            }
             return $player;
         });
     }
@@ -247,6 +347,14 @@ final class GameService
                 'repairedAt' => time(),
             ];
             $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'] ?? [], $catalog);
+            $assemblyIndex = self::engineAssemblyIndexForCar($player, $player['garage'][$index]);
+            if ($assemblyIndex !== null) {
+                $player['inventory']['engines'][$assemblyIndex]['condition'] = EngineSwap::storedCondition($player['garage'][$index]['engineCondition']);
+                $player['inventory']['engines'][$assemblyIndex]['storedStats'] = [
+                    'hp'=>(int)$player['garage'][$index]['derived']['hp'],
+                    'torque'=>(int)$player['garage'][$index]['derived']['torque'],
+                ];
+            }
             self::addTransaction($player, 'engine_rebuild', -$cost, self::carName($car) . ' engine rebuild');
             return $player;
         });
@@ -254,97 +362,130 @@ final class GameService
 
     public static function swapEngine(string $carId, string $engineId): array
     {
-        $parts = self::partsCatalog();
-        $engine = self::findBy(self::engineCatalog(), 'engineId', $engineId);
-        if (!$engine || !EngineSwap::eligible($engine)) {
-            throw new GameException('That engine is not ready for the Engine Swap Shop.', 404);
-        }
+        $parts=self::partsCatalog();
+        $engine=self::findBy(self::engineCatalog(),'engineId',$engineId);
+        if(!$engine||!EngineSwap::eligible($engine))throw new GameException('That engine is not ready for the Engine Swap Shop.',404);
 
-        return self::mutatePlayer(function (array $player) use ($carId, $engine, $parts): array {
-            $carIndex = self::requireOwnedCarIndex($player, $carId);
-            $car = $player['garage'][$carIndex];
-            $fitment = EngineSwap::fitment($car, $engine);
-            if (empty($fitment['allowed'])) throw new GameException((string)($fitment['note'] ?? 'That engine does not fit this chassis.'));
-            if ((int)($car['buildStage'] ?? 1) < (int)($fitment['minBuildStage'] ?? 3)) {
-                throw new GameException('This swap requires Build Type ' . (int)$fitment['minBuildStage'] . '. Upgrade the chassis first.');
+        return self::mutatePlayer(function(array $player)use($carId,$engine,$parts):array{
+            $carIndex=self::requireOwnedCarIndex($player,$carId);
+            $car=$player['garage'][$carIndex];
+            $fitment=EngineSwap::fitment($car,$engine);
+            if(empty($fitment['allowed']))throw new GameException((string)($fitment['note']??'That engine does not fit this chassis.'));
+            if((int)($car['buildStage']??1)<(int)($fitment['minBuildStage']??2)){
+                throw new GameException('This swap requires Build Type '.(int)$fitment['minBuildStage'].'. Upgrade the chassis first.');
             }
-            if ((string)($car['engineId'] ?? $car['factoryEngineId'] ?? '') === (string)$engine['engineId']) {
+            if((string)($car['engineId']??$car['factoryEngineId']??'')===(string)$engine['engineId']){
                 throw new GameException('That engine is already installed in this car.');
             }
 
-            $ownedIndex = -1;
-            foreach (($player['inventory']['engines'] ?? []) as $index => $ownedEngine) {
-                if ((string)($ownedEngine['engineId'] ?? '') === (string)$engine['engineId']) {
-                    $ownedIndex = (int)$index;
-                    break;
-                }
+            $ownedIndex=null;
+            foreach(($player['inventory']['engines']??[])as $idx=>$ownedEngine){
+                if(!empty($ownedEngine['installedOnCarId']))continue;
+                if((string)($ownedEngine['engineId']??'')===(string)$engine['engineId']){$ownedIndex=(int)$idx;break;}
             }
-            $enginePrice = $ownedIndex >= 0 ? 0 : EngineSwap::price($engine);
-            $installCost = max(0, (int)($fitment['installCost'] ?? 0));
-            $totalCost = $enginePrice + $installCost;
-            self::requireCredits($player, $totalCost);
+            $enginePrice=$ownedIndex!==null?0:EngineSwap::price($engine);
+            $installCost=max(0,(int)($fitment['installCost']??0));
+            $totalCost=$enginePrice+$installCost;
+            self::requireCredits($player,$totalCost);
 
-            $incomingCondition = $ownedIndex >= 0
-                ? EngineSwap::storedCondition(is_array($player['inventory']['engines'][$ownedIndex]['condition'] ?? null) ? $player['inventory']['engines'][$ownedIndex]['condition'] : [])
-                : EngineSwap::healthyCondition();
-
-            $outgoingEngineId = (string)($car['engineId'] ?? $car['factoryEngineId'] ?? '');
-            if ($outgoingEngineId !== '') {
-                $player['inventory']['engines'][] = [
-                    'inventoryId' => self::id('engine'),
-                    'engineId' => $outgoingEngineId,
-                    'acquiredAt' => time(),
-                    'source' => $outgoingEngineId === (string)($car['factoryEngineId'] ?? '') ? 'factory_removed' : 'swap_removed',
-                    'condition' => EngineSwap::storedCondition(is_array($car['engineCondition'] ?? null) ? $car['engineCondition'] : []),
-                ];
+            $outgoingIndex=self::engineAssemblyIndexForCar($player,$car);
+            if($outgoingIndex===null)throw new GameException('The installed engine assembly could not be resolved.',500);
+            $outgoing=&$player['inventory']['engines'][$outgoingIndex];
+            $outgoingEngineId=(string)($car['engineId']??$car['factoryEngineId']??'');
+            $outgoing['engineId']=$outgoingEngineId;
+            $outgoing['installedOnCarId']=null;
+            $outgoing['condition']=EngineSwap::storedCondition(is_array($car['engineCondition']??null)?$car['engineCondition']:[]);
+            $outgoing['tune']=is_array($car['tune']??null)?$car['tune']:null;
+            $outgoing['storedStats']=[
+                'hp'=>max(1,(int)round((float)($car['derived']['hp']??$car['base']['hp']??1))),
+                'torque'=>max(1,(int)round((float)($car['derived']['torque']??$car['base']['torque']??1))),
+            ];
+            $attached=is_array($outgoing['attachedPartInventoryIds']??null)?$outgoing['attachedPartInventoryIds']:[];
+            $storedPartNames=[];
+            foreach($player['inventory']['parts'] as &$ownedPart){
+                if((string)($ownedPart['installedOnCarId']??'')!==$carId)continue;
+                $part=self::findBy($parts,'catalogId',(string)($ownedPart['catalogId']??''));
+                if(!$part||!EngineSwap::isEngineBoundPart($part))continue;
+                $ownedPart['installedOnCarId']=null;
+                $ownedPart['installedOnEngineInventoryId']=$outgoing['inventoryId'];
+                $attached[]=(string)$ownedPart['inventoryId'];
+                $storedPartNames[]=(string)($part['name']??$part['catalogId']??'Part');
             }
-            if ($ownedIndex >= 0) array_splice($player['inventory']['engines'], $ownedIndex, 1);
+            unset($ownedPart);
+            $outgoing['attachedPartInventoryIds']=array_values(array_unique($attached));
+            unset($outgoing);
 
-            $candidate = $car;
-            $candidate['engineId'] = (string)$engine['engineId'];
-            $candidate['engine'] = EngineSwap::snapshot($engine, is_array($car['engine'] ?? null) ? $car['engine'] : []);
-            $candidate['base']['hp'] = (int)$engine['peakHp'];
-            $candidate['base']['torque'] = (int)$engine['peakTorque'];
-            if (is_array($candidate['stageBaseline'] ?? null)) {
-                $candidate['stageBaseline']['hp'] = (int)$engine['peakHp'];
-                $candidate['stageBaseline']['torque'] = (int)$engine['peakTorque'];
+            if($ownedIndex===null){
+                $player['inventory']['engines'][]=EngineSwap::normalizeAssembly([
+                    'inventoryId'=>self::id('engine'),
+                    'engineId'=>(string)$engine['engineId'],
+                    'installedOnCarId'=>$carId,
+                    'acquiredAt'=>time(),
+                    'source'=>'swap_shop',
+                    'condition'=>EngineSwap::healthyCondition(),
+                    'attachedPartInventoryIds'=>[],
+                    'tune'=>null,
+                    'storedStats'=>['hp'=>(int)$engine['peakHp'],'torque'=>(int)$engine['peakTorque']],
+                ]);
+                $ownedIndex=count($player['inventory']['engines'])-1;
             }
-            $candidate['tune'] = null;
-            $candidate['tuningRuntime'] = null;
-            $candidate['tuningDiagnostics'] = null;
-            $candidate['engineCondition'] = $incomingCondition;
-            $candidate['engineSwap'] = [
-                'count' => (int)($car['engineSwap']['count'] ?? 0) + 1,
-                'lastFromEngineId' => $outgoingEngineId !== '' ? $outgoingEngineId : null,
-                'lastToEngineId' => (string)$engine['engineId'],
-                'lastFitment' => (string)($fitment['fitment'] ?? 'CUSTOM'),
-                'lastSwapAt' => time(),
+            $incoming=&$player['inventory']['engines'][$ownedIndex];
+            $incoming['installedOnCarId']=$carId;
+
+            $candidate=$car;
+            $candidate['engineId']=(string)$engine['engineId'];
+            $candidate['engineInventoryId']=$incoming['inventoryId'];
+            $candidate['engine']=EngineSwap::snapshot($engine,is_array($car['engine']??null)?$car['engine']:[]);
+            $candidate['base']['hp']=(int)$engine['peakHp'];
+            $candidate['base']['torque']=(int)$engine['peakTorque'];
+            if(is_array($candidate['stageBaseline']??null)){
+                $candidate['stageBaseline']['hp']=(int)$engine['peakHp'];
+                $candidate['stageBaseline']['torque']=(int)$engine['peakTorque'];
+            }
+            $candidate['tune']=is_array($incoming['tune']??null)?$incoming['tune']:null;
+            $candidate['tuningRuntime']=null;
+            $candidate['tuningDiagnostics']=null;
+            $candidate['engineCondition']=EngineSwap::storedCondition(is_array($incoming['condition']??null)?$incoming['condition']:[]);
+            $candidate['engineSwap']=[
+                'count'=>(int)($car['engineSwap']['count']??0)+1,
+                'lastFromEngineId'=>$outgoingEngineId!==''?$outgoingEngineId:null,
+                'lastToEngineId'=>(string)$engine['engineId'],
+                'lastFitment'=>(string)($fitment['fitment']??'CUSTOM'),
+                'lastSwapAt'=>time(),
+                'lastStoredParts'=>$storedPartNames,
             ];
 
-            $uninstalled = [];
-            foreach ($player['inventory']['parts'] as &$ownedPart) {
-                if ((string)($ownedPart['installedOnCarId'] ?? '') !== $carId) continue;
-                $part = self::findBy($parts, 'catalogId', (string)($ownedPart['catalogId'] ?? ''));
-                if (!$part) continue;
-                $incompatible = self::partCompatibilityReason($part, $candidate) !== null;
-                if (EngineSwap::isEngineBoundPart($part) || $incompatible) {
-                    $ownedPart['installedOnCarId'] = null;
-                    $uninstalled[] = (string)($part['name'] ?? $part['catalogId'] ?? 'Part');
+            $chassisUninstalled=[];
+            foreach($player['inventory']['parts'] as &$ownedPart){
+                if((string)($ownedPart['installedOnCarId']??'')!==$carId)continue;
+                $part=self::findBy($parts,'catalogId',(string)($ownedPart['catalogId']??''));
+                if(!$part||EngineSwap::isEngineBoundPart($part))continue;
+                if(self::partCompatibilityReason($part,$candidate)!==null){
+                    $ownedPart['installedOnCarId']=null;
+                    $ownedPart['installedOnEngineInventoryId']=null;
+                    $chassisUninstalled[]=(string)($part['name']??$part['catalogId']??'Part');
                 }
             }
             unset($ownedPart);
 
-            $player['wallet']['credits'] -= $totalCost;
-            if ($ownedIndex < 0) $player['stats']['enginesPurchased'] = (int)($player['stats']['enginesPurchased'] ?? 0) + 1;
-            $player['stats']['engineSwaps'] = (int)($player['stats']['engineSwaps'] ?? 0) + 1;
-            $player['garage'][$carIndex] = self::recalculateCar($candidate, $player['inventory']['parts'], $parts);
-            $player['garage'][$carIndex]['engineSwap']['lastUninstalledParts'] = $uninstalled;
-            self::addTransaction(
-                $player,
-                'engine_swap',
-                -$totalCost,
-                self::carName($car) . ': ' . (string)($engine['name'] ?? $engine['engineId']) . ' swap'
-            );
+            $activation=self::activateEngineAssemblyParts($player,$candidate);
+            $candidate['engineSwap']['lastRestoredParts']=$activation['activeNames'];
+            $candidate['engineSwap']['lastDormantParts']=$activation['dormantNames'];
+            $candidate['engineSwap']['lastChassisUninstalledParts']=$chassisUninstalled;
+
+            $player['wallet']['credits']-=$totalCost;
+            if($enginePrice>0)$player['stats']['enginesPurchased']=(int)($player['stats']['enginesPurchased']??0)+1;
+            $player['stats']['engineSwaps']=(int)($player['stats']['engineSwaps']??0)+1;
+            $player['garage'][$carIndex]=self::recalculateCar($candidate,$player['inventory']['parts'],$parts);
+            $incoming['condition']=EngineSwap::storedCondition(is_array($player['garage'][$carIndex]['engineCondition']??null)?$player['garage'][$carIndex]['engineCondition']:[]);
+            $incoming['tune']=is_array($player['garage'][$carIndex]['tune']??null)?$player['garage'][$carIndex]['tune']:null;
+            $incoming['storedStats']=[
+                'hp'=>max(1,(int)round((float)($player['garage'][$carIndex]['derived']['hp']??$engine['peakHp']??1))),
+                'torque'=>max(1,(int)round((float)($player['garage'][$carIndex]['derived']['torque']??$engine['peakTorque']??1))),
+            ];
+            unset($incoming);
+
+            self::addTransaction($player,'engine_swap',-$totalCost,self::carName($car).': '.(string)($engine['name']??$engine['engineId']).' swap');
             return $player;
         });
     }
@@ -396,6 +537,9 @@ final class GameService
             $partIndex = self::requireOwnedPartIndex($player, $inventoryId);
             $instance = $player['inventory']['parts'][$partIndex];
             $previousCarId = $instance['installedOnCarId'] ?? null;
+            if (!empty($instance['installedOnEngineInventoryId']) && !$previousCarId) {
+                throw new GameException('That part is attached to a stored engine assembly. Install the engine assembly or remove the part from that engine first.');
+            }
             $spec = self::findBy($catalog, 'catalogId', (string)$instance['catalogId']);
             if (!$spec) {
                 throw new GameException('Part catalog entry is missing.', 500);
@@ -415,7 +559,10 @@ final class GameService
                     $installedSpec = self::findBy($catalog, 'catalogId', (string)($ownedPart['catalogId'] ?? ''));
                     $installedMeta = $installedSpec ? self::forcedInductionMeta($installedSpec) : null;
                     if (!$installedMeta || (string)($installedMeta['role'] ?? '') === 'nitrous') continue;
-                    if ((string)($installedMeta['system'] ?? '') === $previousSystem) $ownedPart['installedOnCarId'] = null;
+                    if ((string)($installedMeta['system'] ?? '') === $previousSystem) {
+                        $ownedPart['installedOnCarId'] = null;
+                        self::detachPartFromEngineAssembly($player, $ownedPart);
+                    }
                 }
                 unset($ownedPart);
             }
@@ -435,11 +582,22 @@ final class GameService
                 $installedSpec = self::findBy($catalog, 'catalogId', (string)($ownedPart['catalogId'] ?? ''));
                 if ($installedSpec && (string)$installedSpec['slot'] === $slot) {
                     $ownedPart['installedOnCarId'] = null;
+                    if (EngineSwap::isEngineBoundPart($installedSpec)) self::detachPartFromEngineAssembly($player, $ownedPart);
                 }
             }
             unset($ownedPart);
 
             $player['inventory']['parts'][$partIndex]['installedOnCarId'] = $carId;
+            if (EngineSwap::isEngineBoundPart($spec)) {
+                $assemblyIndex = self::engineAssemblyIndexForCar($player, $car);
+                if ($assemblyIndex !== null) {
+                    $player['inventory']['parts'][$partIndex]['installedOnEngineInventoryId'] = $player['inventory']['engines'][$assemblyIndex]['inventoryId'];
+                    $ids = is_array($player['inventory']['engines'][$assemblyIndex]['attachedPartInventoryIds'] ?? null)
+                        ? $player['inventory']['engines'][$assemblyIndex]['attachedPartInventoryIds'] : [];
+                    $ids[] = $player['inventory']['parts'][$partIndex]['inventoryId'];
+                    $player['inventory']['engines'][$assemblyIndex]['attachedPartInventoryIds'] = array_values(array_unique($ids));
+                }
+            }
             $player['garage'][$carIndex] = self::recalculateCar($player['garage'][$carIndex], $player['inventory']['parts'], $catalog);
             if ($previousCarId && (string)$previousCarId !== (string)$carId) {
                 $previousCarIndex = self::requireOwnedCarIndex($player, (string)$previousCarId);
@@ -466,6 +624,7 @@ final class GameService
                 }
             }
             $player['inventory']['parts'][$partIndex]['installedOnCarId'] = null;
+            self::detachPartFromEngineAssembly($player, $player['inventory']['parts'][$partIndex]);
             if ($carId) {
                 $carIndex = self::requireOwnedCarIndex($player, (string)$carId);
                 $player['garage'][$carIndex] = self::recalculateCar($player['garage'][$carIndex], $player['inventory']['parts'], $catalog);
@@ -499,6 +658,7 @@ final class GameService
                     if (!empty($partSpec['simpleTier'])) $ownedPart['installedOnCarId'] = null;
                 }
                 unset($ownedPart);
+                self::activateEngineAssemblyParts($player, $car);
                 $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'], $catalog);
                 self::addTransaction($player, 'stage_conversion', 0, self::carName($car) . ' converted to Street Race Car');
                 return $player;
@@ -528,6 +688,7 @@ final class GameService
                 }
 
                 $car['buildStage'] = 3;
+                self::activateEngineAssemblyParts($player, $car);
                 $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'], $catalog);
                 self::addTransaction($player, 'stage_conversion', 0, self::carName($car) . ' converted to Front-Half Race Car');
                 return $player;
@@ -535,6 +696,7 @@ final class GameService
 
             if ($stage === 3) {
                 $car['buildStage'] = 4;
+                self::activateEngineAssemblyParts($player, $car);
                 $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'], $catalog);
                 self::addTransaction($player, 'stage_conversion', 0, self::carName($car) . ' converted to Full Race Car');
                 return $player;
@@ -869,6 +1031,10 @@ final class GameService
                     'lastFailureAt' => time(),
                     'repairedAt' => $car['engineCondition']['repairedAt'] ?? null,
                 ];
+                $assemblyIndex = self::engineAssemblyIndexForCar($player, $player['garage'][$carIndex]);
+                if ($assemblyIndex !== null) {
+                    $player['inventory']['engines'][$assemblyIndex]['condition'] = EngineSwap::storedCondition($player['garage'][$carIndex]['engineCondition']);
+                }
                 $result['engineFailure'] = true;
                 $result['engineRepairCost'] = self::engineRepairCost($player['garage'][$carIndex]);
             }
@@ -1033,7 +1199,7 @@ final class GameService
         $car['engineBay'] = $car['engineBay'] ?? ($spec['engineBay'] ?? null);
         $car['engineSwapFitment'] = is_array($car['engineSwapFitment'] ?? null)
             ? $car['engineSwapFitment']
-            : (is_array($spec['engineSwapFitment'] ?? null) ? $spec['engineSwapFitment'] : ['minBuildStage' => 3, 'options' => []]);
+            : (is_array($spec['engineSwapFitment'] ?? null) ? $spec['engineSwapFitment'] : ['minBuildStage' => 2, 'options' => []]);
         $car['engine'] = array_replace(
             is_array($spec['engine'] ?? null) ? $spec['engine'] : [],
             is_array($car['engine'] ?? null) ? $car['engine'] : []
@@ -1108,7 +1274,7 @@ final class GameService
             'factoryEngineId' => $spec['factoryEngineId'] ?? null,
             'engineId' => $spec['factoryEngineId'] ?? null,
             'engineBay' => $spec['engineBay'] ?? null,
-            'engineSwapFitment' => is_array($spec['engineSwapFitment'] ?? null) ? $spec['engineSwapFitment'] : ['minBuildStage' => 3, 'options' => []],
+            'engineSwapFitment' => is_array($spec['engineSwapFitment'] ?? null) ? $spec['engineSwapFitment'] : ['minBuildStage' => 2, 'options' => []],
             'engine' => is_array($spec['engine'] ?? null) ? $spec['engine'] : [],
             'visual' => self::withPaintColor(is_array($spec['visual'] ?? null) ? $spec['visual'] : [], $paintColor ?? self::firstPaintColor($spec)),
             'benchmark' => is_array($spec['benchmark'] ?? null) ? $spec['benchmark'] : $benchmark,
@@ -1198,6 +1364,93 @@ final class GameService
         $car['benchmarkEt'] = (float)$benchmark['quarterMileEt'];
         $car['installedParts'] = array_values(array_filter($installedParts));
         return $car;
+    }
+
+    private static function engineAssemblyIndexForCar(array $player, array $car): ?int
+    {
+        foreach (($player['inventory']['engines'] ?? []) as $index => $item) {
+            if ((string)($item['inventoryId'] ?? '') === (string)($car['engineInventoryId'] ?? '')
+                || (string)($item['installedOnCarId'] ?? '') === (string)($car['carId'] ?? '')) {
+                return (int)$index;
+            }
+        }
+        return null;
+    }
+
+    private static function activateEngineAssemblyParts(array &$player, array $car): array
+    {
+        $assemblyIndex=self::engineAssemblyIndexForCar($player,$car);
+        if($assemblyIndex===null)return ['activeNames'=>[],'dormantNames'=>[]];
+        $assembly=&$player['inventory']['engines'][$assemblyIndex];
+        $assembly['installedOnCarId']=(string)($car['carId']??'');
+        $attachedIds=array_values(array_unique(array_map('strval',is_array($assembly['attachedPartInventoryIds']??null)?$assembly['attachedPartInventoryIds']:[])));
+        $catalog=self::partsCatalog();
+        $candidates=[];
+        foreach($attachedIds as $id){
+            foreach($player['inventory']['parts'] as &$item){
+                if((string)($item['inventoryId']??'')!==$id)continue;
+                $item['installedOnEngineInventoryId']=$assembly['inventoryId'];
+                $spec=self::findBy($catalog,'catalogId',(string)($item['catalogId']??''));
+                if(!$spec)break;
+                $stage=(int)($car['buildStage']??1);
+                $stageOk=(int)($spec['buildStage']??1)<=$stage
+                    && (int)($spec['persistentFromStage']??$spec['buildStage']??1)<=$stage;
+                if(self::partCompatibilityReason($spec,$car)===null&&$stageOk)$candidates[]=['inventoryId'=>$id,'spec'=>$spec];
+                else $item['installedOnCarId']=null;
+                break;
+            }
+            unset($item);
+        }
+        $activeSpecs=array_map(fn(array $row):array=>$row['spec'],$candidates);
+        $engineKitLevel=0;
+        foreach($activeSpecs as $spec)$engineKitLevel=max($engineKitLevel,(int)($spec['engineKit']['level']??0));
+        $activeNames=[];$dormantNames=[];
+        foreach($candidates as $row){
+            $spec=$row['spec'];$id=$row['inventoryId'];
+            $rules=self::partRuleCompatibilityReason($spec,$activeSpecs);
+            $engineKitOk=(int)($spec['requiredEngineKit']??0)<=$engineKitLevel;
+            $name=(string)($spec['name']??$spec['catalogId']??'Part');
+            foreach($player['inventory']['parts'] as &$item){
+                if((string)($item['inventoryId']??'')!==$id)continue;
+                if($rules===null&&$engineKitOk){
+                    $item['installedOnCarId']=(string)($car['carId']??'');
+                    $activeNames[]=$name;
+                }else{
+                    $item['installedOnCarId']=null;
+                    $dormantNames[]=$name;
+                }
+                break;
+            }
+            unset($item);
+        }
+        foreach($attachedIds as $id){
+            $part=null;
+            foreach($player['inventory']['parts'] as $item){
+                if((string)($item['inventoryId']??'')===$id){$part=$item;break;}
+            }
+            if(!$part)continue;
+            $spec=self::findBy($catalog,'catalogId',(string)($part['catalogId']??''));
+            if(!$spec)continue;
+            $name=(string)($spec['name']??$spec['catalogId']??'Part');
+            if(!in_array($name,$activeNames,true)&&!in_array($name,$dormantNames,true))$dormantNames[]=$name;
+        }
+        return ['activeNames'=>$activeNames,'dormantNames'=>$dormantNames];
+    }
+
+    private static function detachPartFromEngineAssembly(array &$player, array &$item): void
+    {
+        $assemblyId=(string)($item['installedOnEngineInventoryId']??'');
+        if($assemblyId==='')return;
+        foreach($player['inventory']['engines'] as &$assembly){
+            if((string)($assembly['inventoryId']??'')!==$assemblyId)continue;
+            $assembly['attachedPartInventoryIds']=array_values(array_filter(
+                is_array($assembly['attachedPartInventoryIds']??null)?$assembly['attachedPartInventoryIds']:[],
+                fn($id):bool=>(string)$id!==(string)($item['inventoryId']??'')
+            ));
+            break;
+        }
+        unset($assembly);
+        $item['installedOnEngineInventoryId']=null;
     }
 
     private static function engineRepairCost(array $car): int

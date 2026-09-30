@@ -1,5 +1,20 @@
 # Changelog
 
+## V0.5.0-h.1 — Complete engine assemblies
+
+- Standard/custom engine swaps now begin at **Street Race Car / Build Type 2**. More invasive fitments can still require Build Type 3 or 4.
+- Engines are now persistent **engine instances / assemblies**, not just catalog IDs.
+- Removing a built engine stores the complete engine assembly: condition, saved calibration, current power snapshot and attached engine-bound parts.
+- Engine-bound Intake, Exhaust, Fuel, ECU, Drivetrain, Forced Induction, Engine Kit and Engine hardware travels with its engine instead of becoming loose Parts inventory.
+- Installing a stored engine automatically restores compatible attached parts and its saved tune.
+- Hardware above the destination chassis Build Type stays attached to the engine but **dormant** until the chassis is upgraded; it is not destroyed or detached.
+- Chassis hardware such as tires, suspension and weight reduction stays with the car.
+- Stored-engine parts no longer appear as loose installable parts in the normal Parts inventory.
+- Engine failure / rebuild condition follows the actual engine assembly when it is moved between cars.
+- Added a schema migration that attempts to reconnect parts detached by the original V0.5H swap implementation to the stored engine they came from.
+- Engine Swap Shop now shows Engine Assembly Inventory with stored HP, attached-part count, condition and saved-tune state.
+
+
 ## V0.5.0-h — Engine Swap Shop
 
 - Added **ENGINE SWAP SHOP** as its own Main Menu destination, separate from Parts.

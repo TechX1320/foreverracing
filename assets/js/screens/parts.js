@@ -898,8 +898,11 @@ function installedSimpleTier(player, carId, key) {
 
 function ownedForCar(player, carId) {
   return (player?.inventory?.parts || []).filter((item) =>
-    String(item.purchasedForCarId || "") === String(carId)
-    || String(item.installedOnCarId || "") === String(carId)
+    String(item.installedOnCarId || "") === String(carId)
+    || (
+      String(item.purchasedForCarId || "") === String(carId)
+      && !item.installedOnEngineInventoryId
+    )
   );
 }
 
