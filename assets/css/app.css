@@ -2297,3 +2297,16 @@ dialog.fr-dialog:has(.tuning-dialog){
   .tuning-dialog__footer{display:block}
   .tuning-dialog__footer .dialog-actions{margin-top:8px}
 }
+
+.race-tuning-log{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  border:1px solid #33463a;
+  border-top:0;
+  background:#0d1410;
+}
+.race-tuning-log>div{padding:7px 8px;border-right:1px solid #29362e}
+.race-tuning-log>div:last-child{border-right:0}
+.race-tuning-log span{display:block;color:var(--faint);font-size:9px;font-weight:900}
+.race-tuning-log b{display:block;margin-top:2px;font-size:10px}
+@media(max-width:760px){.race-tuning-log{grid-template-columns:repeat(2,1fr)}.race-tuning-log>div{border-bottom:1px solid #29362e}}
