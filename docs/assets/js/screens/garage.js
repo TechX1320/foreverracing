@@ -218,8 +218,11 @@ function openTuning(ctx, carId) {
               <div><small>STABILITY</small><strong>${diag.stabilityPct}%</strong></div>
               <div><small>RISK</small><strong class="${diag.riskPct >= 65 ? "bad" : diag.riskPct >= 35 ? "warn" : "good"}">${diag.riskPct}%</strong></div>
               <div><small>1ST GEAR POWER</small><strong>${draft.boostByGear[0]}%</strong></div>
+              <div><small>ENGINE ENVELOPE</small><strong>${number(hardware.powerEnvelope?.capacityHp || 0)} HP</strong></div>
+              <div><small>RAW REQUEST</small><strong>${number(diag.powerLimit?.rawHp || projected.hp)} HP</strong></div>
             </div>
             <div class="tuning-monitor__states">
+              ${stateRow("ENGINE", diag.powerState)}
               ${stateRow("FUEL", diag.fuelState)}
               ${stateRow("TIMING", diag.timingState)}
               ${stateRow("TIRES", diag.tireState)}
@@ -236,6 +239,7 @@ function openTuning(ctx, carId) {
               <span>Tire PSI alters usable grip.</span>
               <span>Boost-by-gear changes early traction demand.</span>
               <span>Launch + shift RPM add or remove ET.</span>
+              <span>Engine capacity applies soft diminishing returns before impossible HP stacks can run away.</span>
               <span>High-risk tunes can pull power on individual passes.</span>
             </div>
           </aside>
@@ -309,8 +313,8 @@ function tuneSlider(label, key, value, min, max, step, unit, hint) {
 
 function stateRow(label, value) {
   const text = String(value || "");
-  const good = ["IN RANGE","DIALED IN","CLOSE"].includes(text);
-  const bad = ["LEAN","AGGRESSIVE","TOO HIGH","OFF TARGET"].includes(text);
+  const good = ["IN RANGE","DIALED IN","CLOSE","HEADROOM"].includes(text);
+  const bad = ["LEAN","AGGRESSIVE","TOO HIGH","OFF TARGET","ENGINE-LIMITED"].includes(text);
   return `<div><span>${escapeHtml(label)}</span><b class="${good ? "good" : bad ? "bad" : ""}">${escapeHtml(text)}</b></div>`;
 }
 
