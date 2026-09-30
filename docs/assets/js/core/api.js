@@ -47,6 +47,8 @@ export class ApiClient {
   renameCar(carId, name) { return this.request("garage/rename.php", { method: "POST", body: { carId, name }, csrf: true }); }
   saveTune(carId, tune) { return this.request("garage/tune.php", { method: "POST", body: { carId, tune }, csrf: true }); }
   repairEngine(carId) { return this.request("garage/repair-engine.php", { method: "POST", body: { carId }, csrf: true }); }
+  engineCatalog() { return this.request("engine-swaps/catalog.php"); }
+  swapEngine(carId, engineId) { return this.request("engine-swaps/install.php", { method: "POST", body: { carId, engineId }, csrf: true }); }
   partsCatalog() { return this.request("parts/catalog.php"); }
   buyPart(catalogId) { return this.request("parts/purchase.php", { method: "POST", body: { catalogId }, csrf: true }); }
   installPart(inventoryId, carId) { return this.request("parts/install.php", { method: "POST", body: { inventoryId, carId }, csrf: true }); }
