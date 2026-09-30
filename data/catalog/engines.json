@@ -249,7 +249,14 @@
       }
     ],
     "sourceStatus": "engine-tool",
-    "curveProfile": "turbo_street"
+    "curveProfile": "turbo_street",
+    "powerLimits": {
+      "stockHp": 360,
+      "kit1Hp": 500,
+      "kit2Hp": 650,
+      "kit3Hp": 820,
+      "kit4Hp": 1000
+    }
   },
   {
     "engineId": "mazda_13b_msp_renesis_238",
@@ -318,7 +325,14 @@
       }
     ],
     "sourceStatus": "engine-tool",
-    "curveProfile": "rotary"
+    "curveProfile": "rotary",
+    "powerLimits": {
+      "stockHp": 380,
+      "kit1Hp": 550,
+      "kit2Hp": 750,
+      "kit3Hp": 930,
+      "kit4Hp": 1100
+    }
   },
   {
     "engineId": "renault_clio_v6_29_255",
@@ -386,6 +400,13 @@
       }
     ],
     "sourceStatus": "engine-tool",
-    "curveProfile": "high_rev_na"
+    "curveProfile": "high_rev_na",
+    "powerLimits": {
+      "stockHp": 420,
+      "kit1Hp": 600,
+      "kit2Hp": 800,
+      "kit3Hp": 1000,
+      "kit4Hp": 1250
+    }
   }
 ]
