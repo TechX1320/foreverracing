@@ -304,7 +304,10 @@ function projectSwap(player, car, engine, quote = null) {
     const spec = partCache.find((part) => String(part.catalogId) === String(item.catalogId));
     if (!spec) continue;
     const compatibility = partCompatibility(spec, candidate);
-    if (!compatibility.ok) {
+    const stage = Number(candidate.buildStage || 1);
+    const stageOk = Number(spec.buildStage || 1) <= stage
+      && Number(spec.persistentFromStage || spec.buildStage || 1) <= stage;
+    if (!compatibility.ok || !stageOk) {
       dormant.push(String(spec.name || spec.catalogId));
       continue;
     }
