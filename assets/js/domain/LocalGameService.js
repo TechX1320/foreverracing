@@ -717,7 +717,7 @@ export class LocalGameService {
     car.tuningDiagnostics = car.tuningDiagnostics && typeof car.tuningDiagnostics === 'object' ? clone(car.tuningDiagnostics) : null;
     car.untunedDerived = car.untunedDerived && typeof car.untunedDerived === 'object' ? clone(car.untunedDerived) : null;
     if (car.derived?.hp && car.derived?.weight) {
-      const benchmark = benchmarkPerformance(car.derived, this.racingConfig);
+      const benchmark = benchmarkPerformance({ ...car.derived, drivetrain: car.base?.drivetrain, tuning: car.tuningRuntime || null }, this.racingConfig);
       car.performanceIndex = benchmark.performanceIndex;
       car.performanceClass = performanceClassFromIndex(benchmark.performanceIndex);
       car.benchmarkEt = benchmark.quarterMileEt;
@@ -798,7 +798,6 @@ export class LocalGameService {
       car.derived = clone(untuned);
       car.tuningRuntime = null;
       car.tuningDiagnostics = null;
-      if (!hardware.unlocked) car.tune = null;
     }
 
     const benchmark = benchmarkPerformance(benchmarkContext, this.racingConfig);
