@@ -347,9 +347,9 @@ async function purchasePart(ctx, dialog, car, catalogId, installNow, button, cat
       if (categoryKey && categoryKey !== "forced_induction") {
         renderStandardCategoryDialog(ctx, dialog, car.carId, categoryKey, viewState);
       } else if (categoryKey === "forced_induction" && candidate) {
-        const system = String(forcedInductionMeta(candidate)?.system || "");
+        const system = String(viewState.fiSystem || forcedInductionMeta(candidate)?.system || "");
         closeDialog(dialog);
-        if (system) openForcedInductionSystem(ctx, car.carId, system);
+        if (system) openForcedInductionSystem(ctx, car.carId, system, Number(viewState.fiPage || 0));
       } else {
         closeDialog(dialog);
       }
@@ -576,7 +576,7 @@ function fiSystemCard(system, title, subtitle, state, stage) {
     </button>`;
 }
 
-function openForcedInductionSystem(ctx, carId, system) {
+function openForcedInductionSystem(ctx, carId, system, requestedPage = 0) {
   const player = ctx.store.player;
   const car = player?.garage?.find((entry) => String(entry.carId) === String(carId));
   if (!car) return;
@@ -585,7 +585,11 @@ function openForcedInductionSystem(ctx, carId, system) {
   const allSpecs = categorySpecs(car, "forced_induction")
     .filter((part) => String(forcedInductionMeta(part)?.system || "") === String(system))
     .filter((part) => forcedInductionPartVisible(part, state, stage));
-  const specs = forcedInductionDisplayParts(allSpecs, state);
+  const displaySpecs = forcedInductionDisplayParts(allSpecs, state);
+  const pageSize = 3;
+  const pageCount = Math.max(1, Math.ceil(displaySpecs.length / pageSize));
+  const page = Math.min(pageCount - 1, Math.max(0, Number(requestedPage || 0)));
+  const specs = displaySpecs.slice(page * pageSize, (page + 1) * pageSize);
   const previewPart = specs.find((part) => !findInventory(player, part.catalogId, car.carId)?.installedOnCarId) || specs[0] || null;
   const previewStats = previewPart ? projectStats(player, car, previewPart) : car.derived;
 
@@ -598,13 +602,20 @@ function openForcedInductionSystem(ctx, carId, system) {
     : "";
 
   const title = system === "nitrous" ? "NOS Kit" : `${systemLabel(system)} Kit`;
+  const pager = pageCount > 1
+    ? `<div class="parts-shop-pager">
+        <button class="button button--small" type="button" data-fi-page="${page - 1}" ${page <= 0 ? "disabled" : ""}>← PREV</button>
+        <span>PAGE <b>${page + 1}</b> / ${pageCount}</span>
+        <button class="button button--small" type="button" data-fi-page="${page + 1}" ${page >= pageCount - 1 ? "disabled" : ""}>NEXT →</button>
+      </div>`
+    : "";
   const dialog = showDialog(`
     <div class="dialog-body parts-shop-dialog forced-induction-parts-dialog">
       <div class="parts-shop-dialog__titlebar">
         <div>
           <span class="section-label">${escapeHtml(buildName(stage))} • FORCED INDUCTION</span>
           <h2>${escapeHtml(title)}</h2>
-          <p>${escapeHtml(carLabel(car))}</p>
+          <p>${escapeHtml(carLabel(car))} • ${specs.length} shown / ${displaySpecs.length} available</p>
         </div>
         <div class="parts-shop-dialog__stats">
           <span><small>HP</small><b>${number(car.derived?.hp)}</b></span>
@@ -614,9 +625,12 @@ function openForcedInductionSystem(ctx, carId, system) {
       </div>
 
       <div class="forced-induction-workspace">
-        <div class="parts-shop-list forced-induction-parts-list">
-          ${factoryRow}
-          ${specs.length ? specs.map((part) => forcedInductionPartRow(player, car, part, previewPart?.catalogId)).join("") : `<div class="empty-state"><strong>No ${escapeHtml(title)} upgrades available for this setup yet.</strong><span>Change build type or install the base kit first.</span></div>`}
+        <div>
+          <div class="parts-shop-list forced-induction-parts-list">
+            ${page === 0 ? factoryRow : ""}
+            ${specs.length ? specs.map((part) => forcedInductionPartRow(player, car, part, previewPart?.catalogId)).join("") : `<div class="empty-state"><strong>No ${escapeHtml(title)} upgrades available for this setup yet.</strong><span>Change build type or install the base kit first.</span></div>`}
+          </div>
+          ${pager}
         </div>
         <aside class="part-dyno" data-fi-dyno>
           ${previewPart ? renderPartDynoChart(car, car.derived, previewStats, previewPart.name) : '<div class="part-dyno__empty">Choose a part to preview its estimated curve.</div>'}
@@ -631,6 +645,13 @@ function openForcedInductionSystem(ctx, carId, system) {
   dialog.querySelector("[data-back]")?.addEventListener("click", () => {
     closeDialog(dialog);
     openForcedInduction(ctx, carId);
+  });
+  dialog.querySelectorAll("[data-fi-page]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const nextPage = Number(button.dataset.fiPage || 0);
+      closeDialog(dialog);
+      openForcedInductionSystem(ctx, carId, system, nextPage);
+    });
   });
 
   dialog.querySelectorAll("[data-fi-dyno-part]").forEach((button) => {
@@ -647,7 +668,7 @@ function openForcedInductionSystem(ctx, carId, system) {
     button.addEventListener("click", async () => {
       const installNow = Boolean(button.dataset.buyInstallPart);
       const catalogId = button.dataset.buyInstallPart || button.dataset.buyPart;
-      await purchasePart(ctx, dialog, car, catalogId, installNow, button, "forced_induction");
+      await purchasePart(ctx, dialog, car, catalogId, installNow, button, "forced_induction", { fiSystem: system, fiPage: page });
     });
   });
 
@@ -668,7 +689,7 @@ function openForcedInductionSystem(ctx, carId, system) {
         closeDialog(dialog);
         ctx.toast("Forced induction updated", "The car's setup and Performance Index were recalculated.");
         await renderParts(ctx);
-        openForcedInductionSystem(ctx, carId, system);
+        openForcedInductionSystem(ctx, carId, system, page);
       } catch (err) {
         ctx.toast("Install blocked", err.message);
         button.disabled = false;
