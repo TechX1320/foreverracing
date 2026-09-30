@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.5.0-f playable direction
+## V0.5.0-g playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,16 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.5G garage tuning
+
+- Installing **Standalone ECU + Laptop** unlocks a per-car **TUNING** action in Garage.
+- The calibration workspace includes Boost Target, six-gear Boost-by-Gear, Fuel Trim, Ignition Advance, Launch RPM, Shift RPM and Front/Rear Tire PSI.
+- These settings feed the actual race simulator: power settings change HP/TQ, tire pressure changes usable grip, early-gear boost changes traction demand, and launch/shift strategy changes ET.
+- Higher-risk calibrations can intermittently trigger an ECU power pull, so the biggest dyno number is not automatically the quickest or most repeatable setup.
+- Each owned car gets a small deterministic calibration fingerprint. A tune shared by another player can be close, but its exact fuel/timing/tire sweet spot will not be identical on every car.
+- The laptop gives directional diagnostics rather than exposing hidden ideal numbers; post-race data logs show whether boost strategy, wheel slip and stability actually affected the pass.
+- Tire PSI is stored with the laptop calibration for convenience even though it is physically a chassis adjustment.
 
 ### V0.5F deep Stage 3 / Stage 4 parts
 
