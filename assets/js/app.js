@@ -17,6 +17,7 @@ import { loadSettings, renderSettings } from './screens/settings.js';
 import { renderContentStudio } from './screens/contentStudio.js';
 import { renderEngineStudio } from './screens/engineStudio.js';
 import { renderPartsStudio } from './screens/partsStudio.js';
+import { renderCircuitStudio } from './screens/circuitStudio.js';
 
 const storage = createStorageProvider();
 const store = new Store();
@@ -36,13 +37,13 @@ document.addEventListener('error', (event) => {
 }, true);
 
 const TUTORIAL_ROUTES = {
-  welcome: ['home', 'settings', 'content-studio', 'engine-studio', 'parts-studio'],
-  buy_first_car: ['home', 'usedlot', 'settings', 'content-studio', 'engine-studio', 'parts-studio'],
-  visit_garage: ['home', 'garage', 'settings', 'content-studio', 'engine-studio', 'parts-studio'],
-  buy_first_upgrade: ['home', 'garage', 'parts', 'settings', 'content-studio', 'engine-studio', 'parts-studio'],
-  install_first_upgrade: ['home', 'garage', 'settings', 'content-studio', 'engine-studio', 'parts-studio'],
-  build_stages: ['home', 'quick-race', 'settings', 'content-studio', 'engine-studio', 'parts-studio'],
-  first_race: ['home', 'quick-race', 'settings', 'content-studio', 'engine-studio', 'parts-studio']
+  welcome: ['home', 'settings', 'content-studio', 'engine-studio', 'parts-studio', 'circuit-studio'],
+  buy_first_car: ['home', 'usedlot', 'settings', 'content-studio', 'engine-studio', 'parts-studio', 'circuit-studio'],
+  visit_garage: ['home', 'garage', 'settings', 'content-studio', 'engine-studio', 'parts-studio', 'circuit-studio'],
+  buy_first_upgrade: ['home', 'garage', 'parts', 'settings', 'content-studio', 'engine-studio', 'parts-studio', 'circuit-studio'],
+  install_first_upgrade: ['home', 'garage', 'settings', 'content-studio', 'engine-studio', 'parts-studio', 'circuit-studio'],
+  build_stages: ['home', 'quick-race', 'settings', 'content-studio', 'engine-studio', 'parts-studio', 'circuit-studio'],
+  first_race: ['home', 'quick-race', 'settings', 'content-studio', 'engine-studio', 'parts-studio', 'circuit-studio']
 };
 
 const ROUTE_UNLOCK_LEVELS = {
@@ -61,7 +62,8 @@ const ROUTE_UNLOCK_LEVELS = {
   settings: 1,
   'content-studio': 1,
   'engine-studio': 1,
-  'parts-studio': 1
+  'parts-studio': 1,
+  'circuit-studio': 1
 };
 
 const ctx = { storage, store, screenRoot, router: null, toast };
@@ -84,6 +86,7 @@ router
   .register('content-studio', feature(renderContentStudio))
   .register('engine-studio', feature(renderEngineStudio))
   .register('parts-studio', feature(renderPartsStudio))
+  .register('circuit-studio', feature(renderCircuitStudio))
   .register('settings', feature(renderSettings));
 
 store.onPlayer((player) => {
@@ -132,8 +135,8 @@ async function enterGame(session) {
   storage.setCsrf(session.csrf);
   store.setPlayer(session.player);
   appRoot.hidden = false;
-  if (session.player?.activeRace && router.current() !== 'quick-race') {
-    history.replaceState(null, '', '#/quick-race');
+  if (session.player?.activeRace && router.current() !== activeRaceRoute(session.player.activeRace)) {
+    history.replaceState(null, '', `#/${activeRaceRoute(session.player.activeRace)}`);
   } else if (!location.hash) {
     history.replaceState(null, '', '#/home');
   }
@@ -318,8 +321,12 @@ function renderObjectiveRail(player) {
   node.innerHTML = `<span class="rail-state">${info.code}</span><strong>${info.title}</strong><p>${info.copy}</p>${info.route ? `<button class="rail-link" data-nav="${info.route}">${info.action}</button>` : ''}`;
 }
 
+function activeRaceRoute(activeRace) {
+  return activeRace?.origin === 'circuit' ? 'roguelike' : 'quick-race';
+}
+
 function routeAllowed(player, route) {
-  if (player?.activeRace && route !== 'quick-race') return false;
+  if (player?.activeRace && route !== activeRaceRoute(player.activeRace)) return false;
   const tutorial = player?.tutorial;
   if (tutorial?.status === 'active') {
     const allowed = TUTORIAL_ROUTES[tutorial.step] || ['home', 'settings'];
