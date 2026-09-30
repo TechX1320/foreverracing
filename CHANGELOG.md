@@ -1,5 +1,15 @@
 # Changelog
 
+## V0.6.0-a.3 — Class recovery + Parts usability
+
+- Added Class and PI to Parts shop headers and before/after part projections.
+- Added direct UNINSTALL actions for installed race-build parts in Parts.
+- Reworked Garage Inventory into a viewport-contained modal with an independently scrollable parts list.
+- Replaced raw HP/TQ multiplier labels in Inventory with real projected install/remove deltas against the current car.
+- Added Inventory Class/PI context and class-boundary warnings.
+- Added a shared PartProjection domain helper so Parts and Garage use the same power/tuning/PI calculations.
+- Added regression coverage proving a Full Race Car can uninstall power parts, keep Build Type 4, and return from a higher class to D Class.
+
 ## V0.6.0-a.2 — Optional Circuit groundwork
 
 - Added hidden-until-unlocked visibility gates for optional Circuits; optionals default to appearing after B Class unlocks.

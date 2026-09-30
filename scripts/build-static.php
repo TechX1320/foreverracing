@@ -82,7 +82,7 @@ Build: {$build}
 Storage mode: local
 Offline service worker: disabled in static development mode
 Race presentation: persistent two-phase start/finish with blocking real-time playback
-V0.6A.2: Optional Circuit visibility/tooling and engine-swap ownership clarity
+V0.6A.3: Class recovery, direct part uninstall, PI previews and scrollable inventory
 Do not edit docs/ by hand; run php scripts/build-static.php.
 ");
 
