@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { LocalGameService } from '../assets/js/domain/LocalGameService.js';
 import { performanceClassFromIndex } from '../assets/js/domain/PerformanceIndex.js';
+import { applyPartEffects, partCompatibility, partStoreAvailable } from '../assets/js/domain/PartCatalog.js';
 
 const [cars, parts, config, buildStageConfig, racingConfig] = await Promise.all([
   fs.readFile(new URL('../data/catalog/cars.json', import.meta.url), 'utf8').then(JSON.parse),
@@ -12,6 +13,18 @@ const [cars, parts, config, buildStageConfig, racingConfig] = await Promise.all(
 ]);
 
 const game = new LocalGameService({ cars, parts, config, buildStages: buildStageConfig.stages, racingConfig });
+const compatibilityFixture = {
+  catalogId: 'test_engine_specific_part',
+  compatibility: { engineIds: ['vw_ea888_20t_200'], buildStages: [2,3,4] },
+  lifecycle: { status: 'active' },
+  effects: [{ stat: 'hp', op: 'add', value: 25 }, { stat: 'weight', op: 'add', value: 5 }],
+};
+assert.equal(partCompatibility(compatibilityFixture, { engineId: 'vw_ea888_20t_200', buildStage: 2, engine: {} }).ok, true);
+assert.equal(partCompatibility(compatibilityFixture, { engineId: 'mazda_13b_msp_238', buildStage: 2, engine: {} }).ok, false);
+assert.equal(partStoreAvailable({ lifecycle: { status: 'deprecated' } }), false);
+assert.equal(partStoreAvailable({ lifecycle: { status: 'retired' } }), false);
+assert.equal(partStoreAvailable({ lifecycle: { status: 'active' } }), true);
+assert.deepEqual(applyPartEffects({ hp: 200, torque: 180, weight: 3000, grip: 1 }, compatibilityFixture.effects), { hp: 225, torque: 180, weight: 3005, grip: 1 });
 assert.equal(buildStageConfig.stages[0].name, 'Street Car');
 assert.equal(buildStageConfig.stages[1].name, 'Street Race Car');
 assert.equal(buildStageConfig.stages[2].name, 'Front-Half Race Car');
