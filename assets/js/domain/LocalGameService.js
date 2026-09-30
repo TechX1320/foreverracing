@@ -186,6 +186,32 @@ export class LocalGameService {
     });
   }
 
+  repairEngine(inputPlayer, carId) {
+    return this.mutate(inputPlayer, (player) => {
+      const index = this.requireOwnedCarIndex(player, carId);
+      const car = player.garage[index];
+      if (!car.engineCondition?.failed) throw new LocalGameError('This engine does not need a catastrophic-failure rebuild.');
+      const cost = this.engineRepairCost(car);
+      this.requireCredits(player, cost);
+      player.wallet.credits -= cost;
+      car.engineCondition = {
+        healthPct: 100,
+        failed: false,
+        failures: Number(car.engineCondition?.failures || 0),
+        lastFailureAt: car.engineCondition?.lastFailureAt || null,
+        repairedAt: now(),
+      };
+      player.garage[index] = this.recalculateCar(car, player.inventory.parts);
+      this.addTransaction(player, 'engine_rebuild', -cost, `${this.carName(car)} engine rebuild`);
+    });
+  }
+
+  engineRepairCost(car) {
+    const capacity = Math.max(200, Number(car?.powerEnvelope?.capacityHp || car?.engine?.powerLimits?.kit4Hp || car?.derived?.hp || 200));
+    const stage = Math.max(1, Number(car?.buildStage || 1));
+    return Math.max(5000, Math.round(((capacity * 12) + (stage * 1500)) / 100) * 100);
+  }
+
   purchasePart(inputPlayer, catalogId) {
     const spec = this.findBy(this.parts, 'catalogId', String(catalogId));
     if (!spec) throw new LocalGameError('That part does not exist.', 404);
@@ -423,6 +449,7 @@ export class LocalGameService {
     const player = this.normalizePlayer(inputPlayer);
     const carIndex = this.requireOwnedCarIndex(player, player.selectedCarId);
     const car = player.garage[carIndex];
+    if (car.engineCondition?.failed) throw new LocalGameError('ENGINE FAILED — rebuild it in Garage before racing again.');
     const tutorialRace = player.tutorial?.status === 'active' && player.tutorial?.step === 'first_race';
     const playerBenchmark = benchmarkPerformance({ ...(car.derived || car.base), drivetrain: car.base?.drivetrain, tuning: car.tuningRuntime || null }, this.racingConfig);
     const opponent = this.nextOpponentProfile(player, car, tutorialRace);
@@ -447,6 +474,7 @@ export class LocalGameService {
 
       const carIndex = this.requireOwnedCarIndex(draft, draft.selectedCarId);
       const car = draft.garage[carIndex];
+      if (car.engineCondition?.failed) throw new LocalGameError('ENGINE FAILED — rebuild it in Garage before racing again.');
       const level = Number(draft.progression?.level || 1);
       const tutorialRace = draft.tutorial?.status === 'active' && draft.tutorial?.step === 'first_race';
       const unlockLevel = distance === '1' ? 10 : distance === '1/2' ? 5 : 1;
@@ -483,13 +511,14 @@ export class LocalGameService {
         opponentRun.foul = false;
       }
 
-      const won = playerRun.totalTime < opponentRun.totalTime;
+      const playerDnf = Boolean(playerRun.dnf);
+      const won = !playerDnf && playerRun.totalTime < opponentRun.totalTime;
       const creditMultiplier = Number(distanceConfig.creditMultiplier || 1);
-      const reward = won
+      const reward = playerDnf ? 0 : (won
         ? Math.round(randomInt(450, 850) * creditMultiplier)
-        : Math.round(randomInt(90, 220) * creditMultiplier);
-      const expReward = this.raceExpReward(level, opponentLevel, won);
-      const repReward = won ? 5 : 2;
+        : Math.round(randomInt(90, 220) * creditMultiplier));
+      const expReward = playerDnf ? 0 : this.raceExpReward(level, opponentLevel, won);
+      const repReward = playerDnf ? 0 : (won ? 5 : 2);
       const opponentVisual = clone(opponentProfile.visual || {});
       const timeScale = Math.max(0.01, Number(this.racingConfig?.presentation?.timeScale || 1));
       const stagingMs = Math.max(1800, Number(this.racingConfig?.presentation?.stagingMs || 2800)) * timeScale;
@@ -506,7 +535,7 @@ export class LocalGameService {
         distanceFeet: Number(distanceConfig.feet || 1320),
         location,
         weather,
-        margin: round3(Math.abs(playerRun.totalTime - opponentRun.totalTime)),
+        margin: playerDnf ? null : round3(Math.abs(playerRun.totalTime - opponentRun.totalTime)),
         reward,
         expReward,
         repReward,
@@ -582,7 +611,7 @@ export class LocalGameService {
       draft.progression.level = this.levelFromExp(draft.progression.exp);
       draft.stats.races = Number(draft.stats.races || 0) + 1;
       draft.stats[won ? 'wins' : 'losses'] = Number(draft.stats[won ? 'wins' : 'losses'] || 0) + 1;
-      if (!playerRun.foul && (draft.stats.bestReaction == null || Number(playerRun.reactionTime) < Number(draft.stats.bestReaction))) {
+      if (!playerRun.foul && !playerRun.dnf && (draft.stats.bestReaction == null || Number(playerRun.reactionTime) < Number(draft.stats.bestReaction))) {
         draft.stats.bestReaction = Number(playerRun.reactionTime);
       }
 
@@ -590,12 +619,25 @@ export class LocalGameService {
       const record = records[distance] || { races: 0, bestEt: null, bestTrap: null };
       record.races = Number(record.races || 0) + 1;
       let newBest = false;
-      if (!playerRun.foul && (record.bestEt == null || Number(playerRun.elapsedTime) < Number(record.bestEt))) {
+      if (!playerRun.foul && !playerRun.dnf && (record.bestEt == null || Number(playerRun.elapsedTime) < Number(record.bestEt))) {
         record.bestEt = Number(playerRun.elapsedTime);
         newBest = true;
       }
-      if (record.bestTrap == null || Number(playerRun.trapSpeed) > Number(record.bestTrap)) record.bestTrap = Number(playerRun.trapSpeed);
+      if (!playerRun.dnf && (record.bestTrap == null || Number(playerRun.trapSpeed) > Number(record.bestTrap))) record.bestTrap = Number(playerRun.trapSpeed);
       records[distance] = record;
+
+      if (playerRun.dnf && playerRun.mechanicalFailure === 'ENGINE FAILURE') {
+        const previousFailures = Number(car.engineCondition?.failures || 0);
+        draft.garage[carIndex].engineCondition = {
+          healthPct: 0,
+          failed: true,
+          failures: previousFailures + 1,
+          lastFailureAt: now(),
+          repairedAt: car.engineCondition?.repairedAt || null,
+        };
+        race.engineFailure = true;
+        race.engineRepairCost = this.engineRepairCost(draft.garage[carIndex]);
+      }
       draft.garage[carIndex].raceRecords = records;
       race.newBest = newBest;
 
@@ -723,6 +765,13 @@ export class LocalGameService {
       },
     };
     car.raceRecords = { ...this.emptyRaceRecords(), ...(car.raceRecords || {}) };
+    car.engineCondition = {
+      healthPct: Math.max(0, Math.min(100, Number(car.engineCondition?.healthPct ?? 100))),
+      failed: car.engineCondition?.failed === true,
+      failures: Math.max(0, Number(car.engineCondition?.failures || 0)),
+      lastFailureAt: car.engineCondition?.lastFailureAt || null,
+      repairedAt: car.engineCondition?.repairedAt || null,
+    };
     car.tune = car.tune && typeof car.tune === 'object' ? clone(car.tune) : null;
     car.tuningRuntime = car.tuningRuntime && typeof car.tuningRuntime === 'object' ? clone(car.tuningRuntime) : null;
     car.tuningDiagnostics = car.tuningDiagnostics && typeof car.tuningDiagnostics === 'object' ? clone(car.tuningDiagnostics) : null;
@@ -758,6 +807,7 @@ export class LocalGameService {
       base: { hp: Number(base.hp), torque: Number(base.torque), weight: Number(base.weight), grip: Number(base.grip || 1), drivetrain: String(base.drivetrain || 'FWD') },
       derived,
       raceRecords: this.emptyRaceRecords(),
+      engineCondition: { healthPct: 100, failed: false, failures: 0, lastFailureAt: null, repairedAt: null },
       createdAt: now(),
     };
   }

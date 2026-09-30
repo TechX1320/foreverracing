@@ -194,29 +194,39 @@ final class Tuning
             'drivetrain'=>$preLimit['drivetrain'],
         ];
 
-        $stability = self::clamp(1-($stress*0.65)-(max(0,abs($fuelError)-3)*0.025)-(max(0,$timingError-1.2)*0.04),0.35,1);
-        $hints = self::buildHints($profile,$hardware,$fuelError,$timingError,$tire,$launch,$shift,$gear,$stress,!empty($limited['powerLimit']['hpLimited']));
+        $capacityHp=max(1.0,(float)($limited['powerLimit']['capacityHp'] ?? $hardware['powerEnvelope']['capacityHp'] ?? $preLimit['hp']));
+        $engineLoadRatio=(float)($limited['powerLimit']['rawHp'] ?? $preLimit['hp'])/$capacityHp;
+        $engineStress=self::clamp(($engineLoadRatio-0.88)/0.18,0,1);
+        $calibrationRisk=self::clamp(($stress*0.78)+($engineStress*0.22),0,1);
+        $failureChance=$calibrationRisk<=0.35 ? 0.0 : pow(($calibrationRisk-0.35)/0.65,2)*0.18;
+        $powerState=$engineLoadRatio>=0.98 ? 'ENGINE-LIMITED' : ($engineLoadRatio>=0.90 ? 'NEAR LIMIT' : 'HEADROOM');
+
+        $stability = self::clamp(1-($calibrationRisk*0.65)-(max(0,abs($fuelError)-3)*0.025)-(max(0,$timingError-1.2)*0.04),0.35,1);
+        $hints = self::buildHints($profile,$hardware,$fuelError,$timingError,$tire,$launch,$shift,$gear,$calibrationRisk,$powerState==='ENGINE-LIMITED');
         return [
             'profile'=>$profile,
             'hardware'=>$hardware,
             'fingerprint'=>$fp,
             'derived'=>$derived,
             'diagnostics'=>[
-                'riskPct'=>(int)round($stress*100),
+                'riskPct'=>(int)round($calibrationRisk*100),
                 'stabilityPct'=>(int)round($stability*100),
                 'fuelState'=>$fuelError < -1.2 ? 'LEAN' : ($fuelError > 2.2 ? 'RICH' : 'IN RANGE'),
                 'timingState'=>$timingError > 1.1 ? 'AGGRESSIVE' : ($timingError < -1.8 ? 'CONSERVATIVE' : 'IN RANGE'),
                 'tireState'=>$tire['state'],
                 'launchState'=>$launch['state'],
                 'shiftState'=>$shift['state'],
-                'powerState'=>!empty($limited['powerLimit']['hpLimited']) ? 'ENGINE-LIMITED' : 'HEADROOM',
+                'powerState'=>$powerState,
+                'engineLoadPct'=>(int)round($engineLoadRatio*100),
+                'failureChancePct'=>round($failureChance*100,2),
                 'powerLimit'=>$limited['powerLimit'] ?? null,
                 'hints'=>$hints,
             ],
             'race'=>[
                 'active'=>true,
                 'stability'=>$stability,
-                'stress'=>$stress,
+                'stress'=>$calibrationRisk,
+                'failureChance'=>$failureChance,
                 'boostPsi'=>$profile['boostPsi'],
                 'boostByGear'=>$profile['boostByGear'],
                 'launchPowerFactor'=>$gear['launchPowerFactor'],
@@ -225,7 +235,7 @@ final class Tuning
                 'shiftPenaltySec'=>$shift['penaltySec'],
                 'rollingPenaltySec'=>$tire['rollingPenaltySec'],
                 'tractionMultiplier'=>$gear['tractionMultiplier'],
-                'tuneLabel'=>$stress >= 0.72 ? 'ON THE EDGE' : ($stress >= 0.4 ? 'AGGRESSIVE' : 'STABLE'),
+                'tuneLabel'=>$calibrationRisk >= 0.72 ? 'ON THE EDGE' : ($calibrationRisk >= 0.4 ? 'AGGRESSIVE' : 'STABLE'),
             ],
         ];
     }

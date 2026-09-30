@@ -1,8 +1,10 @@
 import { bindHome, carLabel, escapeHtml, number, pageShell } from "../ui/components.js";
 import { renderVehicle } from "../ui/vehicleRenderer.js";
 import { showDialog, closeDialog } from "../ui/modal.js";
+import { renderPartDynoChart } from "../ui/partDyno.js";
 import { forcedInductionMeta, forcedInductionState, forcedInductionSwapNeeded, systemLabel } from "../domain/ForcedInduction.js";
 import {
+  baseMapProfile,
   defaultTuneProfile,
   evaluateTune,
   normalizeTuneProfile,
@@ -79,6 +81,20 @@ export async function renderGarage(ctx) {
   ctx.screenRoot.querySelectorAll("[data-tune-car]").forEach((button) => {
     button.addEventListener("click", () => openTuning(ctx, button.dataset.tuneCar));
   });
+  ctx.screenRoot.querySelectorAll("[data-repair-engine]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      try {
+        const data = await ctx.storage.repairEngine(button.dataset.repairEngine);
+        ctx.store.setPlayer(data.player);
+        ctx.toast("Engine rebuilt", "The car is ready to race again.");
+        await renderGarage(ctx);
+      } catch (err) {
+        ctx.toast("Engine rebuild failed", err.message);
+        button.disabled = false;
+      }
+    });
+  });
   ctx.screenRoot.querySelectorAll("[data-stage-up]").forEach((button) => {
     button.addEventListener("click", () => stageUp(ctx, button.dataset.stageUp));
   });
@@ -97,6 +113,8 @@ function carRow(player, car, catalog, tutorialStep) {
   const inventoryCount = inventoryForCar(player, car).length;
   const inventoryHighlight = tutorialStep === "install_first_upgrade";
   const tuneUnlocked = tuningUnlockedForCar(player, car);
+  const engineFailed = car.engineCondition?.failed === true;
+  const repairCost = engineRepairCost(car);
 
   return `
     <article class="garage-entry ${selected ? "is-current" : ""}">
@@ -119,6 +137,7 @@ function carRow(player, car, catalog, tutorialStep) {
           <span><b>${number(car.derived?.weight)}</b> LB</span>
           <span><b>${number(car.mileage)}</b> MI</span>
         </div>
+        ${engineFailed ? `<div class="engine-failure-banner"><b>ENGINE FAILED</b><span>Catastrophic tune failure. Rebuild required before this car can race again.</span></div>` : ""}
         ${progress
           ? `<div class="stage-progress"><div class="stage-progress__label"><span>Street Car completion</span><b>${progress.maxed}/${progress.total} categories maxed</b></div><div class="meter"><i style="width:${(progress.maxed / progress.total) * 100}%"></i></div></div>`
           : `<div class="stage-progress"><div class="stage-progress__label"><span>Build type</span><b>${escapeHtml(buildName(stage))}</b></div></div>`}
@@ -127,10 +146,17 @@ function carRow(player, car, catalog, tutorialStep) {
           <button class="button button--small" data-rename-car="${escapeHtml(car.carId)}">RENAME</button>
           <button class="button button--small ${inventoryHighlight ? "button--primary tutorial-target" : ""}" data-inventory-car="${escapeHtml(car.carId)}">INVENTORY • ${inventoryCount}</button>
           ${tuneUnlocked ? `<button class="button button--small tuning-button ${car.tune ? "tuning-button--saved" : ""}" data-tune-car="${escapeHtml(car.carId)}">TUNING${car.tune ? " • SAVED" : ""}</button>` : ""}
+          ${engineFailed ? `<button class="button button--primary button--small engine-rebuild-button" data-repair-engine="${escapeHtml(car.carId)}">REBUILD ENGINE • ${number(repairCost)} CR</button>` : ""}
           ${progress?.ready ? `<button class="button button--primary button--small" data-stage-up="${escapeHtml(car.carId)}">UPGRADE TO STREET RACE CAR</button>` : ""}
         </div>
       </div>
     </article>`;
+}
+
+function engineRepairCost(car) {
+  const capacity = Math.max(200, Number(car?.powerEnvelope?.capacityHp || car?.engine?.powerLimits?.kit4Hp || car?.derived?.hp || 200));
+  const stage = Math.max(1, Number(car?.buildStage || 1));
+  return Math.max(5000, Math.round(((capacity * 12) + (stage * 1500)) / 100) * 100);
 }
 
 function tuningUnlockedForCar(player, car) {
@@ -220,6 +246,8 @@ function openTuning(ctx, carId) {
               <div><small>1ST GEAR POWER</small><strong>${draft.boostByGear[0]}%</strong></div>
               <div><small>ENGINE ENVELOPE</small><strong>${number(hardware.powerEnvelope?.capacityHp || 0)} HP</strong></div>
               <div><small>RAW REQUEST</small><strong>${number(diag.powerLimit?.rawHp || projected.hp)} HP</strong></div>
+              <div><small>ENGINE LOAD</small><strong>${number(diag.engineLoadPct || 0)}%</strong></div>
+              <div><small>FAILURE / PASS</small><strong class="${diag.failureChancePct >= 5 ? "bad" : diag.failureChancePct > 0 ? "warn" : "good"}">${number(diag.failureChancePct || 0,2)}%</strong></div>
             </div>
             <div class="tuning-monitor__states">
               ${stateRow("ENGINE", diag.powerState)}
@@ -229,26 +257,16 @@ function openTuning(ctx, carId) {
               ${stateRow("LAUNCH", diag.launchState)}
               ${stateRow("SHIFT", diag.shiftState)}
             </div>
-            <div class="tuning-monitor__hints">
-              <span>ECU / DATA LOG NOTES</span>
-              ${diag.hints.map((hint) => `<p>• ${escapeHtml(hint)}</p>`).join("")}
-            </div>
-            <div class="tuning-monitor__physics">
-              <b>WHAT THE SIMULATOR USES</b>
-              <span>Boost/fuel/timing alter HP + torque.</span>
-              <span>Tire PSI alters usable grip.</span>
-              <span>Boost-by-gear changes early traction demand.</span>
-              <span>Launch + shift RPM add or remove ET.</span>
-              <span>Engine capacity applies soft diminishing returns before impossible HP stacks can run away.</span>
-              <span>High-risk tunes can pull power on individual passes.</span>
+            <div class="tuning-monitor__dyno">
+              ${renderPartDynoChart(car, { ...untuned, drivetrain: car.base?.drivetrain }, projected, "LIVE TUNE DYNO")}
             </div>
           </aside>
         </div>
 
         <div class="tuning-dialog__footer">
-          <p>The monitor gives direction, not the exact hidden sweet spot. Race passes and their data log are how you finish the tune.</p>
+          <p>BASE MAP loads a deliberately conservative all-green starting calibration. It is safe, not optimal; race passes are still how you find the quickest setup.</p>
           <div class="dialog-actions">
-            <button class="button button--small" type="button" data-tune-reset>SAFE BASELINE</button>
+            <button class="button button--small" type="button" data-tune-reset>BASE MAP</button>
             <button class="button button--small" type="button" data-close>CANCEL</button>
             <button class="button button--primary" type="button" data-tune-save>SAVE CALIBRATION</button>
           </div>
@@ -282,7 +300,7 @@ function openTuning(ctx, carId) {
       input.addEventListener("change", render);
     });
     dialog.querySelector("[data-tune-reset]")?.addEventListener("click", () => {
-      draft = defaultTuneProfile(car, hardware);
+      draft = baseMapProfile(car, { ...untuned, drivetrain: car.base?.drivetrain }, hardware);
       render();
     });
     dialog.querySelector("[data-tune-save]")?.addEventListener("click", async (event) => {
@@ -315,7 +333,8 @@ function stateRow(label, value) {
   const text = String(value || "");
   const good = ["IN RANGE","DIALED IN","CLOSE","HEADROOM"].includes(text);
   const bad = ["LEAN","AGGRESSIVE","TOO HIGH","OFF TARGET","ENGINE-LIMITED"].includes(text);
-  return `<div><span>${escapeHtml(label)}</span><b class="${good ? "good" : bad ? "bad" : ""}">${escapeHtml(text)}</b></div>`;
+  const warn = ["NEAR LIMIT","WORKABLE","CONSERVATIVE","BOGGING","SHIFTING EARLY","SHIFTING LATE"].includes(text);
+  return `<div><span>${escapeHtml(label)}</span><b class="${good ? "good" : bad ? "bad" : warn ? "warn" : ""}">${escapeHtml(text)}</b></div>`;
 }
 
 function garageTutorial() {

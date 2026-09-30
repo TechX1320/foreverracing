@@ -167,19 +167,19 @@ function raceResult(race) {
   return `
     <section class="race-result-card ${race.won ? "race-result-card--win" : "race-result-card--loss"}">
       <div class="race-result-head">
-        <div><span class="section-label">${escapeHtml(race.distanceLabel || race.distance || "RACE")} / ${escapeHtml(location.name || "Unknown location")}</span><h3>${race.won ? "WIN" : "LOSS"} ${race.newBest ? "• NEW BEST ET" : ""}</h3></div>
+        <div><span class="section-label">${escapeHtml(race.distanceLabel || race.distance || "RACE")} / ${escapeHtml(location.name || "Unknown location")}</span><h3>${player.dnf ? "ENGINE FAILURE • DNF" : race.won ? "WIN" : "LOSS"} ${race.newBest ? "• NEW BEST ET" : ""}</h3></div>
         <div class="race-environment"><span>${location.nightmare ? "NIGHTMARE LOCATION" : "LOCATION"}<b>${escapeHtml(location.name || "Unknown")}</b></span><span>${weather.nightmare ? "NIGHTMARE WEATHER" : "WEATHER"}<b>${escapeHtml(weather.name || "Unknown")}</b></span></div>
       </div>
       <div class="race-timeboard">
         <div class="race-timeboard__row race-timeboard__row--head"><span>RESULT</span><b>YOU</b><b>${escapeHtml(opponent.name || "OPPONENT")}</b></div>
         ${timeRow("Reaction", player.foul ? "RED LIGHT" : `${number(player.reactionTime, 3)} s`, opponent.foul ? "RED LIGHT" : `${number(opponent.reactionTime, 3)} s`, player.foul, opponent.foul)}
-        ${timeRow("Elapsed", `${number(player.elapsedTime, 3)} s`, `${number(opponent.elapsedTime, 3)} s`)}
-        ${timeRow("Trap", `${number(player.trapSpeed, 2)} mph`, `${number(opponent.trapSpeed, 2)} mph`)}
-        ${timeRow("Total", player.foul ? "FOUL" : `${number(player.totalTime, 3)} s`, opponent.foul ? "FOUL" : `${number(opponent.totalTime, 3)} s`, player.foul, opponent.foul)}
+        ${timeRow("Elapsed", player.dnf ? "DNF" : `${number(player.elapsedTime, 3)} s`, `${number(opponent.elapsedTime, 3)} s`, player.dnf, false)}
+        ${timeRow("Trap", player.dnf ? `${number(player.trapSpeed, 2)} mph • FAILED` : `${number(player.trapSpeed, 2)} mph`, `${number(opponent.trapSpeed, 2)} mph`, player.dnf, false)}
+        ${timeRow("Total", player.dnf ? "ENGINE FAILURE" : player.foul ? "FOUL" : `${number(player.totalTime, 3)} s`, opponent.foul ? "FOUL" : `${number(opponent.totalTime, 3)} s`, player.dnf || player.foul, opponent.foul)}
       </div>
       ${tuningRaceLog(player)}
       <div class="race-result-foot">
-        <span><small>MARGIN</small><b>${number(race.margin, 3)} s</b></span>
+        <span><small>MARGIN</small><b>${player.dnf ? "DNF" : `${number(race.margin, 3)} s`}</b></span>
         <span><small>REWARD</small><b class="good">+${money(race.reward)} cr</b></span>
         <span><small>EXP</small><b class="good">+${number(race.expReward)}</b></span>
         <span><small>REP</small><b>+${number(race.repReward)}</b></span>
@@ -199,7 +199,8 @@ function tuningRaceLog(player) {
     <div><span>1ST GEAR</span><b>${number(firstGear)}%</b></div>
     <div><span>WHEEL SLIP</span><b>${slip}%</b></div>
     <div><span>STABILITY</span><b>${stability}%</b></div>
-    <div><span>ECU CORRECTION</span><b class="${tune.powerPull ? "bad" : "good"}">${tune.powerPull ? "POWER PULLED" : "CLEAN PASS"}</b></div>
+    <div><span>FAILURE RISK</span><b>${number(Number(tune.failureChance || 0) * 100,2)}%</b></div>
+    <div><span>ECU / ENGINE</span><b class="${tune.catastrophicFailure || tune.powerPull ? "bad" : "good"}">${tune.catastrophicFailure ? "ENGINE FAILED" : tune.powerPull ? "POWER PULLED" : "CLEAN PASS"}</b></div>
   </div>`;
 }
 
@@ -213,7 +214,7 @@ function raceHistory(player) {
   return `<details class="collapsible-section race-history">
     <summary>RECENT PASSES <span>${rows.length}</span></summary>
     <div class="race-history-list">
-      ${rows.map((race) => `<div><span><b>${escapeHtml(race.distanceLabel || race.distance || "Race")}</b>${escapeHtml(race.location?.name || "")} • ${escapeHtml(race.weather?.name || "")}</span><span class="${race.won ? "good" : "bad"}">${race.won ? "WIN" : "LOSS"}</span><strong>${race.player?.foul ? "FOUL" : `${number(race.player?.elapsedTime, 3)} s`}</strong></div>`).join("")}
+      ${rows.map((race) => `<div><span><b>${escapeHtml(race.distanceLabel || race.distance || "Race")}</b>${escapeHtml(race.location?.name || "")} • ${escapeHtml(race.weather?.name || "")}</span><span class="${race.won ? "good" : "bad"}">${race.player?.dnf ? "DNF" : race.won ? "WIN" : "LOSS"}</span><strong>${race.player?.dnf ? "ENGINE FAILURE" : race.player?.foul ? "FOUL" : `${number(race.player?.elapsedTime, 3)} s`}</strong></div>`).join("")}
     </div>
   </details>`;
 }

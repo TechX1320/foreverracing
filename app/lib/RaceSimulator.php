@@ -128,8 +128,12 @@ final class RaceSimulator
             (float)($distance['maxTrap'] ?? 300)
         );
 
+        if ($catastrophicFailure) {
+            $trap = self::clamp($trap * $this->random(0.25, 0.65), (float)($distance['minTrap'] ?? 20), (float)($distance['maxTrap'] ?? 300));
+        }
+
         $foul = $reaction < 0;
-        $total = $foul ? $et + 60 + abs($reaction) : $et + $reaction;
+        $total = $catastrophicFailure ? 999.0 : ($foul ? $et + 60 + abs($reaction) : $et + $reaction);
 
         return [
             'reactionTime' => round($reaction, 3),
@@ -137,6 +141,8 @@ final class RaceSimulator
             'trapSpeed' => round($trap, 2),
             'totalTime' => round($total, 3),
             'foul' => $foul,
+            'dnf' => $catastrophicFailure,
+            'mechanicalFailure' => $catastrophicFailure ? 'ENGINE FAILURE' : null,
             'traction' => [
                 'gripLoss' => round($gripLoss, 3),
                 'wheelSlip' => round(self::clamp($gripLoss * 1.2, 0.0, 1.0), 3),
@@ -150,7 +156,9 @@ final class RaceSimulator
                 'averagePowerFactor' => round($averagePowerFactor, 3),
                 'stability' => round($tuneStability, 3),
                 'stress' => round((float)($tune['stress'] ?? 0), 3),
+                'failureChance' => round($failureChance, 4),
                 'powerPull' => $tuningPowerPull,
+                'catastrophicFailure' => $catastrophicFailure,
                 'label' => (string)($tune['tuneLabel'] ?? ''),
             ] : null,
         ];

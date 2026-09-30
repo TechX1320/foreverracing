@@ -209,6 +209,31 @@ final class GameService
         });
     }
 
+    public static function repairEngine(string $carId): array
+    {
+        $catalog = self::partsCatalog();
+        return self::mutatePlayer(function (array $player) use ($carId, $catalog): array {
+            $index = self::requireOwnedCarIndex($player, $carId);
+            $car = $player['garage'][$index];
+            if (empty($car['engineCondition']['failed'])) {
+                throw new GameException('This engine does not need a catastrophic-failure rebuild.');
+            }
+            $cost = self::engineRepairCost($car);
+            self::requireCredits($player, $cost);
+            $player['wallet']['credits'] -= $cost;
+            $car['engineCondition'] = [
+                'healthPct' => 100,
+                'failed' => false,
+                'failures' => (int)($car['engineCondition']['failures'] ?? 0),
+                'lastFailureAt' => $car['engineCondition']['lastFailureAt'] ?? null,
+                'repairedAt' => time(),
+            ];
+            $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'] ?? [], $catalog);
+            self::addTransaction($player, 'engine_rebuild', -$cost, self::carName($car) . ' engine rebuild');
+            return $player;
+        });
+    }
+
     public static function purchasePart(string $catalogId): array
     {
         $catalog = self::partsCatalog();
@@ -510,6 +535,9 @@ final class GameService
         $player = self::getPlayer();
         $carIndex = self::requireOwnedCarIndex($player, (string)($player['selectedCarId'] ?? ''));
         $car = $player['garage'][$carIndex];
+        if (!empty($car['engineCondition']['failed'])) {
+            throw new GameException('ENGINE FAILED — rebuild it in Garage before racing again.');
+        }
         $tutorialRace = ($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'first_race';
 
         $playerBenchmark = PerformanceIndex::forCar($car, self::racingConfig());
@@ -540,6 +568,9 @@ final class GameService
 
             $carIndex = self::requireOwnedCarIndex($player, (string)($player['selectedCarId'] ?? ''));
             $car = $player['garage'][$carIndex];
+            if (!empty($car['engineCondition']['failed'])) {
+                throw new GameException('ENGINE FAILED — rebuild it in Garage before racing again.');
+            }
             $level = max(1, (int)($player['progression']['level'] ?? 1));
             $tutorialRace = ($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'first_race';
             $unlockLevel = $distance === '1' ? 10 : ($distance === '1/2' ? 5 : 1);
@@ -584,13 +615,14 @@ final class GameService
                 $opponentRun['foul'] = false;
             }
 
-            $won = (float)$playerRun['totalTime'] < (float)$opponentRun['totalTime'];
+            $playerDnf = !empty($playerRun['dnf']);
+            $won = !$playerDnf && (float)$playerRun['totalTime'] < (float)$opponentRun['totalTime'];
             $creditMultiplier = (float)($distanceConfig['creditMultiplier'] ?? 1);
-            $reward = $won
+            $reward = $playerDnf ? 0 : ($won
                 ? (int)round(mt_rand(450, 850) * $creditMultiplier)
-                : (int)round(mt_rand(90, 220) * $creditMultiplier);
-            $expReward = self::raceExpReward($level, $opponentLevel, $won);
-            $repReward = $won ? 5 : 2;
+                : (int)round(mt_rand(90, 220) * $creditMultiplier));
+            $expReward = $playerDnf ? 0 : self::raceExpReward($level, $opponentLevel, $won);
+            $repReward = $playerDnf ? 0 : ($won ? 5 : 2);
             $opponentVisual = is_array($opponentProfile['visual'] ?? null) ? $opponentProfile['visual'] : [];
             $timeScale = self::raceTimeScale($racingConfig);
             $stagingMs = max(1800.0, (float)($racingConfig['presentation']['stagingMs'] ?? 2800)) * $timeScale;
@@ -607,7 +639,7 @@ final class GameService
                 'distanceFeet' => (int)($distanceConfig['feet'] ?? 1320),
                 'location' => $location,
                 'weather' => $weather,
-                'margin' => round(abs((float)$playerRun['totalTime'] - (float)$opponentRun['totalTime']), 3),
+                'margin' => $playerDnf ? null : round(abs((float)$playerRun['totalTime'] - (float)$opponentRun['totalTime']), 3),
                 'reward' => $reward,
                 'expReward' => $expReward,
                 'repReward' => $repReward,
@@ -696,7 +728,7 @@ final class GameService
             $player['stats']['races'] = (int)($player['stats']['races'] ?? 0) + 1;
             $player['stats'][$won ? 'wins' : 'losses'] = (int)($player['stats'][$won ? 'wins' : 'losses'] ?? 0) + 1;
 
-            if (empty($playerRun['foul']) && (($player['stats']['bestReaction'] ?? null) === null || (float)($playerRun['reactionTime'] ?? 999) < (float)$player['stats']['bestReaction'])) {
+            if (empty($playerRun['foul']) && empty($playerRun['dnf']) && (($player['stats']['bestReaction'] ?? null) === null || (float)($playerRun['reactionTime'] ?? 999) < (float)$player['stats']['bestReaction'])) {
                 $player['stats']['bestReaction'] = (float)$playerRun['reactionTime'];
             }
 
@@ -704,14 +736,27 @@ final class GameService
             $record = is_array($records[$distance] ?? null) ? $records[$distance] : ['races' => 0, 'bestEt' => null, 'bestTrap' => null];
             $record['races'] = (int)($record['races'] ?? 0) + 1;
             $newBest = false;
-            if (empty($playerRun['foul']) && (($record['bestEt'] ?? null) === null || (float)$playerRun['elapsedTime'] < (float)$record['bestEt'])) {
+            if (empty($playerRun['foul']) && empty($playerRun['dnf']) && (($record['bestEt'] ?? null) === null || (float)$playerRun['elapsedTime'] < (float)$record['bestEt'])) {
                 $record['bestEt'] = (float)$playerRun['elapsedTime'];
                 $newBest = true;
             }
-            if (($record['bestTrap'] ?? null) === null || (float)$playerRun['trapSpeed'] > (float)$record['bestTrap']) {
+            if (empty($playerRun['dnf']) && (($record['bestTrap'] ?? null) === null || (float)$playerRun['trapSpeed'] > (float)$record['bestTrap'])) {
                 $record['bestTrap'] = (float)$playerRun['trapSpeed'];
             }
             $records[$distance] = $record;
+
+            if (!empty($playerRun['dnf']) && ($playerRun['mechanicalFailure'] ?? '') === 'ENGINE FAILURE') {
+                $previousFailures = (int)($car['engineCondition']['failures'] ?? 0);
+                $player['garage'][$carIndex]['engineCondition'] = [
+                    'healthPct' => 0,
+                    'failed' => true,
+                    'failures' => $previousFailures + 1,
+                    'lastFailureAt' => time(),
+                    'repairedAt' => $car['engineCondition']['repairedAt'] ?? null,
+                ];
+                $result['engineFailure'] = true;
+                $result['engineRepairCost'] = self::engineRepairCost($player['garage'][$carIndex]);
+            }
             $player['garage'][$carIndex]['raceRecords'] = $records;
             $result['newBest'] = $newBest;
 
@@ -890,6 +935,14 @@ final class GameService
             is_array($savedLayered['anchors'] ?? null) ? $savedLayered['anchors'] : []
         );
         $car['raceRecords'] = array_replace(self::emptyRaceRecords(), is_array($car['raceRecords'] ?? null) ? $car['raceRecords'] : []);
+        $condition = is_array($car['engineCondition'] ?? null) ? $car['engineCondition'] : [];
+        $car['engineCondition'] = [
+            'healthPct' => max(0, min(100, (int)($condition['healthPct'] ?? 100))),
+            'failed' => !empty($condition['failed']),
+            'failures' => max(0, (int)($condition['failures'] ?? 0)),
+            'lastFailureAt' => $condition['lastFailureAt'] ?? null,
+            'repairedAt' => $condition['repairedAt'] ?? null,
+        ];
         $car['tune'] = is_array($car['tune'] ?? null) ? $car['tune'] : null;
         $car['tuningRuntime'] = is_array($car['tuningRuntime'] ?? null) ? $car['tuningRuntime'] : null;
         $car['tuningDiagnostics'] = is_array($car['tuningDiagnostics'] ?? null) ? $car['tuningDiagnostics'] : null;
@@ -946,6 +999,7 @@ final class GameService
             ],
             'derived' => $derived,
             'raceRecords' => self::emptyRaceRecords(),
+            'engineCondition' => ['healthPct' => 100, 'failed' => false, 'failures' => 0, 'lastFailureAt' => null, 'repairedAt' => null],
             'createdAt' => time(),
         ];
     }
@@ -1021,6 +1075,13 @@ final class GameService
         $car['benchmarkEt'] = (float)$benchmark['quarterMileEt'];
         $car['installedParts'] = array_values(array_filter($installedParts));
         return $car;
+    }
+
+    private static function engineRepairCost(array $car): int
+    {
+        $capacity = max(200, (float)($car['powerEnvelope']['capacityHp'] ?? $car['engine']['powerLimits']['kit4Hp'] ?? $car['derived']['hp'] ?? 200));
+        $stage = max(1, (int)($car['buildStage'] ?? 1));
+        return max(5000, (int)(round((($capacity * 12) + ($stage * 1500)) / 100) * 100));
     }
 
     private static function installedPartSpecs(array $player, string $carId, array $catalog): array

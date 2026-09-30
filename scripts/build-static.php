@@ -82,7 +82,7 @@ Build: {$build}
 Storage mode: local
 Offline service worker: disabled in static development mode
 Race presentation: persistent two-phase start/finish with blocking real-time playback
-V0.5G.1: Engine-specific power envelopes and realistic support-part scaling
+V0.5G.2: Tuning base map, live dyno and catastrophic engine risk
 Do not edit docs/ by hand; run php scripts/build-static.php.
 ");
 

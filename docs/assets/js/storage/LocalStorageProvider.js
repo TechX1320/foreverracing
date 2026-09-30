@@ -95,6 +95,13 @@ export class LocalStorageProvider extends StorageProvider {
     return { ok: true, player };
   }
 
+  async repairEngine(carId) {
+    await this.#ready();
+    const player = this.#service.repairEngine(this.#loadPlayer(), carId);
+    this.#savePlayer(player);
+    return { ok: true, player };
+  }
+
   async partsCatalog() {
     await this.#ready();
     return { ok: true, parts: structuredClone(this.#service.parts) };

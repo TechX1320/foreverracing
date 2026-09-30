@@ -2310,3 +2310,42 @@ dialog.fr-dialog:has(.tuning-dialog){
 .race-tuning-log span{display:block;color:var(--faint);font-size:9px;font-weight:900}
 .race-tuning-log b{display:block;margin-top:2px;font-size:10px}
 @media(max-width:760px){.race-tuning-log{grid-template-columns:repeat(2,1fr)}.race-tuning-log>div{border-bottom:1px solid #29362e}}
+
+
+/* V0.5G.2 tuning polish + mechanical risk */
+.tuning-monitor__dyno{
+  padding:8px;
+  border-top:1px solid var(--border);
+  background:#0b0e10;
+}
+.tuning-monitor__dyno .part-dyno{
+  display:block;
+  border:0;
+  padding:0;
+  background:transparent;
+}
+.tuning-monitor__dyno .part-dyno__title strong{font-size:11px;color:var(--accent-2)}
+.tuning-monitor__dyno .part-dyno__title span{font-size:8px}
+.tuning-monitor__dyno .part-dyno__legend{margin:5px 0 2px}
+.tuning-monitor__dyno .part-dyno svg{max-height:220px}
+.tuning-monitor__dyno .part-dyno__note{display:none}
+.engine-failure-banner{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:6px 0;
+  padding:8px 10px;
+  border:1px solid #793838;
+  background:#1b0d0d;
+}
+.engine-failure-banner b{color:#ef8787;font-size:12px;letter-spacing:.08em}
+.engine-failure-banner span{color:#c99;font-size:10px}
+.engine-rebuild-button{border-color:#9b4747!important;background:#651f1f!important}
+.race-tuning-log{grid-template-columns:repeat(7,minmax(0,1fr))}
+@media(max-width:980px){
+  .tuning-monitor__dyno .part-dyno{display:block}
+}
+@media(max-width:760px){
+  .race-tuning-log{grid-template-columns:repeat(2,1fr)}
+  .engine-failure-banner{align-items:flex-start;flex-direction:column;gap:3px}
+}

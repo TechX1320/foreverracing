@@ -1,10 +1,11 @@
 import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { LocalGameService } from '../assets/js/domain/LocalGameService.js';
+import { RaceSimulator } from '../assets/js/domain/RaceSimulator.js';
 import { benchmarkPerformance, performanceClassFromIndex } from '../assets/js/domain/PerformanceIndex.js';
 import { applyPartEffects, partCompatibility, partStoreAvailable } from '../assets/js/domain/PartCatalog.js';
 import { applyBuildPartEffect, enginePowerEnvelope, limitEngineOutput, suggestedPowerLimits } from '../assets/js/domain/PowerModel.js';
-import { defaultTuneProfile, evaluateTune, tuningFingerprint, tuningHardwareProfile } from '../assets/js/domain/Tuning.js';
+import { baseMapProfile, defaultTuneProfile, evaluateTune, tuningFingerprint, tuningHardwareProfile } from '../assets/js/domain/Tuning.js';
 
 const [cars, parts, config, buildStageConfig, racingConfig] = await Promise.all([
   fs.readFile(new URL('../data/catalog/cars.json', import.meta.url), 'utf8').then(JSON.parse),
@@ -151,6 +152,90 @@ assert.notDeepEqual(tuningFingerprint(tuningCar), tuningFingerprint(tuningCarB),
 const otherEval = evaluateTune(tuningCarB, rx8LowEightStats, boostTune, tuningHardwareProfile(tuningCarB, tuningSpecs));
 assert.ok(otherEval.derived.hp !== boostEval.derived.hp || otherEval.diagnostics.riskPct !== boostEval.diagnostics.riskPct,
   'The same shared tune should not evaluate identically on every owned car.');
+
+const tuningSpecsKit4 = tuningSpecs
+  .filter((part) => part.catalogId !== 's3_engine_kit_3')
+  .concat([rx8Kit4]);
+const maxEffortCar = {
+  ...structuredClone(tuningCar),
+  carId: 'tuning-rx8-max',
+  untunedDerived: { hp: 1066, torque: 650, weight: 2450, grip: 2.1, drivetrain: 'RWD' },
+  derived: { hp: 1066, torque: 650, weight: 2450, grip: 2.1, drivetrain: 'RWD' },
+};
+const maxHardware = tuningHardwareProfile(maxEffortCar, tuningSpecsKit4);
+assert.equal(maxHardware.powerEnvelope.capacityHp, 1100);
+
+const baseMap = baseMapProfile(maxEffortCar, maxEffortCar.untunedDerived, maxHardware);
+const baseMapEval = evaluateTune(maxEffortCar, maxEffortCar.untunedDerived, baseMap, maxHardware);
+assert.equal(baseMapEval.diagnostics.powerState, 'HEADROOM');
+assert.equal(baseMapEval.diagnostics.fuelState, 'IN RANGE');
+assert.equal(baseMapEval.diagnostics.timingState, 'IN RANGE');
+assert.equal(baseMapEval.diagnostics.tireState, 'DIALED IN');
+assert.equal(baseMapEval.diagnostics.launchState, 'CLOSE');
+assert.equal(baseMapEval.diagnostics.shiftState, 'CLOSE');
+assert.ok(baseMapEval.diagnostics.riskPct <= 20);
+assert.equal(baseMapEval.diagnostics.failureChancePct, 0);
+assert.ok(baseMapEval.derived.hp < maxEffortCar.untunedDerived.hp,
+  'BASE MAP should deliberately give up some peak power for a safe starting calibration.');
+
+const lowPsiEval = evaluateTune(maxEffortCar, maxEffortCar.untunedDerived, { ...baseMap, tirePsiRear: 13 }, maxHardware);
+assert.equal(lowPsiEval.diagnostics.powerState, baseMapEval.diagnostics.powerState,
+  'Tire PSI must never decide whether the engine is engine-limited.');
+assert.equal(lowPsiEval.diagnostics.powerLimit.rawHp, baseMapEval.diagnostics.powerLimit.rawHp,
+  'Tire PSI must not change the ECU raw horsepower request.');
+assert.equal(lowPsiEval.diagnostics.engineLoadPct, baseMapEval.diagnostics.engineLoadPct);
+
+const dangerousTune = {
+  ...baseMap,
+  boostPsi: maxHardware.maxBoostPsi,
+  fuelTrimPct: -10,
+  ignitionAdvanceDeg: 7,
+  boostByGear: [100,100,100,100,100,100],
+};
+const dangerousEval = evaluateTune(maxEffortCar, maxEffortCar.untunedDerived, dangerousTune, maxHardware);
+assert.ok(dangerousEval.diagnostics.riskPct >= 50);
+assert.ok(dangerousEval.diagnostics.failureChancePct > 0);
+
+const failureSimulator = new RaceSimulator(racingConfig, () => 0);
+const failurePass = failureSimulator.simulate({
+  hp: dangerousEval.derived.hp,
+  torque: dangerousEval.derived.torque,
+  weight: dangerousEval.derived.weight,
+  grip: dangerousEval.derived.grip,
+  drivetrain: 'RWD',
+  level: 50,
+  allowFoul: false,
+  tuning: { ...dangerousEval.race, failureChance: 0.25 },
+}, '1/4', { name: 'Test', etModifier: 0, mphModifier: 0 });
+assert.equal(failurePass.dnf, true);
+assert.equal(failurePass.mechanicalFailure, 'ENGINE FAILURE');
+assert.equal(failurePass.tuning.catastrophicFailure, true);
+assert.equal(failurePass.totalTime, 999);
+
+let failedPlayer = game.defaultPlayer();
+failedPlayer.user = { ...failedPlayer.user, username: 'RiskTester' };
+failedPlayer.tutorial = { ...failedPlayer.tutorial, status: 'complete', step: 'complete' };
+failedPlayer.wallet.credits = 100000;
+failedPlayer.garage = [{
+  ...structuredClone(maxEffortCar),
+  engineCondition: { healthPct: 0, failed: true, failures: 1, lastFailureAt: 1, repairedAt: null },
+}];
+failedPlayer.selectedCarId = maxEffortCar.carId;
+failedPlayer.inventory.parts = tuningSpecsKit4.map((part, index) => ({
+  inventoryId: `repair-part-${index}`,
+  catalogId: part.catalogId,
+  purchasedForCarId: maxEffortCar.carId,
+  installedOnCarId: maxEffortCar.carId,
+  purchasedAt: 1,
+}));
+failedPlayer = game.normalizePlayer(failedPlayer);
+assert.throws(() => game.quickRacePreview(failedPlayer), /ENGINE FAILED/i);
+const rebuildCost = game.engineRepairCost(failedPlayer.garage[0]);
+const creditsBeforeRepair = failedPlayer.wallet.credits;
+failedPlayer = game.repairEngine(failedPlayer, maxEffortCar.carId);
+assert.equal(failedPlayer.garage[0].engineCondition.failed, false);
+assert.equal(failedPlayer.garage[0].engineCondition.healthPct, 100);
+assert.equal(failedPlayer.wallet.credits, creditsBeforeRepair - rebuildCost);
 
 let tuningPlayer = game.defaultPlayer();
 tuningPlayer.tutorial = { ...tuningPlayer.tutorial, status: 'complete', step: 'complete' };

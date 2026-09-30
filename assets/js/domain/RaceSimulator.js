@@ -42,6 +42,7 @@ export class RaceSimulator {
     const launchPowerFactor = tuneActive ? clamp(Number(tune.launchPowerFactor ?? 1), 0.45, 1) : 1;
     const averagePowerFactor = tuneActive ? clamp(Number(tune.averagePowerFactor ?? 1), 0.45, 1) : 1;
     const tuneStability = tuneActive ? clamp(Number(tune.stability ?? 1), 0.35, 1) : 1;
+    const failureChance = tuneActive ? clamp(Number(tune.failureChance ?? 0), 0, 0.25) : 0;
 
     const reaction = this.#reaction(level, torque, weight, Number(context.reactionOffset || 0), context.allowFoul !== false);
     let et = Number(distance.etFactor) * Math.cbrt(weight / hp);
@@ -70,6 +71,8 @@ export class RaceSimulator {
       et *= 1 + ((1 - tuningPullFactor) * 0.9);
     }
 
+    const catastrophicFailure = tuneActive && failureChance > 0 && this.rng() < failureChance;
+
     if (this.rng() < 0.10) et *= 1 + this.#random(0.005, 0.025);
 
     if (condition.slippery) {
@@ -96,14 +99,16 @@ export class RaceSimulator {
     const tuneTrapFactor = tuneActive
       ? (1 - ((1 - averagePowerFactor) * 0.12)) * tuningPullFactor
       : 1;
-    const trap = clamp(
+    let trap = clamp(
       (baseTrap * tuneTrapFactor * Number(distance.trapMultiplier || 1)) + Number(condition.mphModifier || 0) + this.#random(-1.25, 1.25),
       Number(distance.minTrap || 20),
       Number(distance.maxTrap || 300)
     );
 
+    if (catastrophicFailure) trap = clamp(trap * this.#random(0.25, 0.65), Number(distance.minTrap || 20), Number(distance.maxTrap || 300));
+
     const foul = reaction < 0;
-    const total = foul ? et + 60 + Math.abs(reaction) : et + reaction;
+    const total = catastrophicFailure ? 999 : (foul ? et + 60 + Math.abs(reaction) : et + reaction);
 
     return {
       reactionTime: round(reaction, 3),
@@ -111,6 +116,8 @@ export class RaceSimulator {
       trapSpeed: round(trap, 2),
       totalTime: round(total, 3),
       foul,
+      dnf: catastrophicFailure,
+      mechanicalFailure: catastrophicFailure ? "ENGINE FAILURE" : null,
       traction: {
         gripLoss: round(gripLoss, 3),
         wheelSlip: round(clamp(gripLoss * 1.2, 0, 1), 3),
@@ -124,7 +131,9 @@ export class RaceSimulator {
         averagePowerFactor: round(averagePowerFactor, 3),
         stability: round(tuneStability, 3),
         stress: round(Number(tune.stress || 0), 3),
+        failureChance: round(failureChance, 4),
         powerPull: tuningPowerPull,
+        catastrophicFailure,
         label: String(tune.tuneLabel || ""),
       } : null,
     };

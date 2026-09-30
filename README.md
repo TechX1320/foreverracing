@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.5.0-g.1 playable direction
+## V0.5.0-g.2 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,15 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.5G.2 tuning polish + real risk
+
+- **BASE MAP** replaces Safe Baseline. It calculates a conservative, all-green starting map for that specific owned car without revealing the fastest calibration.
+- Engine limit status is isolated from chassis tuning: changing tire PSI can change grip, but cannot change whether the engine is HEADROOM / NEAR LIMIT / ENGINE-LIMITED.
+- The tuning laptop now uses the freed monitor space for a live before/after HP + torque dyno graph.
+- Risk now has a real consequence. Aggressive boost/fuel/timing and running near the engine envelope increase a displayed per-pass catastrophic-failure chance.
+- A catastrophic failure causes a DNF, persists the car as **ENGINE FAILED**, blocks more racing, and requires a paid engine rebuild in Garage.
+- Low-risk / BASE MAP calibrations have zero catastrophic-failure chance; pushing the edge is optional risk/reward rather than unavoidable RNG.
 
 ### V0.5G.1 engine-specific power envelopes
 
