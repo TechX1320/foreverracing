@@ -4,6 +4,7 @@ import { showDialog, closeDialog } from "../ui/modal.js";
 import { renderPartDynoChart } from "../ui/partDyno.js";
 import { partCompatibility, partStoreAvailable } from "../domain/PartCatalog.js";
 import { projectPartChange } from "../domain/PartProjection.js";
+import { classChangeWarningLabel, confirmClassUpgrade } from "../ui/classChangeWarning.js";
 import {
   forcedInductionCompatibility,
   forcedInductionMeta,
@@ -286,9 +287,17 @@ function renderStandardCategoryDialog(ctx, dialog, carId, key, viewState = {}) {
 
   dialog.querySelectorAll("[data-install-shop-part]").forEach((button) => {
     button.addEventListener("click", async () => {
+      const inventoryId = String(button.dataset.installShopPart || "");
+      const item = player?.inventory?.parts?.find((row) => String(row.inventoryId) === inventoryId);
+      const spec = catalogCache.find((row) => String(row.catalogId) === String(item?.catalogId || ""));
+      if (spec) {
+        const projected = projectStats(player, car, spec);
+        const proceed = await confirmClassUpgrade({ car, projected, partName: spec.name });
+        if (!proceed) return;
+      }
       button.disabled = true;
       try {
-        const data = await ctx.storage.installPart(button.dataset.installShopPart, car.carId);
+        const data = await ctx.storage.installPart(inventoryId, car.carId);
         ctx.store.setPlayer(data.player);
         ctx.toast("Part installed", "The car's setup and stats were updated.");
         if (data.player?.tutorial?.status === "active" && data.player?.tutorial?.step === "first_race") {
@@ -325,6 +334,14 @@ function renderStandardCategoryDialog(ctx, dialog, carId, key, viewState = {}) {
 async function purchasePart(ctx, dialog, car, catalogId, installNow, button, categoryKey = null, viewState = {}) {
   button.disabled = true;
   const candidate = catalogCache.find((part) => String(part.catalogId) === String(catalogId));
+  if (installNow && candidate) {
+    const projected = projectStats(ctx.store.player, car, candidate);
+    const proceed = await confirmClassUpgrade({ car, projected, partName: candidate.name });
+    if (!proceed) {
+      button.disabled = false;
+      return;
+    }
+  }
   if (installNow && candidate && forcedInductionSwapNeeded(car, ctx.store.player?.inventory?.parts || [], candidate, catalogCache)) {
     const state = forcedInductionState(car, ctx.store.player?.inventory?.parts || [], catalogCache);
     const target = systemLabel(forcedInductionMeta(candidate)?.system);
@@ -704,6 +721,11 @@ function openForcedInductionSystem(ctx, carId, system, requestedPage = 0) {
       const inventoryId = String(button.dataset.installShopPart || "");
       const item = player?.inventory?.parts?.find((row) => String(row.inventoryId) === inventoryId);
       const spec = catalogCache.find((row) => String(row.catalogId) === String(item?.catalogId || ""));
+      if (spec) {
+        const projected = projectStats(player, car, spec);
+        const proceed = await confirmClassUpgrade({ car, projected, partName: spec.name });
+        if (!proceed) return;
+      }
       if (spec && forcedInductionSwapNeeded(car, player?.inventory?.parts || [], spec, catalogCache)) {
         const fiState = forcedInductionState(car, player?.inventory?.parts || [], catalogCache);
         const confirmed = globalThis.confirm?.(`Swap ${systemLabel(fiState.primarySystem)} to ${systemLabel(forcedInductionMeta(spec)?.system)}? Existing parts for the old system will be uninstalled but remain owned.`) ?? true;
@@ -982,7 +1004,9 @@ function projectStats(player, car, candidate) {
 function partProjectionMarkup(car, projected) {
   const currentClass = String(car?.performanceClass || car?.stockClass || "—");
   const nextClass = String(projected?.performanceClass || currentClass);
+  const warning = classChangeWarningLabel(car, projected);
   return [
+    warning ? `<span class="class-jump-warning"><b>${escapeHtml(warning)}</b></span>` : "",
     `<span>HP <b>${number(car?.derived?.hp)} → ${number(projected?.hp)}</b></span>`,
     `<span>TQ <b>${number(car?.derived?.torque)} → ${number(projected?.torque)}</b></span>`,
     `<span>WT <b>${number(car?.derived?.weight)} → ${number(projected?.weight)}</b></span>`,

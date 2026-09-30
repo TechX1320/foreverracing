@@ -4,6 +4,7 @@ import { showDialog, closeDialog } from "../ui/modal.js";
 import { renderPartDynoChart } from "../ui/partDyno.js";
 import { forcedInductionMeta, forcedInductionState, forcedInductionSwapNeeded, systemLabel } from "../domain/ForcedInduction.js";
 import { projectPartChange, signedDelta } from "../domain/PartProjection.js";
+import { classChangeWarningLabel, confirmClassUpgrade } from "../ui/classChangeWarning.js";
 import {
   baseMapProfile,
   defaultTuneProfile,
@@ -410,6 +411,17 @@ function openInventory(ctx, carId) {
       const inventoryId = String(button.dataset.installOwned || "");
       const item = player?.inventory?.parts?.find((row) => String(row.inventoryId) === inventoryId);
       const spec = partsCache.find((row) => String(row.catalogId) === String(item?.catalogId || ""));
+      if (spec) {
+        const projected = projectPartChange({
+          player,
+          car,
+          catalog: partsCache,
+          racingConfig: racingConfigCache || {},
+          candidate: spec,
+        });
+        const proceed = await confirmClassUpgrade({ car, projected, partName: spec.name });
+        if (!proceed) return;
+      }
       if (spec && forcedInductionSwapNeeded(car, player?.inventory?.parts || [], spec, partsCache)) {
         const state = forcedInductionState(car, player?.inventory?.parts || [], partsCache);
         const confirmed = globalThis.confirm?.(`Swap ${systemLabel(state.primarySystem)} to ${systemLabel(forcedInductionMeta(spec)?.system)}? Existing parts for the old system will be uninstalled but remain owned.`) ?? true;
@@ -507,6 +519,8 @@ function effectsSummary(player, car, item, spec) {
   if (Math.abs(torqueDelta) >= 0.5) rows.push(`<span>TQ <b>${signedDelta(Math.round(torqueDelta))}</b></span>`);
   if (Math.abs(weightDelta) >= 0.5) rows.push(`<span>WT <b>${signedDelta(Math.round(weightDelta))} lb</b></span>`);
   if (Math.abs(gripDelta) >= 0.0005) rows.push(`<span>GRIP <b>${signedDelta(gripDelta)}</b></span>`);
+  const warning = classChangeWarningLabel(car, projected);
+  if (warning) rows.unshift(`<span class="class-jump-warning"><b>${escapeHtml(warning)}</b></span>`);
   rows.push(`<span>PI <b>${number(car.performanceIndex || 0)} → ${number(projected.performanceIndex || 0)} (${signedDelta(Math.round(piDelta))})</b></span>`);
   if (nextClass !== currentClass) rows.push(`<span>CLASS <b class="warn">${escapeHtml(currentClass)} → ${escapeHtml(nextClass)}</b></span>`);
 

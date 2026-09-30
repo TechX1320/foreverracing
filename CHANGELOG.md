@@ -1,5 +1,15 @@
 # Changelog
 
+## V0.6.0-a.4 — Performance Class boundary warnings
+
+- Added shared Performance Class threshold/rank helpers.
+- Added visible CLASS UP warnings to projected part changes.
+- Added a blocking Class Change Warning modal before BUY + INSTALL / INSTALL actions that cross into a higher class.
+- Warning modal shows current and projected Class/PI plus the new-class PI threshold.
+- Added the same confirmation to Garage Inventory installs.
+- BUY ONLY does not warn because it does not alter the car.
+- Added regression/static checks for class thresholds and warning coverage.
+
 ## V0.6.0-a.3 — Class recovery + Parts usability
 
 - Added Class and PI to Parts shop headers and before/after part projections.

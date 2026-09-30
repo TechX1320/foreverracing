@@ -64,6 +64,8 @@ const required = [
   'assets/js/ui/vehicleRenderer.js',
   'assets/js/ui/partDyno.js',
   'assets/js/ui/racePresentation.js',
+  'assets/js/ui/classChangeWarning.js',
+  'assets/js/ui/classChangeWarning.js',
   'assets/js/content/ContentStudioCatalog.js',
   'assets/js/content/ContentStudioEngineCatalog.js',
   'assets/js/content/ContentStudioPartCatalog.js',
@@ -91,7 +93,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.6.0-a.3"')) throw new Error('Static index is missing the V0.6A.3 build marker.');
+if (!html.includes('data-build="0.6.0-a.4"')) throw new Error('Static index is missing the V0.6A.4 build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -944,6 +946,23 @@ if (!partProjectionV06a3.includes('projectPartChange') ||
   throw new Error('V0.6A.3 class recovery / uninstall / inventory scrolling workflow is incomplete.');
 }
 console.log('V0.6A.3 parts recovery UI + projection checks passed.');
+
+const classWarningV06a4 = await fs.readFile(new URL('assets/js/ui/classChangeWarning.js', root), 'utf8');
+const performanceIndexV06a4 = await fs.readFile(new URL('assets/js/domain/PerformanceIndex.js', root), 'utf8');
+if (!classWarningV06a4.includes('CLASS CHANGE WARNING') ||
+    !classWarningV06a4.includes('INSTALL ANYWAY') ||
+    !classWarningV06a4.includes('confirmClassUpgrade') ||
+    !performanceIndexV06a4.includes('PERFORMANCE_CLASS_THRESHOLDS') ||
+    !performanceIndexV06a4.includes('performanceClassThreshold') ||
+    !partsSourceV04b.includes('confirmClassUpgrade') ||
+    !partsSourceV04b.includes('classChangeWarningLabel') ||
+    !garageSource.includes('confirmClassUpgrade') ||
+    !garageSource.includes('classChangeWarningLabel') ||
+    !cssV04b.includes('V0.6A.4 Performance Class boundary warnings')) {
+  throw new Error('V0.6A.4 class-boundary warning workflow is incomplete.');
+}
+console.log('V0.6A.4 class-boundary warning checks passed.');
+
 
 
 

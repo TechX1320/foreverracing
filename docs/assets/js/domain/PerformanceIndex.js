@@ -5,6 +5,27 @@ export const PERFORMANCE_INDEX_PASSES = 51;
 export const PERFORMANCE_INDEX_BASE_ET = 20;
 export const PERFORMANCE_INDEX_PER_TENTH = 8;
 
+export const PERFORMANCE_CLASS_THRESHOLDS = Object.freeze({
+  D: 0,
+  C: 450,
+  B: 600,
+  A: 750,
+  S: 900,
+  X: 1100,
+});
+
+export const PERFORMANCE_CLASS_ORDER = Object.freeze(["D", "C", "B", "A", "S", "X"]);
+
+export function performanceClassRank(className) {
+  const index = PERFORMANCE_CLASS_ORDER.indexOf(String(className || "").toUpperCase());
+  return index < 0 ? -1 : index;
+}
+
+export function performanceClassThreshold(className) {
+  const key = String(className || "").toUpperCase();
+  return Number(PERFORMANCE_CLASS_THRESHOLDS[key] ?? 0);
+}
+
 export function benchmarkPerformance(context, racingConfig = {}, { passes = PERFORMANCE_INDEX_PASSES, seed = 0x46525049 } = {}) {
   const rows = [];
   const condition = { name: "Benchmark", etModifier: 0, mphModifier: 0, weight: 1 };

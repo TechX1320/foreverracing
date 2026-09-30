@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { LocalGameService } from '../assets/js/domain/LocalGameService.js';
 import { RaceSimulator } from '../assets/js/domain/RaceSimulator.js';
-import { benchmarkPerformance, performanceClassFromIndex } from '../assets/js/domain/PerformanceIndex.js';
+import { benchmarkPerformance, performanceClassFromIndex, performanceClassRank, performanceClassThreshold } from '../assets/js/domain/PerformanceIndex.js';
 import { applyPartEffects, partCompatibility, partStoreAvailable } from '../assets/js/domain/PartCatalog.js';
 import { applyBuildPartEffect, enginePowerEnvelope, limitEngineOutput, suggestedPowerLimits } from '../assets/js/domain/PowerModel.js';
 import { baseMapProfile, defaultTuneProfile, evaluateTune, tuningFingerprint, tuningHardwareProfile } from '../assets/js/domain/Tuning.js';
@@ -812,6 +812,13 @@ assert.equal(recoveredPlayer.inventory.parts[0].installedOnCarId, null);
 assert.equal(recoveredPlayer.garage[0].buildStage, 4, 'Uninstalling performance parts must not downgrade Build Type.');
 assert.equal(recoveredPlayer.garage[0].performanceClass, 'D', 'A player must be able to strip a race build back into an eligible lower PI class.');
 console.log('V0.6A.3 uninstall recovery + PI/Class projection test passed.');
+
+assert.equal(performanceClassThreshold('C'), 450);
+assert.equal(performanceClassThreshold('B'), 600);
+assert.ok(performanceClassRank('C') > performanceClassRank('D'));
+assert.ok(performanceClassRank('B') > performanceClassRank('C'));
+console.log('V0.6A.4 Performance Class threshold helpers test passed.');
+
 
 
 

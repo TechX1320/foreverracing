@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.6.0-a.3 playable direction
+## V0.6.0-a.4 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,15 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is now a catalog of self-contained PvE mini-roguelite events. Required Circuits drive class progression; optional Circuits can use their own race counts, restrictions, distances, targets and rewards. Opponents are authored builds that use the real race simulator rather than scaling directly from the player's PI.
+
+### V0.6A.4 Performance Class boundary warnings
+
+- Parts now flag projected upward class changes directly on the part row with a visible CLASS UP warning.
+- BUY + INSTALL and INSTALL actions open a blocking confirmation before a part can move the current car into a higher Performance Class.
+- The warning shows current Class/PI, projected Class/PI, and the PI threshold that starts the new class.
+- Garage Inventory uses the same warning flow, so installing an owned part cannot bypass the class-change confirmation.
+- BUY ONLY remains warning-free because it does not change the car.
+- The warning reminds players that lower-class Circuit eligibility may be lost until PI is reduced again.
 
 ### V0.6A.3 class recovery + Parts usability
 
