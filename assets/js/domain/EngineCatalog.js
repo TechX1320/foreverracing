@@ -147,7 +147,7 @@ export function normalizeEngineDefinition(engine = {}) {
     peakTorqueRpm: peakTorqueRpm > 0 ? peakTorqueRpm : 0,
     powerLimits: normalizePowerLimits({ ...engine, peakHp: peakHp > 0 ? peakHp : 0 }, peakHp > 0 ? peakHp : 0),
     swapMarket: {
-      available: engine?.swapMarket?.available !== false,
+      available: engine?.swapMarket?.available !== false && String(engine?.swapMarket?.available ?? "true").toLowerCase() !== "false",
       price: Math.max(0, Math.round(Number(engine?.swapMarket?.price || 0))),
     },
     redlineRpm: redlineRpm > 0 ? redlineRpm : 0,
