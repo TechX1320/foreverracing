@@ -756,6 +756,16 @@ export class LocalGameService {
     return tier;
   }
 
+  installedEngineKitLevel(player, carId) {
+    let level = 0;
+    for (const instance of player.inventory?.parts || []) {
+      if (String(instance.installedOnCarId || '') !== String(carId)) continue;
+      const spec = this.findBy(this.parts, 'catalogId', String(instance.catalogId || ''));
+      level = Math.max(level, Number(spec?.engineKit?.level || 0));
+    }
+    return level;
+  }
+
   requirePartCompatible(player, car, spec, { purchasing = false } = {}) {
     const stage = Number(car.buildStage || 1);
     if (stage === 1) {
@@ -768,6 +778,22 @@ export class LocalGameService {
     if (spec.simpleTier) throw new LocalGameError('Street Car ladder parts are incorporated when the car converts to a Street Race Car.');
     if (Number(spec.buildStage || 2) > stage) throw new LocalGameError('This part requires a later Build Type.');
     if (Number(spec.persistentFromStage || spec.buildStage || 2) > stage) throw new LocalGameError('This part is not available for the current Build Type.');
+
+    const currentEngineKit = this.installedEngineKitLevel(player, car.carId);
+    const engineKitLevel = Number(spec?.engineKit?.level || 0);
+    if (engineKitLevel > 0) {
+      if (purchasing && engineKitLevel !== currentEngineKit + 1) {
+        throw new LocalGameError(`Install Engine Kit ${currentEngineKit + 1} before buying Engine Kit ${engineKitLevel}.`);
+      }
+      if (!purchasing && engineKitLevel < currentEngineKit) {
+        throw new LocalGameError('Engine Kits cannot be downgraded.');
+      }
+    }
+
+    const requiredEngineKit = Math.max(0, Number(spec.requiredEngineKit || 0));
+    if (requiredEngineKit > currentEngineKit) {
+      throw new LocalGameError(`Requires Engine Kit ${requiredEngineKit} before this power adder can be used.`);
+    }
 
     const fi = forcedInductionCompatibility(car, player.inventory?.parts || [], spec, this.parts, { purchasing });
     if (!fi.ok) throw new LocalGameError(fi.reason || 'That forced-induction part is not compatible with this setup.');
