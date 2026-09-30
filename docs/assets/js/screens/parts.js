@@ -141,12 +141,13 @@ function categoryCard(player, car, key, tutorialStep = null) {
       </button>`;
   }
 
-  const installed = scopedOwned.find((item) => String(item.installedOnCarId || "") === String(car.carId));
+  const installedCount = scopedOwned.filter((item) => String(item.installedOnCarId || "") === String(car.carId)).length;
+  const groups = [...new Set(specs.map((part) => String(part.subCategory || "General")).filter(Boolean))];
   return `
     <button class="parts-category-card" type="button" data-parts-category="${escapeHtml(key)}">
       <span class="parts-category-card__name">${escapeHtml(label)}</span>
-      <strong>${scopedOwned.length} OWNED</strong>
-      <small>${installed ? `Installed: ${escapeHtml(partName(installed.catalogId))}` : "Stock setup installed"}</small>
+      <strong>${installedCount} INSTALLED • ${scopedOwned.length} OWNED</strong>
+      <small>${groups.length > 1 ? `${groups.length} subcategories` : escapeHtml(groups[0] || "General")}</small>
       <i class="parts-category-card__count">${specs.length} options</i>
     </button>`;
 }
@@ -173,10 +174,11 @@ function openCategory(ctx, carId, key) {
   renderStandardCategoryDialog(ctx, dialog, carId, key);
 }
 
-function renderStandardCategoryDialog(ctx, dialog, carId, key) {
+function renderStandardCategoryDialog(ctx, dialog, carId, key, viewState = {}) {
   const player = ctx.store.player;
   const car = player?.garage?.find((entry) => String(entry.carId) === String(carId));
   if (!car || !dialog) return;
+  const stage = Number(car.buildStage || 1);
   const tutorialStep = player?.tutorial?.status === "active" ? player.tutorial.step : null;
   const specs = categorySpecs(car, key);
   if (!specs.length) {
@@ -184,13 +186,48 @@ function renderStandardCategoryDialog(ctx, dialog, carId, key) {
     return;
   }
 
+  const groups = stage === 1
+    ? []
+    : [...new Set(specs.map((part) => String(part.subCategory || "General")).filter(Boolean))];
+  const selectedGroup = groups.includes(String(viewState.subCategory || ""))
+    ? String(viewState.subCategory)
+    : (groups[0] || "General");
+  const groupedSpecs = stage === 1
+    ? specs
+    : specs.filter((part) => String(part.subCategory || "General") === selectedGroup);
+  const pageSize = 3;
+  const pageCount = Math.max(1, Math.ceil(groupedSpecs.length / pageSize));
+  const page = Math.min(pageCount - 1, Math.max(0, Number(viewState.page || 0)));
+  const visibleSpecs = stage === 1
+    ? groupedSpecs
+    : groupedSpecs.slice(page * pageSize, (page + 1) * pageSize);
+
+  dialog.dataset.partsCategory = key;
+  dialog.dataset.partsSubcategory = selectedGroup;
+  dialog.dataset.partsPage = String(page);
+
+  const groupTabs = stage >= 2 && groups.length > 1
+    ? `<div class="parts-shop-subnav">${groups.map((group) => {
+        const count = specs.filter((part) => String(part.subCategory || "General") === group).length;
+        return `<button class="parts-shop-subnav__button ${group === selectedGroup ? "is-active" : ""}" type="button" data-parts-subcategory="${escapeHtml(group)}"><b>${escapeHtml(group)}</b><span>${count}</span></button>`;
+      }).join("")}</div>`
+    : "";
+
+  const pager = stage >= 2 && pageCount > 1
+    ? `<div class="parts-shop-pager">
+        <button class="button button--small" type="button" data-parts-page="${page - 1}" ${page <= 0 ? "disabled" : ""}>← PREV</button>
+        <span>PAGE <b>${page + 1}</b> / ${pageCount}</span>
+        <button class="button button--small" type="button" data-parts-page="${page + 1}" ${page >= pageCount - 1 ? "disabled" : ""}>NEXT →</button>
+      </div>`
+    : "";
+
   dialog.innerHTML = `
     <div class="dialog-body parts-shop-dialog">
       <div class="parts-shop-dialog__titlebar">
         <div>
-          <span class="section-label">${tutorialStep === "buy_first_upgrade" ? "STEP 4/5 • BUY THIS PART" : escapeHtml(buildName(Number(car.buildStage || 1)))}</span>
+          <span class="section-label">${tutorialStep === "buy_first_upgrade" ? "STEP 4/5 • BUY THIS PART" : escapeHtml(buildName(stage))}</span>
           <h2>${escapeHtml(specs[0]?.category || key)}</h2>
-          <p>${escapeHtml(carLabel(car))}</p>
+          <p>${escapeHtml(carLabel(car))}${stage >= 2 ? ` • ${visibleSpecs.length} shown / ${specs.length} available` : ""}</p>
         </div>
         <div class="parts-shop-dialog__stats">
           <span><small>HP</small><b>${number(car.derived?.hp)}</b></span>
@@ -199,14 +236,16 @@ function renderStandardCategoryDialog(ctx, dialog, carId, key) {
         </div>
       </div>
       ${tutorialStep === "buy_first_upgrade" ? '<div class="ftue-inline-command"><strong>BUY THE STAGE 1 INTAKE</strong><span>This is the only purchase available until you complete your first race.</span></div>' : ""}
+      ${groupTabs}
       <div class="parts-shop-list">
-        ${Number(car.buildStage || 1) === 1
-          ? streetCategoryRows(player, car, specs, tutorialStep)
+        ${stage === 1
+          ? streetCategoryRows(player, car, visibleSpecs, tutorialStep)
           : key === "engine_kit"
-            ? engineKitRows(player, car, specs)
-            : choiceCategoryRows(player, car, specs)}
+            ? engineKitRows(player, car, visibleSpecs)
+            : choiceCategoryRows(player, car, visibleSpecs)}
       </div>
-      <div class="parts-shop-dialog__note">BUY + INSTALL applies the part immediately. BUY ONLY keeps it in Garage Inventory for later.${Number(car.buildStage || 1) >= 2 ? " Earlier Build Type parts stay available after you advance." : ""}</div>
+      ${pager}
+      <div class="parts-shop-dialog__note">BUY + INSTALL applies the part immediately. BUY ONLY keeps it in Garage Inventory for later.${stage >= 2 ? " Earlier Build Type parts stay available after you advance." : ""}</div>
       <div class="dialog-actions"><button class="button button--small" type="button" data-close>CLOSE</button><button class="button button--primary button--small" type="button" data-inventory>GARAGE INVENTORY</button></div>
     </div>`;
 
@@ -217,11 +256,22 @@ function renderStandardCategoryDialog(ctx, dialog, carId, key) {
     ctx.router.navigate("garage");
   });
 
+  dialog.querySelectorAll("[data-parts-subcategory]").forEach((button) => {
+    button.addEventListener("click", () => {
+      renderStandardCategoryDialog(ctx, dialog, carId, key, { subCategory: button.dataset.partsSubcategory, page: 0 });
+    });
+  });
+  dialog.querySelectorAll("[data-parts-page]").forEach((button) => {
+    button.addEventListener("click", () => {
+      renderStandardCategoryDialog(ctx, dialog, carId, key, { subCategory: selectedGroup, page: Number(button.dataset.partsPage || 0) });
+    });
+  });
+
   dialog.querySelectorAll("[data-buy-part],[data-buy-install-part]").forEach((button) => {
     button.addEventListener("click", async () => {
       const installNow = Boolean(button.dataset.buyInstallPart);
       const catalogId = button.dataset.buyInstallPart || button.dataset.buyPart;
-      await purchasePart(ctx, dialog, car, catalogId, installNow, button, key);
+      await purchasePart(ctx, dialog, car, catalogId, installNow, button, key, { subCategory: selectedGroup, page });
     });
   });
 
@@ -238,8 +288,7 @@ function renderStandardCategoryDialog(ctx, dialog, carId, key) {
           return;
         }
         await renderParts(ctx);
-        if (Number(car.buildStage || 1) === 1) renderStandardCategoryDialog(ctx, dialog, carId, key);
-        else closeDialog(dialog);
+        renderStandardCategoryDialog(ctx, dialog, carId, key, { subCategory: selectedGroup, page });
       } catch (err) {
         ctx.toast("Install blocked", err.message);
         button.disabled = false;
@@ -248,7 +297,7 @@ function renderStandardCategoryDialog(ctx, dialog, carId, key) {
   });
 }
 
-async function purchasePart(ctx, dialog, car, catalogId, installNow, button, categoryKey = null) {
+async function purchasePart(ctx, dialog, car, catalogId, installNow, button, categoryKey = null, viewState = {}) {
   button.disabled = true;
   const candidate = catalogCache.find((part) => String(part.catalogId) === String(catalogId));
   if (installNow && candidate && forcedInductionSwapNeeded(car, ctx.store.player?.inventory?.parts || [], candidate, catalogCache)) {
@@ -267,9 +316,13 @@ async function purchasePart(ctx, dialog, car, catalogId, installNow, button, cat
     ctx.store.setPlayer(purchased.player);
 
     if (!installNow) {
-      closeDialog(dialog);
       ctx.toast("Part purchased", "Saved to Garage Inventory.");
       await renderParts(ctx);
+      if (categoryKey && categoryKey !== "forced_induction") {
+        renderStandardCategoryDialog(ctx, dialog, car.carId, categoryKey, viewState);
+      } else {
+        closeDialog(dialog);
+      }
       return;
     }
 
@@ -292,21 +345,25 @@ async function purchasePart(ctx, dialog, car, catalogId, installNow, button, cat
       ctx.router.navigate("quick-race");
     } else {
       await renderParts(ctx);
-      if (Number(car.buildStage || 1) === 1 && categoryKey && categoryKey !== "forced_induction") {
-        renderStandardCategoryDialog(ctx, dialog, car.carId, categoryKey);
+      if (categoryKey && categoryKey !== "forced_induction") {
+        renderStandardCategoryDialog(ctx, dialog, car.carId, categoryKey, viewState);
       } else if (categoryKey === "forced_induction" && candidate) {
-        const system = String(forcedInductionMeta(candidate)?.system || "");
+        const system = String(viewState.fiSystem || forcedInductionMeta(candidate)?.system || "");
         closeDialog(dialog);
-        if (system) openForcedInductionSystem(ctx, car.carId, system);
+        if (system) openForcedInductionSystem(ctx, car.carId, system, Number(viewState.fiPage || 0));
       } else {
         closeDialog(dialog);
       }
     }
   } catch (err) {
     if (purchased?.player) {
-      closeDialog(dialog);
       ctx.toast("Part purchased", `Installation was blocked: ${err.message}`);
       await renderParts(ctx);
+      if (categoryKey && categoryKey !== "forced_induction") {
+        renderStandardCategoryDialog(ctx, dialog, car.carId, categoryKey, viewState);
+      } else {
+        closeDialog(dialog);
+      }
       return;
     }
     ctx.toast("Purchase blocked", err.message);
@@ -520,7 +577,7 @@ function fiSystemCard(system, title, subtitle, state, stage) {
     </button>`;
 }
 
-function openForcedInductionSystem(ctx, carId, system) {
+function openForcedInductionSystem(ctx, carId, system, requestedPage = 0) {
   const player = ctx.store.player;
   const car = player?.garage?.find((entry) => String(entry.carId) === String(carId));
   if (!car) return;
@@ -529,7 +586,11 @@ function openForcedInductionSystem(ctx, carId, system) {
   const allSpecs = categorySpecs(car, "forced_induction")
     .filter((part) => String(forcedInductionMeta(part)?.system || "") === String(system))
     .filter((part) => forcedInductionPartVisible(part, state, stage));
-  const specs = forcedInductionDisplayParts(allSpecs, state);
+  const displaySpecs = forcedInductionDisplayParts(allSpecs, state);
+  const pageSize = 3;
+  const pageCount = Math.max(1, Math.ceil(displaySpecs.length / pageSize));
+  const page = Math.min(pageCount - 1, Math.max(0, Number(requestedPage || 0)));
+  const specs = displaySpecs.slice(page * pageSize, (page + 1) * pageSize);
   const previewPart = specs.find((part) => !findInventory(player, part.catalogId, car.carId)?.installedOnCarId) || specs[0] || null;
   const previewStats = previewPart ? projectStats(player, car, previewPart) : car.derived;
 
@@ -542,13 +603,20 @@ function openForcedInductionSystem(ctx, carId, system) {
     : "";
 
   const title = system === "nitrous" ? "NOS Kit" : `${systemLabel(system)} Kit`;
+  const pager = pageCount > 1
+    ? `<div class="parts-shop-pager">
+        <button class="button button--small" type="button" data-fi-page="${page - 1}" ${page <= 0 ? "disabled" : ""}>← PREV</button>
+        <span>PAGE <b>${page + 1}</b> / ${pageCount}</span>
+        <button class="button button--small" type="button" data-fi-page="${page + 1}" ${page >= pageCount - 1 ? "disabled" : ""}>NEXT →</button>
+      </div>`
+    : "";
   const dialog = showDialog(`
     <div class="dialog-body parts-shop-dialog forced-induction-parts-dialog">
       <div class="parts-shop-dialog__titlebar">
         <div>
           <span class="section-label">${escapeHtml(buildName(stage))} • FORCED INDUCTION</span>
           <h2>${escapeHtml(title)}</h2>
-          <p>${escapeHtml(carLabel(car))}</p>
+          <p>${escapeHtml(carLabel(car))} • ${specs.length} shown / ${displaySpecs.length} available</p>
         </div>
         <div class="parts-shop-dialog__stats">
           <span><small>HP</small><b>${number(car.derived?.hp)}</b></span>
@@ -558,9 +626,12 @@ function openForcedInductionSystem(ctx, carId, system) {
       </div>
 
       <div class="forced-induction-workspace">
-        <div class="parts-shop-list forced-induction-parts-list">
-          ${factoryRow}
-          ${specs.length ? specs.map((part) => forcedInductionPartRow(player, car, part, previewPart?.catalogId)).join("") : `<div class="empty-state"><strong>No ${escapeHtml(title)} upgrades available for this setup yet.</strong><span>Change build type or install the base kit first.</span></div>`}
+        <div>
+          <div class="parts-shop-list forced-induction-parts-list">
+            ${page === 0 ? factoryRow : ""}
+            ${specs.length ? specs.map((part) => forcedInductionPartRow(player, car, part, previewPart?.catalogId)).join("") : `<div class="empty-state"><strong>No ${escapeHtml(title)} upgrades available for this setup yet.</strong><span>Change build type or install the base kit first.</span></div>`}
+          </div>
+          ${pager}
         </div>
         <aside class="part-dyno" data-fi-dyno>
           ${previewPart ? renderPartDynoChart(car, car.derived, previewStats, previewPart.name) : '<div class="part-dyno__empty">Choose a part to preview its estimated curve.</div>'}
@@ -575,6 +646,13 @@ function openForcedInductionSystem(ctx, carId, system) {
   dialog.querySelector("[data-back]")?.addEventListener("click", () => {
     closeDialog(dialog);
     openForcedInduction(ctx, carId);
+  });
+  dialog.querySelectorAll("[data-fi-page]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const nextPage = Number(button.dataset.fiPage || 0);
+      closeDialog(dialog);
+      openForcedInductionSystem(ctx, carId, system, nextPage);
+    });
   });
 
   dialog.querySelectorAll("[data-fi-dyno-part]").forEach((button) => {
@@ -591,7 +669,7 @@ function openForcedInductionSystem(ctx, carId, system) {
     button.addEventListener("click", async () => {
       const installNow = Boolean(button.dataset.buyInstallPart);
       const catalogId = button.dataset.buyInstallPart || button.dataset.buyPart;
-      await purchasePart(ctx, dialog, car, catalogId, installNow, button, "forced_induction");
+      await purchasePart(ctx, dialog, car, catalogId, installNow, button, "forced_induction", { fiSystem: system, fiPage: page });
     });
   });
 
@@ -612,7 +690,7 @@ function openForcedInductionSystem(ctx, carId, system) {
         closeDialog(dialog);
         ctx.toast("Forced induction updated", "The car's setup and Performance Index were recalculated.");
         await renderParts(ctx);
-        openForcedInductionSystem(ctx, carId, system);
+        openForcedInductionSystem(ctx, carId, system, page);
       } catch (err) {
         ctx.toast("Install blocked", err.message);
         button.disabled = false;
@@ -726,13 +804,13 @@ function stageProgressionMarkup(player, car) {
       </div>`;
     }
     return `<div class="stage-ready stage-ready--reactive">
-      <div><span class="section-label">STREET RACE CAR COMPLETE</span><strong>Ready for a Front-Half Race Car?</strong><p>Forced Induction and Engine Kits are optional paths. Nothing gets locked: Stage 2 parts stay purchasable after advancing. Stage 3 adds individual boost hardware, larger NOS foggers and engine-swap access.</p></div>
+      <div><span class="section-label">STREET RACE CAR COMPLETE</span><strong>Ready for a Front-Half Race Car?</strong><p>Forced Induction and Engine Kits are optional paths. Nothing gets locked: Stage 2 parts stay purchasable after advancing. Stage 3 adds individual boost hardware plus deeper fueling, ECU, drivetrain, suspension, tires and weight reduction. Engine swaps are the next powertrain-system pass.</p></div>
       <button class="button button--primary" data-stage-up>UPGRADE TO FRONT-HALF RACE CAR</button>
     </div>`;
   }
 
   return `<div class="stage-ready stage-ready--reactive">
-    <div><span class="section-label">FRONT-HALF BUILD</span><strong>Ready for a Full Race Car?</strong><p>Earlier Stage 2/3 parts stay available after advancing. Stage 4 opens twin charging, Engine Kit 4, extreme NOS foggers and the widest engine-swap freedom.</p></div>
+    <div><span class="section-label">FRONT-HALF BUILD</span><strong>Ready for a Full Race Car?</strong><p>Earlier Stage 2/3 parts stay available after advancing. Stage 4 opens engine internals, standalone management hardware, professional drag components, twin charging and extreme NOS foggers.</p></div>
     <button class="button button--primary" data-stage-up>UPGRADE TO FULL RACE CAR</button>
   </div>`;
 }
@@ -746,8 +824,8 @@ function promptStageConversion(ctx, carId) {
   const copy = stage === 1
     ? "Your completed Street Car setup becomes the permanent baseline. The numbered Street Car upgrade ladder is incorporated into the car and cannot be restored."
     : stage === 2
-      ? "Your current Street Race Car parts remain installed. Front-Half Race Car unlocks Stage 3 forced-induction hardware and engine-swap access."
-      : "Your current build remains intact. Full Race Car unlocks twin charging, the highest NOS foggers and the widest powertrain freedom.";
+      ? "Your current Street Race Car parts remain installed. Front-Half Race Car unlocks Stage 3 forced-induction hardware and much deeper supporting parts. Engine swaps arrive in the next powertrain-system pass."
+      : "Your current build remains intact. Full Race Car unlocks engine internals, standalone management hardware, professional drag parts, twin charging and the highest NOS foggers.";
 
   const dialog = showDialog(`<div class="dialog-body stage-conversion-dialog">
     <div class="dialog-vehicle">${renderVehicle(car, { stage: nextStage, view: "sideProfile" })}</div>
