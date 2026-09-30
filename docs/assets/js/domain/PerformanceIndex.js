@@ -1,6 +1,6 @@
 import { RaceSimulator } from "./RaceSimulator.js";
 
-export const PERFORMANCE_INDEX_VERSION = 1;
+export const PERFORMANCE_INDEX_VERSION = 2;
 export const PERFORMANCE_INDEX_PASSES = 51;
 export const PERFORMANCE_INDEX_BASE_ET = 20;
 export const PERFORMANCE_INDEX_PER_TENTH = 8;
@@ -11,7 +11,7 @@ export const PERFORMANCE_CLASS_THRESHOLDS = Object.freeze({
   B: 600,
   A: 750,
   S: 900,
-  X: 1100,
+  X: 1000,
 });
 
 export const PERFORMANCE_CLASS_ORDER = Object.freeze(["D", "C", "B", "A", "S", "X"]);
@@ -78,7 +78,7 @@ export function performanceClassFromIndex(index) {
   if (pi < 600) return "C";
   if (pi < 750) return "B";
   if (pi < 900) return "A";
-  if (pi < 1100) return "S";
+  if (pi < 1000) return "S";
   return "X";
 }
 
