@@ -1,5 +1,17 @@
 # Changelog
 
+## V0.5.0-d.1 — parts depth and UX
+
+- Kept Stage 1 category modals open after Buy + Install.
+- Added four progressive Engine Kits and Engine Kit requirements to higher boost/NOS upgrades.
+- Added selectable before/after dyno previews to Forced Induction parts.
+- Reduced Forced Induction modal scrolling by showing current/next progressive upgrades and using a split desktop workspace.
+- Added explicit click affordance to Turbo/Supercharger/NOS system cards.
+- Switched Street Race Car+ category layout to a 3-column grid and clarified that earlier-stage parts remain available after advancing.
+- Added a 10,000,000 CR minimum balance for the Admin development account.
+- Preserved Engine Creator power-curve data in car engine snapshots.
+
+
 ## V0.5.0-d — forced-induction foundation
 
 - Added staged Turbo, Supercharger and NOS gameplay systems starting at Street Race Car.
