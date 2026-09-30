@@ -49,9 +49,30 @@ const effectsFor = (ids) => ids.flatMap((id) => {
   assert.ok(part, `Missing V0.5F balance part: ${id}`);
   return part.effects || [];
 });
-const rx8StageBaseline = applyPartEffects(deepRx8.base, effectsFor(stageOneMaxIds));
+const applyBuildEffects = (base, effects) => {
+  const stats = {
+    hp: Number(base.hp || 1),
+    torque: Number(base.torque || 1),
+    weight: Number(base.weight || 500),
+    grip: Number(base.grip || 1),
+  };
+  for (const effect of effects) {
+    const stat = String(effect.stat || '');
+    if (!(stat in stats)) continue;
+    const value = Number(effect.value || 0);
+    if (String(effect.op || 'add') === 'mul') stats[stat] *= value;
+    else stats[stat] += value;
+  }
+  return {
+    hp: Math.round(stats.hp),
+    torque: Math.round(stats.torque),
+    weight: Math.round(stats.weight),
+    grip: Math.round(stats.grip * 1000) / 1000,
+  };
+};
+const rx8StageBaseline = applyBuildEffects(deepRx8.base, effectsFor(stageOneMaxIds));
 const rx8LowEightStats = {
-  ...applyPartEffects(rx8StageBaseline, effectsFor(lowEightBuildIds)),
+  ...applyBuildEffects(rx8StageBaseline, effectsFor(lowEightBuildIds)),
   drivetrain: 'RWD',
 };
 const rx8LowEightBenchmark = benchmarkPerformance(rx8LowEightStats, racingConfig);
