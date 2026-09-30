@@ -82,7 +82,7 @@ Build: {$build}
 Storage mode: local
 Offline service worker: disabled in static development mode
 Race presentation: persistent two-phase start/finish with blocking real-time playback
-V0.5D: Forced Induction gameplay foundation, Stage 3/4 progression and live Engine Creator refresh
+V0.5D.1: Parts UX polish, Engine Kits, FI dyno comparison and Admin test credits
 Do not edit docs/ by hand; run php scripts/build-static.php.
 ");
 
