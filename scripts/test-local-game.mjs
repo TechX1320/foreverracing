@@ -509,7 +509,7 @@ assert.ok(step.step && typeof step.step.won === 'boolean');
 console.log('V0.4H.2 layered race wheels + grip telemetry local game flow test passed.');
 
 
-// V0.5H Engine Swap Shop regression
+// V0.5H.1 Engine Assembly regression
 const swapEngines = engines.filter(engineSwapEligible);
 assert.equal(swapEngines.length, 3, 'Only fully-authored engines should enter the initial Engine Swap Shop.');
 const ea888 = swapEngines.find((engine) => engine.engineId === 'vw_ea888_20t_mk6_gti_200');
@@ -522,22 +522,36 @@ swapPlayer.user = { ...swapPlayer.user, username: 'SwapTester' };
 swapPlayer.wallet.credits = 100000;
 swapPlayer.tutorial = { ...swapPlayer.tutorial, status: 'complete', step: 'complete' };
 const swapRx8 = game.createOwnedCar(deepRx8, 'used', 120000, 75, 5000);
-swapRx8.buildStage = 3;
+swapRx8.buildStage = 2;
 swapRx8.stageBaseline = { hp: 260, torque: 175, weight: 2850, grip: 1.15 };
+swapRx8.tune = { boostPsi: 9, fuelTrimPct: 2, ignitionAdvanceDeg: 0, boostByGear: [70,80,90,100,100,100] };
 swapPlayer.garage = [swapRx8];
 swapPlayer.selectedCarId = swapRx8.carId;
 
 const engineBoundPart = partFor('s2_intake_01');
-const chassisPart = partFor('s3_tires_drag_radial');
+const dormantEnginePart = partFor('s4_ecu_standalone');
+const chassisPart = partFor('s2_tires_11');
 swapPlayer.inventory.parts = [
   { inventoryId: 'swap-intake', catalogId: engineBoundPart.catalogId, purchasedForCarId: swapRx8.carId, installedOnCarId: swapRx8.carId, purchasedAt: 1 },
+  { inventoryId: 'swap-ecu', catalogId: dormantEnginePart.catalogId, purchasedForCarId: swapRx8.carId, installedOnCarId: swapRx8.carId, purchasedAt: 1 },
   { inventoryId: 'swap-tire', catalogId: chassisPart.catalogId, purchasedForCarId: swapRx8.carId, installedOnCarId: swapRx8.carId, purchasedAt: 1 },
 ];
 swapPlayer = game.normalizePlayer(swapPlayer);
-const swapCarBefore = swapPlayer.garage[0];
-const eaQuote = engineSwapQuote(swapCarBefore, ea888, swapPlayer.inventory.engines);
+
+const initialRx8 = swapPlayer.garage[0];
+const initialAssembly = swapPlayer.inventory.engines.find((item) => item.installedOnCarId === swapRx8.carId);
+assert.ok(initialAssembly);
+assert.equal(initialAssembly.engineId, renesis.engineId);
+assert.ok(initialAssembly.attachedPartInventoryIds.includes('swap-intake'));
+assert.ok(initialAssembly.attachedPartInventoryIds.includes('swap-ecu'));
+assert.equal(swapPlayer.inventory.parts.find((part) => part.inventoryId === 'swap-ecu').installedOnCarId, null,
+  'Stage 4 engine hardware should stay attached but dormant on a Stage 2 chassis.');
+assert.equal(swapPlayer.inventory.parts.find((part) => part.inventoryId === 'swap-tire').installedOnEngineInventoryId, null,
+  'Tires must stay chassis-bound rather than joining the engine assembly.');
+
+const eaQuote = engineSwapQuote(initialRx8, ea888, swapPlayer.inventory.engines);
 assert.equal(eaQuote.fitment.fitment, 'CUSTOM');
-assert.equal(eaQuote.fitment.minBuildStage, 3);
+assert.equal(eaQuote.fitment.minBuildStage, 2);
 assert.equal(eaQuote.enginePrice, 8500);
 assert.equal(eaQuote.installCost, 7000);
 assert.equal(eaQuote.totalCost, 15500);
@@ -547,33 +561,45 @@ swapPlayer = game.swapEngine(swapPlayer, swapRx8.carId, ea888.engineId);
 const swappedRx8 = swapPlayer.garage[0];
 assert.equal(swappedRx8.engineId, ea888.engineId);
 assert.equal(swappedRx8.engine.peakHp, 200);
-assert.equal(swappedRx8.engine.tags.includes('ea888'), true);
 assert.equal(swappedRx8.base.hp, 200);
 assert.equal(swappedRx8.stageBaseline.hp, 200);
 assert.equal(swappedRx8.stageBaseline.torque, 207);
-assert.equal(swappedRx8.tune, null);
 assert.equal(swapPlayer.wallet.credits, swapCreditsBefore - 15500);
 assert.equal(swapPlayer.inventory.parts.find((part) => part.inventoryId === 'swap-intake').installedOnCarId, null);
 assert.equal(swapPlayer.inventory.parts.find((part) => part.inventoryId === 'swap-tire').installedOnCarId, swapRx8.carId);
-assert.ok(swapPlayer.inventory.engines.some((item) => item.engineId === renesis.engineId && item.source === 'factory_removed'));
-assert.equal(swappedRx8.engineSwap.lastUninstalledParts.includes(engineBoundPart.name), true);
-assert.equal(swappedRx8.engineSwap.lastUninstalledParts.includes(chassisPart.name), false);
-assert.equal(partCompatibility({ ...compatibilityFixture, compatibility: { engineIds: [ea888.engineId], buildStages: [3,4] } }, swappedRx8).ok, true);
-assert.equal(partCompatibility({ ...compatibilityFixture, compatibility: { engineIds: [renesis.engineId], buildStages: [3,4] } }, swappedRx8).ok, false);
+
+const storedRenesis = swapPlayer.inventory.engines.find((item) => item.engineId === renesis.engineId && !item.installedOnCarId);
+assert.ok(storedRenesis, 'The removed Renesis should remain as a detached engine assembly.');
+assert.ok(storedRenesis.attachedPartInventoryIds.includes('swap-intake'));
+assert.ok(storedRenesis.attachedPartInventoryIds.includes('swap-ecu'));
+assert.ok(storedRenesis.tune, 'Saved calibration should travel with the stored engine assembly.');
+assert.ok(Number(storedRenesis.storedStats?.hp || 0) > 0);
+
+const installedEa888 = swapPlayer.inventory.engines.find((item) => item.engineId === ea888.engineId && item.installedOnCarId === swapRx8.carId);
+assert.ok(installedEa888);
+assert.equal(installedEa888.attachedPartInventoryIds.length, 0);
 
 const renesisOwnedQuote = engineSwapQuote(swappedRx8, renesis, swapPlayer.inventory.engines);
 assert.equal(renesisOwnedQuote.enginePrice, 0);
 assert.equal(renesisOwnedQuote.totalCost, 2500);
 const creditsBeforeReturn = swapPlayer.wallet.credits;
 swapPlayer = game.swapEngine(swapPlayer, swapRx8.carId, renesis.engineId);
-assert.equal(swapPlayer.garage[0].engineId, renesis.engineId);
+const returnedRx8 = swapPlayer.garage[0];
+assert.equal(returnedRx8.engineId, renesis.engineId);
 assert.equal(swapPlayer.wallet.credits, creditsBeforeReturn - 2500);
-assert.ok(swapPlayer.inventory.engines.some((item) => item.engineId === ea888.engineId));
-assert.equal(swapPlayer.inventory.engines.some((item) => item.engineId === renesis.engineId), false);
+assert.equal(swapPlayer.inventory.parts.find((part) => part.inventoryId === 'swap-intake').installedOnCarId, swapRx8.carId,
+  'Stage 2-compatible engine parts should reactivate automatically with their stored engine.');
+assert.equal(swapPlayer.inventory.parts.find((part) => part.inventoryId === 'swap-ecu').installedOnCarId, null,
+  'Later-stage engine parts should remain dormant after the assembly returns to a Stage 2 chassis.');
+assert.ok(returnedRx8.tune, 'The stored engine calibration should return with the assembly.');
+assert.ok(swapPlayer.inventory.engines.some((item) => item.engineId === ea888.engineId && !item.installedOnCarId));
+assert.ok(swapPlayer.inventory.engines.some((item) => item.engineId === renesis.engineId && item.installedOnCarId === swapRx8.carId));
 
-const lockedStagePlayer = structuredClone(swapPlayer);
-lockedStagePlayer.garage[0].buildStage = 2;
-assert.throws(() => game.swapEngine(lockedStagePlayer, swapRx8.carId, ea888.engineId), /Build Type 3/i);
+const promotedSwapPlayer = structuredClone(swapPlayer);
+promotedSwapPlayer.garage[0].buildStage = 4;
+const normalizedPromoted = game.normalizePlayer(promotedSwapPlayer);
+assert.equal(normalizedPromoted.inventory.parts.find((part) => part.inventoryId === 'swap-ecu').installedOnCarId, swapRx8.carId,
+  'Dormant assembly hardware should wake up automatically when the chassis reaches the required Build Type.');
 
 let golfSwapPlayer = game.defaultPlayer();
 golfSwapPlayer.user = { ...golfSwapPlayer.user, username: 'GolfSwapTester' };
@@ -591,7 +617,10 @@ assert.throws(() => game.swapEngine(golfSwapPlayer, golfOwned.carId, 'ford_coyot
 
 let failedSwapPlayer = structuredClone(swapPlayer);
 failedSwapPlayer.garage[0].engineCondition = { healthPct: 0, failed: true, failures: 1, lastFailureAt: 1, repairedAt: null };
+failedSwapPlayer = game.normalizePlayer(failedSwapPlayer);
 failedSwapPlayer = game.swapEngine(failedSwapPlayer, swapRx8.carId, ea888.engineId);
-assert.equal(failedSwapPlayer.garage[0].engineCondition.failed, false, 'A newly purchased replacement engine should be healthy.');
-assert.ok(failedSwapPlayer.inventory.engines.some((item) => item.engineId === renesis.engineId && item.condition?.failed === true),
-  'The failed outgoing engine should stay failed in Engine Inventory.');
+assert.equal(failedSwapPlayer.garage[0].engineCondition.failed, false, 'A healthy stored EA888 assembly should remain healthy when installed.');
+const failedStoredRenesis = failedSwapPlayer.inventory.engines.find((item) => item.engineId === renesis.engineId && !item.installedOnCarId);
+assert.equal(failedStoredRenesis.condition.failed, true, 'The failed outgoing Renesis assembly should keep its failure state.');
+
+console.log('V0.5H.1 engine assembly + Stage 2 swap flow test passed.');
