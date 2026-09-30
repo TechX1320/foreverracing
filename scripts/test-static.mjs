@@ -77,7 +77,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.5.0-c.2"')) throw new Error('Static index is missing the V0.5C.2 build marker.');
+if (!html.includes('data-build="0.5.0-c.3"')) throw new Error('Static index is missing the V0.5C.3 build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -512,5 +512,20 @@ if (!engineDomainSource.includes('peakBoostPsi') ||
   throw new Error('V0.5C.2 factory boost baseline is incomplete.');
 }
 console.log('V0.5C.2 factory boost baseline checks passed.');
+
+const hdGolfArtV05c3 = (artCatalog.cars || []).find((car) => car.assetId === 'hd_golf_gti');
+if (!hdGolfArtV05c3?.certifiedAtlas?.src || hdGolfArtV05c3?.layers?.body?.src || hdGolfArtV05c3?.layers?.wheel?.src) {
+  throw new Error('V0.5C.3 HD Golf composite-art regression fixture changed unexpectedly.');
+}
+if (!rendererSource.includes('vehicleVisualCapabilities') ||
+    !rendererSource.includes('effectiveAnimatedWheels') ||
+    !rendererSource.includes('animatedWheels && capabilities.animatedWheels') ||
+    !contentStudioSource.includes('PAINT LOCKED') ||
+    !contentStudioSource.includes('Fixed livery / composite art') ||
+    !contentStudioSource.includes('vehicleVisualCapabilities(draft)') ||
+    !cssV04b.includes('V0.5C.3 composite art fallback')) {
+  throw new Error('V0.5C.3 composite race-art / fixed-livery fallback is incomplete.');
+}
+console.log('V0.5C.3 composite race-art fallback checks passed.');
 
 
