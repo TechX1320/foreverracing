@@ -364,6 +364,53 @@ function choiceCategoryRows(player, car, specs) {
   }).join("");
 }
 
+function engineKitRows(player, car, specs) {
+  const currentLevel = installedEngineKitLevel(player, car.carId);
+  return specs
+    .sort((a, b) => Number(a.engineKit?.level || 0) - Number(b.engineKit?.level || 0))
+    .map((part) => {
+      const level = Number(part.engineKit?.level || 0);
+      const owned = findInventory(player, part.catalogId, car.carId);
+      const installed = owned && String(owned.installedOnCarId || "") === String(car.carId);
+      const projected = projectStats(player, car, part);
+      const next = level === currentLevel + 1;
+      const canBuy = next && !owned && Number(player.wallet?.credits || 0) >= Number(part.price || 0);
+      let action = '<span class="status-text">LOCKED</span>';
+
+      if (installed) action = '<span class="status-text status-text--good">INSTALLED</span>';
+      else if (level < currentLevel) action = '<span class="status-text status-text--good">COMPLETED</span>';
+      else if (owned && level === currentLevel + 1) action = `<button class="button button--primary button--small" data-install-shop-part="${escapeHtml(owned.inventoryId)}">INSTALL</button>`;
+      else if (next) action = `<div class="parts-shop-row__buy-actions"><button class="button button--primary button--small" data-buy-install-part="${escapeHtml(part.catalogId)}" ${canBuy ? "" : "disabled"}>BUY + INSTALL • ${money(part.price)} CR</button><button class="button button--small" data-buy-part="${escapeHtml(part.catalogId)}" ${canBuy ? "" : "disabled"}>BUY ONLY</button></div>`;
+
+      return `<article class="parts-shop-row ${installed || level < currentLevel ? "is-complete" : ""}">
+        <div class="parts-shop-row__title"><span>ENGINE KIT ${level}</span><strong>${escapeHtml(part.name)}</strong><small>${escapeHtml(part.description || "")}</small></div>
+        <div class="parts-shop-row__delta">
+          <span>HP <b>${number(car.derived?.hp)} → ${number(projected.hp)}</b></span>
+          <span>TQ <b>${number(car.derived?.torque)} → ${number(projected.torque)}</b></span>
+          <span>CAP <b>${number(part.engineKit?.powerCapacityHp || 0)} hp</b></span>
+        </div>
+        <div class="parts-shop-row__action">${action}</div>
+      </article>`;
+    }).join("");
+}
+
+function installedEngineKitLevel(player, carId) {
+  let level = 0;
+  for (const item of player?.inventory?.parts || []) {
+    if (String(item.installedOnCarId || "") !== String(carId)) continue;
+    const spec = catalogCache.find((part) => String(part.catalogId) === String(item.catalogId));
+    level = Math.max(level, Number(spec?.engineKit?.level || 0));
+  }
+  return level;
+}
+
+function engineKitRequirementReason(player, car, part) {
+  const required = Math.max(0, Number(part?.requiredEngineKit || 0));
+  if (!required) return "";
+  const current = installedEngineKitLevel(player, car.carId);
+  return current >= required ? "" : `Requires Engine Kit ${required}`;
+}
+
 function forcedInductionCategoryCard(player, car) {
   const state = forcedInductionState(car, player?.inventory?.parts || [], catalogCache);
   const turbo = fiSystemStatus(state, "turbo");
