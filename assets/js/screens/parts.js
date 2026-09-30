@@ -141,12 +141,13 @@ function categoryCard(player, car, key, tutorialStep = null) {
       </button>`;
   }
 
-  const installed = scopedOwned.find((item) => String(item.installedOnCarId || "") === String(car.carId));
+  const installedCount = scopedOwned.filter((item) => String(item.installedOnCarId || "") === String(car.carId)).length;
+  const groups = [...new Set(specs.map((part) => String(part.subCategory || "General")).filter(Boolean))];
   return `
     <button class="parts-category-card" type="button" data-parts-category="${escapeHtml(key)}">
       <span class="parts-category-card__name">${escapeHtml(label)}</span>
-      <strong>${scopedOwned.length} OWNED</strong>
-      <small>${installed ? `Installed: ${escapeHtml(partName(installed.catalogId))}` : "Stock setup installed"}</small>
+      <strong>${installedCount} INSTALLED • ${scopedOwned.length} OWNED</strong>
+      <small>${groups.length > 1 ? `${groups.length} subcategories` : escapeHtml(groups[0] || "General")}</small>
       <i class="parts-category-card__count">${specs.length} options</i>
     </button>`;
 }
