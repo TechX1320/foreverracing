@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "stages": [
     {
       "stage": 1,
@@ -23,9 +23,9 @@
       "stage": 2,
       "name": "Street Race Car",
       "shortName": "Street Race Car",
-      "description": "Stock body, gutted and caged, questionably street legal. Named race parts unlock alongside Turbo, Supercharger and NOS kit choices.",
+      "description": "Street Race Car construction with individual performance choices, forced induction, Engine Kits and standard/custom engine swaps.",
       "requiredCategories": [],
-      "engineSwaps": false,
+      "engineSwaps": true,
       "optionalCategories": [
         "forced_induction"
       ],
@@ -34,7 +34,8 @@
         "supercharger": true,
         "nitrousMaxShot": 50,
         "twinCharge": false
-      }
+      },
+      "engineSwapPlanned": false
     },
     {
       "stage": 3,
