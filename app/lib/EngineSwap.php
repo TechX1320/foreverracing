@@ -54,6 +54,7 @@ final class EngineSwap
 
     public static function isEngineBoundPart(array $part): bool
     {
+        if((int)($part['simpleTier']??0)>0)return false;
         return in_array(strtolower((string)($part['categoryKey']??'')),self::ENGINE_BOUND_CATEGORIES,true);
     }
 
