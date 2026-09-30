@@ -213,6 +213,7 @@ assert.equal(failurePass.tuning.catastrophicFailure, true);
 assert.equal(failurePass.totalTime, 999);
 
 let failedPlayer = game.defaultPlayer();
+failedPlayer.user = { ...failedPlayer.user, username: 'RiskTester' };
 failedPlayer.tutorial = { ...failedPlayer.tutorial, status: 'complete', step: 'complete' };
 failedPlayer.wallet.credits = 100000;
 failedPlayer.garage = [{
