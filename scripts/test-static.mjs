@@ -54,6 +54,7 @@ const required = [
   'assets/js/domain/PerformanceIndex.js',
   'assets/js/domain/ContentRelease.js',
   'assets/js/domain/EngineCatalog.js',
+  'assets/js/domain/EngineSwap.js',
   'assets/js/domain/ForcedInduction.js',
   'assets/js/domain/PartCatalog.js',
   'assets/js/domain/PowerModel.js',
@@ -66,6 +67,7 @@ const required = [
   'assets/js/content/ContentStudioPartCatalog.js',
   'assets/js/screens/contentStudio.js',
   'assets/js/screens/engineStudio.js',
+  'assets/js/screens/engineSwapShop.js',
   'assets/js/screens/partsStudio.js',
   'data/catalog/cars.json',
   'data/catalog/car-art.json',
@@ -84,7 +86,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.5.0-g.2"')) throw new Error('Static index is missing the V0.5G.2 build marker.');
+if (!html.includes('data-build="0.5.0-h"')) throw new Error('Static index is missing the V0.5H build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -179,6 +181,7 @@ const modules = [
   'assets/js/domain/PerformanceIndex.js',
   'assets/js/domain/ContentRelease.js',
   'assets/js/domain/EngineCatalog.js',
+  'assets/js/domain/EngineSwap.js',
   'assets/js/domain/PowerModel.js',
   'assets/js/domain/Tuning.js',
   'assets/js/ui/vehicleRenderer.js',
@@ -189,6 +192,7 @@ const modules = [
   'assets/js/storage/createStorageProvider.js',
   'assets/js/screens/showroom.js',
   'assets/js/screens/garage.js',
+  'assets/js/screens/engineSwapShop.js',
   'assets/js/screens/parts.js',
   'assets/js/screens/quickRace.js',
   'assets/js/screens/usedlot.js',
@@ -659,12 +663,8 @@ if (!partsSourceV04b.includes('parts-shop-subnav') ||
     !cssV04b.includes('V0.5F deep parts navigation')) {
   throw new Error('V0.5F subcategory / pagination UI is incomplete.');
 }
-if (buildStages.version < 5 ||
-    buildStages.stages?.[2]?.engineSwapPlanned !== true ||
-    buildStages.stages?.[3]?.engineSwapPlanned !== true ||
-    buildStages.stages?.[2]?.engineSwaps !== false ||
-    buildStages.stages?.[3]?.engineSwaps !== false) {
-  throw new Error('V0.5F build-stage engine-swap status is misleading or stale.');
+if (buildStages.version < 5) {
+  throw new Error('V0.5F build-stage configuration is stale.');
 }
 console.log('V0.5F Stage 3/4 parts depth + pagination checks passed.');
 
@@ -765,5 +765,69 @@ if (runtimeConfig.schemaVersion < 9 ||
   throw new Error('V0.5G.2 tuning polish / catastrophic engine-risk workflow is incomplete.');
 }
 console.log('V0.5G.2 tuning base-map, dyno and engine-risk checks passed.');
+
+const engineSwapDomainV05h = await fs.readFile(new URL('assets/js/domain/EngineSwap.js', root), 'utf8');
+const engineSwapShopV05h = await fs.readFile(new URL('assets/js/screens/engineSwapShop.js', root), 'utf8');
+const engineSwapApiCatalogV05h = await fs.readFile(new URL('api/engine-swaps/catalog.php', root), 'utf8');
+const engineSwapApiInstallV05h = await fs.readFile(new URL('api/engine-swaps/install.php', root), 'utf8');
+const serviceWorkerV05h = await fs.readFile(new URL('service-worker.js', root), 'utf8');
+const swapReadyEnginesV05h = engineCatalogV05c.filter((engine) =>
+  engine.swapMarket?.available === true &&
+  Number(engine.peakHp || 0) > 0 &&
+  Number(engine.peakTorque || 0) > 0 &&
+  Number(engine.redlineRpm || 0) > 0
+);
+if (runtimeConfig.schemaVersion < 10 ||
+    buildStages.version < 6 ||
+    buildStages.stages?.[2]?.engineSwaps !== true ||
+    buildStages.stages?.[3]?.engineSwaps !== true ||
+    buildStages.stages?.[2]?.engineSwapPlanned !== false ||
+    buildStages.stages?.[3]?.engineSwapPlanned !== false) {
+  throw new Error('V0.5H Build Type engine-swap configuration is incomplete.');
+}
+if (swapReadyEnginesV05h.length !== 3 ||
+    !swapReadyEnginesV05h.every((engine) => Number(engine.swapMarket?.price || 0) > 0) ||
+    engineCatalogV05c.some((engine) => engine.sourceStatus === 'legacy-fitment' && engine.swapMarket?.available === true)) {
+  throw new Error('V0.5H Engine Swap Shop roster must contain only the three fully-authored engines.');
+}
+for (const car of carCatalog) {
+  const options = car.engineSwapFitment?.options || {};
+  if (!options['vw_ea888_20t_mk6_gti_200'] ||
+      !options['mazda_13b_msp_renesis_238'] ||
+      !options['renault_clio_v6_29_255']) {
+    throw new Error(`V0.5H engine fitments are incomplete for ${car.catalogId}.`);
+  }
+}
+if (carCatalog.find((car) => car.catalogId === 'mazda_rx8')?.engineSwapFitment?.options?.vw_ea888_20t_mk6_gti_200?.minBuildStage !== 3 ||
+    carCatalog.find((car) => car.catalogId === 'golf_gti')?.engineSwapFitment?.options?.mazda_13b_msp_renesis_238?.minBuildStage !== 4) {
+  throw new Error('V0.5H Stage 3/custom vs Stage 4/extreme fitment gates changed unexpectedly.');
+}
+if (!html.includes('data-nav="engine-swap-shop"') ||
+    !html.includes('ENGINE SWAP SHOP') ||
+    !appSource.includes('renderEngineSwapShop') ||
+    !appSource.includes(".register('engine-swap-shop'") ||
+    !engineSwapDomainV05h.includes('ENGINE_BOUND_CATEGORIES') ||
+    !engineSwapDomainV05h.includes('engineSwapQuote') ||
+    !engineSwapDomainV05h.includes('engineSwapEligible') ||
+    !engineSwapShopV05h.includes('OPEN PARTS FOR NEW ENGINE') ||
+    !engineSwapShopV05h.includes('ENGINE INVENTORY') ||
+    !engineSwapShopV05h.includes('AFTER SWAP / BEFORE NEW ENGINE PARTS') ||
+    !localGameSource.includes('swapEngine(inputPlayer') ||
+    !localGameSource.includes('inventory.engines') ||
+    !serverGameSourceV04c.includes('public static function swapEngine') ||
+    !serverGameSourceV04c.includes('EngineSwap::isEngineBoundPart') ||
+    !engineSwapApiCatalogV05h.includes('GameService::engineCatalog') ||
+    !engineSwapApiInstallV05h.includes('GameService::swapEngine') ||
+    !storageContractV05g2.includes('swapEngine') ||
+    !localStorageSourceV05g2.includes('swapEngine(carId, engineId)') ||
+    !apiStorageSourceV05g2.includes('swapEngine(carId, engineId)') ||
+    !engineStudioSource.includes('Swap Shop Price (CR)') ||
+    !engineStudioSource.includes('Swap Shop Listing') ||
+    !cssV04b.includes('V0.5H Engine Swap Shop') ||
+    !serviceWorkerV05h.includes('EngineSwap.js') ||
+    !serviceWorkerV05h.includes('engineSwapShop.js')) {
+  throw new Error('V0.5H Engine Swap Shop runtime / authoring workflow is incomplete.');
+}
+console.log('V0.5H Engine Swap Shop checks passed.');
 
 
