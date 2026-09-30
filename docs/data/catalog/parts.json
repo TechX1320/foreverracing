@@ -924,7 +924,8 @@
         "op": "add",
         "value": 42
       }
-    ]
+    ],
+    "requiredEngineKit": 0
   },
   {
     "catalogId": "s2_fi_supercharger_kit",
@@ -959,7 +960,8 @@
         "op": "add",
         "value": 50
       }
-    ]
+    ],
+    "requiredEngineKit": 0
   },
   {
     "catalogId": "s2_fi_turbo_upgrade_1",
@@ -994,7 +996,8 @@
         "op": "add",
         "value": 44
       }
-    ]
+    ],
+    "requiredEngineKit": 1
   },
   {
     "catalogId": "s2_fi_turbo_upgrade_2",
@@ -1029,7 +1032,8 @@
         "op": "add",
         "value": 46
       }
-    ]
+    ],
+    "requiredEngineKit": 1
   },
   {
     "catalogId": "s2_fi_turbo_upgrade_3",
@@ -1064,7 +1068,8 @@
         "op": "add",
         "value": 48
       }
-    ]
+    ],
+    "requiredEngineKit": 2
   },
   {
     "catalogId": "s2_fi_supercharger_upgrade_1",
@@ -1099,7 +1104,8 @@
         "op": "add",
         "value": 52
       }
-    ]
+    ],
+    "requiredEngineKit": 1
   },
   {
     "catalogId": "s2_fi_supercharger_upgrade_2",
@@ -1134,7 +1140,8 @@
         "op": "add",
         "value": 54
       }
-    ]
+    ],
+    "requiredEngineKit": 1
   },
   {
     "catalogId": "s2_fi_supercharger_upgrade_3",
@@ -1169,7 +1176,8 @@
         "op": "add",
         "value": 56
       }
-    ]
+    ],
+    "requiredEngineKit": 2
   },
   {
     "catalogId": "s2_fi_factory_turbo_1",
@@ -1204,7 +1212,8 @@
         "op": "add",
         "value": 3
       }
-    ]
+    ],
+    "requiredEngineKit": 0
   },
   {
     "catalogId": "s2_fi_factory_turbo_2",
@@ -1239,7 +1248,8 @@
         "op": "add",
         "value": 5
       }
-    ]
+    ],
+    "requiredEngineKit": 1
   },
   {
     "catalogId": "s2_fi_factory_turbo_3",
@@ -1274,7 +1284,8 @@
         "op": "add",
         "value": 7
       }
-    ]
+    ],
+    "requiredEngineKit": 2
   },
   {
     "catalogId": "s2_fi_factory_supercharger_1",
@@ -1309,7 +1320,8 @@
         "op": "add",
         "value": 2
       }
-    ]
+    ],
+    "requiredEngineKit": 0
   },
   {
     "catalogId": "s2_fi_factory_supercharger_2",
@@ -1344,7 +1356,8 @@
         "op": "add",
         "value": 3
       }
-    ]
+    ],
+    "requiredEngineKit": 1
   },
   {
     "catalogId": "s2_fi_factory_supercharger_3",
@@ -1379,7 +1392,8 @@
         "op": "add",
         "value": 4
       }
-    ]
+    ],
+    "requiredEngineKit": 2
   },
   {
     "catalogId": "s2_fi_nos_50",
@@ -1410,7 +1424,8 @@
         "op": "add",
         "value": 25
       }
-    ]
+    ],
+    "requiredEngineKit": 0
   },
   {
     "catalogId": "s3_fi_turbo_intercooler",
@@ -1444,7 +1459,8 @@
         "op": "add",
         "value": 8
       }
-    ]
+    ],
+    "requiredEngineKit": 0
   },
   {
     "catalogId": "s3_fi_turbo_upgrade",
@@ -1478,7 +1494,8 @@
         "op": "add",
         "value": 3
       }
-    ]
+    ],
+    "requiredEngineKit": 2
   },
   {
     "catalogId": "s3_fi_turbo_bov",
@@ -1502,7 +1519,8 @@
         "op": "add",
         "value": 1
       }
-    ]
+    ],
+    "requiredEngineKit": 0
   },
   {
     "catalogId": "s3_fi_turbo_piping",
@@ -1536,7 +1554,8 @@
         "op": "add",
         "value": 4
       }
-    ]
+    ],
+    "requiredEngineKit": 1
   },
   {
     "catalogId": "s3_fi_supercharger_upgrade",
@@ -1570,7 +1589,8 @@
         "op": "add",
         "value": 6
       }
-    ]
+    ],
+    "requiredEngineKit": 2
   },
   {
     "catalogId": "s3_fi_supercharger_pulley",
@@ -1599,7 +1619,8 @@
         "op": "mul",
         "value": 1.1
       }
-    ]
+    ],
+    "requiredEngineKit": 2
   },
   {
     "catalogId": "s3_fi_nos_75",
@@ -1630,7 +1651,8 @@
         "op": "add",
         "value": 25
       }
-    ]
+    ],
+    "requiredEngineKit": 0
   },
   {
     "catalogId": "s3_fi_nos_100",
@@ -1661,7 +1683,8 @@
         "op": "add",
         "value": 25
       }
-    ]
+    ],
+    "requiredEngineKit": 1
   },
   {
     "catalogId": "s3_fi_nos_150",
@@ -1692,7 +1715,8 @@
         "op": "add",
         "value": 25
       }
-    ]
+    ],
+    "requiredEngineKit": 2
   },
   {
     "catalogId": "s4_fi_twin_turbo",
@@ -1727,7 +1751,8 @@
         "op": "add",
         "value": 35
       }
-    ]
+    ],
+    "requiredEngineKit": 3
   },
   {
     "catalogId": "s4_fi_twin_supercharger",
@@ -1762,7 +1787,8 @@
         "op": "add",
         "value": 45
       }
-    ]
+    ],
+    "requiredEngineKit": 3
   },
   {
     "catalogId": "s4_fi_nos_175",
@@ -1793,7 +1819,8 @@
         "op": "add",
         "value": 25
       }
-    ]
+    ],
+    "requiredEngineKit": 2
   },
   {
     "catalogId": "s4_fi_nos_200",
@@ -1824,7 +1851,8 @@
         "op": "add",
         "value": 25
       }
-    ]
+    ],
+    "requiredEngineKit": 3
   },
   {
     "catalogId": "s4_fi_nos_250",
@@ -1855,7 +1883,8 @@
         "op": "add",
         "value": 25
       }
-    ]
+    ],
+    "requiredEngineKit": 3
   },
   {
     "catalogId": "s4_fi_nos_300",
@@ -1885,6 +1914,143 @@
         "stat": "weight",
         "op": "add",
         "value": 25
+      }
+    ],
+    "requiredEngineKit": 4
+  },
+  {
+    "catalogId": "s2_engine_kit_1",
+    "name": "Engine Kit 1 • Forged Street Bottom End",
+    "category": "Engine Kit",
+    "categoryKey": "engine_kit",
+    "slot": "engine_kit",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": false,
+    "price": 8500,
+    "description": "Forged pistons and rods for moderate boost and nitrous. First durability step for serious power adders.",
+    "engineKit": {
+      "level": 1,
+      "powerCapacityHp": 600
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.02
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.03
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 4
+      }
+    ]
+  },
+  {
+    "catalogId": "s2_engine_kit_2",
+    "name": "Engine Kit 2 • Built Bottom End",
+    "category": "Engine Kit",
+    "categoryKey": "engine_kit",
+    "slot": "engine_kit",
+    "buildStage": 2,
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": false,
+    "price": 16000,
+    "description": "Forged rotating assembly, bearings and fasteners for substantially more cylinder pressure.",
+    "engineKit": {
+      "level": 2,
+      "powerCapacityHp": 950
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.04
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.05
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 8
+      }
+    ]
+  },
+  {
+    "catalogId": "s3_engine_kit_3",
+    "name": "Engine Kit 3 • Race Block + Head",
+    "category": "Engine Kit",
+    "categoryKey": "engine_kit",
+    "slot": "engine_kit",
+    "buildStage": 3,
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "price": 28500,
+    "description": "Reinforced block, head hardware and race valvetrain for extreme Stage 3 power.",
+    "engineKit": {
+      "level": 3,
+      "powerCapacityHp": 1400
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.06
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.07
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 12
+      }
+    ]
+  },
+  {
+    "catalogId": "s4_engine_kit_4",
+    "name": "Engine Kit 4 • Max-Effort Race Engine",
+    "category": "Engine Kit",
+    "categoryKey": "engine_kit",
+    "slot": "engine_kit",
+    "buildStage": 4,
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "price": 50000,
+    "description": "Full race engine preparation intended for four-digit power, twin charging and the largest nitrous systems.",
+    "engineKit": {
+      "level": 4,
+      "powerCapacityHp": 2200
+    },
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.08
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.1
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 18
       }
     ]
   }

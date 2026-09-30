@@ -10,12 +10,13 @@ if (is_file($gameConfigPath)) {
 
 return [
     'app_name' => 'Forever Racing',
-    'build' => '0.5.0-d',
+    'build' => '0.5.0-d.1',
     'admin_username' => 'Admin',
     'admin_password' => '12345',
     'session_name' => 'forever_racing_session',
     'session_active_ttl_seconds' => (int)($gameConfig['sessionActiveTtlSeconds'] ?? 7200),
     'starting_credits' => (int)($gameConfig['startingCredits'] ?? 75000),
+    'local_dev_credits' => (int)($gameConfig['localDevCredits'] ?? 10000000),
     'used_lot_refresh_seconds' => (int)($gameConfig['usedLotRefreshSeconds'] ?? 1800),
     'schema_version' => (int)($gameConfig['schemaVersion'] ?? 3),
     'tutorial_version' => (int)($gameConfig['tutorialVersion'] ?? 1),

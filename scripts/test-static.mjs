@@ -56,6 +56,7 @@ const required = [
   'assets/js/domain/EngineCatalog.js',
   'assets/js/domain/ForcedInduction.js',
   'assets/js/ui/vehicleRenderer.js',
+  'assets/js/ui/partDyno.js',
   'assets/js/ui/racePresentation.js',
   'assets/js/content/ContentStudioCatalog.js',
   'assets/js/content/ContentStudioEngineCatalog.js',
@@ -78,7 +79,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.5.0-d"')) throw new Error('Static index is missing the V0.5D build marker.');
+if (!html.includes('data-build="0.5.0-d.1"')) throw new Error('Static index is missing the V0.5D.1 build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -567,5 +568,33 @@ if (buildStages.version < 4 ||
   throw new Error('V0.5D build-stage forced-induction capabilities are incomplete.');
 }
 console.log('V0.5D forced-induction / progression checks passed.');
+
+const partDynoSourceV05d1 = await fs.readFile(new URL('assets/js/ui/partDyno.js', root), 'utf8');
+const engineKitsV05d1 = JSON.parse(await fs.readFile(new URL('data/catalog/parts.json', docs), 'utf8'))
+  .filter((part) => part.categoryKey === 'engine_kit');
+const gameConfigV05d1 = JSON.parse(await fs.readFile(new URL('data/config/game.json', docs), 'utf8'));
+if (engineKitsV05d1.length !== 4 ||
+    engineKitsV05d1.at(-1)?.price !== 50000 ||
+    engineKitsV05d1.at(-1)?.engineKit?.level !== 4 ||
+    !forcedParts.some((part) => Number(part.requiredEngineKit || 0) >= 4)) {
+  throw new Error('V0.5D.1 Engine Kit catalog / durability gates are incomplete.');
+}
+if (Number(gameConfigV05d1.localDevCredits || 0) !== 10000000 ||
+    !localGameSource.includes('localDevCredits') ||
+    !serverGameSourceV04c.includes('local_dev_credits')) {
+  throw new Error('V0.5D.1 Admin testing-credit floor is incomplete.');
+}
+if (!partDynoSourceV05d1.includes('renderPartDynoChart') ||
+    !partDynoSourceV05d1.includes('Estimated before / after curve') ||
+    !partsSourceV04b.includes('CLICK TO OPEN') ||
+    !partsSourceV04b.includes('parts-category-grid--race') ||
+    !partsSourceV04b.includes('engineKitRows') ||
+    !partsSourceV04b.includes('renderStandardCategoryDialog') ||
+    !partsSourceV04b.includes('renderPartDynoChart') ||
+    !partsSourceV04b.includes('Earlier-stage parts remain available') ||
+    !cssV04b.includes('V0.5D.1 parts depth + dyno polish')) {
+  throw new Error('V0.5D.1 Parts / FI dyno UX is incomplete.');
+}
+console.log('V0.5D.1 parts depth / dyno UX checks passed.');
 
 

@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.5.0-d playable direction
+## V0.5.0-d.1 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,18 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.5D.1 parts depth + UX
+
+- Stage 1 **Buy + Install** now keeps the active category modal open so the next step can be purchased without reopening the category.
+- Street Race Car+ uses a 3-column category layout; the new **Engine Kit** category creates a 3x3 desktop parts grid instead of growing into a long page.
+- Added four progressive Engine Kits: forged street bottom end, built bottom end, race block/head, and a 50,000 CR max-effort race engine.
+- Higher forced-induction upgrades now require appropriate Engine Kit levels. This starts the durability/build-puzzle layer instead of allowing every boost/NOS part on a stock long block.
+- Forced Induction system cards now explicitly say **CLICK TO OPEN**, show only the current/next progressive upgrade where appropriate, and use a wider non-scroll desktop layout.
+- Forced Induction part pages now include a selectable **before/after dyno preview** based on the authored engine curve (or a generated fallback curve).
+- Earlier Stage 2/3 parts remain purchasable after advancing Build Type; Forced Induction and Engine Kits are optional build paths rather than progression locks.
+- The Admin development account is normalized to a **10,000,000 CR minimum balance** for testing.
+- Engine snapshots now retain curve profile/notes/curve points so new cars can carry their Engine Creator dyno data into future parts/tuning systems.
 
 ### V0.5D forced-induction foundation
 

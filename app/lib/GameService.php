@@ -70,6 +70,9 @@ final class GameService
         $player['schemaVersion'] = (int)app_config()['schema_version'];
         $player['user'] = array_replace($default['user'], is_array($player['user'] ?? null) ? $player['user'] : []);
         $player['wallet'] = array_replace($default['wallet'], is_array($player['wallet'] ?? null) ? $player['wallet'] : []);
+        if (strcasecmp((string)($player['user']['username'] ?? ''), (string)(app_config()['admin_username'] ?? 'Admin')) === 0) {
+            $player['wallet']['credits'] = max((int)($player['wallet']['credits'] ?? 0), (int)(app_config()['local_dev_credits'] ?? 10000000));
+        }
         $player['progression'] = array_replace($default['progression'], is_array($player['progression'] ?? null) ? $player['progression'] : []);
         $player['tutorial'] = array_replace($default['tutorial'], is_array($player['tutorial'] ?? null) ? $player['tutorial'] : []);
         $player['tutorial']['completedSteps'] = array_values(is_array($player['tutorial']['completedSteps'] ?? null) ? $player['tutorial']['completedSteps'] : []);
@@ -966,6 +969,17 @@ final class GameService
         return $tier;
     }
 
+    private static function installedEngineKitLevel(array $player, string $carId, array $catalog): int
+    {
+        $level = 0;
+        foreach (($player['inventory']['parts'] ?? []) as $instance) {
+            if ((string)($instance['installedOnCarId'] ?? '') !== $carId) continue;
+            $spec = self::findBy($catalog, 'catalogId', (string)($instance['catalogId'] ?? ''));
+            $level = max($level, (int)($spec['engineKit']['level'] ?? 0));
+        }
+        return $level;
+    }
+
     private static function normalizeFiSystem(mixed $value): ?string
     {
         $text = strtolower(trim((string)$value));
@@ -1108,6 +1122,22 @@ final class GameService
         }
         if ((int)($spec['persistentFromStage'] ?? $spec['buildStage'] ?? 2) > $stage) {
             throw new GameException('This part is not available for the current Build Type.');
+        }
+
+        $currentEngineKit = self::installedEngineKitLevel($player, (string)$car['carId'], $catalog);
+        $engineKitLevel = (int)($spec['engineKit']['level'] ?? 0);
+        if ($engineKitLevel > 0) {
+            if ($purchasing && $engineKitLevel !== $currentEngineKit + 1) {
+                throw new GameException('Install Engine Kit ' . ($currentEngineKit + 1) . ' before buying Engine Kit ' . $engineKitLevel . '.');
+            }
+            if (!$purchasing && $engineKitLevel < $currentEngineKit) {
+                throw new GameException('Engine Kits cannot be downgraded.');
+            }
+        }
+
+        $requiredEngineKit = max(0, (int)($spec['requiredEngineKit'] ?? 0));
+        if ($requiredEngineKit > $currentEngineKit) {
+            throw new GameException('Requires Engine Kit ' . $requiredEngineKit . ' before this power adder can be used.');
         }
 
         $reason = self::forcedInductionCompatibility($car, $player['inventory']['parts'] ?? [], $spec, $catalog, $purchasing);
