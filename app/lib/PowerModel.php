@@ -98,6 +98,7 @@ final class PowerModel
         if($stat!=='hp'&&$stat!=='torque')return 1;
         $explicit=$part['powerModel']['effectScale']??$part['powerEffectScale']??null;
         if($explicit!==null && is_numeric($explicit))return self::clamp((float)$explicit,0,1.5);
+        if((int)($part['simpleTier']??0)>0)return 1;
         $category=strtolower((string)($part['categoryKey']??''));
         $sub=strtolower((string)($part['subCategory']??''));
         $id=strtolower((string)($part['catalogId']??''));
