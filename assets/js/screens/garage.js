@@ -81,6 +81,20 @@ export async function renderGarage(ctx) {
   ctx.screenRoot.querySelectorAll("[data-tune-car]").forEach((button) => {
     button.addEventListener("click", () => openTuning(ctx, button.dataset.tuneCar));
   });
+  ctx.screenRoot.querySelectorAll("[data-repair-engine]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      try {
+        const data = await ctx.storage.repairEngine(button.dataset.repairEngine);
+        ctx.store.setPlayer(data.player);
+        ctx.toast("Engine rebuilt", "The car is ready to race again.");
+        await renderGarage(ctx);
+      } catch (err) {
+        ctx.toast("Engine rebuild failed", err.message);
+        button.disabled = false;
+      }
+    });
+  });
   ctx.screenRoot.querySelectorAll("[data-stage-up]").forEach((button) => {
     button.addEventListener("click", () => stageUp(ctx, button.dataset.stageUp));
   });
@@ -99,6 +113,8 @@ function carRow(player, car, catalog, tutorialStep) {
   const inventoryCount = inventoryForCar(player, car).length;
   const inventoryHighlight = tutorialStep === "install_first_upgrade";
   const tuneUnlocked = tuningUnlockedForCar(player, car);
+  const engineFailed = car.engineCondition?.failed === true;
+  const repairCost = engineRepairCost(car);
 
   return `
     <article class="garage-entry ${selected ? "is-current" : ""}">
@@ -121,6 +137,7 @@ function carRow(player, car, catalog, tutorialStep) {
           <span><b>${number(car.derived?.weight)}</b> LB</span>
           <span><b>${number(car.mileage)}</b> MI</span>
         </div>
+        ${engineFailed ? `<div class="engine-failure-banner"><b>ENGINE FAILED</b><span>Catastrophic tune failure. Rebuild required before this car can race again.</span></div>` : ""}
         ${progress
           ? `<div class="stage-progress"><div class="stage-progress__label"><span>Street Car completion</span><b>${progress.maxed}/${progress.total} categories maxed</b></div><div class="meter"><i style="width:${(progress.maxed / progress.total) * 100}%"></i></div></div>`
           : `<div class="stage-progress"><div class="stage-progress__label"><span>Build type</span><b>${escapeHtml(buildName(stage))}</b></div></div>`}
@@ -129,10 +146,17 @@ function carRow(player, car, catalog, tutorialStep) {
           <button class="button button--small" data-rename-car="${escapeHtml(car.carId)}">RENAME</button>
           <button class="button button--small ${inventoryHighlight ? "button--primary tutorial-target" : ""}" data-inventory-car="${escapeHtml(car.carId)}">INVENTORY • ${inventoryCount}</button>
           ${tuneUnlocked ? `<button class="button button--small tuning-button ${car.tune ? "tuning-button--saved" : ""}" data-tune-car="${escapeHtml(car.carId)}">TUNING${car.tune ? " • SAVED" : ""}</button>` : ""}
+          ${engineFailed ? `<button class="button button--primary button--small engine-rebuild-button" data-repair-engine="${escapeHtml(car.carId)}">REBUILD ENGINE • ${number(repairCost)} CR</button>` : ""}
           ${progress?.ready ? `<button class="button button--primary button--small" data-stage-up="${escapeHtml(car.carId)}">UPGRADE TO STREET RACE CAR</button>` : ""}
         </div>
       </div>
     </article>`;
+}
+
+function engineRepairCost(car) {
+  const capacity = Math.max(200, Number(car?.powerEnvelope?.capacityHp || car?.engine?.powerLimits?.kit4Hp || car?.derived?.hp || 200));
+  const stage = Math.max(1, Number(car?.buildStage || 1));
+  return Math.max(5000, Math.round(((capacity * 12) + (stage * 1500)) / 100) * 100);
 }
 
 function tuningUnlockedForCar(player, car) {
