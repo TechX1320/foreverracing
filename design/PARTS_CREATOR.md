@@ -306,3 +306,20 @@ The first usable Parts Creator should include:
 The part catalog should be content data, not hardcoded balance logic.
 
 If adding a turbo, ECU, special wheel, old discontinued part or event-only nitrous kit requires changing gameplay code, Parts Creator has not gone far enough.
+
+
+## Forced induction gameplay baseline
+
+V0.5D establishes the first gameplay model that Parts Creator will eventually author instead of hardcoding.
+
+- Forced Induction is optional for build progression and unlocks at Street Race Car.
+- Factory turbo/supercharged engines count as already having their matching base kit installed.
+- Stage 2 supports a primary Turbo or Supercharger kit, three kit-upgrade levels, and a 50-shot NOS kit.
+- Stage 2/3 primary-kit swaps uninstall the old system's installed forced-induction parts while keeping those parts owned.
+- Stage 3 unlocks turbo intercooler/turbo/BOV/piping, supercharger head-unit/pulley, and 75/100/150-shot NOS.
+- Stage 4 permits a second opposite forced-induction system for twin charging and expands NOS through 300 shot.
+- NOS is independent of the turbo/supercharger choice.
+- Generic V0.5D gains are only starter balance. Parts Creator should eventually replace them with engine-specific or engine-family-specific parts and tradeoffs.
+- Factory boost PSI remains reference metadata; parts modify the car through authored effects rather than a universal PSI-to-horsepower formula.
+
+The long-term tuning system can later expose boost control, fueling, redline/shift-point controls and tire pressure after the relevant hardware/software part is purchased.
