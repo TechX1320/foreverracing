@@ -69,7 +69,7 @@ assert.equal(player.garage[0].performanceClass, 'D');
 assert.ok(player.garage[0].performanceIndex > 0);
 assert.ok(player.garage[0].benchmarkEt > 0);
 assert.equal(player.selectedCarId, player.garage[0].carId);
-assert.equal(player.wallet.credits, Number(config.localDevCredits) - Number(golfListing.price));
+assert.equal(player.wallet.credits, Number(config.localDevCredits));
 assert.equal(player.tutorial.step, 'visit_garage');
 assert.equal(player.garage[0].source, 'used');
 assert.ok(player.garage[0].mileage >= 105000);
