@@ -153,6 +153,7 @@ function openCategory(ctx, carId, key) {
   const car = player?.garage?.find((entry) => String(entry.carId) === String(carId));
   if (!car) return;
   const tutorialStep = player?.tutorial?.status === "active" ? player.tutorial.step : null;
+
   if (key === "forced_induction") {
     openForcedInduction(ctx, carId);
     return;
@@ -162,10 +163,25 @@ function openCategory(ctx, carId, key) {
     ctx.toast("Tutorial step", "Buy the Stage 1 Intake first.");
     return;
   }
+
   const specs = categorySpecs(car, key);
   if (!specs.length) return;
+  const dialog = showDialog('<div class="dialog-body parts-shop-dialog"></div>');
+  renderStandardCategoryDialog(ctx, dialog, carId, key);
+}
 
-  const dialog = showDialog(`
+function renderStandardCategoryDialog(ctx, dialog, carId, key) {
+  const player = ctx.store.player;
+  const car = player?.garage?.find((entry) => String(entry.carId) === String(carId));
+  if (!car || !dialog) return;
+  const tutorialStep = player?.tutorial?.status === "active" ? player.tutorial.step : null;
+  const specs = categorySpecs(car, key);
+  if (!specs.length) {
+    closeDialog(dialog);
+    return;
+  }
+
+  dialog.innerHTML = `
     <div class="dialog-body parts-shop-dialog">
       <div class="parts-shop-dialog__titlebar">
         <div>
@@ -183,11 +199,13 @@ function openCategory(ctx, carId, key) {
       <div class="parts-shop-list">
         ${Number(car.buildStage || 1) === 1
           ? streetCategoryRows(player, car, specs, tutorialStep)
-          : choiceCategoryRows(player, car, specs)}
+          : key === "engine_kit"
+            ? engineKitRows(player, car, specs)
+            : choiceCategoryRows(player, car, specs)}
       </div>
-      <div class="parts-shop-dialog__note">BUY + INSTALL applies the part immediately. BUY ONLY keeps it in Garage Inventory for later.</div>
+      <div class="parts-shop-dialog__note">BUY + INSTALL applies the part immediately. BUY ONLY keeps it in Garage Inventory for later.${Number(car.buildStage || 1) >= 2 ? " Earlier Build Type parts stay available after you advance." : ""}</div>
       <div class="dialog-actions"><button class="button button--small" type="button" data-close>CLOSE</button><button class="button button--primary button--small" type="button" data-inventory>GARAGE INVENTORY</button></div>
-    </div>`);
+    </div>`;
 
   dialog.querySelector("[data-close]")?.addEventListener("click", () => closeDialog(dialog));
   dialog.querySelector("[data-inventory]")?.addEventListener("click", () => {
@@ -195,11 +213,12 @@ function openCategory(ctx, carId, key) {
     sessionStorage.setItem("foreverRacing.openInventory", String(car.carId));
     ctx.router.navigate("garage");
   });
+
   dialog.querySelectorAll("[data-buy-part],[data-buy-install-part]").forEach((button) => {
     button.addEventListener("click", async () => {
       const installNow = Boolean(button.dataset.buyInstallPart);
       const catalogId = button.dataset.buyInstallPart || button.dataset.buyPart;
-      await purchasePart(ctx, dialog, car, catalogId, installNow, button);
+      await purchasePart(ctx, dialog, car, catalogId, installNow, button, key);
     });
   });
 
@@ -209,13 +228,15 @@ function openCategory(ctx, carId, key) {
       try {
         const data = await ctx.storage.installPart(button.dataset.installShopPart, car.carId);
         ctx.store.setPlayer(data.player);
-        closeDialog(dialog);
         ctx.toast("Part installed", "The car's setup and stats were updated.");
         if (data.player?.tutorial?.status === "active" && data.player?.tutorial?.step === "first_race") {
+          closeDialog(dialog);
           ctx.router.navigate("quick-race");
-        } else {
-          await renderParts(ctx);
+          return;
         }
+        await renderParts(ctx);
+        if (Number(car.buildStage || 1) === 1) renderStandardCategoryDialog(ctx, dialog, carId, key);
+        else closeDialog(dialog);
       } catch (err) {
         ctx.toast("Install blocked", err.message);
         button.disabled = false;
@@ -224,7 +245,7 @@ function openCategory(ctx, carId, key) {
   });
 }
 
-async function purchasePart(ctx, dialog, car, catalogId, installNow, button) {
+async function purchasePart(ctx, dialog, car, catalogId, installNow, button, categoryKey = null) {
   button.disabled = true;
   const candidate = catalogCache.find((part) => String(part.catalogId) === String(catalogId));
   if (installNow && candidate && forcedInductionSwapNeeded(car, ctx.store.player?.inventory?.parts || [], candidate, catalogCache)) {
@@ -261,13 +282,18 @@ async function purchasePart(ctx, dialog, car, catalogId, installNow, button) {
 
     const installed = await ctx.storage.installPart(owned.inventoryId, car.carId);
     ctx.store.setPlayer(installed.player);
-    closeDialog(dialog);
     ctx.toast("Purchased + installed", "Upgrade applied immediately.");
 
     if (installed.player?.tutorial?.status === "active" && installed.player?.tutorial?.step === "first_race") {
+      closeDialog(dialog);
       ctx.router.navigate("quick-race");
     } else {
       await renderParts(ctx);
+      if (Number(car.buildStage || 1) === 1 && categoryKey && categoryKey !== "forced_induction") {
+        renderStandardCategoryDialog(ctx, dialog, car.carId, categoryKey);
+      } else {
+        closeDialog(dialog);
+      }
     }
   } catch (err) {
     if (purchased?.player) {
