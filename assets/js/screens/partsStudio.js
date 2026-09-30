@@ -194,8 +194,12 @@ export async function renderPartsStudio(ctx) {
     host.querySelectorAll("[data-effect-value],[data-effect-op]").forEach((input) => {
       input.addEventListener("change", () => {
         const stat = String(input.dataset.effectStat || "");
-        const row = draft.effects?.find((effect) => effect.stat === stat);
-        if (!row) return;
+        draft.effects ||= [];
+        let row = draft.effects.find((effect) => effect.stat === stat);
+        if (!row) {
+          row = { stat, op: "add", value: 0 };
+          draft.effects.push(row);
+        }
         if (input.dataset.effectValue != null) row.value = Number(input.value || 0);
         if (input.dataset.effectOp != null) row.op = String(input.value || "add");
         render();
@@ -240,7 +244,7 @@ export async function renderPartsStudio(ctx) {
       draft = structuredClone(part);
       loadedId = part.catalogId;
       ctx.toast(enabled ? "Part activated locally" : "Part draft saved", enabled
-        ? "Reload the Parts screen to test this definition in the browser-local catalog."
+        ? "Reload the page to test this definition in the browser-local Parts catalog."
         : "The part remains Content Studio-only until activated.");
       render();
     } catch (error) {
