@@ -636,7 +636,7 @@ function openForcedInductionSystem(ctx, carId, system, requestedPage = 0) {
   const previewStats = previewPart ? projectStats(player, car, previewPart) : car.derived;
 
   const factoryRow = system !== "nitrous" && state.factorySystem === system && state.primarySource === "factory"
-    ? `<article class="parts-shop-row is-complete">
+    ? `<article class="parts-shop-row forced-induction-factory-row is-complete">
         <div class="parts-shop-row__title"><span>FACTORY BASELINE</span><strong>Factory ${escapeHtml(systemLabel(system))} System</strong><small>Installed from the factory${car.engine?.peakBoostPsi != null ? ` • ${escapeHtml(car.engine.peakBoostPsi)} PSI peak boost` : ""}.</small></div>
         <div class="parts-shop-row__delta"><span>BASE <b>${number(car.stageBaseline?.hp || car.base?.hp)} hp</b></span><span>UPGRADE <b>${state.factoryUpgradeStep}/3</b></span></div>
         <div class="parts-shop-row__action"><span class="status-text status-text--good">INSTALLED</span></div>
