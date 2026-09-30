@@ -1,5 +1,21 @@
 # Changelog
 
+## V0.5.0-h — Engine Swap Shop
+
+- Added **ENGINE SWAP SHOP** as its own Main Menu destination, separate from Parts.
+- Engine swaps unlock at Front-Half Race Car / Build Type 3; deliberately extreme chassis combinations can require Full Race Car / Build Type 4.
+- The first swap roster contains only fully-authored Engine Creator engines: Mk6 GTI EA888, Mazda Renesis and Renault Clio V6. Legacy fitment-only engine IDs stay hidden until their HP/TQ curves are authored.
+- Added explicit chassis-by-engine fitment, labor cost and fitment severity instead of allowing every engine to fit every car automatically.
+- Engines have purchase prices; subsequent owned-engine swaps charge labor only.
+- Swapped-out engines remain in Engine Inventory and preserve their mechanical condition, including failed engines.
+- Engine-bound Intake, Exhaust, Fuel, ECU, Drivetrain, Forced Induction, Engine Kit and Engine parts are returned to normal Inventory on a swap; suspension, tires and weight-reduction hardware can remain installed.
+- Parts compatibility now follows the **currently installed engine**, so opening Parts after a swap immediately rebuilds the available catalog around that engine.
+- Engine swaps reset the old ECU calibration and recalculate HP/TQ, engine envelope, PI and benchmark ET from the replacement engine.
+- Added current-vs-swap dyno preview and before/after PI preview before confirming a swap.
+- Engine Creator can now author Swap Shop visibility and engine purchase price.
+- Final-drive/gearing changes are intentionally outside this release.
+
+
 ## V0.5.0-g.2 — Tuning polish + real mechanical risk
 
 - Replaced the misleading Safe Baseline button with **BASE MAP**, which calculates a deliberately conservative all-green calibration for the specific owned car.
