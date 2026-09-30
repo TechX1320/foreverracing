@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { LocalGameService } from '../assets/js/domain/LocalGameService.js';
 import { benchmarkPerformance, performanceClassFromIndex } from '../assets/js/domain/PerformanceIndex.js';
 import { applyPartEffects, partCompatibility, partStoreAvailable } from '../assets/js/domain/PartCatalog.js';
+import { defaultTuneProfile, evaluateTune, tuningFingerprint, tuningHardwareProfile } from '../assets/js/domain/Tuning.js';
 
 const [cars, parts, config, buildStageConfig, racingConfig] = await Promise.all([
   fs.readFile(new URL('../data/catalog/cars.json', import.meta.url), 'utf8').then(JSON.parse),
@@ -79,6 +80,68 @@ const rx8LowEightBenchmark = benchmarkPerformance(rx8LowEightStats, racingConfig
 assert.ok(rx8LowEightBenchmark.quarterMileEt >= 7.75 && rx8LowEightBenchmark.quarterMileEt <= 8.45,
   `V0.5F RX-8 deep Stage 4 build should land in the low-8-second neighborhood; got ${rx8LowEightBenchmark.quarterMileEt}s.`);
 assert.ok(rx8LowEightStats.hp >= 950 && rx8LowEightStats.weight <= 2600);
+
+
+const tuningCar = {
+  ...structuredClone(deepRx8),
+  carId: 'tuning-rx8-a',
+  buildStage: 4,
+  stageBaseline: rx8StageBaseline,
+  derived: { ...rx8LowEightStats },
+  untunedDerived: { ...rx8LowEightStats },
+};
+const tuningSpecs = lowEightBuildIds.map((id) => parts.find((part) => part.catalogId === id)).filter(Boolean);
+const tuningHardware = tuningHardwareProfile(tuningCar, tuningSpecs);
+assert.equal(tuningHardware.unlocked, true);
+assert.equal(tuningHardware.boosted, true);
+assert.ok(tuningHardware.maxBoostPsi > tuningHardware.baseBoostPsi);
+
+const safeTune = defaultTuneProfile(tuningCar, tuningHardware);
+const safeEval = evaluateTune(tuningCar, rx8LowEightStats, safeTune, tuningHardware);
+assert.ok(safeEval.derived.hp > 0);
+assert.equal(safeEval.race.active, true);
+assert.ok(safeEval.diagnostics.stabilityPct >= 60);
+
+const boostTune = {
+  ...safeTune,
+  boostPsi: Math.min(tuningHardware.safeBoostPsi + 1, tuningHardware.maxBoostPsi),
+  fuelTrimPct: 4,
+  ignitionAdvanceDeg: 0,
+  boostByGear: [100,100,100,100,100,100],
+};
+const boostEval = evaluateTune(tuningCar, rx8LowEightStats, boostTune, tuningHardware);
+assert.notEqual(boostEval.derived.hp, safeEval.derived.hp);
+
+const tractionTune = { ...boostTune, boostByGear: [55,70,90,100,100,100] };
+const tractionEval = evaluateTune(tuningCar, rx8LowEightStats, tractionTune, tuningHardware);
+const fullBoostBenchmark = benchmarkPerformance({ ...boostEval.derived, tuning: boostEval.race }, racingConfig);
+const tractionBenchmark = benchmarkPerformance({ ...tractionEval.derived, tuning: tractionEval.race }, racingConfig);
+assert.notEqual(fullBoostBenchmark.quarterMileEt, tractionBenchmark.quarterMileEt,
+  'Boost-by-gear must materially affect simulated ET.');
+
+const tuningCarB = { ...structuredClone(tuningCar), carId: 'tuning-rx8-b' };
+assert.notDeepEqual(tuningFingerprint(tuningCar), tuningFingerprint(tuningCarB),
+  'Owned cars need unique calibration fingerprints.');
+const otherEval = evaluateTune(tuningCarB, rx8LowEightStats, boostTune, tuningHardwareProfile(tuningCarB, tuningSpecs));
+assert.ok(otherEval.derived.hp !== boostEval.derived.hp || otherEval.diagnostics.riskPct !== boostEval.diagnostics.riskPct,
+  'The same shared tune should not evaluate identically on every owned car.');
+
+let tuningPlayer = game.defaultPlayer();
+tuningPlayer.tutorial = { ...tuningPlayer.tutorial, status: 'complete', step: 'complete' };
+tuningPlayer.garage = [structuredClone(tuningCar)];
+tuningPlayer.selectedCarId = tuningCar.carId;
+tuningPlayer.inventory.parts = tuningSpecs.map((part, index) => ({
+  inventoryId: `tune-part-${index}`,
+  catalogId: part.catalogId,
+  purchasedForCarId: tuningCar.carId,
+  installedOnCarId: tuningCar.carId,
+  purchasedAt: 1,
+}));
+tuningPlayer.garage[0] = game.recalculateCar(tuningPlayer.garage[0], tuningPlayer.inventory.parts);
+tuningPlayer = game.saveTune(tuningPlayer, tuningCar.carId, tractionTune);
+assert.ok(tuningPlayer.garage[0].tune);
+assert.equal(tuningPlayer.garage[0].tuningRuntime?.active, true);
+assert.ok(tuningPlayer.garage[0].tuningDiagnostics?.stabilityPct > 0);
 
 assert.equal(buildStageConfig.stages[0].name, 'Street Car');
 assert.equal(buildStageConfig.stages[1].name, 'Street Race Car');
