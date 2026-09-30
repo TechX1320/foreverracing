@@ -64,6 +64,8 @@ const required = [
   'assets/js/ui/vehicleRenderer.js',
   'assets/js/ui/partDyno.js',
   'assets/js/ui/racePresentation.js',
+  'assets/js/ui/classChangeWarning.js',
+  'assets/js/ui/classChangeWarning.js',
   'assets/js/content/ContentStudioCatalog.js',
   'assets/js/content/ContentStudioEngineCatalog.js',
   'assets/js/content/ContentStudioPartCatalog.js',
@@ -944,6 +946,23 @@ if (!partProjectionV06a3.includes('projectPartChange') ||
   throw new Error('V0.6A.3 class recovery / uninstall / inventory scrolling workflow is incomplete.');
 }
 console.log('V0.6A.3 parts recovery UI + projection checks passed.');
+
+const classWarningV06a4 = await fs.readFile(new URL('assets/js/ui/classChangeWarning.js', root), 'utf8');
+const performanceIndexV06a4 = await fs.readFile(new URL('assets/js/domain/PerformanceIndex.js', root), 'utf8');
+if (!classWarningV06a4.includes('CLASS CHANGE WARNING') ||
+    !classWarningV06a4.includes('INSTALL ANYWAY') ||
+    !classWarningV06a4.includes('confirmClassUpgrade') ||
+    !performanceIndexV06a4.includes('PERFORMANCE_CLASS_THRESHOLDS') ||
+    !performanceIndexV06a4.includes('performanceClassThreshold') ||
+    !partsSourceV04b.includes('confirmClassUpgrade') ||
+    !partsSourceV04b.includes('classChangeWarningLabel') ||
+    !garageSource.includes('confirmClassUpgrade') ||
+    !garageSource.includes('classChangeWarningLabel') ||
+    !cssV04b.includes('V0.6A.4 Performance Class boundary warnings')) {
+  throw new Error('V0.6A.4 class-boundary warning workflow is incomplete.');
+}
+console.log('V0.6A.4 class-boundary warning checks passed.');
+
 
 
 
