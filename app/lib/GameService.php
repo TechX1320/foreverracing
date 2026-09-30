@@ -553,6 +553,7 @@ final class GameService
             $playerRun = $simulator->simulate([
                 'hp' => $hp, 'torque' => $torque, 'weight' => $weight, 'grip' => $grip, 'drivetrain' => $drivetrain, 'level' => $level,
                 'allowFoul' => !$tutorialRace,
+                'tuning' => is_array($car['tuningRuntime'] ?? null) ? $car['tuningRuntime'] : null,
             ], $distance, $weather);
             $opponentRun = $simulator->simulate([
                 'hp' => $opponentHp, 'torque' => $opponentTorque, 'weight' => $opponentWeight, 'grip' => $opponentGrip, 'drivetrain' => (string)($opponentProfile['drivetrain'] ?? '-'), 'level' => $opponentLevel,
