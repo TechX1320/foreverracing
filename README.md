@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.6.0-a.4 playable direction
+## V0.6.0-a.5 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,17 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is now a catalog of self-contained PvE mini-roguelite events. Required Circuits drive class progression; optional Circuits can use their own race counts, restrictions, distances, targets and rewards. Opponents are authored builds that use the real race simulator rather than scaling directly from the player's PI.
+
+### V0.6A.5 modal sizing audit
+
+- Re-audited the shared dialog shell after the readability pass so complex workspaces are not forced back into generic modal widths.
+- Forced Induction parts + dyno now gets up to **1400 px** on desktop; the dyno stays beside the parts list only when both columns have enough room.
+- Fixed the Factory Forced-Induction baseline row using the four-column part grid despite not having a DYNO button, which was squeezing its title into the narrow selector column.
+- Standard Parts, Garage Inventory, Tuning, Engine Swap, Classified detail and Car Art debug dialogs now have explicit content-appropriate desktop widths.
+- Garage Inventory keeps its dedicated internal scrolling; other large workspaces can scroll at the dialog shell when viewport height is limited.
+- Race playback gets additional desktop breathing room.
+- Simple confirmation/forms remain compact instead of making every dialog unnecessarily huge.
+- Mobile/tablet still collapse to near-full-viewport dialogs and stacked layouts.
 
 ### V0.6A.4 Performance Class boundary warnings
 

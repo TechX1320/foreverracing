@@ -93,7 +93,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.6.0-a.4"')) throw new Error('Static index is missing the V0.6A.4 build marker.');
+if (!html.includes('data-build="0.6.0-a.5"')) throw new Error('Static index is missing the V0.6A.5 build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -962,6 +962,25 @@ if (!classWarningV06a4.includes('CLASS CHANGE WARNING') ||
   throw new Error('V0.6A.4 class-boundary warning workflow is incomplete.');
 }
 console.log('V0.6A.4 class-boundary warning checks passed.');
+
+const modalAuditV06a5 = cssV04b.indexOf('V0.6A.5 modal sizing audit');
+if (modalAuditV06a5 < 0 ||
+    modalAuditV06a5 < cssV04b.indexOf('V0.6A.4 Performance Class boundary warnings') ||
+    !cssV04b.includes('dialog.fr-dialog:has(.forced-induction-parts-dialog)') ||
+    !cssV04b.includes('width:min(1400px,calc(100vw - 24px))') ||
+    !cssV04b.includes('.forced-induction-parts-list .forced-induction-factory-row') ||
+    !cssV04b.includes('grid-template-columns:minmax(280px,1.25fr) minmax(260px,.9fr) 160px') ||
+    !cssV04b.includes('dialog.fr-dialog:has(.tuning-dialog)') ||
+    !cssV04b.includes('width:min(1280px,calc(100vw - 24px))') ||
+    !cssV04b.includes('dialog.fr-dialog:has(.engine-swap-dialog)') ||
+    !cssV04b.includes('width:min(1180px,calc(100vw - 24px))') ||
+    !cssV04b.includes('dialog.fr-dialog:has(.garage-inventory-dialog)') ||
+    !cssV04b.includes('width:min(1080px,calc(100vw - 24px))') ||
+    !partsSourceV04b.includes('forced-induction-factory-row')) {
+  throw new Error('V0.6A.5 modal sizing audit / forced-induction workspace protection is incomplete.');
+}
+console.log('V0.6A.5 modal sizing audit checks passed.');
+
 
 
 
