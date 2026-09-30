@@ -1,5 +1,15 @@
 # Changelog
 
+## V0.6.0-a.5 — Modal sizing audit
+
+- Audited modal sizing after the global readability pass.
+- Expanded the Forced Induction + dyno workspace to use available desktop width and added a safer breakpoint before the two-column layout becomes cramped.
+- Fixed the Factory forced-induction baseline row so it no longer occupies the narrow DYNO-selector column.
+- Assigned explicit desktop widths to Parts, Garage Inventory, Tuning, Engine Swap, Classified detail and Car Art debug dialogs.
+- Preserved Garage Inventory's internal scrolling while allowing other large dialog shells to scroll naturally when needed.
+- Increased side-view race playback width on desktop.
+- Kept simple confirmation and form dialogs compact.
+
 ## V0.6.0-a.4 — Performance Class boundary warnings
 
 - Added shared Performance Class threshold/rank helpers.
