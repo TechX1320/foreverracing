@@ -1,5 +1,18 @@
 # Changelog
 
+## V0.5.0-g.2 — Tuning polish + real mechanical risk
+
+- Replaced the misleading Safe Baseline button with **BASE MAP**, which calculates a deliberately conservative all-green calibration for the specific owned car.
+- BASE MAP gives up peak power on purpose, keeps fuel/timing/chassis states in safe windows, and does not reveal the hidden optimum.
+- Engine HEADROOM / NEAR LIMIT / ENGINE-LIMITED state now depends only on requested engine output versus the engine envelope; tire PSI can no longer flip the engine-limit indicator.
+- Added live **before / after dyno** visualization to the tuning laptop and removed the old explanatory notes / simulator boxes.
+- Added engine-load percentage and per-pass catastrophic failure chance to the tuning monitor.
+- Calibration Risk now feeds real mechanical consequences. High-risk tunes can suffer a catastrophic engine failure during a pass.
+- Catastrophic failures produce a DNF, zero race rewards, no record ET/trap, persist as an ENGINE FAILED garage state, and block further racing.
+- Failed engines can be rebuilt from Garage for a power/stage-scaled credit cost.
+- Added local/browser and PHP server parity plus regression tests for Base Map safety, tire-PSI isolation, failure rolls and rebuild recovery.
+
+
 ## V0.5.0-g.1 — Engine-specific power model
 
 - Replaced runaway percentage stacking with an engine-aware power-envelope model.
