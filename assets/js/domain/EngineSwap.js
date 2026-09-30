@@ -43,7 +43,7 @@ export function engineSwapFitment(car, engine) {
   if (!authored && !factory) {
     return {
       allowed: false,
-      minBuildStage: Math.max(3, Number(source.minBuildStage || 3)),
+      minBuildStage: Math.max(2, Number(source.minBuildStage || 2)),
       fitment: "NO FITMENT",
       installCost: 0,
       note: "No chassis fitment has been authored for this engine.",
@@ -53,7 +53,7 @@ export function engineSwapFitment(car, engine) {
   const fitment = authored && typeof authored === "object" ? authored : {};
   return {
     allowed: fitment.allowed !== false,
-    minBuildStage: Math.max(3, Number(fitment.minBuildStage || source.minBuildStage || 3)),
+    minBuildStage: Math.max(2, Number(fitment.minBuildStage || source.minBuildStage || 2)),
     fitment: String(fitment.fitment || (factory ? "FACTORY" : "CUSTOM")).toUpperCase(),
     installCost: Math.max(0, Math.round(Number(fitment.installCost ?? (factory ? 2500 : 7500)))),
     note: String(fitment.note || (factory
@@ -66,7 +66,10 @@ export function engineSwapQuote(car, engine, ownedEngines = []) {
   const row = normalizeEngineDefinition(engine);
   const fitment = engineSwapFitment(car, row);
   const owned = (Array.isArray(ownedEngines) ? ownedEngines : [])
-    .find((item) => String(item?.engineId || "") === row.engineId) || null;
+    .find((item) =>
+      String(item?.engineId || "") === row.engineId
+      && !item?.installedOnCarId
+    ) || null;
   const current = String(car?.engineId || car?.factoryEngineId || "") === row.engineId;
   const enginePrice = current || owned ? 0 : engineSwapPrice(row);
   return {
@@ -124,4 +127,32 @@ export function normalizedStoredEngineCondition(source = {}) {
     lastFailureAt: source?.lastFailureAt || null,
     repairedAt: source?.repairedAt || null,
   };
+}
+
+
+export function normalizeEngineAssembly(item = {}) {
+  return {
+    inventoryId: String(item?.inventoryId || ""),
+    engineId: String(item?.engineId || ""),
+    installedOnCarId: item?.installedOnCarId ? String(item.installedOnCarId) : null,
+    acquiredAt: Number(item?.acquiredAt || 0),
+    source: String(item?.source || "owned"),
+    condition: normalizedStoredEngineCondition(item?.condition || {}),
+    attachedPartInventoryIds: [...new Set((Array.isArray(item?.attachedPartInventoryIds) ? item.attachedPartInventoryIds : [])
+      .map((id) => String(id || "").trim())
+      .filter(Boolean))],
+    tune: item?.tune && typeof item.tune === "object" ? structuredClone(item.tune) : null,
+    storedStats: item?.storedStats && typeof item.storedStats === "object"
+      ? {
+          hp: Math.max(1, Math.round(Number(item.storedStats.hp || 1))),
+          torque: Math.max(1, Math.round(Number(item.storedStats.torque || 1))),
+        }
+      : null,
+  };
+}
+
+export function assemblyLabel(engine, assembly) {
+  const partCount = Number(assembly?.attachedPartInventoryIds?.length || 0);
+  const hp = Number(assembly?.storedStats?.hp || 0);
+  return `${String(engine?.name || assembly?.engineId || "Engine")}${hp ? ` • ${hp} HP` : ""}${partCount ? ` • ${partCount} parts` : ""}`;
 }
