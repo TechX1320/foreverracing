@@ -990,7 +990,6 @@ final class GameService
             $car['derived'] = $untuned;
             $car['tuningRuntime'] = null;
             $car['tuningDiagnostics'] = null;
-            if (empty($hardware['unlocked'])) $car['tune'] = null;
         }
 
         $benchmark = PerformanceIndex::forCar($car, self::racingConfig());
