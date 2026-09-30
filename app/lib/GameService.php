@@ -179,6 +179,9 @@ final class GameService
         if (!$spec) {
             throw new GameException('That part does not exist.', 404);
         }
+        if (!self::partStoreAvailable($spec)) {
+            throw new GameException('That part is not currently available for purchase.', 404);
+        }
 
         return self::mutatePlayer(function (array $player) use ($spec, $catalog): array {
             $car = self::selectedCar($player);
@@ -1098,8 +1101,96 @@ final class GameService
         return !empty($state['primarySystem']) && $system && $state['primarySystem'] !== $system;
     }
 
+    private static function partStoreAvailable(array $spec): bool
+    {
+        $lifecycle = is_array($spec['lifecycle'] ?? null) ? $spec['lifecycle'] : [];
+        $status = strtolower(trim((string)($lifecycle['status'] ?? 'active')));
+        if ($status === 'draft' || $status === 'deprecated' || $status === 'retired') return false;
+        if ($status === 'scheduled') {
+            $available = trim((string)($lifecycle['availableFrom'] ?? ''));
+            if ($available === '') return false;
+            $timestamp = strtotime($available);
+            return $timestamp !== false && $timestamp <= time();
+        }
+        return true;
+    }
+
+    private static function partCompatibilityReason(array $spec, array $car): ?string
+    {
+        $compat = is_array($spec['compatibility'] ?? null) ? $spec['compatibility'] : [];
+        $engineId = (string)($car['engineId'] ?? $car['factoryEngineId'] ?? '');
+        $carId = (string)($car['catalogId'] ?? '');
+        $stage = (int)($car['buildStage'] ?? 1);
+        $aspiration = strtolower(trim((string)($car['engine']['aspiration'] ?? '')));
+        $configuration = strtolower(trim((string)($car['engine']['configuration'] ?? '')));
+        $engineTags = array_map(fn($value): string => strtolower(trim((string)$value)), is_array($car['engine']['tags'] ?? null) ? $car['engine']['tags'] : []);
+
+        $engineIds = array_map('strval', is_array($compat['engineIds'] ?? null) ? $compat['engineIds'] : []);
+        $carIds = array_map('strval', is_array($compat['carCatalogIds'] ?? null) ? $compat['carCatalogIds'] : []);
+        $excludedCars = array_map('strval', is_array($compat['excludeCarCatalogIds'] ?? null) ? $compat['excludeCarCatalogIds'] : []);
+        $stages = array_map('intval', is_array($compat['buildStages'] ?? null) ? $compat['buildStages'] : []);
+        $aspirations = array_map(fn($value): string => strtolower(trim((string)$value)), is_array($compat['aspiration'] ?? null) ? $compat['aspiration'] : []);
+        $configurations = array_map(fn($value): string => strtolower(trim((string)$value)), is_array($compat['engineConfigurations'] ?? null) ? $compat['engineConfigurations'] : []);
+
+        if (in_array($carId, $excludedCars, true)) return 'This part is explicitly blocked for this car.';
+        if ($carIds && !in_array($carId, $carIds, true)) return 'This part is not authored for this car.';
+        if ($engineIds && !in_array($engineId, $engineIds, true)) return 'This part is not compatible with the installed engine.';
+        if ($stages && !in_array($stage, $stages, true)) return 'This part is not compatible with the current Build Type.';
+        if ($aspirations && !in_array($aspiration, $aspirations, true)) return 'This part does not match the engine aspiration.';
+        if ($configurations && !in_array($configuration, $configurations, true)) return 'This part does not match the engine configuration.';
+
+        foreach ((is_array($compat['tagsRequired'] ?? null) ? $compat['tagsRequired'] : []) as $tag) {
+            if (!in_array(strtolower(trim((string)$tag)), $engineTags, true)) return 'Engine tag required: ' . (string)$tag . '.';
+        }
+        foreach ((is_array($compat['tagsBlocked'] ?? null) ? $compat['tagsBlocked'] : []) as $tag) {
+            if (in_array(strtolower(trim((string)$tag)), $engineTags, true)) return 'Blocked engine tag: ' . (string)$tag . '.';
+        }
+        return null;
+    }
+
+    private static function partRuleCompatibilityReason(array $spec, array $installedSpecs): ?string
+    {
+        $requires = is_array($spec['requires'] ?? null) ? $spec['requires'] : [];
+        $conflicts = is_array($spec['conflicts'] ?? null) ? $spec['conflicts'] : [];
+        $installedIds = [];
+        $installedTags = [];
+        foreach ($installedSpecs as $installed) {
+            $installedIds[] = (string)($installed['catalogId'] ?? '');
+            foreach ((is_array($installed['tags'] ?? null) ? $installed['tags'] : []) as $tag) {
+                $installedTags[] = strtolower(trim((string)$tag));
+            }
+        }
+
+        $anyPartIds = array_map('strval', is_array($requires['anyPartIds'] ?? null) ? $requires['anyPartIds'] : []);
+        if ($anyPartIds && !array_intersect($anyPartIds, $installedIds)) {
+            return 'Requires one of: ' . implode(', ', $anyPartIds) . '.';
+        }
+        foreach ((is_array($requires['allTags'] ?? null) ? $requires['allTags'] : []) as $tag) {
+            if (!in_array(strtolower(trim((string)$tag)), $installedTags, true)) return 'Requires installed part tag: ' . (string)$tag . '.';
+        }
+        foreach ((is_array($conflicts['partIds'] ?? null) ? $conflicts['partIds'] : []) as $id) {
+            if (in_array((string)$id, $installedIds, true)) return 'Conflicts with installed part: ' . (string)$id . '.';
+        }
+        foreach ((is_array($conflicts['tags'] ?? null) ? $conflicts['tags'] : []) as $tag) {
+            if (in_array(strtolower(trim((string)$tag)), $installedTags, true)) return 'Conflicts with installed part tag: ' . (string)$tag . '.';
+        }
+        return null;
+    }
+
     private static function requirePartCompatible(array $player, array $car, array $spec, array $catalog, bool $purchasing): void
     {
+        $compatibilityReason = self::partCompatibilityReason($spec, $car);
+        if ($compatibilityReason !== null) throw new GameException($compatibilityReason);
+
+        $installedSpecs = [];
+        foreach (($player['inventory']['parts'] ?? []) as $instance) {
+            if ((string)($instance['installedOnCarId'] ?? '') !== (string)($car['carId'] ?? '')) continue;
+            $installed = self::findBy($catalog, 'catalogId', (string)($instance['catalogId'] ?? ''));
+            if ($installed) $installedSpecs[] = $installed;
+        }
+        $ruleReason = self::partRuleCompatibilityReason($spec, $installedSpecs);
+        if ($ruleReason !== null) throw new GameException($ruleReason);
+
         $stage = (int)($car['buildStage'] ?? 1);
         if ($stage === 1) {
             if ((int)($spec['buildStage'] ?? 1) !== 1 || (int)($spec['simpleTier'] ?? 0) <= 0) {
