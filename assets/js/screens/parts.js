@@ -598,6 +598,23 @@ function openForcedInductionSystem(ctx, carId, system) {
   });
 }
 
+function forcedInductionDisplayParts(parts, state) {
+  return [...parts]
+    .sort((a, b) => Number(forcedInductionMeta(a)?.step || 0) - Number(forcedInductionMeta(b)?.step || 0))
+    .filter((part) => {
+      const meta = forcedInductionMeta(part) || {};
+      const role = String(meta.role || "");
+      const step = Number(meta.step || 0);
+      if (role === "factory_upgrade") return step === state.factoryUpgradeStep || step === state.factoryUpgradeStep + 1;
+      if (role === "kit_upgrade") return step === state.primaryStep || step === state.primaryStep + 1;
+      if (role === "nitrous") {
+        if (!state.nitrousShot) return step === 0;
+        return step === state.nitrousStep || step === state.nitrousStep + 1;
+      }
+      return true;
+    });
+}
+
 function forcedInductionPartVisible(part, state, stage) {
   const meta = forcedInductionMeta(part);
   if (!meta) return false;
