@@ -966,6 +966,17 @@ final class GameService
         return $tier;
     }
 
+    private static function installedEngineKitLevel(array $player, string $carId, array $catalog): int
+    {
+        $level = 0;
+        foreach (($player['inventory']['parts'] ?? []) as $instance) {
+            if ((string)($instance['installedOnCarId'] ?? '') !== $carId) continue;
+            $spec = self::findBy($catalog, 'catalogId', (string)($instance['catalogId'] ?? ''));
+            $level = max($level, (int)($spec['engineKit']['level'] ?? 0));
+        }
+        return $level;
+    }
+
     private static function normalizeFiSystem(mixed $value): ?string
     {
         $text = strtolower(trim((string)$value));
@@ -1108,6 +1119,22 @@ final class GameService
         }
         if ((int)($spec['persistentFromStage'] ?? $spec['buildStage'] ?? 2) > $stage) {
             throw new GameException('This part is not available for the current Build Type.');
+        }
+
+        $currentEngineKit = self::installedEngineKitLevel($player, (string)$car['carId'], $catalog);
+        $engineKitLevel = (int)($spec['engineKit']['level'] ?? 0);
+        if ($engineKitLevel > 0) {
+            if ($purchasing && $engineKitLevel !== $currentEngineKit + 1) {
+                throw new GameException('Install Engine Kit ' . ($currentEngineKit + 1) . ' before buying Engine Kit ' . $engineKitLevel . '.');
+            }
+            if (!$purchasing && $engineKitLevel < $currentEngineKit) {
+                throw new GameException('Engine Kits cannot be downgraded.');
+            }
+        }
+
+        $requiredEngineKit = max(0, (int)($spec['requiredEngineKit'] ?? 0));
+        if ($requiredEngineKit > $currentEngineKit) {
+            throw new GameException('Requires Engine Kit ' . $requiredEngineKit . ' before this power adder can be used.');
         }
 
         $reason = self::forcedInductionCompatibility($car, $player['inventory']['parts'] ?? [], $spec, $catalog, $purchasing);
