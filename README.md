@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.6.0-a.2 playable direction
+## V0.6.0-a.3 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,16 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is now a catalog of self-contained PvE mini-roguelite events. Required Circuits drive class progression; optional Circuits can use their own race counts, restrictions, distances, targets and rewards. Opponents are authored builds that use the real race simulator rather than scaling directly from the player's PI.
+
+### V0.6A.3 class recovery + Parts usability
+
+- Parts category dialogs now show current Class and Performance Index beside HP/TQ/weight.
+- Race-build part previews show before/after HP, TQ, weight, Class and PI so class-boundary changes are visible before installation.
+- Installed Stage 2/3/4 parts can be UNINSTALLED directly from the Parts shop, making it possible to strip a higher-class build back into a lower Circuit class.
+- Garage Inventory now has a dedicated scrollable parts area instead of extending below the viewport.
+- Inventory rows show real install/remove HP/TQ/weight/grip/PI changes against the current car setup rather than raw multipliers.
+- Build Type remains chassis-owned: removing performance parts may lower PI/Class but never downgrades Full Race / Front-Half / Street Race construction.
+- Engine Kit prerequisites on large forced-induction hardware remain unchanged for now; risk-based overbuilding is deferred until engine damage/repair gameplay is mature.
 
 ### V0.6A.2 optional Circuit groundwork
 

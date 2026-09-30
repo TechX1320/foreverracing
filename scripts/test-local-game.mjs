@@ -7,6 +7,7 @@ import { applyPartEffects, partCompatibility, partStoreAvailable } from '../asse
 import { applyBuildPartEffect, enginePowerEnvelope, limitEngineOutput, suggestedPowerLimits } from '../assets/js/domain/PowerModel.js';
 import { baseMapProfile, defaultTuneProfile, evaluateTune, tuningFingerprint, tuningHardwareProfile } from '../assets/js/domain/Tuning.js';
 import { CHASSIS_BOUND_CATEGORIES, engineSwapEligible, engineSwapQuote, isEngineBoundPart } from '../assets/js/domain/EngineSwap.js';
+import { projectPartChange } from '../assets/js/domain/PartProjection.js';
 import { CIRCUIT_SCHEMA_VERSION, circuitEntryStatus, circuitVisibleToPlayer, normalizeCircuitDefinition } from '../assets/js/domain/CircuitCatalog.js';
 
 const [cars, parts, engines, circuits, config, buildStageConfig, racingConfig] = await Promise.all([
@@ -749,5 +750,68 @@ assert.throws(() => optionalGame.circuitStart(circuitPlayer, hiddenOptional.circ
 const optionalStarted = optionalGame.circuitStart(optionalPlayer, hiddenOptional.circuitId);
 assert.equal(optionalStarted.circuits.activeRun.circuitId, hiddenOptional.circuitId);
 console.log('V0.6A.2 optional visibility, filters and chassis-stage persistence test passed.');
+
+// V0.6A.3 part recovery + PI/Class projection regression
+const trapPart = {
+  catalogId: 'test_pi_trap_part',
+  name: 'Test PI Trap Part',
+  category: 'ECU',
+  categoryKey: 'ecu',
+  subCategory: 'Calibration',
+  slot: 'test_pi_trap_slot',
+  price: 1,
+  buildStage: 2,
+  persistentFromStage: 2,
+  requiredForStageProgression: false,
+  compatibility: {},
+  lifecycle: { status: 'active' },
+  effects: [
+    { stat: 'hp', op: 'add', value: 180 },
+    { stat: 'torque', op: 'add', value: 150 },
+  ],
+};
+const recoveryParts = [...parts, trapPart];
+const recoveryGame = new LocalGameService({
+  cars, parts: recoveryParts, engines, circuits, config, buildStages: buildStageConfig.stages, racingConfig
+});
+const recoveryCar = recoveryGame.createOwnedCar(deepRx8, 'used', 90000, 80, 5000);
+recoveryCar.buildStage = 4;
+recoveryCar.stageBaseline = { ...recoveryCar.base };
+const trapInventory = {
+  inventoryId: 'trap-part-owned',
+  catalogId: trapPart.catalogId,
+  purchasedForCarId: recoveryCar.carId,
+  installedOnCarId: recoveryCar.carId,
+  installedOnEngineInventoryId: null,
+  purchasedAt: 1,
+};
+const boostedRecoveryCar = recoveryGame.recalculateCar(recoveryCar, [trapInventory]);
+assert.notEqual(boostedRecoveryCar.performanceClass, 'D', 'Strong installed parts should be able to push a starter out of D Class.');
+
+let recoveryPlayer = recoveryGame.defaultPlayer();
+recoveryPlayer.user = { ...recoveryPlayer.user, username: 'RecoveryTester' };
+recoveryPlayer.tutorial = { ...recoveryPlayer.tutorial, status: 'complete', step: 'complete' };
+recoveryPlayer.garage = [boostedRecoveryCar];
+recoveryPlayer.selectedCarId = boostedRecoveryCar.carId;
+recoveryPlayer.inventory.parts = [trapInventory];
+recoveryPlayer = recoveryGame.normalizePlayer(recoveryPlayer);
+
+const removalPreview = projectPartChange({
+  player: recoveryPlayer,
+  car: recoveryPlayer.garage[0],
+  catalog: recoveryParts,
+  racingConfig,
+  candidate: null,
+  removeInventoryId: trapInventory.inventoryId,
+});
+assert.ok(removalPreview.performanceIndex < recoveryPlayer.garage[0].performanceIndex);
+assert.equal(removalPreview.performanceClass, 'D', 'Parts UI should be able to preview a removal back into D Class.');
+
+const recoveredPlayer = recoveryGame.uninstallPart(recoveryPlayer, trapInventory.inventoryId);
+assert.equal(recoveredPlayer.inventory.parts[0].installedOnCarId, null);
+assert.equal(recoveredPlayer.garage[0].buildStage, 4, 'Uninstalling performance parts must not downgrade Build Type.');
+assert.equal(recoveredPlayer.garage[0].performanceClass, 'D', 'A player must be able to strip a race build back into an eligible lower PI class.');
+console.log('V0.6A.3 uninstall recovery + PI/Class projection test passed.');
+
 
 

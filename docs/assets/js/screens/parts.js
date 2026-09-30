@@ -3,7 +3,7 @@ import { renderVehicle } from "../ui/vehicleRenderer.js";
 import { showDialog, closeDialog } from "../ui/modal.js";
 import { renderPartDynoChart } from "../ui/partDyno.js";
 import { partCompatibility, partStoreAvailable } from "../domain/PartCatalog.js";
-import { applyBuildPartEffect, enginePowerEnvelope, limitEngineOutput } from "../domain/PowerModel.js";
+import { projectPartChange } from "../domain/PartProjection.js";
 import {
   forcedInductionCompatibility,
   forcedInductionMeta,
@@ -13,6 +13,7 @@ import {
 } from "../domain/ForcedInduction.js";
 
 let catalogCache = null;
+let racingConfigCache = null;
 const REQUIRED = ["intake", "exhaust", "ecu", "fuel", "drivetrain", "suspension", "tires", "weight"];
 const BUILD_NAMES = {
   1: "Street Car",
@@ -26,6 +27,11 @@ export async function renderParts(ctx) {
   if (!catalogCache) {
     const data = await ctx.storage.partsCatalog();
     catalogCache = data.parts || [];
+  }
+  if (!racingConfigCache) {
+    racingConfigCache = await fetch("data/config/racing.json", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : {})
+      .catch(() => ({}));
   }
 
   const current = selectedCar(player);
@@ -234,6 +240,8 @@ function renderStandardCategoryDialog(ctx, dialog, carId, key, viewState = {}) {
           <span><small>HP</small><b>${number(car.derived?.hp)}</b></span>
           <span><small>TQ</small><b>${number(car.derived?.torque)}</b></span>
           <span><small>WT</small><b>${number(car.derived?.weight)} lb</b></span>
+          <span class="parts-shop-dialog__class"><small>CLASS</small><b>${escapeHtml(car.performanceClass || car.stockClass || "—")}</b></span>
+          <span><small>PI</small><b>${number(car.performanceIndex || 0)}</b></span>
         </div>
       </div>
       ${tutorialStep === "buy_first_upgrade" ? '<div class="ftue-inline-command"><strong>BUY THE STAGE 1 INTAKE</strong><span>This is the only purchase available until you complete your first race.</span></div>' : ""}
@@ -292,6 +300,22 @@ function renderStandardCategoryDialog(ctx, dialog, carId, key, viewState = {}) {
         renderStandardCategoryDialog(ctx, dialog, carId, key, { subCategory: selectedGroup, page });
       } catch (err) {
         ctx.toast("Install blocked", err.message);
+        button.disabled = false;
+      }
+    });
+  });
+
+  dialog.querySelectorAll("[data-uninstall-shop-part]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      try {
+        const data = await ctx.storage.uninstallPart(button.dataset.uninstallShopPart);
+        ctx.store.setPlayer(data.player);
+        ctx.toast("Part uninstalled", "The car's stats, Class and Performance Index were recalculated.");
+        await renderParts(ctx);
+        renderStandardCategoryDialog(ctx, dialog, carId, key, { subCategory: selectedGroup, page });
+      } catch (err) {
+        ctx.toast("Cannot uninstall part", err.message);
         button.disabled = false;
       }
     });
@@ -387,7 +411,7 @@ function streetCategoryRows(player, car, specs, tutorialStep = null) {
       const projected = projectStats(player, car, part);
       const canBuy = next && !owned && Number(player.wallet?.credits || 0) >= Number(part.price || 0);
       let action = '<span class="status-text">LOCKED</span>';
-      if (installed) action = '<span class="status-text status-text--good">INSTALLED</span>';
+      if (installed) action = '<span class="status-text status-text--good">INSTALLED • LOCKED</span>';
       else if (complete) action = '<span class="status-text status-text--good">COMPLETED</span>';
       else if (owned) action = `<button class="button button--primary button--small" data-install-shop-part="${escapeHtml(owned.inventoryId)}">INSTALL</button>`;
       else if (next) action = tutorialStep === "buy_first_upgrade"
@@ -415,12 +439,10 @@ function choiceCategoryRows(player, car, specs) {
     return `<article class="parts-shop-row ${installed ? "is-complete" : ""}">
       <div class="parts-shop-row__title"><strong>${escapeHtml(part.name)}</strong><small>${escapeHtml(part.description || "")}</small></div>
       <div class="parts-shop-row__delta">
-        <span>HP <b>${number(car.derived?.hp)} → ${number(projected.hp)}</b></span>
-        <span>TQ <b>${number(car.derived?.torque)} → ${number(projected.torque)}</b></span>
-        <span>WT <b>${number(car.derived?.weight)} → ${number(projected.weight)}</b></span>
+        ${partProjectionMarkup(car, projected)}
       </div>
       <div class="parts-shop-row__action">${installed
-        ? '<span class="status-text status-text--good">INSTALLED</span>'
+        ? `<button class="button button--small" data-uninstall-shop-part="${escapeHtml(owned.inventoryId)}">UNINSTALL</button>`
         : owned
           ? `<button class="button button--primary button--small" data-install-shop-part="${escapeHtml(owned.inventoryId)}">INSTALL</button>`
           : `<div class="parts-shop-row__buy-actions"><button class="button button--primary button--small" data-buy-install-part="${escapeHtml(part.catalogId)}" ${canBuy ? "" : "disabled"}>BUY + INSTALL • ${money(part.price)} CR</button><button class="button button--small" data-buy-part="${escapeHtml(part.catalogId)}" ${canBuy ? "" : "disabled"}>BUY ONLY</button></div>`
@@ -442,7 +464,7 @@ function engineKitRows(player, car, specs) {
       const canBuy = next && !owned && Number(player.wallet?.credits || 0) >= Number(part.price || 0);
       let action = '<span class="status-text">LOCKED</span>';
 
-      if (installed) action = '<span class="status-text status-text--good">INSTALLED</span>';
+      if (installed) action = `<button class="button button--small" data-uninstall-shop-part="${escapeHtml(owned.inventoryId)}">UNINSTALL</button>`;
       else if (level < currentLevel) action = '<span class="status-text status-text--good">COMPLETED</span>';
       else if (owned && level === currentLevel + 1) action = `<button class="button button--primary button--small" data-install-shop-part="${escapeHtml(owned.inventoryId)}">INSTALL</button>`;
       else if (next) action = `<div class="parts-shop-row__buy-actions"><button class="button button--primary button--small" data-buy-install-part="${escapeHtml(part.catalogId)}" ${canBuy ? "" : "disabled"}>BUY + INSTALL • ${money(part.price)} CR</button><button class="button button--small" data-buy-part="${escapeHtml(part.catalogId)}" ${canBuy ? "" : "disabled"}>BUY ONLY</button></div>`;
@@ -450,8 +472,7 @@ function engineKitRows(player, car, specs) {
       return `<article class="parts-shop-row ${installed || level < currentLevel ? "is-complete" : ""}">
         <div class="parts-shop-row__title"><span>ENGINE KIT ${level}</span><strong>${escapeHtml(part.name)}</strong><small>${escapeHtml(part.description || "")}</small></div>
         <div class="parts-shop-row__delta">
-          <span>HP <b>${number(car.derived?.hp)} → ${number(projected.hp)}</b></span>
-          <span>TQ <b>${number(car.derived?.torque)} → ${number(projected.torque)}</b></span>
+          ${partProjectionMarkup(car, projected)}
           <span>ENGINE CAP <b>${number(projected.capacityHp || 0)} hp</b></span>
         </div>
         <div class="parts-shop-row__action">${action}</div>
@@ -523,6 +544,8 @@ function openForcedInduction(ctx, carId) {
           <span><small>HP</small><b>${number(car.derived?.hp)}</b></span>
           <span><small>TQ</small><b>${number(car.derived?.torque)}</b></span>
           <span><small>WT</small><b>${number(car.derived?.weight)} lb</b></span>
+          <span class="parts-shop-dialog__class"><small>CLASS</small><b>${escapeHtml(car.performanceClass || car.stockClass || "—")}</b></span>
+          <span><small>PI</small><b>${number(car.performanceIndex || 0)}</b></span>
         </div>
       </div>
 
@@ -623,6 +646,8 @@ function openForcedInductionSystem(ctx, carId, system, requestedPage = 0) {
           <span><small>HP</small><b>${number(car.derived?.hp)}</b></span>
           <span><small>TQ</small><b>${number(car.derived?.torque)}</b></span>
           <span><small>WT</small><b>${number(car.derived?.weight)} lb</b></span>
+          <span class="parts-shop-dialog__class"><small>CLASS</small><b>${escapeHtml(car.performanceClass || car.stockClass || "—")}</b></span>
+          <span><small>PI</small><b>${number(car.performanceIndex || 0)}</b></span>
         </div>
       </div>
 
@@ -698,6 +723,23 @@ function openForcedInductionSystem(ctx, carId, system, requestedPage = 0) {
       }
     });
   });
+
+  dialog.querySelectorAll("[data-uninstall-shop-part]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      try {
+        const data = await ctx.storage.uninstallPart(button.dataset.uninstallShopPart);
+        ctx.store.setPlayer(data.player);
+        closeDialog(dialog);
+        ctx.toast("Part uninstalled", "The car's Class and Performance Index were recalculated.");
+        await renderParts(ctx);
+        openForcedInductionSystem(ctx, carId, system, page);
+      } catch (err) {
+        ctx.toast("Cannot uninstall part", err.message);
+        button.disabled = false;
+      }
+    });
+  });
 }
 
 function forcedInductionDisplayParts(parts, state) {
@@ -744,7 +786,7 @@ function forcedInductionPartRow(player, car, part, selectedCatalogId = null) {
 
   let action;
   if (installed) {
-    action = '<span class="status-text status-text--good">INSTALLED</span>';
+    action = `<button class="button button--small" data-uninstall-shop-part="${escapeHtml(owned.inventoryId)}">UNINSTALL</button>`;
   } else if (owned) {
     action = installCompatibility.ok && !engineRequirement
       ? `<button class="button button--primary button--small" data-install-shop-part="${escapeHtml(owned.inventoryId)}">INSTALL</button>`
@@ -767,9 +809,7 @@ function forcedInductionPartRow(player, car, part, selectedCatalogId = null) {
     <button class="parts-shop-row__dyno-select ${String(selectedCatalogId || "") === String(part.catalogId) ? "is-selected" : ""}" type="button" data-fi-dyno-part="${escapeHtml(part.catalogId)}" title="Show before/after dyno preview"><span>DYNO</span></button>
     <div class="parts-shop-row__title"><span>${escapeHtml(kicker)}${Number(part.requiredEngineKit || 0) ? ` • ENGINE KIT ${Number(part.requiredEngineKit)}` : ""}</span><strong>${escapeHtml(part.name)}</strong><small>${escapeHtml(part.description || "")}</small></div>
     <div class="parts-shop-row__delta">
-      <span>HP <b>${number(car.derived?.hp)} → ${number(projected.hp)}</b></span>
-      <span>TQ <b>${number(car.derived?.torque)} → ${number(projected.torque)}</b></span>
-      <span>WT <b>${number(car.derived?.weight)} → ${number(projected.weight)}</b></span>
+      ${partProjectionMarkup(car, projected)}
     </div>
     <div class="parts-shop-row__action">${action}</div>
   </article>`;
@@ -919,51 +959,34 @@ function buildName(stage) {
 }
 
 function projectStats(player, car, candidate) {
-  const seed = Number(car.buildStage || 1) >= 2 && car.stageBaseline ? car.stageBaseline : car.base;
-  const stats = {
-    hp: Number(seed.hp),
-    torque: Number(seed.torque),
-    weight: Number(seed.weight),
-    grip: Number(seed.grip || 1)
-  };
-  const installedSpecs = [];
-
-  const swapState = forcedInductionSwapNeeded(car, player?.inventory?.parts || [], candidate, catalogCache)
-    ? forcedInductionState(car, player?.inventory?.parts || [], catalogCache)
-    : null;
-
-  for (const item of player?.inventory?.parts || []) {
-    if (String(item.installedOnCarId || "") !== String(car.carId)) continue;
-    const spec = catalogCache.find((part) => part.catalogId === item.catalogId);
-    if (!spec || String(spec.slot) === String(candidate.slot)) continue;
-    if (swapState) {
-      const meta = forcedInductionMeta(spec);
-      if (meta && String(meta.role || "") !== "nitrous" && String(meta.system || "") === String(swapState.primarySystem || "")) continue;
-    }
-    installedSpecs.push(spec);
-    for (const effect of spec.effects || []) applyBuildPartEffect(stats, effect, spec);
-  }
-
-  installedSpecs.push(candidate);
-  for (const effect of candidate.effects || []) applyBuildPartEffect(stats, effect, candidate);
-  const envelope = enginePowerEnvelope(car, installedSpecs);
-  const limited = limitEngineOutput(stats, envelope);
-  return {
-    hp: limited.hp,
-    torque: limited.torque,
-    weight: Math.round(stats.weight),
-    grip: Math.round(stats.grip * 1000) / 1000,
-    capacityHp: envelope.capacityHp,
-    powerLimited: Boolean(limited.powerLimit?.hpLimited),
+  const owned = findInventory(player, candidate?.catalogId, car?.carId);
+  const installed = owned && String(owned.installedOnCarId || "") === String(car?.carId || "");
+  return projectPartChange({
+    player,
+    car,
+    catalog: catalogCache,
+    racingConfig: racingConfigCache || {},
+    candidate: installed ? null : candidate,
+    removeInventoryId: installed ? owned.inventoryId : null,
+  }) || {
+    hp: Number(car?.derived?.hp || 0),
+    torque: Number(car?.derived?.torque || 0),
+    weight: Number(car?.derived?.weight || 0),
+    grip: Number(car?.derived?.grip || 0),
+    capacityHp: 0,
+    performanceIndex: Number(car?.performanceIndex || 0),
+    performanceClass: String(car?.performanceClass || car?.stockClass || "—"),
   };
 }
 
-function applyEffects(stats, effects) {
-  for (const effect of effects) {
-    const stat = String(effect.stat || "");
-    if (!(stat in stats)) continue;
-    const value = Number(effect.value || 0);
-    if (effect.op === "mul") stats[stat] *= value;
-    else stats[stat] += value;
-  }
+function partProjectionMarkup(car, projected) {
+  const currentClass = String(car?.performanceClass || car?.stockClass || "—");
+  const nextClass = String(projected?.performanceClass || currentClass);
+  return [
+    `<span>HP <b>${number(car?.derived?.hp)} → ${number(projected?.hp)}</b></span>`,
+    `<span>TQ <b>${number(car?.derived?.torque)} → ${number(projected?.torque)}</b></span>`,
+    `<span>WT <b>${number(car?.derived?.weight)} → ${number(projected?.weight)}</b></span>`,
+    `<span>CLASS <b class="${nextClass !== currentClass ? "warn" : ""}">${escapeHtml(currentClass)} → ${escapeHtml(nextClass)}</b></span>`,
+    `<span>PI <b>${number(car?.performanceIndex || 0)} → ${number(projected?.performanceIndex || 0)}</b></span>`,
+  ].join("");
 }

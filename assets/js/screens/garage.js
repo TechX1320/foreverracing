@@ -3,6 +3,7 @@ import { renderVehicle } from "../ui/vehicleRenderer.js";
 import { showDialog, closeDialog } from "../ui/modal.js";
 import { renderPartDynoChart } from "../ui/partDyno.js";
 import { forcedInductionMeta, forcedInductionState, forcedInductionSwapNeeded, systemLabel } from "../domain/ForcedInduction.js";
+import { projectPartChange, signedDelta } from "../domain/PartProjection.js";
 import {
   baseMapProfile,
   defaultTuneProfile,
@@ -12,6 +13,7 @@ import {
 } from "../domain/Tuning.js";
 
 let partsCache = null;
+let racingConfigCache = null;
 const REQUIRED = ["intake", "exhaust", "ecu", "fuel", "drivetrain", "suspension", "tires", "weight"];
 const BUILD_NAMES = {
   1: "Street Car",
@@ -25,6 +27,11 @@ export async function renderGarage(ctx) {
   if (!partsCache) {
     const data = await ctx.storage.partsCatalog();
     partsCache = data.parts || [];
+  }
+  if (!racingConfigCache) {
+    racingConfigCache = await fetch("data/config/racing.json", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : {})
+      .catch(() => ({}));
   }
   const garage = Array.isArray(player?.garage) ? player.garage : [];
   const tutorialStep = player?.tutorial?.status === "active" ? player.tutorial.step : null;
@@ -376,7 +383,13 @@ function openInventory(ctx, carId) {
           <h2>${escapeHtml(carLabel(car))}</h2>
           <p>${tutorialInstall ? "One action: install your new Stage 1 Intake." : "Owned parts live here. Install, remove and swap them without returning to the shop."}</p>
         </div>
-        <div class="garage-inventory-dialog__car">${renderVehicle(car, { stage: Number(car.buildStage || 1), view: "sideProfile" })}</div>
+        <div class="garage-inventory-dialog__car">
+          ${renderVehicle(car, { stage: Number(car.buildStage || 1), view: "sideProfile" })}
+          <div class="garage-inventory-dialog__performance">
+            <span><small>CLASS</small><b>${escapeHtml(car.performanceClass || car.stockClass || "—")}</b></span>
+            <span><small>PI</small><b>${number(car.performanceIndex || 0)}</b></span>
+          </div>
+        </div>
       </div>
       <div class="garage-inventory-list">
         ${items.length ? items.map(({ item, spec }) => inventoryRow(player, car, item, spec, tutorialInstall)).join("") : '<div class="empty-state"><strong>No parts owned for this car.</strong><span>Open Parts to buy upgrades. They will appear here.</span></div>'}
@@ -453,7 +466,7 @@ function inventoryRow(player, car, item, spec, tutorialInstall = false) {
   if (installed && stage === 1 && simpleTier) {
     action = '<span class="status-text status-text--good">INSTALLED • LOCKED</span>';
   } else if (installed) {
-    action = `<button class="button button--small" data-uninstall-owned="${escapeHtml(item.inventoryId)}">REMOVE</button>`;
+    action = `<button class="button button--small" data-uninstall-owned="${escapeHtml(item.inventoryId)}">UNINSTALL</button>`;
   } else if (completedOldStep) {
     action = '<span class="status-text">COMPLETED STEP</span>';
   } else {
@@ -462,19 +475,42 @@ function inventoryRow(player, car, item, spec, tutorialInstall = false) {
 
   return `<article class="garage-inventory-row ${installed ? "is-installed" : ""} ${tutorialInstall ? "garage-inventory-row--ftue tutorial-target" : ""}">
     <div class="garage-inventory-row__identity"><span class="garage-inventory-row__category">${escapeHtml(spec.category || spec.categoryKey)}</span><strong>${escapeHtml(spec.name)}</strong><small>${escapeHtml(spec.description || "")}</small></div>
-    <div class="garage-inventory-row__effects">${effectsSummary(spec.effects || [])}</div>
+    <div class="garage-inventory-row__effects">${effectsSummary(player, car, item, spec)}</div>
     <div class="garage-inventory-row__action">${tutorialInstall && !installed ? action.replace('button--small', 'ftue-primary-action') : action}</div>
   </article>`;
 }
 
-function effectsSummary(effects) {
-  if (!effects.length) return '<span>No stat change</span>';
-  return effects.map((effect) => {
-    const stat = String(effect.stat || "").toUpperCase();
-    const value = Number(effect.value || 0);
-    if (effect.op === "mul") return `<span>${stat} ×${value.toFixed(3)}</span>`;
-    return `<span>${stat} ${value >= 0 ? "+" : ""}${value}${effect.stat === "weight" ? " lb" : ""}</span>`;
-  }).join("");
+function effectsSummary(player, car, item, spec) {
+  const installed = String(item?.installedOnCarId || "") === String(car?.carId || "");
+  const projected = projectPartChange({
+    player,
+    car,
+    catalog: partsCache,
+    racingConfig: racingConfigCache || {},
+    candidate: installed ? null : spec,
+    removeInventoryId: installed ? item.inventoryId : null,
+  });
+
+  if (!projected) return '<span>No stat change</span>';
+
+  const hpDelta = Number(projected.hp || 0) - Number(car.derived?.hp || 0);
+  const torqueDelta = Number(projected.torque || 0) - Number(car.derived?.torque || 0);
+  const weightDelta = Number(projected.weight || 0) - Number(car.derived?.weight || 0);
+  const gripDelta = Number(projected.grip || 0) - Number(car.derived?.grip || 0);
+  const piDelta = Number(projected.performanceIndex || 0) - Number(car.performanceIndex || 0);
+  const currentClass = String(car.performanceClass || car.stockClass || "—");
+  const nextClass = String(projected.performanceClass || currentClass);
+  const prefix = installed ? "REMOVE" : "INSTALL";
+
+  const rows = [];
+  if (Math.abs(hpDelta) >= 0.5) rows.push(`<span>${prefix} HP <b>${signedDelta(Math.round(hpDelta))}</b></span>`);
+  if (Math.abs(torqueDelta) >= 0.5) rows.push(`<span>TQ <b>${signedDelta(Math.round(torqueDelta))}</b></span>`);
+  if (Math.abs(weightDelta) >= 0.5) rows.push(`<span>WT <b>${signedDelta(Math.round(weightDelta))} lb</b></span>`);
+  if (Math.abs(gripDelta) >= 0.0005) rows.push(`<span>GRIP <b>${signedDelta(gripDelta)}</b></span>`);
+  rows.push(`<span>PI <b>${number(car.performanceIndex || 0)} → ${number(projected.performanceIndex || 0)} (${signedDelta(Math.round(piDelta))})</b></span>`);
+  if (nextClass !== currentClass) rows.push(`<span>CLASS <b class="warn">${escapeHtml(currentClass)} → ${escapeHtml(nextClass)}</b></span>`);
+
+  return rows.length ? rows.join("") : '<span>No effective stat change</span>';
 }
 
 function streetCarProgress(player, car, catalog) {

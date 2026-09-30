@@ -2952,3 +2952,141 @@ dialog.fr-dialog{max-height:calc(100dvh - 24px);overflow:auto}
   .circuit-restriction-chips span{font-size:12px;min-height:28px}
   .engine-swap-dialog__impact{grid-template-columns:1fr}
 }
+
+
+/* V0.6A.3 parts recovery: Class/PI previews + usable inventory scrolling */
+dialog.fr-dialog:has(.parts-shop-dialog){
+  width:min(980px,calc(100vw - 24px));
+}
+.parts-shop-dialog__stats{
+  grid-template-columns:repeat(5,minmax(72px,1fr));
+}
+.parts-shop-dialog__stats .parts-shop-dialog__class b{color:var(--accent-2)}
+.parts-shop-row{
+  grid-template-columns:minmax(230px,1.1fr) minmax(330px,1.2fr) 180px;
+}
+.parts-shop-row__delta{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px 10px;
+}
+.parts-shop-row__delta span{min-width:0}
+.parts-shop-row__delta b.warn,
+.garage-inventory-row__effects b.warn{color:#ffb35f}
+
+.forced-induction-parts-list .parts-shop-row{
+  grid-template-columns:46px minmax(190px,1fr) minmax(310px,1.25fr) 160px;
+}
+
+/* Inventory owns recovery actions. Keep the header/actions fixed and scroll the parts list. */
+dialog.fr-dialog:has(.garage-inventory-dialog){
+  width:min(940px,calc(100vw - 24px));
+  height:min(900px,calc(100dvh - 24px));
+  max-height:calc(100dvh - 24px);
+  overflow:hidden;
+}
+.garage-inventory-dialog{
+  display:flex;
+  flex-direction:column;
+  width:100%;
+  height:100%;
+  max-height:none;
+  overflow:hidden;
+}
+.garage-inventory-dialog__titlebar{
+  flex:0 0 auto;
+  min-height:0;
+}
+.garage-inventory-dialog__car{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  height:auto;
+  min-height:110px;
+}
+.garage-inventory-dialog__performance{
+  display:grid;
+  grid-template-columns:repeat(2,74px);
+  border:1px solid var(--border);
+}
+.garage-inventory-dialog__performance span{
+  padding:6px 8px;
+  text-align:center;
+}
+.garage-inventory-dialog__performance span+span{border-left:1px solid var(--border)}
+.garage-inventory-dialog__performance small{
+  display:block;
+  color:var(--faint);
+  font-size:10px;
+  font-weight:900;
+}
+.garage-inventory-dialog__performance b{
+  display:block;
+  margin-top:2px;
+  color:var(--accent-2);
+  font-size:14px;
+}
+.garage-inventory-list{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  padding-right:6px;
+  scrollbar-gutter:stable;
+}
+.garage-inventory-dialog>.dialog-actions{
+  flex:0 0 auto;
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid var(--border);
+  background:#15181b;
+}
+.garage-inventory-row{
+  grid-template-columns:minmax(250px,1.25fr) minmax(280px,1fr) 150px;
+}
+.garage-inventory-row__effects{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:6px 10px;
+}
+.garage-inventory-row__effects span{
+  display:block;
+  min-width:0;
+  font-size:12px;
+}
+.garage-inventory-row__effects b{
+  display:block;
+  margin-top:1px;
+  color:var(--text);
+  font-size:13px;
+}
+
+@media(max-width:900px){
+  .parts-shop-dialog__stats{grid-template-columns:repeat(5,minmax(58px,1fr));width:100%;margin-top:10px}
+  .parts-shop-row,
+  .forced-induction-parts-list .parts-shop-row,
+  .garage-inventory-row{grid-template-columns:1fr}
+  .parts-shop-row__delta,.garage-inventory-row__effects{
+    border-inline:0;
+    border-block:1px solid var(--border);
+  }
+  .parts-shop-row__action,.garage-inventory-row__action{text-align:left}
+}
+@media(max-width:760px){
+  dialog.fr-dialog:has(.garage-inventory-dialog){
+    width:calc(100vw - 8px);
+    height:calc(100dvh - 8px);
+    max-height:calc(100dvh - 8px);
+    overflow:hidden;
+  }
+  .garage-inventory-dialog{padding:10px}
+  .garage-inventory-dialog__titlebar{grid-template-columns:1fr}
+  .garage-inventory-dialog__car{min-height:90px}
+  .garage-inventory-row__effects{grid-template-columns:1fr 1fr}
+  .parts-shop-dialog__stats{grid-template-columns:repeat(5,1fr)}
+  .parts-shop-dialog__stats span{padding:7px 4px}
+  .parts-shop-dialog__stats small{font-size:10px}
+  .parts-shop-dialog__stats b{font-size:13px}
+}
