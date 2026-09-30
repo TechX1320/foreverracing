@@ -77,7 +77,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.5.0-c.1"')) throw new Error('Static index is missing the V0.5C.1 build marker.');
+if (!html.includes('data-build="0.5.0-c.2"')) throw new Error('Static index is missing the V0.5C.2 build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -503,5 +503,14 @@ for (const engine of engineCatalogV05c) {
   }
 }
 console.log('V0.5C.1 simplified Engine Creator checks passed.');
+
+if (!engineDomainSource.includes('peakBoostPsi') ||
+    !engineStudioSource.includes('Factory Peak Boost (PSI)') ||
+    !engineStudioSource.includes('does not calculate horsepower automatically') ||
+    !contentStudioSource.includes('Factory Peak Boost') ||
+    !contentStudioSource.includes('peakBoostPsi')) {
+  throw new Error('V0.5C.2 factory boost baseline is incomplete.');
+}
+console.log('V0.5C.2 factory boost baseline checks passed.');
 
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## V0.5.0-c.2 — factory peak boost
+
+- Added optional Factory Peak Boost (PSI) to boosted Engine Creator definitions.
+- Car Creator carries and displays the linked engine's factory boost baseline.
+- Boost remains reference metadata; HP/TQ anchors and the torque curve are still authored directly.
+- Establishes the baseline needed for future forced-induction tuning features.
+
+
 ## V0.5.0-c.1 — Engine Creator simplification
 
 - Removed unused compression ratio, engine weight, physical size-class and orientation authoring.

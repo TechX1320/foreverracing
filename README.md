@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.5.0-c.1 playable direction
+## V0.5.0-c.2 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -109,6 +109,13 @@ Completing the tutorial no longer opens every system at once. The initial progre
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
 
+### V0.5C.2 factory boost baseline
+
+- Turbo, twin-turbo, turbo-diesel and supercharged engines now expose an optional **Factory Peak Boost (PSI)** field.
+- Peak boost is baseline/reference data only. It does **not** calculate horsepower or torque automatically.
+- HP/TQ anchors and the authored dyno curve remain the source of performance; boost exists so future turbos, superchargers, boost controllers and tuning can build from the factory baseline.
+- Car Creator shows the linked engine's factory boost when applicable.
+
 ### V0.5C.1 Engine Creator simplification
 
 - Removed Compression Ratio, Engine Weight, Size Class and Orientation from the Engine Creator workflow.
@@ -120,7 +127,7 @@ Completing the tutorial no longer opens every system at once. The initial progre
 ### V0.5C Engine Creator
 
 - Added a dedicated **Engine Creator** inside Content Studio, modeled after the familiar Auto Dyno Curve workflow without requiring ChatGPT inside the game tool.
-- Engines now have **family + variant IDs**, manufacturer/name metadata, displacement, configuration, aspiration, compression, weight, fitment orientation, tags, peak HP/TQ anchors, redline and rev limiter.
+- Engines now have **family + variant IDs**, manufacturer/name metadata, displacement, configuration, aspiration, tags, peak HP/TQ anchors, redline and rev limiter.
 - Power curves are **torque-first**: RPM + torque are authored directly and horsepower is always derived with HP = Torque × RPM / 5252.
 - Engine Creator includes a live HP/TQ graph, editable curve table, validation, and a quick **Generate Baseline** option for rough game curves before source-backed refinement.
 - Local engine drafts can be saved, activated, exported or copied just like cars.
