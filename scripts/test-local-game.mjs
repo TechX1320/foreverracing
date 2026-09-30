@@ -269,8 +269,8 @@ assert.equal(performanceClassFromIndex(450), 'C');
 assert.equal(performanceClassFromIndex(600), 'B');
 assert.equal(performanceClassFromIndex(750), 'A');
 assert.equal(performanceClassFromIndex(900), 'S');
-assert.equal(performanceClassFromIndex(1099), 'S');
-assert.equal(performanceClassFromIndex(1100), 'X');
+assert.equal(performanceClassFromIndex(999), 'S');
+assert.equal(performanceClassFromIndex(1000), 'X');
 let player = game.defaultPlayer();
 
 assert.equal(player.wallet.credits, 75000);
@@ -815,9 +815,54 @@ console.log('V0.6A.3 uninstall recovery + PI/Class projection test passed.');
 
 assert.equal(performanceClassThreshold('C'), 450);
 assert.equal(performanceClassThreshold('B'), 600);
+assert.equal(performanceClassThreshold('X'), 1000);
+assert.equal(performanceClassFromIndex(999), 'S');
+assert.equal(performanceClassFromIndex(1000), 'X');
 assert.ok(performanceClassRank('C') > performanceClassRank('D'));
 assert.ok(performanceClassRank('B') > performanceClassRank('C'));
 console.log('V0.6A.4 Performance Class threshold helpers test passed.');
+
+// V0.6B complete required-career Circuit spine + opponent PI calibration
+const careerPath = [
+  { id: 'street_roots_d', className: 'D', previous: null, next: 'C', minPi: 0, maxPi: 449 },
+  { id: 'city_limits_c', className: 'C', previous: 'street_roots_d', next: 'B', minPi: 450, maxPi: 599 },
+  { id: 'crew_territory_b', className: 'B', previous: 'city_limits_c', next: 'A', minPi: 600, maxPi: 749 },
+  { id: 'regional_ladder_a', className: 'A', previous: 'crew_territory_b', next: 'S', minPi: 750, maxPi: 899 },
+  { id: 'elite_circuit_s', className: 'S', previous: 'regional_ladder_a', next: 'X', minPi: 900, maxPi: 999 },
+  { id: 'apex_crown_x', className: 'X', previous: 'elite_circuit_s', next: null, minPi: 1000, maxPi: null },
+];
+assert.equal(circuits.filter((row) => row.required).length, careerPath.length);
+
+for (const step of careerPath) {
+  const circuit = circuits.find((row) => row.circuitId === step.id);
+  assert.ok(circuit, `Missing required career Circuit: ${step.id}`);
+  assert.equal(circuit.schemaVersion, 2);
+  assert.equal(circuit.required, true);
+  assert.equal(circuit.category, 'progression');
+  assert.equal(circuit.races.length, 5, `${step.id} must remain four races + one boss.`);
+  assert.equal(circuit.races.at(-1).type, 'boss');
+  assert.deepEqual(circuit.entryRules.allowedClasses, [step.className]);
+  assert.equal(circuit.entryRules.minPerformanceIndex, step.className === 'D' ? null : step.minPi);
+  assert.equal(circuit.entryRules.maxPerformanceIndex, step.maxPi);
+  assert.equal(circuit.completion.unlockClass, step.next);
+  assert.deepEqual(circuit.unlock.requiresCircuitIds, step.previous ? [step.previous] : []);
+
+  for (const race of circuit.races) {
+    const benchmark = benchmarkPerformance(race.opponent.stats, racingConfig);
+    const actualClass = performanceClassFromIndex(benchmark.performanceIndex);
+    assert.equal(
+      actualClass,
+      step.className,
+      `${circuit.name} / ${race.name} benchmarks at PI ${benchmark.performanceIndex} (${actualClass}), expected ${step.className}.`
+    );
+    assert.ok(
+      Math.abs(Number(race.recommendation.performanceIndex) - benchmark.performanceIndex) <= 5,
+      `${circuit.name} / ${race.name} recommendation PI ${race.recommendation.performanceIndex} is too far from benchmark PI ${benchmark.performanceIndex}.`
+    );
+  }
+}
+console.log('V0.6B D-through-X required career Circuit calibration test passed.');
+
 
 
 

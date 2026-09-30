@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.6.0-a.5 playable direction
+## V0.6.0-b playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,18 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is now a catalog of self-contained PvE mini-roguelite events. Required Circuits drive class progression; optional Circuits can use their own race counts, restrictions, distances, targets and rewards. Opponents are authored builds that use the real race simulator rather than scaling directly from the player's PI.
+
+### V0.6B full required career progression
+
+- The required PvE career now has a complete **D → C → B → A → S → X** progression spine.
+- Every class uses the same clear **four regular races + one rival/boss** structure for the initial career pass.
+- Added **City Limits (C)**, **Crew Territory (B)**, **Regional Ladder (A)**, **Elite Circuit (S)** and **Apex Crown (X)** behind Street Roots.
+- Each required Circuit explicitly requires the previous Circuit plus the newly unlocked class, preventing progression skips.
+- Boss clears unlock the next class; **Apex Crown** is the current final required career Circuit and has no higher class unlock.
+- Higher-class opponents are authored builds using cars that already exist in the catalog; these can be swapped to future cars as the vehicle roster expands.
+- Opponent builds are regression-tested against the real Performance Index simulator so every required race remains inside its intended class.
+- **X Class now begins at PI 1000** instead of 1100. The old 1100 threshold was effectively unreachable under the current 1/4-mile PI model.
+- Required career races stay 1/4-mile for now; mixed-distance and special-rule structures remain the domain of optional Circuits.
 
 ### V0.6A.5 modal sizing audit
 

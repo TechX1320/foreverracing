@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 final class PerformanceIndex
 {
-    public const VERSION = 1;
+    public const VERSION = 2;
     public const PASSES = 51;
     public const BASE_ET = 20.0;
     public const PER_TENTH = 8;
@@ -75,7 +75,7 @@ final class PerformanceIndex
         if ($pi < 600) return 'C';
         if ($pi < 750) return 'B';
         if ($pi < 900) return 'A';
-        if ($pi < 1100) return 'S';
+        if ($pi < 1000) return 'S';
         return 'X';
     }
 

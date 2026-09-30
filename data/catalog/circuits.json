@@ -1,6 +1,6 @@
 [
   {
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "circuitId": "street_roots_d",
     "name": "Street Roots",
     "description": "Five local races. Four regulars, then the rival. Clear the boss to unlock C Class progression.",
@@ -51,8 +51,8 @@
         "weather": "Cool & Cloudy",
         "recommendation": {
           "class": "D",
-          "performanceIndex": 335,
-          "etSeconds": 15.8
+          "performanceIndex": 300,
+          "etSeconds": 16.3
         },
         "opponent": {
           "name": "Mia",
@@ -82,8 +82,8 @@
         "weather": "Cool & Cloudy",
         "recommendation": {
           "class": "D",
-          "performanceIndex": 365,
-          "etSeconds": 15.4
+          "performanceIndex": 360,
+          "etSeconds": 15.5
         },
         "opponent": {
           "name": "Trey",
@@ -113,7 +113,7 @@
         "weather": "Cold & Dry",
         "recommendation": {
           "class": "D",
-          "performanceIndex": 395,
+          "performanceIndex": 398,
           "etSeconds": 15
         },
         "opponent": {
@@ -144,8 +144,8 @@
         "weather": "Cold & Dry",
         "recommendation": {
           "class": "D",
-          "performanceIndex": 425,
-          "etSeconds": 14.7
+          "performanceIndex": 418,
+          "etSeconds": 14.8
         },
         "opponent": {
           "name": "Luc",
@@ -175,7 +175,7 @@
         "weather": "Cool & Cloudy",
         "recommendation": {
           "class": "D",
-          "performanceIndex": 445,
+          "performanceIndex": 438,
           "etSeconds": 14.5
         },
         "opponent": {
@@ -196,6 +196,1036 @@
           "credits": 1750,
           "exp": 90,
           "rep": 12
+        }
+      }
+    ]
+  },
+  {
+    "schemaVersion": 2,
+    "circuitId": "city_limits_c",
+    "name": "City Limits",
+    "description": "The local scene opens up into the city. Four crew races lead to a faster rival and B Class progression.",
+    "category": "progression",
+    "required": true,
+    "repeatable": true,
+    "lossRule": "retry_race",
+    "unlock": {
+      "requiresClasses": [
+        "C"
+      ],
+      "requiresCircuitIds": [
+        "street_roots_d"
+      ]
+    },
+    "entryRules": {
+      "allowedClasses": [
+        "C"
+      ],
+      "minPerformanceIndex": 450,
+      "maxPerformanceIndex": 599,
+      "buildTypes": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "drivetrains": [],
+      "manufacturers": [],
+      "aspirations": [],
+      "engineConfigurations": [],
+      "allowedCarIds": []
+    },
+    "recommendation": {
+      "class": "C",
+      "performanceIndex": 560,
+      "etSeconds": 13
+    },
+    "completion": {
+      "credits": 5000,
+      "exp": 260,
+      "rep": 55,
+      "unlockClass": "B",
+      "unlockCircuitIds": []
+    },
+    "races": [
+      {
+        "raceId": "c_warehouse_sprint",
+        "name": "Warehouse Sprint",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "LA Industrial Docks",
+        "weather": "Cool & Cloudy",
+        "recommendation": {
+          "class": "C",
+          "performanceIndex": 466,
+          "etSeconds": 14.2
+        },
+        "opponent": {
+          "name": "Mia",
+          "carCatalogId": "golf_gti",
+          "level": 10,
+          "buildType": 2,
+          "stats": {
+            "hp": 280,
+            "torque": 280,
+            "weight": 3000,
+            "grip": 1.06,
+            "drivetrain": "FWD"
+          }
+        },
+        "rewards": {
+          "credits": 1100,
+          "exp": 55,
+          "rep": 7
+        }
+      },
+      {
+        "raceId": "c_neon_underpass",
+        "name": "Neon Underpass",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "LA Industrial Docks",
+        "weather": "Cold & Dry",
+        "recommendation": {
+          "class": "C",
+          "performanceIndex": 504,
+          "etSeconds": 13.7
+        },
+        "opponent": {
+          "name": "Nori",
+          "carCatalogId": "mazda_rx8",
+          "level": 12,
+          "buildType": 2,
+          "stats": {
+            "hp": 305,
+            "torque": 275,
+            "weight": 2950,
+            "grip": 1.08,
+            "drivetrain": "RWD"
+          }
+        },
+        "rewards": {
+          "credits": 1300,
+          "exp": 65,
+          "rep": 8
+        }
+      },
+      {
+        "raceId": "c_v6_after_hours",
+        "name": "V6 After Hours",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "LA Industrial Docks",
+        "weather": "Cool & Cloudy",
+        "recommendation": {
+          "class": "C",
+          "performanceIndex": 534,
+          "etSeconds": 13.3
+        },
+        "opponent": {
+          "name": "Luc",
+          "carCatalogId": "renault_clio",
+          "level": 14,
+          "buildType": 2,
+          "stats": {
+            "hp": 325,
+            "torque": 293,
+            "weight": 2900,
+            "grip": 1.1,
+            "drivetrain": "RWD"
+          }
+        },
+        "rewards": {
+          "credits": 1500,
+          "exp": 75,
+          "rep": 9
+        }
+      },
+      {
+        "raceId": "c_crew_checkpoint",
+        "name": "Crew Checkpoint",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "LA Industrial Docks",
+        "weather": "Hot & Dry",
+        "recommendation": {
+          "class": "C",
+          "performanceIndex": 561,
+          "etSeconds": 13
+        },
+        "opponent": {
+          "name": "Trey",
+          "carCatalogId": "golf_gti",
+          "level": 16,
+          "buildType": 2,
+          "stats": {
+            "hp": 345,
+            "torque": 345,
+            "weight": 2850,
+            "grip": 1.12,
+            "drivetrain": "FWD"
+          }
+        },
+        "rewards": {
+          "credits": 1800,
+          "exp": 90,
+          "rep": 11
+        }
+      },
+      {
+        "raceId": "c_boss_vega",
+        "name": "Rival: Vega",
+        "type": "boss",
+        "distance": "1/4",
+        "location": "LA Industrial Docks",
+        "weather": "Cold & Dry",
+        "recommendation": {
+          "class": "C",
+          "performanceIndex": 582,
+          "etSeconds": 12.7
+        },
+        "opponent": {
+          "name": "Vega",
+          "carCatalogId": "renault_clio",
+          "level": 20,
+          "buildType": 2,
+          "stats": {
+            "hp": 360,
+            "torque": 342,
+            "weight": 2800,
+            "grip": 1.14,
+            "drivetrain": "RWD"
+          },
+          "paintColor": "#d06432"
+        },
+        "rewards": {
+          "credits": 2400,
+          "exp": 125,
+          "rep": 16
+        }
+      }
+    ]
+  },
+  {
+    "schemaVersion": 2,
+    "circuitId": "crew_territory_b",
+    "name": "Crew Territory",
+    "description": "City rivals become organized crews. Survive four territory runs and beat Cipher to unlock A Class.",
+    "category": "progression",
+    "required": true,
+    "repeatable": true,
+    "lossRule": "retry_race",
+    "unlock": {
+      "requiresClasses": [
+        "B"
+      ],
+      "requiresCircuitIds": [
+        "city_limits_c"
+      ]
+    },
+    "entryRules": {
+      "allowedClasses": [
+        "B"
+      ],
+      "minPerformanceIndex": 600,
+      "maxPerformanceIndex": 749,
+      "buildTypes": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "drivetrains": [],
+      "manufacturers": [],
+      "aspirations": [],
+      "engineConfigurations": [],
+      "allowedCarIds": []
+    },
+    "recommendation": {
+      "class": "B",
+      "performanceIndex": 700,
+      "etSeconds": 11.25
+    },
+    "completion": {
+      "credits": 7500,
+      "exp": 380,
+      "rep": 80,
+      "unlockClass": "A",
+      "unlockCircuitIds": []
+    },
+    "races": [
+      {
+        "raceId": "b_bridge_run",
+        "name": "Bridge Run",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Tokyo Underground",
+        "weather": "Cool & Cloudy",
+        "recommendation": {
+          "class": "B",
+          "performanceIndex": 616,
+          "etSeconds": 12.3
+        },
+        "opponent": {
+          "name": "Trey",
+          "carCatalogId": "golf_gti",
+          "level": 22,
+          "buildType": 2,
+          "stats": {
+            "hp": 410,
+            "torque": 410,
+            "weight": 2850,
+            "grip": 1.12,
+            "drivetrain": "FWD"
+          }
+        },
+        "rewards": {
+          "credits": 1800,
+          "exp": 85,
+          "rep": 10
+        }
+      },
+      {
+        "raceId": "b_tunnel_pressure",
+        "name": "Tunnel Pressure",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Tokyo Underground",
+        "weather": "Cold & Dry",
+        "recommendation": {
+          "class": "B",
+          "performanceIndex": 645,
+          "etSeconds": 11.9
+        },
+        "opponent": {
+          "name": "Luc",
+          "carCatalogId": "renault_clio",
+          "level": 24,
+          "buildType": 2,
+          "stats": {
+            "hp": 440,
+            "torque": 418,
+            "weight": 2800,
+            "grip": 1.14,
+            "drivetrain": "RWD"
+          }
+        },
+        "rewards": {
+          "credits": 2200,
+          "exp": 100,
+          "rep": 12
+        }
+      },
+      {
+        "raceId": "b_rotary_territory",
+        "name": "Rotary Territory",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Tokyo Underground",
+        "weather": "Cool & Cloudy",
+        "recommendation": {
+          "class": "B",
+          "performanceIndex": 681,
+          "etSeconds": 11.5
+        },
+        "opponent": {
+          "name": "Nori",
+          "carCatalogId": "mazda_rx8",
+          "level": 26,
+          "buildType": 3,
+          "stats": {
+            "hp": 485,
+            "torque": 437,
+            "weight": 2750,
+            "grip": 1.16,
+            "drivetrain": "RWD"
+          }
+        },
+        "rewards": {
+          "credits": 2600,
+          "exp": 115,
+          "rep": 14
+        }
+      },
+      {
+        "raceId": "b_crew_elimination",
+        "name": "Crew Elimination",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Tokyo Underground",
+        "weather": "Hot & Dry",
+        "recommendation": {
+          "class": "B",
+          "performanceIndex": 710,
+          "etSeconds": 11.1
+        },
+        "opponent": {
+          "name": "Mia",
+          "carCatalogId": "golf_gti",
+          "level": 28,
+          "buildType": 3,
+          "stats": {
+            "hp": 525,
+            "torque": 525,
+            "weight": 2700,
+            "grip": 1.18,
+            "drivetrain": "FWD"
+          }
+        },
+        "rewards": {
+          "credits": 3000,
+          "exp": 135,
+          "rep": 16
+        }
+      },
+      {
+        "raceId": "b_boss_cipher",
+        "name": "Rival: Cipher",
+        "type": "boss",
+        "distance": "1/4",
+        "location": "Tokyo Underground",
+        "weather": "Cold & Dry",
+        "recommendation": {
+          "class": "B",
+          "performanceIndex": 737,
+          "etSeconds": 10.8
+        },
+        "opponent": {
+          "name": "Cipher",
+          "carCatalogId": "renault_clio",
+          "level": 32,
+          "buildType": 3,
+          "stats": {
+            "hp": 565,
+            "torque": 537,
+            "weight": 2650,
+            "grip": 1.2,
+            "drivetrain": "RWD"
+          },
+          "paintColor": "#4d79c7"
+        },
+        "rewards": {
+          "credits": 4000,
+          "exp": 175,
+          "rep": 22
+        }
+      }
+    ]
+  },
+  {
+    "schemaVersion": 2,
+    "circuitId": "regional_ladder_a",
+    "name": "Regional Ladder",
+    "description": "The street scene gives way to serious regional competition. Clear the ladder and beat Marlowe to unlock S Class.",
+    "category": "progression",
+    "required": true,
+    "repeatable": true,
+    "lossRule": "retry_race",
+    "unlock": {
+      "requiresClasses": [
+        "A"
+      ],
+      "requiresCircuitIds": [
+        "crew_territory_b"
+      ]
+    },
+    "entryRules": {
+      "allowedClasses": [
+        "A"
+      ],
+      "minPerformanceIndex": 750,
+      "maxPerformanceIndex": 899,
+      "buildTypes": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "drivetrains": [],
+      "manufacturers": [],
+      "aspirations": [],
+      "engineConfigurations": [],
+      "allowedCarIds": []
+    },
+    "recommendation": {
+      "class": "A",
+      "performanceIndex": 850,
+      "etSeconds": 9.4
+    },
+    "completion": {
+      "credits": 10000,
+      "exp": 520,
+      "rep": 115,
+      "unlockClass": "S",
+      "unlockCircuitIds": []
+    },
+    "races": [
+      {
+        "raceId": "a_qualifying_heat",
+        "name": "Qualifying Heat",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Nürburgring Dragway",
+        "weather": "Cool & Cloudy",
+        "recommendation": {
+          "class": "A",
+          "performanceIndex": 766,
+          "etSeconds": 10.4
+        },
+        "opponent": {
+          "name": "Luc",
+          "carCatalogId": "renault_clio",
+          "level": 35,
+          "buildType": 3,
+          "stats": {
+            "hp": 640,
+            "torque": 608,
+            "weight": 2700,
+            "grip": 1.18,
+            "drivetrain": "RWD"
+          }
+        },
+        "rewards": {
+          "credits": 3000,
+          "exp": 120,
+          "rep": 15
+        }
+      },
+      {
+        "raceId": "a_boosted_grid",
+        "name": "Boosted Grid",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Nürburgring Dragway",
+        "weather": "Cold & Dry",
+        "recommendation": {
+          "class": "A",
+          "performanceIndex": 798,
+          "etSeconds": 10
+        },
+        "opponent": {
+          "name": "Trey",
+          "carCatalogId": "golf_gti",
+          "level": 38,
+          "buildType": 3,
+          "stats": {
+            "hp": 705,
+            "torque": 705,
+            "weight": 2650,
+            "grip": 1.2,
+            "drivetrain": "FWD"
+          }
+        },
+        "rewards": {
+          "credits": 3500,
+          "exp": 140,
+          "rep": 18
+        }
+      },
+      {
+        "raceId": "a_rotary_proving",
+        "name": "Rotary Proving Run",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Nürburgring Dragway",
+        "weather": "Cool & Cloudy",
+        "recommendation": {
+          "class": "A",
+          "performanceIndex": 827,
+          "etSeconds": 9.7
+        },
+        "opponent": {
+          "name": "Nori",
+          "carCatalogId": "mazda_rx8",
+          "level": 41,
+          "buildType": 3,
+          "stats": {
+            "hp": 775,
+            "torque": 736,
+            "weight": 2600,
+            "grip": 1.22,
+            "drivetrain": "RWD"
+          }
+        },
+        "rewards": {
+          "credits": 4000,
+          "exp": 165,
+          "rep": 20
+        }
+      },
+      {
+        "raceId": "a_top_eight",
+        "name": "Top Eight",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Nürburgring Dragway",
+        "weather": "Hot & Dry",
+        "recommendation": {
+          "class": "A",
+          "performanceIndex": 858,
+          "etSeconds": 9.3
+        },
+        "opponent": {
+          "name": "Vega",
+          "carCatalogId": "renault_clio",
+          "level": 44,
+          "buildType": 4,
+          "stats": {
+            "hp": 860,
+            "torque": 817,
+            "weight": 2550,
+            "grip": 1.24,
+            "drivetrain": "RWD"
+          }
+        },
+        "rewards": {
+          "credits": 5000,
+          "exp": 190,
+          "rep": 24
+        }
+      },
+      {
+        "raceId": "a_boss_marlowe",
+        "name": "Rival: Marlowe",
+        "type": "boss",
+        "distance": "1/4",
+        "location": "Nürburgring Dragway",
+        "weather": "Cold & Dry",
+        "recommendation": {
+          "class": "A",
+          "performanceIndex": 889,
+          "etSeconds": 8.9
+        },
+        "opponent": {
+          "name": "Marlowe",
+          "carCatalogId": "mazda_rx8",
+          "level": 48,
+          "buildType": 4,
+          "stats": {
+            "hp": 955,
+            "torque": 955,
+            "weight": 2500,
+            "grip": 1.26,
+            "drivetrain": "RWD"
+          },
+          "paintColor": "#6b2fa5"
+        },
+        "rewards": {
+          "credits": 6500,
+          "exp": 240,
+          "rep": 32
+        }
+      }
+    ]
+  },
+  {
+    "schemaVersion": 2,
+    "circuitId": "elite_circuit_s",
+    "name": "Elite Circuit",
+    "description": "Only the fastest builds remain. Four elite passes stand between you and Nyx, the gatekeeper to X Class.",
+    "category": "progression",
+    "required": true,
+    "repeatable": true,
+    "lossRule": "retry_race",
+    "unlock": {
+      "requiresClasses": [
+        "S"
+      ],
+      "requiresCircuitIds": [
+        "regional_ladder_a"
+      ]
+    },
+    "entryRules": {
+      "allowedClasses": [
+        "S"
+      ],
+      "minPerformanceIndex": 900,
+      "maxPerformanceIndex": 999,
+      "buildTypes": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "drivetrains": [],
+      "manufacturers": [],
+      "aspirations": [],
+      "engineConfigurations": [],
+      "allowedCarIds": []
+    },
+    "recommendation": {
+      "class": "S",
+      "performanceIndex": 970,
+      "etSeconds": 7.9
+    },
+    "completion": {
+      "credits": 15000,
+      "exp": 720,
+      "rep": 160,
+      "unlockClass": "X",
+      "unlockCircuitIds": []
+    },
+    "races": [
+      {
+        "raceId": "s_elite_entry",
+        "name": "Elite Entry",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Abu Dhabi Midnight",
+        "weather": "Cool & Cloudy",
+        "recommendation": {
+          "class": "S",
+          "performanceIndex": 914,
+          "etSeconds": 8.6
+        },
+        "opponent": {
+          "name": "Luc",
+          "carCatalogId": "renault_clio",
+          "level": 52,
+          "buildType": 4,
+          "stats": {
+            "hp": 1115,
+            "torque": 1115,
+            "weight": 2600,
+            "grip": 1.22,
+            "drivetrain": "RWD"
+          }
+        },
+        "rewards": {
+          "credits": 5000,
+          "exp": 170,
+          "rep": 22
+        }
+      },
+      {
+        "raceId": "s_midnight_invite",
+        "name": "Midnight Invitational",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Abu Dhabi Midnight",
+        "weather": "Cold & Dry",
+        "recommendation": {
+          "class": "S",
+          "performanceIndex": 934,
+          "etSeconds": 8.3
+        },
+        "opponent": {
+          "name": "Trey",
+          "carCatalogId": "golf_gti",
+          "level": 56,
+          "buildType": 4,
+          "stats": {
+            "hp": 1195,
+            "torque": 1195,
+            "weight": 2550,
+            "grip": 1.24,
+            "drivetrain": "FWD"
+          }
+        },
+        "rewards": {
+          "credits": 6000,
+          "exp": 200,
+          "rep": 26
+        }
+      },
+      {
+        "raceId": "s_no_lift",
+        "name": "No-Lift Run",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Abu Dhabi Midnight",
+        "weather": "Cool & Cloudy",
+        "recommendation": {
+          "class": "S",
+          "performanceIndex": 954,
+          "etSeconds": 8.1
+        },
+        "opponent": {
+          "name": "Nori",
+          "carCatalogId": "mazda_rx8",
+          "level": 60,
+          "buildType": 4,
+          "stats": {
+            "hp": 1285,
+            "torque": 1285,
+            "weight": 2500,
+            "grip": 1.26,
+            "drivetrain": "RWD"
+          }
+        },
+        "rewards": {
+          "credits": 7000,
+          "exp": 230,
+          "rep": 30
+        }
+      },
+      {
+        "raceId": "s_master_pass",
+        "name": "Master Pass",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Abu Dhabi Midnight",
+        "weather": "Hot & Dry",
+        "recommendation": {
+          "class": "S",
+          "performanceIndex": 978,
+          "etSeconds": 7.8
+        },
+        "opponent": {
+          "name": "Vega",
+          "carCatalogId": "renault_clio",
+          "level": 64,
+          "buildType": 4,
+          "stats": {
+            "hp": 1480,
+            "torque": 1480,
+            "weight": 2450,
+            "grip": 1.28,
+            "drivetrain": "RWD"
+          }
+        },
+        "rewards": {
+          "credits": 8500,
+          "exp": 270,
+          "rep": 36
+        }
+      },
+      {
+        "raceId": "s_boss_nyx",
+        "name": "Rival: Nyx",
+        "type": "boss",
+        "distance": "1/4",
+        "location": "Abu Dhabi Midnight",
+        "weather": "Cold & Dry",
+        "recommendation": {
+          "class": "S",
+          "performanceIndex": 992,
+          "etSeconds": 7.6
+        },
+        "opponent": {
+          "name": "Nyx",
+          "carCatalogId": "mazda_rx8",
+          "level": 70,
+          "buildType": 4,
+          "stats": {
+            "hp": 1560,
+            "torque": 1560,
+            "weight": 2400,
+            "grip": 1.3,
+            "drivetrain": "RWD"
+          },
+          "paintColor": "#111111"
+        },
+        "rewards": {
+          "credits": 11000,
+          "exp": 340,
+          "rep": 48
+        }
+      }
+    ]
+  },
+  {
+    "schemaVersion": 2,
+    "circuitId": "apex_crown_x",
+    "name": "Apex Crown",
+    "description": "The final required career Circuit. X Class has no higher unlock — clear the four apex runs and beat the final rival.",
+    "category": "progression",
+    "required": true,
+    "repeatable": true,
+    "lossRule": "retry_race",
+    "unlock": {
+      "requiresClasses": [
+        "X"
+      ],
+      "requiresCircuitIds": [
+        "elite_circuit_s"
+      ]
+    },
+    "entryRules": {
+      "allowedClasses": [
+        "X"
+      ],
+      "minPerformanceIndex": 1000,
+      "maxPerformanceIndex": null,
+      "buildTypes": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "drivetrains": [],
+      "manufacturers": [],
+      "aspirations": [],
+      "engineConfigurations": [],
+      "allowedCarIds": []
+    },
+    "recommendation": {
+      "class": "X",
+      "performanceIndex": 1040,
+      "etSeconds": 7
+    },
+    "completion": {
+      "credits": 25000,
+      "exp": 1100,
+      "rep": 250,
+      "unlockClass": null,
+      "unlockCircuitIds": []
+    },
+    "races": [
+      {
+        "raceId": "x_hyper_entry",
+        "name": "Hyper Entry",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Dubai Palm Circuit",
+        "weather": "Cool & Cloudy",
+        "recommendation": {
+          "class": "X",
+          "performanceIndex": 1003,
+          "etSeconds": 7.5
+        },
+        "opponent": {
+          "name": "Nori",
+          "carCatalogId": "mazda_rx8",
+          "level": 75,
+          "buildType": 4,
+          "stats": {
+            "hp": 1640,
+            "torque": 1640,
+            "weight": 2400,
+            "grip": 1.32,
+            "drivetrain": "RWD"
+          }
+        },
+        "rewards": {
+          "credits": 8000,
+          "exp": 260,
+          "rep": 34
+        }
+      },
+      {
+        "raceId": "x_apex_test",
+        "name": "Apex Test",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Dubai Palm Circuit",
+        "weather": "Cold & Dry",
+        "recommendation": {
+          "class": "X",
+          "performanceIndex": 1017,
+          "etSeconds": 7.3
+        },
+        "opponent": {
+          "name": "Luc",
+          "carCatalogId": "renault_clio",
+          "level": 80,
+          "buildType": 4,
+          "stats": {
+            "hp": 1730,
+            "torque": 1730,
+            "weight": 2350,
+            "grip": 1.34,
+            "drivetrain": "RWD"
+          }
+        },
+        "rewards": {
+          "credits": 10000,
+          "exp": 310,
+          "rep": 40
+        }
+      },
+      {
+        "raceId": "x_zero_margin",
+        "name": "Zero Margin",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Dubai Palm Circuit",
+        "weather": "Cool & Cloudy",
+        "recommendation": {
+          "class": "X",
+          "performanceIndex": 1038,
+          "etSeconds": 7
+        },
+        "opponent": {
+          "name": "Trey",
+          "carCatalogId": "golf_gti",
+          "level": 85,
+          "buildType": 4,
+          "stats": {
+            "hp": 1885,
+            "torque": 1885,
+            "weight": 2300,
+            "grip": 1.36,
+            "drivetrain": "FWD"
+          }
+        },
+        "rewards": {
+          "credits": 12000,
+          "exp": 370,
+          "rep": 48
+        }
+      },
+      {
+        "raceId": "x_final_gate",
+        "name": "Final Gate",
+        "type": "regular",
+        "distance": "1/4",
+        "location": "Dubai Palm Circuit",
+        "weather": "Hot & Dry",
+        "recommendation": {
+          "class": "X",
+          "performanceIndex": 1052,
+          "etSeconds": 6.8
+        },
+        "opponent": {
+          "name": "Marlowe",
+          "carCatalogId": "mazda_rx8",
+          "level": 90,
+          "buildType": 4,
+          "stats": {
+            "hp": 1995,
+            "torque": 1995,
+            "weight": 2250,
+            "grip": 1.4,
+            "drivetrain": "RWD"
+          }
+        },
+        "rewards": {
+          "credits": 15000,
+          "exp": 450,
+          "rep": 58
+        }
+      },
+      {
+        "raceId": "x_boss_apex",
+        "name": "Rival: Apex",
+        "type": "boss",
+        "distance": "1/4",
+        "location": "Dubai Palm Circuit",
+        "weather": "Cold & Dry",
+        "recommendation": {
+          "class": "X",
+          "performanceIndex": 1058,
+          "etSeconds": 6.8
+        },
+        "opponent": {
+          "name": "Apex",
+          "carCatalogId": "renault_clio",
+          "level": 100,
+          "buildType": 4,
+          "stats": {
+            "hp": 2020,
+            "torque": 2020,
+            "weight": 2200,
+            "grip": 1.45,
+            "drivetrain": "RWD"
+          },
+          "paintColor": "#e5e7e9"
+        },
+        "rewards": {
+          "credits": 20000,
+          "exp": 600,
+          "rep": 80
         }
       }
     ]
