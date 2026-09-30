@@ -84,7 +84,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.5.0-g.1"')) throw new Error('Static index is missing the V0.5G.1 build marker.');
+if (!html.includes('data-build="0.5.0-g.2"')) throw new Error('Static index is missing the V0.5G.2 build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -733,5 +733,37 @@ if (!powerModelSourceV05g1.includes('enginePowerEnvelope') ||
   throw new Error('V0.5G.1 engine-capacity workflow is incomplete.');
 }
 console.log('V0.5G.1 realistic power-model checks passed.');
+
+const repairApiSourceV05g2 = await fs.readFile(new URL('api/garage/repair-engine.php', root), 'utf8');
+const storageContractV05g2 = await fs.readFile(new URL('assets/js/storage/StorageProvider.js', root), 'utf8');
+const localStorageSourceV05g2 = await fs.readFile(new URL('assets/js/storage/LocalStorageProvider.js', root), 'utf8');
+const apiStorageSourceV05g2 = await fs.readFile(new URL('assets/js/storage/ApiStorageProvider.js', root), 'utf8');
+if (runtimeConfig.schemaVersion < 9 ||
+    !tuningSourceV05g.includes('baseMapProfile') ||
+    !tuningSourceV05g.includes('failureChancePct') ||
+    !tuningSourceV05g.includes('engineLoadPct') ||
+    !serverTuningSourceV05g.includes('failureChance') ||
+    !raceSimulatorSourceV04d.includes('catastrophicFailure') ||
+    !raceSimulatorSourceV04d.includes('mechanicalFailure') ||
+    !localGameSource.includes('repairEngine(inputPlayer') ||
+    !localGameSource.includes('engineCondition') ||
+    !serverGameSourceV04c.includes('public static function repairEngine') ||
+    !serverGameSourceV04c.includes('engineCondition') ||
+    !repairApiSourceV05g2.includes('GameService::repairEngine') ||
+    !storageContractV05g2.includes('repairEngine') ||
+    !localStorageSourceV05g2.includes('repairEngine(carId)') ||
+    !apiStorageSourceV05g2.includes('repairEngine(carId)') ||
+    !garageSource.includes('BASE MAP') ||
+    !garageSource.includes('LIVE TUNE DYNO') ||
+    !garageSource.includes('FAILURE / PASS') ||
+    garageSource.includes('ECU / DATA LOG NOTES') ||
+    garageSource.includes('WHAT THE SIMULATOR USES') ||
+    !garageSource.includes('REBUILD ENGINE') ||
+    !quickRaceSource.includes('ENGINE FAILURE • DNF') ||
+    !quickRaceSource.includes('ENGINE FAILED') ||
+    !cssV04b.includes('V0.5G.2 tuning polish + mechanical risk')) {
+  throw new Error('V0.5G.2 tuning polish / catastrophic engine-risk workflow is incomplete.');
+}
+console.log('V0.5G.2 tuning base-map, dyno and engine-risk checks passed.');
 
 
