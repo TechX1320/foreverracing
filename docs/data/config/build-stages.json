@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "stages": [
     {
       "stage": 1,
@@ -40,12 +40,13 @@
       "stage": 3,
       "name": "Front-Half Race Car",
       "shortName": "Front-Half Race Car",
-      "description": "Front-half / tube-chassis work with serious chassis changes, individual forced-induction hardware and physically compatible engine swaps.",
+      "description": "Front-half / tube-chassis work with deeper fuel, ECU, drivetrain, suspension, tire and weight choices plus individual forced-induction hardware.",
       "requiredCategories": [],
-      "engineSwaps": true,
+      "engineSwaps": false,
       "defaultDisplacementAllowanceLiters": 0.6,
       "optionalCategories": [
-        "forced_induction"
+        "forced_induction",
+        "engine_kit"
       ],
       "forcedInduction": {
         "turboComponents": [
@@ -60,25 +61,29 @@
         ],
         "nitrousMaxShot": 150,
         "twinCharge": false
-      }
+      },
+      "engineSwapPlanned": true
     },
     {
       "stage": 4,
       "name": "Full Race Car",
       "shortName": "Full Race Car",
-      "description": "Full race-car construction with twin charging, extreme nitrous and much wider powertrain/chassis freedom.",
+      "description": "Full race-car construction with engine internals, standalone management, professional drag hardware, twin charging and extreme nitrous.",
       "requiredCategories": [],
-      "engineSwaps": true,
+      "engineSwaps": false,
       "defaultDisplacementAllowanceLiters": 1,
       "optionalCategories": [
-        "forced_induction"
+        "forced_induction",
+        "engine_kit",
+        "engine"
       ],
       "forcedInduction": {
         "turbo": true,
         "supercharger": true,
         "nitrousMaxShot": 300,
         "twinCharge": true
-      }
+      },
+      "engineSwapPlanned": true
     }
   ]
 }
