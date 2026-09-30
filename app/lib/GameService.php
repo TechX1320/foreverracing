@@ -70,6 +70,9 @@ final class GameService
         $player['schemaVersion'] = (int)app_config()['schema_version'];
         $player['user'] = array_replace($default['user'], is_array($player['user'] ?? null) ? $player['user'] : []);
         $player['wallet'] = array_replace($default['wallet'], is_array($player['wallet'] ?? null) ? $player['wallet'] : []);
+        if (strcasecmp((string)($player['user']['username'] ?? ''), (string)(app_config()['admin_username'] ?? 'Admin')) === 0) {
+            $player['wallet']['credits'] = max((int)($player['wallet']['credits'] ?? 0), (int)(app_config()['local_dev_credits'] ?? 10000000));
+        }
         $player['progression'] = array_replace($default['progression'], is_array($player['progression'] ?? null) ? $player['progression'] : []);
         $player['tutorial'] = array_replace($default['tutorial'], is_array($player['tutorial'] ?? null) ? $player['tutorial'] : []);
         $player['tutorial']['completedSteps'] = array_values(is_array($player['tutorial']['completedSteps'] ?? null) ? $player['tutorial']['completedSteps'] : []);
