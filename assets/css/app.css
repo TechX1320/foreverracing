@@ -2896,3 +2896,59 @@ dialog.fr-dialog{max-height:calc(100dvh - 24px);overflow:auto}
   .circuit-run-head__stats{grid-template-columns:1fr}
   .player-info-grid{grid-template-columns:1fr}
 }
+
+
+/* V0.6A.2 optional Circuit board + swap ownership clarity */
+.circuit-board-section{margin-top:14px}
+.circuit-board-section:first-of-type{margin-top:0}
+.circuit-board-section__head{
+  display:flex;
+  align-items:end;
+  justify-content:space-between;
+  gap:16px;
+  padding:0 2px 9px;
+}
+.circuit-board-section__head h3{margin:3px 0 0;font-size:20px}
+.circuit-board-section__head p{margin:0;color:var(--muted);font-size:13px}
+.circuit-board-section--optional{
+  margin-top:22px;
+  padding-top:16px;
+  border-top:1px solid var(--border);
+}
+.circuit-board-section--optional .section-label{color:#d6b66f}
+.circuit-event-card.is-optional{border-left:3px solid #8d7643}
+.circuit-event-card.is-optional>header .pill{border-color:#5e5136}
+.circuit-event-grid--optional{grid-template-columns:repeat(2,minmax(0,1fr))}
+.circuit-restriction-chips{display:flex;flex-wrap:wrap;gap:6px}
+.circuit-restriction-chips span{
+  display:inline-flex;
+  align-items:center;
+  min-height:26px;
+  padding:3px 7px;
+  border:1px solid #3b4146;
+  background:#121518;
+  color:#b8c0c6;
+  font-size:11px;
+  font-weight:850;
+  letter-spacing:.025em;
+}
+.circuit-studio__visibility{border-color:#554a31}
+.circuit-studio__section-note{margin:0;padding:10px 12px;border-top:1px solid var(--border);background:#14130f}
+
+.engine-swap-dialog__impact{grid-template-columns:repeat(4,minmax(0,1fr))}
+.engine-swap-dialog__impact>div{padding:10px}
+.engine-swap-dialog__impact small{font-size:11px}
+.engine-swap-dialog__impact b{margin:3px 0;font-size:14px}
+.engine-swap-dialog__impact p{font-size:12px;line-height:1.45}
+.engine-swap-footnote{font-size:12px;line-height:1.5}
+
+@media(max-width:1180px){
+  .circuit-event-grid--optional{grid-template-columns:1fr}
+  .engine-swap-dialog__impact{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .circuit-board-section__head{align-items:flex-start;flex-direction:column;gap:4px}
+  .circuit-board-section__head p{font-size:13px}
+  .circuit-restriction-chips span{font-size:12px;min-height:28px}
+  .engine-swap-dialog__impact{grid-template-columns:1fr}
+}

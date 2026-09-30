@@ -7,6 +7,7 @@ import { applyPartEffects, partCompatibility, partStoreAvailable } from '../asse
 import { applyBuildPartEffect, enginePowerEnvelope, limitEngineOutput, suggestedPowerLimits } from '../assets/js/domain/PowerModel.js';
 import { baseMapProfile, defaultTuneProfile, evaluateTune, tuningFingerprint, tuningHardwareProfile } from '../assets/js/domain/Tuning.js';
 import { CHASSIS_BOUND_CATEGORIES, engineSwapEligible, engineSwapQuote, isEngineBoundPart } from '../assets/js/domain/EngineSwap.js';
+import { CIRCUIT_SCHEMA_VERSION, circuitEntryStatus, circuitVisibleToPlayer, normalizeCircuitDefinition } from '../assets/js/domain/CircuitCatalog.js';
 
 const [cars, parts, engines, circuits, config, buildStageConfig, racingConfig] = await Promise.all([
   fs.readFile(new URL('../data/catalog/cars.json', import.meta.url), 'utf8').then(JSON.parse),
@@ -587,6 +588,9 @@ assert.equal(swappedRx8.engine.peakHp, 200);
 assert.equal(swappedRx8.base.hp, 200);
 assert.equal(swappedRx8.stageBaseline.hp, 200);
 assert.equal(swappedRx8.stageBaseline.torque, 207);
+assert.equal(swappedRx8.buildStage, 2, 'Engine swaps must not downgrade the chassis Build Type.');
+assert.equal(swappedRx8.stageBaseline.weight, 2850, 'Chassis weight baseline must survive an engine swap.');
+assert.equal(swappedRx8.stageBaseline.grip, 1.15, 'Chassis grip baseline must survive an engine swap.');
 assert.equal(swapPlayer.wallet.credits, swapCreditsBefore - 15500);
 assert.equal(swapPlayer.inventory.parts.find((part) => part.inventoryId === 'swap-intake').installedOnCarId, null);
 for (const id of ['swap-tire', 'swap-suspension', 'swap-weight']) {
@@ -616,6 +620,7 @@ const creditsBeforeReturn = swapPlayer.wallet.credits;
 swapPlayer = game.swapEngine(swapPlayer, swapRx8.carId, renesis.engineId);
 const returnedRx8 = swapPlayer.garage[0];
 assert.equal(returnedRx8.engineId, renesis.engineId);
+assert.equal(returnedRx8.buildStage, 2, 'Returning an owned engine must keep the chassis Build Type.');
 assert.equal(swapPlayer.wallet.credits, creditsBeforeReturn - 2500);
 assert.equal(swapPlayer.inventory.parts.find((part) => part.inventoryId === 'swap-intake').installedOnCarId, swapRx8.carId,
   'Stage 2-compatible engine parts should reactivate automatically with their stored engine.');
@@ -701,4 +706,48 @@ assert.equal(finalCircuitResult.unlockClass, 'C');
 assert.ok(circuitPlayer.progression.unlockedClasses.includes('C'));
 assert.equal(circuitPlayer.circuits.progress.street_roots_d.completed, true);
 console.log('V0.6A Circuit five-race progression + boss unlock test passed.');
+
+// V0.6A.2 Optional Circuit visibility + filter regression
+assert.equal(CIRCUIT_SCHEMA_VERSION, 2);
+const hiddenOptional = normalizeCircuitDefinition({
+  circuitId: 'after_c_hidden_optional',
+  name: 'After C Optional',
+  category: 'optional',
+  required: false,
+  repeatable: true,
+  entryRules: {
+    allowedClasses: [],
+    buildTypes: [1,2,3,4],
+    manufacturers: ['Mazda'],
+    aspirations: ['Naturally Aspirated'],
+    engineConfigurations: ['Rotary'],
+  },
+  races: [structuredClone(streetRoots.races[0])],
+});
+assert.equal(hiddenOptional.visibility.hiddenUntilUnlocked, true);
+assert.deepEqual(hiddenOptional.visibility.requiresClasses, ['B']);
+assert.equal(circuitVisibleToPlayer(hiddenOptional, circuitPlayer), false,
+  'Optional Circuits should remain invisible after only D/C progression is unlocked.');
+
+const optionalPlayer = structuredClone(circuitPlayer);
+optionalPlayer.progression.unlockedClasses.push('B');
+assert.equal(circuitVisibleToPlayer(hiddenOptional, optionalPlayer), true,
+  'Unlocking B should reveal optionals configured to appear after beating C.');
+assert.equal(circuitEntryStatus(hiddenOptional, optionalPlayer, optionalPlayer.garage[0]).ok, true,
+  'RX-8 should satisfy Mazda / NA / Rotary optional filters.');
+
+const golfFilterCar = game.createOwnedCar(golfSpec, 'used', 50000, 90, 5000);
+assert.equal(circuitEntryStatus(hiddenOptional, optionalPlayer, golfFilterCar).ok, false,
+  'Manufacturer / aspiration / engine-configuration filters must reject ineligible cars.');
+
+const optionalGame = new LocalGameService({
+  cars, parts, engines, circuits: [...circuits, hiddenOptional],
+  config, buildStages: buildStageConfig.stages, racingConfig
+});
+assert.throws(() => optionalGame.circuitStart(circuitPlayer, hiddenOptional.circuitId), /not been revealed/i,
+  'Hidden optional Circuits must not be enterable by ID before their reveal gate.');
+const optionalStarted = optionalGame.circuitStart(optionalPlayer, hiddenOptional.circuitId);
+assert.equal(optionalStarted.circuits.activeRun.circuitId, hiddenOptional.circuitId);
+console.log('V0.6A.2 optional visibility, filters and chassis-stage persistence test passed.');
+
 

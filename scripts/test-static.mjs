@@ -90,7 +90,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.6.0-a.1"')) throw new Error('Static index is missing the V0.6A build marker.');
+if (!html.includes('data-build="0.6.0-a.2"')) throw new Error('Static index is missing the V0.6A.2 build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -132,6 +132,7 @@ for (const file of [
   'data/catalog/cars.json',
   'data/catalog/parts.json',
   'data/catalog/engines.json',
+  'data/catalog/circuits.json',
   'data/config/game.json',
   'data/config/build-stages.json',
 ]) {
@@ -866,7 +867,7 @@ if (runtimeConfig.schemaVersion < 12 ||
     streetRootsV06a.completion?.unlockClass !== 'C') {
   throw new Error('V0.6A starter Circuit progression definition is incomplete.');
 }
-if (!circuitDomainV06a.includes('CIRCUIT_SCHEMA_VERSION') ||
+if (!circuitDomainV06a.includes('CIRCUIT_SCHEMA_VERSION = 2') ||
     !circuitDomainV06a.includes('CIRCUIT_MAX_RACES = 50') ||
     !circuitDomainV06a.includes('validateCircuitDefinition') ||
     !circuitScreenV06a.includes('PVE MINI-ROGUELITE EVENTS') ||
@@ -905,6 +906,26 @@ if (!cssV04b.includes('V0.6A.1 adaptive readability + natural page scaling') ||
   throw new Error('V0.6A.1 adaptive readability / mobile scaling pass is incomplete.');
 }
 console.log('V0.6A.1 readability scaling checks passed.');
+
+if (!circuitDomainV06a.includes('circuitVisibleToPlayer') ||
+    !circuitDomainV06a.includes('hiddenUntilUnlocked') ||
+    !circuitDomainV06a.includes('manufacturers') ||
+    !circuitDomainV06a.includes('engineConfigurations') ||
+    !circuitScreenV06a.includes('OPTIONAL CHALLENGES') ||
+    !circuitScreenV06a.includes('circuitVisibleToPlayer') ||
+    !circuitScreenV06a.includes('circuit-restriction-chips') ||
+    !circuitStudioV06a.includes('CIRCUIT SCHEMA V2') ||
+    !circuitStudioV06a.includes('HIDDEN UNTIL REVEALED') ||
+    !circuitStudioV06a.includes('Reveal After Class Unlocks') ||
+    !circuitStudioV06a.includes('Manufacturers (CSV)') ||
+    !serverGameSourceV04c.includes('This optional Circuit has not been revealed yet.') ||
+    !engineSwapShopV05h.includes('BUILD TYPE') ||
+    !engineSwapShopV05h.includes('complete runnable factory assembly') ||
+    !cssV04b.includes('V0.6A.2 optional Circuit board + swap ownership clarity')) {
+  throw new Error('V0.6A.2 optional Circuit gates / Creator filters / swap ownership UX is incomplete.');
+}
+console.log('V0.6A.2 optional Circuit tooling + engine-swap ownership checks passed.');
+
 
 
 

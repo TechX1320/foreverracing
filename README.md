@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.6.0-a.1 playable direction
+## V0.6.0-a.2 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -109,6 +109,16 @@ Completing the tutorial no longer opens every system at once. The initial progre
 
 **The Circuit** is now a catalog of self-contained PvE mini-roguelite events. Required Circuits drive class progression; optional Circuits can use their own race counts, restrictions, distances, targets and rewards. Opponents are authored builds that use the real race simulator rather than scaling directly from the player's PI.
 
+### V0.6A.2 optional Circuit groundwork
+
+- Optional Circuits can now remain completely hidden until progression reveal gates are met.
+- New optional events default to revealing after **B Class unlocks**, which maps to beating the future C-Class progression boss.
+- Circuit Creator now exposes reveal gates plus class, PI, Build Type, drivetrain, manufacturer, aspiration, engine-configuration and specific-car filters.
+- Circuit Schema is now **V2**; the copyable LLM prompt documents the new visibility/filter fields.
+- Required progression and optional Circuits have separate event-board presentation, with restriction chips for optional events.
+- Engine-swap UX now explicitly states that **Build Type belongs to the chassis**. Swapping engines does not downgrade a Full Race Car.
+- A replacement engine is treated as a complete runnable factory assembly. Engine-specific performance parts/tuning reset or stay with the removed engine; chassis upgrades stay with the car.
+
 ### V0.6A.1 adaptive readability
 
 - Raised typography across the game shell, navigation, context rail, cards, forms, dialogs and gameplay surfaces.
@@ -124,7 +134,7 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Winning the Street Roots boss permanently unlocks **C Class** progression.
 - Circuit races use authored opponent HP/TQ/weight/grip/drivetrain and the same RaceSimulator + side-view race presentation as Quick Race.
 - Circuit definitions support required/optional events, repeatability, loss rules, PI/class/build/drivetrain/car filters, recommended PI/ET guidance, mixed race distances, per-race rewards and completion unlocks.
-- Added **Circuit PvE Creator** to Content Studio with manual race-by-race editing plus Circuit Schema V1 JSON import/export and a copyable LLM prompt.
+- Added **Circuit PvE Creator** to Content Studio with manual race-by-race editing plus Circuit Schema V2 JSON import/export and a copyable LLM prompt.
 - Engine swaps now deliberately clear the active ECU calibration. Engine hardware can travel with the assembly, but tuning restarts at RESET / NONE after every swap.
 
 ### V0.5H.2 swap preview + chassis ownership hardening

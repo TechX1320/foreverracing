@@ -1463,6 +1463,9 @@ final class GameService
         $car['buildStage'] = max(1, (int)($car['buildStage'] ?? 1));
         $car['stageBaseline'] = is_array($car['stageBaseline'] ?? null) ? $car['stageBaseline'] : null;
         $car['catalogId'] = $car['catalogId'] ?? ($spec['catalogId'] ?? $spec['visual']['layered']['assetId'] ?? null);
+        $car['year'] = (int)($car['year'] ?? $spec['year'] ?? 0) ?: null;
+        $car['make'] = trim((string)($car['make'] ?? $spec['make'] ?? ''));
+        $car['model'] = trim((string)($car['model'] ?? $spec['model'] ?? ''));
         $car['factoryEngineId'] = $car['factoryEngineId'] ?? ($spec['factoryEngineId'] ?? null);
         $car['engineId'] = $car['engineId'] ?? $car['factoryEngineId'];
         $car['engineBay'] = $car['engineBay'] ?? ($spec['engineBay'] ?? null);
@@ -1532,6 +1535,9 @@ final class GameService
             'carId' => self::id('car'),
             'stockId' => (int)$spec['stockId'],
             'catalogId' => $spec['catalogId'] ?? $spec['visual']['layered']['assetId'] ?? null,
+            'year' => (int)($spec['year'] ?? 0) ?: null,
+            'make' => trim((string)($spec['make'] ?? '')),
+            'model' => trim((string)($spec['model'] ?? '')),
             'displayName' => $displayName !== '' ? $displayName : 'Unknown Car',
             'nickname' => '',
             'source' => $source,
@@ -2376,6 +2382,25 @@ final class GameService
     private static function circuitEntryReason(array $circuit, array $player, array $car): ?string
     {
         $unlocked=array_map(fn($value):string=>strtoupper((string)$value),is_array($player['progression']['unlockedClasses']??null)?$player['progression']['unlockedClasses']:['D']);
+        $category=strtolower(trim((string)($circuit['category']??(!empty($circuit['required'])?'progression':'optional'))));
+        $required=!empty($circuit['required']);
+        $visibility=is_array($circuit['visibility']??null)?$circuit['visibility']:[];
+        $hidden=array_key_exists('hiddenUntilUnlocked',$visibility)
+            ? !empty($visibility['hiddenUntilUnlocked'])
+            : (!$required&&$category==='optional');
+        if(!$required&&$category==='optional'&&$hidden){
+            $visibilityClasses=array_key_exists('requiresClasses',$visibility)
+                ? (is_array($visibility['requiresClasses'])?$visibility['requiresClasses']:[])
+                : ['B'];
+            foreach($visibilityClasses as $class){
+                $class=strtoupper(trim((string)$class));
+                if($class!==''&&!in_array($class,$unlocked,true))return 'This optional Circuit has not been revealed yet.';
+            }
+            foreach((array)($visibility['requiresCircuitIds']??[]) as $requiredId){
+                if(empty($player['circuits']['progress'][(string)$requiredId]['completed']))return 'This optional Circuit has not been revealed yet.';
+            }
+        }
+
         foreach((array)($circuit['unlock']['requiresClasses']??[]) as $class){
             $class=strtoupper((string)$class);
             if(!in_array($class,$unlocked,true))return 'Unlock class '.$class.' first.';
@@ -2395,6 +2420,19 @@ final class GameService
         $drives=array_map(fn($value):string=>strtoupper((string)$value),is_array($rules['drivetrains']??null)?$rules['drivetrains']:[]);
         $drive=strtoupper((string)($car['base']['drivetrain']??$car['derived']['drivetrain']??''));
         if($drives&&!in_array($drive,$drives,true))return 'Requires drivetrain: '.implode('/',$drives).'.';
+
+        $manufacturers=array_values(array_filter(array_map(fn($value):string=>strtolower(trim((string)$value)),is_array($rules['manufacturers']??null)?$rules['manufacturers']:[])));
+        $make=strtolower(trim((string)($car['make']??'')));
+        if($manufacturers&&!in_array($make,$manufacturers,true))return 'This manufacturer is not eligible for the event.';
+
+        $aspirations=array_values(array_filter(array_map(fn($value):string=>strtolower(trim((string)$value)),is_array($rules['aspirations']??null)?$rules['aspirations']:[])));
+        $aspiration=strtolower(trim((string)($car['engine']['aspiration']??'')));
+        if($aspirations&&!in_array($aspiration,$aspirations,true))return 'This aspiration type is not eligible for the event.';
+
+        $configurations=array_values(array_filter(array_map(fn($value):string=>strtolower(trim((string)$value)),is_array($rules['engineConfigurations']??null)?$rules['engineConfigurations']:[])));
+        $configuration=strtolower(trim((string)($car['engine']['configuration']??'')));
+        if($configurations&&!in_array($configuration,$configurations,true))return 'This engine configuration is not eligible for the event.';
+
         $allowedCars=array_map('strval',is_array($rules['allowedCarIds']??null)?$rules['allowedCarIds']:[]);
         if($allowedCars&&!in_array((string)($car['catalogId']??''),$allowedCars,true))return 'This car is not eligible for the event.';
         return null;
