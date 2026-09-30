@@ -172,6 +172,25 @@ final class GameService
         });
     }
 
+    public static function saveTune(string $carId, array $rawTune): array
+    {
+        $catalog = self::partsCatalog();
+        return self::mutatePlayer(function (array $player) use ($carId, $rawTune, $catalog): array {
+            $index = self::requireOwnedCarIndex($player, $carId);
+            $car = $player['garage'][$index];
+            $specs = self::installedPartSpecs($player, $carId, $catalog);
+            $hardware = Tuning::hardwareProfile($car, $specs);
+            if (empty($hardware['unlocked'])) {
+                throw new GameException('Install a Standalone ECU + Laptop before tuning this car.');
+            }
+            $tune = Tuning::normalizeProfile($rawTune, $car, $hardware);
+            $tune['savedAt'] = time();
+            $car['tune'] = $tune;
+            $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'] ?? [], $catalog);
+            return $player;
+        });
+    }
+
     public static function purchasePart(string $catalogId): array
     {
         $catalog = self::partsCatalog();
