@@ -37,6 +37,11 @@ export class RaceSimulator {
     const grip = clamp(Number(context.grip || 1), 0.5, 2);
     const level = Math.max(1, Number(context.level || 1));
     const drivetrain = String(context.drivetrain || "").toUpperCase();
+    const tune = context.tuning && typeof context.tuning === "object" ? context.tuning : {};
+    const tuneActive = tune.active === true;
+    const launchPowerFactor = tuneActive ? clamp(Number(tune.launchPowerFactor ?? 1), 0.45, 1) : 1;
+    const averagePowerFactor = tuneActive ? clamp(Number(tune.averagePowerFactor ?? 1), 0.45, 1) : 1;
+    const tuneStability = tuneActive ? clamp(Number(tune.stability ?? 1), 0.35, 1) : 1;
 
     const reaction = this.#reaction(level, torque, weight, Number(context.reactionOffset || 0), context.allowFoul !== false);
     let et = Number(distance.etFactor) * Math.cbrt(weight / hp);
@@ -52,6 +57,19 @@ export class RaceSimulator {
     const shiftSkillFactor = clamp(level / 100, 0, 1);
     et += estimatedGears * 0.05 * (1 - (shiftSkillFactor * 0.4)) + this.#random(-0.05, 0.08);
 
+    if (tuneActive) {
+      et *= 1 + ((1 - averagePowerFactor) * 0.045);
+      et += Number(tune.launchEtModifier || 0) + Number(tune.shiftPenaltySec || 0) + Number(tune.rollingPenaltySec || 0);
+    }
+
+    let tuningPowerPull = false;
+    let tuningPullFactor = 1;
+    if (tuneActive && this.rng() > tuneStability) {
+      tuningPowerPull = true;
+      tuningPullFactor = 1 - this.#random(0.025, 0.09);
+      et *= 1 + ((1 - tuningPullFactor) * 0.9);
+    }
+
     if (this.rng() < 0.10) et *= 1 + this.#random(0.005, 0.025);
 
     if (condition.slippery) {
@@ -63,24 +81,29 @@ export class RaceSimulator {
       if (condition.name === 'Drizzle' || condition.name === 'Misty') et *= 1.005 + this.#random(0, 0.01);
     }
 
+    const driveFactor = drivetrain === "AWD" ? 0.82 : drivetrain === "FWD" ? 1.04 : 1;
+    const surfaceFactor = condition.slippery ? 0.82 : 1;
+    const tractionDemand = ((((torque / weight) * 9) + ((hp / weight) * 2)) * driveFactor)
+      * (tuneActive ? launchPowerFactor : 1);
+    const tractionCapacity = grip * 0.72 * surfaceFactor;
+    const gripLoss = clamp((tractionDemand - tractionCapacity) / 0.42, 0, 1);
+    const smokeLevel = clamp((gripLoss - 0.06) / 0.6, 0, 1);
+    if (tuneActive) et *= 1 + (gripLoss * 0.105);
+
     et = Math.max(Number(distance.minEt || 1), et);
 
     const baseTrap = 234 * Math.cbrt(hp / weight);
+    const tuneTrapFactor = tuneActive
+      ? (1 - ((1 - averagePowerFactor) * 0.12)) * tuningPullFactor
+      : 1;
     const trap = clamp(
-      (baseTrap * Number(distance.trapMultiplier || 1)) + Number(condition.mphModifier || 0) + this.#random(-1.25, 1.25),
+      (baseTrap * tuneTrapFactor * Number(distance.trapMultiplier || 1)) + Number(condition.mphModifier || 0) + this.#random(-1.25, 1.25),
       Number(distance.minTrap || 20),
       Number(distance.maxTrap || 300)
     );
 
     const foul = reaction < 0;
     const total = foul ? et + 60 + Math.abs(reaction) : et + reaction;
-
-    const driveFactor = drivetrain === "AWD" ? 0.82 : drivetrain === "FWD" ? 1.04 : 1;
-    const surfaceFactor = condition.slippery ? 0.82 : 1;
-    const tractionDemand = (((torque / weight) * 9) + ((hp / weight) * 2)) * driveFactor;
-    const tractionCapacity = grip * 0.72 * surfaceFactor;
-    const gripLoss = clamp((tractionDemand - tractionCapacity) / 0.42, 0, 1);
-    const smokeLevel = clamp((gripLoss - 0.06) / 0.6, 0, 1);
 
     return {
       reactionTime: round(reaction, 3),
@@ -93,6 +116,17 @@ export class RaceSimulator {
         wheelSlip: round(clamp(gripLoss * 1.2, 0, 1), 3),
         smokeLevel: round(smokeLevel, 3),
       },
+      tuning: tuneActive ? {
+        active: true,
+        boostPsi: round(Number(tune.boostPsi || 0), 1),
+        boostByGear: Array.isArray(tune.boostByGear) ? tune.boostByGear.map((value) => Math.round(Number(value || 0))) : [],
+        launchPowerFactor: round(launchPowerFactor, 3),
+        averagePowerFactor: round(averagePowerFactor, 3),
+        stability: round(tuneStability, 3),
+        stress: round(Number(tune.stress || 0), 3),
+        powerPull: tuningPowerPull,
+        label: String(tune.tuneLabel || ""),
+      } : null,
     };
   }
 
