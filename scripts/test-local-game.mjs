@@ -6,16 +6,18 @@ import { benchmarkPerformance, performanceClassFromIndex } from '../assets/js/do
 import { applyPartEffects, partCompatibility, partStoreAvailable } from '../assets/js/domain/PartCatalog.js';
 import { applyBuildPartEffect, enginePowerEnvelope, limitEngineOutput, suggestedPowerLimits } from '../assets/js/domain/PowerModel.js';
 import { baseMapProfile, defaultTuneProfile, evaluateTune, tuningFingerprint, tuningHardwareProfile } from '../assets/js/domain/Tuning.js';
+import { engineSwapEligible, engineSwapQuote } from '../assets/js/domain/EngineSwap.js';
 
-const [cars, parts, config, buildStageConfig, racingConfig] = await Promise.all([
+const [cars, parts, engines, config, buildStageConfig, racingConfig] = await Promise.all([
   fs.readFile(new URL('../data/catalog/cars.json', import.meta.url), 'utf8').then(JSON.parse),
   fs.readFile(new URL('../data/catalog/parts.json', import.meta.url), 'utf8').then(JSON.parse),
+  fs.readFile(new URL('../data/catalog/engines.json', import.meta.url), 'utf8').then(JSON.parse),
   fs.readFile(new URL('../data/config/game.json', import.meta.url), 'utf8').then(JSON.parse),
   fs.readFile(new URL('../data/config/build-stages.json', import.meta.url), 'utf8').then(JSON.parse),
   fs.readFile(new URL('../data/config/racing.json', import.meta.url), 'utf8').then(JSON.parse),
 ]);
 
-const game = new LocalGameService({ cars, parts, config, buildStages: buildStageConfig.stages, racingConfig });
+const game = new LocalGameService({ cars, parts, engines, config, buildStages: buildStageConfig.stages, racingConfig });
 const compatibilityFixture = {
   catalogId: 'test_engine_specific_part',
   compatibility: { engineIds: ['vw_ea888_20t_200'], buildStages: [2,3,4] },
@@ -505,3 +507,91 @@ const step = game.roguelikeStep(player, 'safe');
 assert.ok(step.step && typeof step.step.won === 'boolean');
 
 console.log('V0.4H.2 layered race wheels + grip telemetry local game flow test passed.');
+
+
+// V0.5H Engine Swap Shop regression
+const swapEngines = engines.filter(engineSwapEligible);
+assert.equal(swapEngines.length, 3, 'Only fully-authored engines should enter the initial Engine Swap Shop.');
+const ea888 = swapEngines.find((engine) => engine.engineId === 'vw_ea888_20t_mk6_gti_200');
+const renesis = swapEngines.find((engine) => engine.engineId === 'mazda_13b_msp_renesis_238');
+const clioV6 = swapEngines.find((engine) => engine.engineId === 'renault_clio_v6_29_255');
+assert.ok(ea888 && renesis && clioV6);
+
+let swapPlayer = game.defaultPlayer();
+swapPlayer.user = { ...swapPlayer.user, username: 'SwapTester' };
+swapPlayer.wallet.credits = 100000;
+swapPlayer.tutorial = { ...swapPlayer.tutorial, status: 'complete', step: 'complete' };
+const swapRx8 = game.createOwnedCar(deepRx8, 'used', 120000, 75, 5000);
+swapRx8.buildStage = 3;
+swapRx8.stageBaseline = { hp: 260, torque: 175, weight: 2850, grip: 1.15 };
+swapPlayer.garage = [swapRx8];
+swapPlayer.selectedCarId = swapRx8.carId;
+
+const engineBoundPart = partFor('s2_intake_01');
+const chassisPart = partFor('s3_tires_drag_radial');
+swapPlayer.inventory.parts = [
+  { inventoryId: 'swap-intake', catalogId: engineBoundPart.catalogId, purchasedForCarId: swapRx8.carId, installedOnCarId: swapRx8.carId, purchasedAt: 1 },
+  { inventoryId: 'swap-tire', catalogId: chassisPart.catalogId, purchasedForCarId: swapRx8.carId, installedOnCarId: swapRx8.carId, purchasedAt: 1 },
+];
+swapPlayer = game.normalizePlayer(swapPlayer);
+const swapCarBefore = swapPlayer.garage[0];
+const eaQuote = engineSwapQuote(swapCarBefore, ea888, swapPlayer.inventory.engines);
+assert.equal(eaQuote.fitment.fitment, 'CUSTOM');
+assert.equal(eaQuote.fitment.minBuildStage, 3);
+assert.equal(eaQuote.enginePrice, 8500);
+assert.equal(eaQuote.installCost, 7000);
+assert.equal(eaQuote.totalCost, 15500);
+
+const swapCreditsBefore = swapPlayer.wallet.credits;
+swapPlayer = game.swapEngine(swapPlayer, swapRx8.carId, ea888.engineId);
+const swappedRx8 = swapPlayer.garage[0];
+assert.equal(swappedRx8.engineId, ea888.engineId);
+assert.equal(swappedRx8.engine.peakHp, 200);
+assert.equal(swappedRx8.engine.tags.includes('ea888'), true);
+assert.equal(swappedRx8.base.hp, 200);
+assert.equal(swappedRx8.stageBaseline.hp, 200);
+assert.equal(swappedRx8.stageBaseline.torque, 207);
+assert.equal(swappedRx8.tune, null);
+assert.equal(swapPlayer.wallet.credits, swapCreditsBefore - 15500);
+assert.equal(swapPlayer.inventory.parts.find((part) => part.inventoryId === 'swap-intake').installedOnCarId, null);
+assert.equal(swapPlayer.inventory.parts.find((part) => part.inventoryId === 'swap-tire').installedOnCarId, swapRx8.carId);
+assert.ok(swapPlayer.inventory.engines.some((item) => item.engineId === renesis.engineId && item.source === 'factory_removed'));
+assert.equal(swappedRx8.engineSwap.lastUninstalledParts.includes(engineBoundPart.name), true);
+assert.equal(swappedRx8.engineSwap.lastUninstalledParts.includes(chassisPart.name), false);
+assert.equal(partCompatibility({ ...compatibilityFixture, compatibility: { engineIds: [ea888.engineId], buildStages: [3,4] } }, swappedRx8).ok, true);
+assert.equal(partCompatibility({ ...compatibilityFixture, compatibility: { engineIds: [renesis.engineId], buildStages: [3,4] } }, swappedRx8).ok, false);
+
+const renesisOwnedQuote = engineSwapQuote(swappedRx8, renesis, swapPlayer.inventory.engines);
+assert.equal(renesisOwnedQuote.enginePrice, 0);
+assert.equal(renesisOwnedQuote.totalCost, 2500);
+const creditsBeforeReturn = swapPlayer.wallet.credits;
+swapPlayer = game.swapEngine(swapPlayer, swapRx8.carId, renesis.engineId);
+assert.equal(swapPlayer.garage[0].engineId, renesis.engineId);
+assert.equal(swapPlayer.wallet.credits, creditsBeforeReturn - 2500);
+assert.ok(swapPlayer.inventory.engines.some((item) => item.engineId === ea888.engineId));
+assert.equal(swapPlayer.inventory.engines.some((item) => item.engineId === renesis.engineId), false);
+
+const lockedStagePlayer = structuredClone(swapPlayer);
+lockedStagePlayer.garage[0].buildStage = 2;
+assert.throws(() => game.swapEngine(lockedStagePlayer, swapRx8.carId, ea888.engineId), /Build Type 3/i);
+
+let golfSwapPlayer = game.defaultPlayer();
+golfSwapPlayer.user = { ...golfSwapPlayer.user, username: 'GolfSwapTester' };
+golfSwapPlayer.wallet.credits = 100000;
+golfSwapPlayer.tutorial = { ...golfSwapPlayer.tutorial, status: 'complete', step: 'complete' };
+const golfSpec = cars.find((car) => car.catalogId === 'golf_gti');
+const golfOwned = game.createOwnedCar(golfSpec, 'used', 90000, 80, 7000);
+golfOwned.buildStage = 3;
+golfOwned.stageBaseline = { hp: 225, torque: 230, weight: 2900, grip: 1.1 };
+golfSwapPlayer.garage = [golfOwned];
+golfSwapPlayer.selectedCarId = golfOwned.carId;
+golfSwapPlayer = game.normalizePlayer(golfSwapPlayer);
+assert.throws(() => game.swapEngine(golfSwapPlayer, golfOwned.carId, renesis.engineId), /Build Type 4/i);
+assert.throws(() => game.swapEngine(golfSwapPlayer, golfOwned.carId, 'ford_coyote_50'), /not ready/i);
+
+let failedSwapPlayer = structuredClone(swapPlayer);
+failedSwapPlayer.garage[0].engineCondition = { healthPct: 0, failed: true, failures: 1, lastFailureAt: 1, repairedAt: null };
+failedSwapPlayer = game.swapEngine(failedSwapPlayer, swapRx8.carId, ea888.engineId);
+assert.equal(failedSwapPlayer.garage[0].engineCondition.failed, false, 'A newly purchased replacement engine should be healthy.');
+assert.ok(failedSwapPlayer.inventory.engines.some((item) => item.engineId === renesis.engineId && item.condition?.failed === true),
+  'The failed outgoing engine should stay failed in Engine Inventory.');
