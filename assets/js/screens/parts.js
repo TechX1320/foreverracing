@@ -411,7 +411,7 @@ function streetCategoryRows(player, car, specs, tutorialStep = null) {
       const projected = projectStats(player, car, part);
       const canBuy = next && !owned && Number(player.wallet?.credits || 0) >= Number(part.price || 0);
       let action = '<span class="status-text">LOCKED</span>';
-      if (installed) action = `<button class="button button--small" data-uninstall-shop-part="${escapeHtml(owned.inventoryId)}">UNINSTALL</button>`;
+      if (installed) action = '<span class="status-text status-text--good">INSTALLED • LOCKED</span>';
       else if (complete) action = '<span class="status-text status-text--good">COMPLETED</span>';
       else if (owned) action = `<button class="button button--primary button--small" data-install-shop-part="${escapeHtml(owned.inventoryId)}">INSTALL</button>`;
       else if (next) action = tutorialStep === "buy_first_upgrade"
@@ -464,7 +464,7 @@ function engineKitRows(player, car, specs) {
       const canBuy = next && !owned && Number(player.wallet?.credits || 0) >= Number(part.price || 0);
       let action = '<span class="status-text">LOCKED</span>';
 
-      if (installed) action = '<span class="status-text status-text--good">INSTALLED</span>';
+      if (installed) action = `<button class="button button--small" data-uninstall-shop-part="${escapeHtml(owned.inventoryId)}">UNINSTALL</button>`;
       else if (level < currentLevel) action = '<span class="status-text status-text--good">COMPLETED</span>';
       else if (owned && level === currentLevel + 1) action = `<button class="button button--primary button--small" data-install-shop-part="${escapeHtml(owned.inventoryId)}">INSTALL</button>`;
       else if (next) action = `<div class="parts-shop-row__buy-actions"><button class="button button--primary button--small" data-buy-install-part="${escapeHtml(part.catalogId)}" ${canBuy ? "" : "disabled"}>BUY + INSTALL • ${money(part.price)} CR</button><button class="button button--small" data-buy-part="${escapeHtml(part.catalogId)}" ${canBuy ? "" : "disabled"}>BUY ONLY</button></div>`;
