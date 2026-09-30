@@ -521,6 +521,9 @@ final class GameService
             $partIndex = self::requireOwnedPartIndex($player, $inventoryId);
             $instance = $player['inventory']['parts'][$partIndex];
             $previousCarId = $instance['installedOnCarId'] ?? null;
+            if (!empty($instance['installedOnEngineInventoryId']) && !$previousCarId) {
+                throw new GameException('That part is attached to a stored engine assembly. Install the engine assembly or remove the part from that engine first.');
+            }
             $spec = self::findBy($catalog, 'catalogId', (string)$instance['catalogId']);
             if (!$spec) {
                 throw new GameException('Part catalog entry is missing.', 500);
@@ -540,7 +543,10 @@ final class GameService
                     $installedSpec = self::findBy($catalog, 'catalogId', (string)($ownedPart['catalogId'] ?? ''));
                     $installedMeta = $installedSpec ? self::forcedInductionMeta($installedSpec) : null;
                     if (!$installedMeta || (string)($installedMeta['role'] ?? '') === 'nitrous') continue;
-                    if ((string)($installedMeta['system'] ?? '') === $previousSystem) $ownedPart['installedOnCarId'] = null;
+                    if ((string)($installedMeta['system'] ?? '') === $previousSystem) {
+                        $ownedPart['installedOnCarId'] = null;
+                        self::detachPartFromEngineAssembly($player, $ownedPart);
+                    }
                 }
                 unset($ownedPart);
             }
@@ -560,11 +566,22 @@ final class GameService
                 $installedSpec = self::findBy($catalog, 'catalogId', (string)($ownedPart['catalogId'] ?? ''));
                 if ($installedSpec && (string)$installedSpec['slot'] === $slot) {
                     $ownedPart['installedOnCarId'] = null;
+                    if (EngineSwap::isEngineBoundPart($installedSpec)) self::detachPartFromEngineAssembly($player, $ownedPart);
                 }
             }
             unset($ownedPart);
 
             $player['inventory']['parts'][$partIndex]['installedOnCarId'] = $carId;
+            if (EngineSwap::isEngineBoundPart($spec)) {
+                $assemblyIndex = self::engineAssemblyIndexForCar($player, $car);
+                if ($assemblyIndex !== null) {
+                    $player['inventory']['parts'][$partIndex]['installedOnEngineInventoryId'] = $player['inventory']['engines'][$assemblyIndex]['inventoryId'];
+                    $ids = is_array($player['inventory']['engines'][$assemblyIndex]['attachedPartInventoryIds'] ?? null)
+                        ? $player['inventory']['engines'][$assemblyIndex]['attachedPartInventoryIds'] : [];
+                    $ids[] = $player['inventory']['parts'][$partIndex]['inventoryId'];
+                    $player['inventory']['engines'][$assemblyIndex]['attachedPartInventoryIds'] = array_values(array_unique($ids));
+                }
+            }
             $player['garage'][$carIndex] = self::recalculateCar($player['garage'][$carIndex], $player['inventory']['parts'], $catalog);
             if ($previousCarId && (string)$previousCarId !== (string)$carId) {
                 $previousCarIndex = self::requireOwnedCarIndex($player, (string)$previousCarId);
@@ -591,6 +608,7 @@ final class GameService
                 }
             }
             $player['inventory']['parts'][$partIndex]['installedOnCarId'] = null;
+            self::detachPartFromEngineAssembly($player, $player['inventory']['parts'][$partIndex]);
             if ($carId) {
                 $carIndex = self::requireOwnedCarIndex($player, (string)$carId);
                 $player['garage'][$carIndex] = self::recalculateCar($player['garage'][$carIndex], $player['inventory']['parts'], $catalog);
@@ -624,6 +642,7 @@ final class GameService
                     if (!empty($partSpec['simpleTier'])) $ownedPart['installedOnCarId'] = null;
                 }
                 unset($ownedPart);
+                self::activateEngineAssemblyParts($player, $car);
                 $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'], $catalog);
                 self::addTransaction($player, 'stage_conversion', 0, self::carName($car) . ' converted to Street Race Car');
                 return $player;
@@ -653,6 +672,7 @@ final class GameService
                 }
 
                 $car['buildStage'] = 3;
+                self::activateEngineAssemblyParts($player, $car);
                 $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'], $catalog);
                 self::addTransaction($player, 'stage_conversion', 0, self::carName($car) . ' converted to Front-Half Race Car');
                 return $player;
@@ -660,6 +680,7 @@ final class GameService
 
             if ($stage === 3) {
                 $car['buildStage'] = 4;
+                self::activateEngineAssemblyParts($player, $car);
                 $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'], $catalog);
                 self::addTransaction($player, 'stage_conversion', 0, self::carName($car) . ' converted to Full Race Car');
                 return $player;
@@ -1158,7 +1179,7 @@ final class GameService
         $car['engineBay'] = $car['engineBay'] ?? ($spec['engineBay'] ?? null);
         $car['engineSwapFitment'] = is_array($car['engineSwapFitment'] ?? null)
             ? $car['engineSwapFitment']
-            : (is_array($spec['engineSwapFitment'] ?? null) ? $spec['engineSwapFitment'] : ['minBuildStage' => 3, 'options' => []]);
+            : (is_array($spec['engineSwapFitment'] ?? null) ? $spec['engineSwapFitment'] : ['minBuildStage' => 2, 'options' => []]);
         $car['engine'] = array_replace(
             is_array($spec['engine'] ?? null) ? $spec['engine'] : [],
             is_array($car['engine'] ?? null) ? $car['engine'] : []
@@ -1233,7 +1254,7 @@ final class GameService
             'factoryEngineId' => $spec['factoryEngineId'] ?? null,
             'engineId' => $spec['factoryEngineId'] ?? null,
             'engineBay' => $spec['engineBay'] ?? null,
-            'engineSwapFitment' => is_array($spec['engineSwapFitment'] ?? null) ? $spec['engineSwapFitment'] : ['minBuildStage' => 3, 'options' => []],
+            'engineSwapFitment' => is_array($spec['engineSwapFitment'] ?? null) ? $spec['engineSwapFitment'] : ['minBuildStage' => 2, 'options' => []],
             'engine' => is_array($spec['engine'] ?? null) ? $spec['engine'] : [],
             'visual' => self::withPaintColor(is_array($spec['visual'] ?? null) ? $spec['visual'] : [], $paintColor ?? self::firstPaintColor($spec)),
             'benchmark' => is_array($spec['benchmark'] ?? null) ? $spec['benchmark'] : $benchmark,
