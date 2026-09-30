@@ -236,18 +236,18 @@ const choicePart = player.inventory.parts.find((row) => row.catalogId === 's2_in
 player = game.installPart(player, choicePart.inventoryId, player.selectedCarId);
 assert.ok(player.garage[0].derived.hp > beforeStageUp.hp);
 
-player = game.purchasePart(player, 's2_fi_turbo_kit');
-const turboKit = player.inventory.parts.find((row) => row.catalogId === 's2_fi_turbo_kit');
-player = game.installPart(player, turboKit.inventoryId, player.selectedCarId);
-assert.throws(() => game.purchasePart(player, 's2_fi_turbo_upgrade_1'), /Engine Kit 1/i);
+player = game.purchasePart(player, 's2_fi_supercharger_kit');
+const superchargerKit = player.inventory.parts.find((row) => row.catalogId === 's2_fi_supercharger_kit');
+player = game.installPart(player, superchargerKit.inventoryId, player.selectedCarId);
+assert.throws(() => game.purchasePart(player, 's2_fi_supercharger_upgrade_1'), /Engine Kit 1/i);
 
 player = game.purchasePart(player, 's2_engine_kit_1');
 const engineKit1 = player.inventory.parts.find((row) => row.catalogId === 's2_engine_kit_1');
 player = game.installPart(player, engineKit1.inventoryId, player.selectedCarId);
 assert.ok(player.garage[0].derived.hp > beforeStageUp.hp);
-player = game.purchasePart(player, 's2_fi_turbo_upgrade_1');
-const turboUpgrade1 = player.inventory.parts.find((row) => row.catalogId === 's2_fi_turbo_upgrade_1');
-player = game.installPart(player, turboUpgrade1.inventoryId, player.selectedCarId);
+player = game.purchasePart(player, 's2_fi_supercharger_upgrade_1');
+const superchargerUpgrade1 = player.inventory.parts.find((row) => row.catalogId === 's2_fi_supercharger_upgrade_1');
+player = game.installPart(player, superchargerUpgrade1.inventoryId, player.selectedCarId);
 assert.ok(player.garage[0].derived.hp > beforeStageUp.hp);
 
 const lot = game.generateUsedLot();
