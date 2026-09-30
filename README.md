@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.6.0-a playable direction
+## V0.6.0-a.1 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,14 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is now a catalog of self-contained PvE mini-roguelite events. Required Circuits drive class progression; optional Circuits can use their own race counts, restrictions, distances, targets and rewards. Opponents are authored builds that use the real race simulator rather than scaling directly from the player's PI.
+
+### V0.6A.1 adaptive readability
+
+- Raised typography across the game shell, navigation, context rail, cards, forms, dialogs and gameplay surfaces.
+- The Circuit event board now uses larger rows, recommendations, rewards and race information instead of compact spreadsheet-scale text.
+- Desktop layouts are allowed to grow vertically instead of compressing content to avoid scrolling.
+- Phone/tablet breakpoints keep larger fonts and touch targets and rely on normal vertical scrolling rather than shrinking the interface.
+- Increased muted/faint text contrast so secondary information remains readable against the dark UI.
 
 ### V0.6A The Circuit foundation
 

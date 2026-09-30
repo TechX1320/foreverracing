@@ -90,7 +90,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.6.0-a"')) throw new Error('Static index is missing the V0.6A build marker.');
+if (!html.includes('data-build="0.6.0-a.1"')) throw new Error('Static index is missing the V0.6A build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -896,6 +896,16 @@ if (!engineSwapShopV05h.includes('RESET / NONE') ||
   throw new Error('V0.6A engine swaps must clear active ECU calibration.');
 }
 console.log('V0.6A Circuit progression, creator and tune-reset checks passed.');
+
+if (!cssV04b.includes('V0.6A.1 adaptive readability + natural page scaling') ||
+    !cssV04b.includes('font-size:clamp(16px') ||
+    !cssV04b.includes('.circuit-race-row{') ||
+    !cssV04b.includes('min-height:74px') ||
+    !cssV04b.includes('@media(max-width:760px)')) {
+  throw new Error('V0.6A.1 adaptive readability / mobile scaling pass is incomplete.');
+}
+console.log('V0.6A.1 readability scaling checks passed.');
+
 
 
 

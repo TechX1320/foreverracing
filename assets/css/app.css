@@ -2625,3 +2625,274 @@ dialog.fr-dialog:has(.engine-swap-dialog){
   .circuit-race-row{grid-template-columns:48px 1fr 70px}
   .circuit-race-row>span:last-child{grid-column:1/-1;text-align:left}
 }
+
+
+/* V0.6A.1 adaptive readability + natural page scaling
+   Readability wins over forcing every screen into a single viewport. */
+:root{
+  --muted:#abb2b8;
+  --faint:#858e95;
+}
+html{
+  min-height:100%;
+  font-size:16px;
+  overflow-y:auto;
+}
+body{
+  min-height:100%;
+  height:auto;
+  overflow-y:auto;
+  font-size:clamp(16px,calc(14px + .16vw),18px);
+  line-height:1.55;
+}
+.game-frame{
+  width:min(1680px,100%);
+  min-height:100dvh;
+  height:auto;
+}
+.game-layout{
+  grid-template-columns:200px minmax(0,1fr) 270px;
+  min-height:calc(100dvh - 82px);
+  height:auto;
+}
+.game-content{
+  padding:clamp(12px,1vw,18px);
+  overflow:visible;
+}
+.screen-root{overflow:visible}
+
+/* Global chrome: no more sub-10px navigation or utility text. */
+.brand__mark{width:40px;height:40px;font-size:13px}
+.brand__copy strong{font-size:15px}
+.brand__copy small,.environment-tag,.storage-tag,.header-action{font-size:11px}
+.game-header{height:58px;min-height:58px;padding-inline:16px}
+.nav-rail{padding:10px 8px;gap:4px}
+.nav-rail__label{font-size:11px;padding:8px 9px 4px}
+.nav-rail button{min-height:50px;padding:7px 10px}
+.nav-rail button b{font-size:14px}
+.nav-rail button span{font-size:12px;line-height:1.35;margin-top:2px}
+.context-rail{padding:12px;gap:12px}
+.rail-panel>header,.rail-panel header{height:auto;min-height:36px;padding:7px 10px;font-size:11px}
+.tutorial-rail{gap:8px;padding:10px}
+.tutorial-rail strong{font-size:15px}
+.tutorial-rail p,.rail-panel p,.rail-panel--dev p{font-size:13px;line-height:1.5}
+.rail-state{font-size:11px;padding:4px 7px}
+.rail-link{font-size:12px;padding-top:9px}
+.rule-list div{grid-template-columns:82px 1fr;gap:10px;padding:10px 0}
+.rule-list b{font-size:11px}
+.rule-list span{font-size:13px;line-height:1.45}
+.player-info-grid>div{padding:10px 11px}
+.player-info-grid span{font-size:11px}
+.player-info-grid b{font-size:16px}
+
+/* Shared page language. */
+.screen-toolbar{min-height:44px;margin-bottom:10px}
+.screen-toolbar__trail{font-size:13px}
+.section-heading{min-height:58px}
+.section-heading small,.section-label{font-size:12px}
+.section-heading h2{font-size:26px}
+.screen-copy,.muted,.objective-box p,.empty-state span{font-size:14px;line-height:1.55}
+.button{min-height:42px;padding-inline:14px;font-size:14px}
+.button--small{min-height:38px;padding-inline:12px;font-size:13px}
+.pill,.filter-chip{font-size:11px;min-height:28px}
+.game-card{padding:14px}
+.game-card h3{font-size:17px}
+.game-card p{font-size:14px;line-height:1.5}
+.game-card__price{font-size:14px}
+.spec span{font-size:11px}
+.spec strong{font-size:15px}
+.empty-state{font-size:14px;padding:34px 16px}
+.empty-state strong{font-size:17px}
+.activity-list>div{min-height:42px;font-size:13px}
+.stage-mini-list span{font-size:13px}
+.stage-mini-list--named b{font-size:11px}
+.home-section>header span,.home-section>header button{font-size:11px}
+.home-car-stats span{font-size:11px}
+.home-car-stats b{font-size:16px}
+.panel-heading h1{font-size:25px}
+.panel-heading p{font-size:13px}
+.build-summary b{font-size:12px}
+.build-summary span{font-size:12px}
+
+/* Forms/dialogs stay legible when they need to scroll. */
+.dialog-body{font-size:15px}
+.dialog-body h2{font-size:22px}
+.dialog-body>p{font-size:14px}
+.field label{font-size:12px}
+.field input,.field select,.studio-field input,.studio-field select,.studio-inline-field select{
+  min-height:42px;
+  font-size:14px;
+}
+.form-error{font-size:12px}
+.toast{font-size:13px}
+.toast strong{font-size:14px}
+dialog.fr-dialog{max-height:calc(100dvh - 24px);overflow:auto}
+
+/* Existing dense car/parts surfaces get a readable floor. */
+.parts-category-card__name,
+.parts-shop-row__title span,
+.garage-inventory-row__category,
+.stage-name-tag,
+.classified-detail-specs span,
+.race-record-strip small,
+.race-result-foot small,
+.race-playback__meta span,
+.race-playback-result__grid span,
+.race-playback-result__rewards small{
+  font-size:11px;
+}
+.parts-category-card strong{font-size:18px}
+.parts-category-card small,
+.parts-shop-row__title small,
+.garage-inventory-row small,
+.classified-detail-note,
+.parts-shop-dialog__note{font-size:13px}
+.parts-shop-row__title strong,.garage-inventory-row__identity strong{font-size:16px}
+.parts-shop-row__delta span,.garage-inventory-row__effects span{font-size:12px}
+.parts-shop-row__delta b{font-size:14px}
+.classified-card__title strong{font-size:17px}
+.classified-card__title small,.classified-card__meta{font-size:13px}
+.condition-badge{font-size:12px}
+.classified-card__meta b{font-size:17px}
+
+/* The Circuit should read like a game event board, not a spreadsheet thumbnail. */
+.circuit-career-strip{margin-bottom:14px}
+.circuit-career-strip span{padding:12px 14px}
+.circuit-career-strip small{font-size:11px}
+.circuit-career-strip b{margin-top:4px;font-size:15px}
+.circuit-event-grid{gap:12px}
+.circuit-event-card{gap:12px;padding:16px}
+.circuit-event-card h3{font-size:22px}
+.circuit-event-card>p{font-size:14px;line-height:1.55}
+.circuit-event-card__targets span{padding:10px}
+.circuit-event-card__targets small,
+.circuit-next-race__targets small,
+.circuit-run-head__stats small{font-size:11px}
+.circuit-event-card__targets b,
+.circuit-next-race__targets b,
+.circuit-run-head__stats b{margin-top:4px;font-size:14px}
+.circuit-entry-blocked{padding:9px 11px;font-size:13px}
+.circuit-event-card>footer>span{font-size:11px}
+.circuit-race-dots{gap:7px}
+.circuit-race-dots i{width:26px;height:7px}
+
+.circuit-run-head{
+  grid-template-columns:minmax(0,1.25fr) minmax(420px,.85fr);
+  gap:14px;
+  margin-bottom:12px;
+  padding:16px;
+}
+.circuit-run-head h2{font-size:24px;margin:4px 0 7px}
+.circuit-run-head p{font-size:14px;line-height:1.5}
+.circuit-run-head__stats span{padding:11px 12px}
+
+.circuit-race-row{
+  grid-template-columns:72px minmax(220px,1fr) 130px 96px;
+  gap:12px;
+  min-height:64px;
+  padding:11px 13px;
+}
+.circuit-race-row__number{font-size:12px}
+.circuit-race-row span b{font-size:14px}
+.circuit-race-row span small{margin-top:3px;font-size:12px}
+.circuit-race-row>span:last-child{font-size:11px}
+
+.circuit-next-race{
+  grid-template-columns:minmax(220px,.8fr) minmax(420px,1.2fr) minmax(170px,auto);
+  gap:14px;
+  margin-top:12px;
+  padding:16px;
+}
+.circuit-next-race h3{font-size:22px;margin:4px 0 5px}
+.circuit-next-race p{font-size:13px;line-height:1.45}
+.circuit-next-race__targets span{padding:10px}
+.circuit-next-race__actions{gap:8px;min-width:175px}
+
+/* Creator tools need readable data entry too. */
+.circuit-studio__layout{gap:14px}
+.circuit-json-box{
+  height:420px;
+  padding:12px;
+  font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;
+}
+.circuit-studio__checks{padding:11px 12px}
+.circuit-studio__checks label{font-size:12px}
+.circuit-studio__races{gap:10px;padding:10px}
+.circuit-studio-race>header{grid-template-columns:80px 1fr auto;gap:10px;padding:10px}
+.circuit-studio-race>header>span{font-size:11px}
+.circuit-studio-race>header>b{font-size:14px}
+.circuit-studio-race .studio-form-grid{padding:12px}
+
+/* Desktop can use its available space rather than compressing vertically. */
+@media(min-width:1400px){
+  .game-layout{grid-template-columns:210px minmax(0,1fr) 285px}
+  .game-content{padding:18px}
+  .circuit-race-row{min-height:68px;padding-block:13px}
+  .circuit-run-head,.circuit-next-race{padding:18px}
+}
+
+/* At narrower desktop widths the right rail moves below naturally;
+   nothing shrinks just to preserve a no-scroll target. */
+@media(max-width:1180px){
+  .game-layout{grid-template-columns:190px minmax(0,1fr)}
+  .context-rail{
+    grid-column:1/-1;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .circuit-run-head,.circuit-next-race{grid-template-columns:1fr}
+  .circuit-next-race__actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+/* Phone/tablet: larger tap/read targets and normal vertical scrolling. */
+@media(max-width:760px){
+  body{font-size:17px}
+  .game-layout{display:flex;flex-direction:column;min-height:auto}
+  .game-content{padding:10px}
+  .nav-rail{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    padding:8px;
+    gap:6px;
+  }
+  .nav-rail button{min-height:54px!important;padding:8px 9px}
+  .nav-rail button b{font-size:13px}
+  .nav-rail button span{font-size:12px}
+  .nav-rail__label{font-size:12px}
+  .context-rail{grid-template-columns:1fr;padding:10px}
+  .section-heading h2{font-size:25px}
+  .section-label,.section-heading small{font-size:12px}
+  .screen-toolbar__trail{font-size:12px}
+  .screen-copy,.muted{font-size:14px}
+  .button,.button--small{min-height:44px;font-size:14px}
+  .pill,.filter-chip{font-size:12px}
+  .circuit-career-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .circuit-event-card__targets,.circuit-next-race__targets{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .circuit-run-head{padding:14px}
+  .circuit-run-head__stats{grid-template-columns:1fr 1fr}
+  .circuit-race-row{
+    grid-template-columns:58px minmax(0,1fr) 88px;
+    min-height:74px;
+    padding:12px;
+  }
+  .circuit-race-row__number{font-size:12px}
+  .circuit-race-row span b{font-size:15px}
+  .circuit-race-row span small{font-size:12px}
+  .circuit-next-race{padding:14px}
+  .circuit-next-race__actions{grid-template-columns:1fr}
+  .circuit-json-box{height:320px;font-size:13px}
+}
+
+@media(max-width:480px){
+  .game-header{padding-inline:9px}
+  .brand__copy strong{font-size:14px}
+  .brand__copy small{font-size:10px}
+  .environment-tag,.storage-tag{display:none}
+  .nav-rail{grid-template-columns:1fr 1fr}
+  .circuit-career-strip,
+  .circuit-event-card__targets,
+  .circuit-next-race__targets{grid-template-columns:1fr}
+  .circuit-race-row{grid-template-columns:52px 1fr}
+  .circuit-race-row>span:nth-child(3),
+  .circuit-race-row>span:last-child{grid-column:2}
+  .circuit-run-head__stats{grid-template-columns:1fr}
+  .player-info-grid{grid-template-columns:1fr}
+}
