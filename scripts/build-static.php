@@ -82,7 +82,7 @@ Build: {$build}
 Storage mode: local
 Offline service worker: disabled in static development mode
 Race presentation: persistent two-phase start/finish with blocking real-time playback
-V0.6A.5: Modal sizing audit and Forced Induction dyno layout fix
+V0.6B: Complete D-through-X required PvE career progression
 Do not edit docs/ by hand; run php scripts/build-static.php.
 ");
 

@@ -93,7 +93,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.6.0-a.5"')) throw new Error('Static index is missing the V0.6A.5 build marker.');
+if (!html.includes('data-build="0.6.0-b"')) throw new Error('Static index is missing the V0.6B build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -980,6 +980,39 @@ if (modalAuditV06a5 < 0 ||
   throw new Error('V0.6A.5 modal sizing audit / forced-induction workspace protection is incomplete.');
 }
 console.log('V0.6A.5 modal sizing audit checks passed.');
+
+const requiredCareerV06b = [
+  ['street_roots_d','D','C'],
+  ['city_limits_c','C','B'],
+  ['crew_territory_b','B','A'],
+  ['regional_ladder_a','A','S'],
+  ['elite_circuit_s','S','X'],
+  ['apex_crown_x','X',null],
+];
+const requiredCircuitsV06b = circuitCatalogV06a.filter((row) => row.required === true);
+if (requiredCircuitsV06b.length !== requiredCareerV06b.length) {
+  throw new Error('V0.6B required career path does not contain exactly D/C/B/A/S/X.');
+}
+for (let index = 0; index < requiredCareerV06b.length; index += 1) {
+  const [id, className, nextClass] = requiredCareerV06b[index];
+  const circuit = requiredCircuitsV06b[index];
+  if (!circuit ||
+      circuit.circuitId !== id ||
+      circuit.schemaVersion !== 2 ||
+      circuit.entryRules?.allowedClasses?.[0] !== className ||
+      circuit.races?.length !== 5 ||
+      circuit.races?.[4]?.type !== 'boss' ||
+      circuit.completion?.unlockClass !== nextClass) {
+    throw new Error(`V0.6B career Circuit mismatch at ${className} Class.`);
+  }
+}
+if (!performanceIndexV06a4.includes('X: 1000') ||
+    !performanceIndexV06a4.includes('if (pi < 1000) return "S";') ||
+    !serverGameSourceV04c.includes("if ($pi < 1000) return 'S';")) {
+  throw new Error('V0.6B X Class PI 1000 threshold parity is incomplete.');
+}
+console.log('V0.6B D-through-X career path + X threshold checks passed.');
+
 
 
 

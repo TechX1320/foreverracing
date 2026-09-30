@@ -1,5 +1,16 @@
 # Changelog
 
+## V0.6.0-b — Full required career progression
+
+- Added the complete D → C → B → A → S → X required PvE career path.
+- Added City Limits (C), Crew Territory (B), Regional Ladder (A), Elite Circuit (S) and Apex Crown (X).
+- Each class currently uses four regular races plus one boss/rival race.
+- Chained every required Circuit to the previous clear and current class unlock.
+- S-Class completion unlocks X; Apex Crown is the current final required Circuit.
+- Rebalanced X Class to begin at PI 1000 instead of the effectively unreachable PI 1100 threshold.
+- Bumped Performance Index mapping version to 2 with JS/PHP parity.
+- Added regression coverage that benchmarks every authored required-career opponent and verifies it remains inside the intended class.
+
 ## V0.6.0-a.5 — Modal sizing audit
 
 - Audited modal sizing after the global readability pass.
