@@ -1463,6 +1463,9 @@ final class GameService
         $car['buildStage'] = max(1, (int)($car['buildStage'] ?? 1));
         $car['stageBaseline'] = is_array($car['stageBaseline'] ?? null) ? $car['stageBaseline'] : null;
         $car['catalogId'] = $car['catalogId'] ?? ($spec['catalogId'] ?? $spec['visual']['layered']['assetId'] ?? null);
+        $car['year'] = (int)($car['year'] ?? $spec['year'] ?? 0) ?: null;
+        $car['make'] = trim((string)($car['make'] ?? $spec['make'] ?? ''));
+        $car['model'] = trim((string)($car['model'] ?? $spec['model'] ?? ''));
         $car['factoryEngineId'] = $car['factoryEngineId'] ?? ($spec['factoryEngineId'] ?? null);
         $car['engineId'] = $car['engineId'] ?? $car['factoryEngineId'];
         $car['engineBay'] = $car['engineBay'] ?? ($spec['engineBay'] ?? null);
@@ -1532,6 +1535,9 @@ final class GameService
             'carId' => self::id('car'),
             'stockId' => (int)$spec['stockId'],
             'catalogId' => $spec['catalogId'] ?? $spec['visual']['layered']['assetId'] ?? null,
+            'year' => (int)($spec['year'] ?? 0) ?: null,
+            'make' => trim((string)($spec['make'] ?? '')),
+            'model' => trim((string)($spec['model'] ?? '')),
             'displayName' => $displayName !== '' ? $displayName : 'Unknown Car',
             'nickname' => '',
             'source' => $source,
