@@ -119,6 +119,8 @@ export function normalizePowerCurve(points = []) {
 export function normalizeEngineDefinition(engine = {}) {
   const displacement = Number(engine.displacementLiters ?? engine.displacement ?? 0);
   const aspiration = normalizeAspiration(engine.aspiration);
+  const peakBoostPsiRaw = engine.peakBoostPsi ?? engine.factoryPeakBoostPsi ?? engine.output?.peakBoostPsi ?? null;
+  const peakBoostPsi = peakBoostPsiRaw == null || peakBoostPsiRaw === "" ? null : Math.max(0, Number(peakBoostPsiRaw));
   const peakHp = Number(engine.peakHp ?? engine.output?.peakHp ?? 0);
   const peakHpRpm = Number(engine.peakHpRpm ?? engine.output?.peakHpRpm ?? 0);
   const peakTorque = Number(engine.peakTorque ?? engine.output?.peakTorque ?? 0);
@@ -137,6 +139,7 @@ export function normalizeEngineDefinition(engine = {}) {
     displacementLiters: displacement > 0 ? displacement : 0,
     configuration: String(engine.configuration || "").trim(),
     aspiration,
+    peakBoostPsi: Number.isFinite(peakBoostPsi) ? peakBoostPsi : null,
     peakHp: peakHp > 0 ? peakHp : 0,
     peakHpRpm: peakHpRpm > 0 ? peakHpRpm : 0,
     peakTorque: peakTorque > 0 ? peakTorque : 0,
@@ -170,6 +173,7 @@ export function engineToCarSnapshot(engine, existing = {}) {
     displacementLiters: row.displacementLiters || Number(existing.displacementLiters || 0),
     configuration: row.configuration || String(existing.configuration || ""),
     aspiration: row.aspiration || String(existing.aspiration || ""),
+    peakBoostPsi: row.peakBoostPsi ?? existing.peakBoostPsi ?? null,
     peakHp: row.peakHp || Number(existing.peakHp || 0),
     peakHpRpm: row.peakHpRpm || Number(existing.peakHpRpm || 0),
     peakTorque: row.peakTorque || Number(existing.peakTorque || 0),
