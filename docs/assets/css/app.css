@@ -1885,3 +1885,23 @@ dialog.fr-dialog:has(.garage-inventory-dialog){
 @media(max-width:760px){
   .engine-studio__profile-note{display:grid}
 }
+
+/* V0.5C.3 composite art fallback */
+.content-studio__paint-locked{
+  margin:10px;
+  padding:10px;
+  border:1px solid var(--border);
+  background:#0d1012;
+}
+.content-studio__paint-locked b{
+  display:block;
+  color:var(--accent-2);
+  font-size:11px;
+}
+.content-studio__paint-locked span{
+  display:block;
+  margin-top:4px;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.45;
+}

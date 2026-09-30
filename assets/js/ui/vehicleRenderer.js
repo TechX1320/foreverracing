@@ -5,15 +5,40 @@ export function renderVehicle(car, { stage = null, compact = false, view = "side
   }
 
   const paintColor = String(car?.visual?.paintColor || "").trim();
+  const capabilities = vehicleVisualCapabilities(car);
   const wantsEditableLayers = forceLayers || String(car?.visual?.renderMode || "") === "layers" || Boolean(paintColor);
-  const hasEditableLayers = hasLayerSource(layered.layers) || hasLayerSource(layered.raceLayers);
+  const hasEditableLayers = capabilities.layered;
   const useEditableLayers = wantsEditableLayers && hasEditableLayers;
-  const hasCertifiedArt = Boolean(String(layered.certifiedSrc || "").trim() || layered.certifiedAtlas?.src);
-  if (!hasEditableLayers && !hasCertifiedArt) {
+  if (!hasEditableLayers && !capabilities.certified) {
     return renderMissingArt(car, { compact, view });
   }
 
-  return renderLayeredVehicle(car, layered, { stage, compact, view, className, animatedWheels, forceLayers: useEditableLayers });
+  // Race playback asks for animated wheels, but some imported/special cars only
+  // have a certified composite/atlas image. Keep those cars visible as static
+  // race art instead of falling through into empty body/wheel layers.
+  const effectiveAnimatedWheels = Boolean(animatedWheels && capabilities.animatedWheels);
+  return renderLayeredVehicle(car, layered, {
+    stage,
+    compact,
+    view,
+    className,
+    animatedWheels: effectiveAnimatedWheels,
+    forceLayers: useEditableLayers,
+  });
+}
+
+export function vehicleVisualCapabilities(car) {
+  const layered = car?.visual?.layered;
+  const authored = layered?.layers || {};
+  const race = layered?.raceLayers || {};
+  const bodySrc = String(race?.body?.src || authored?.body?.src || "").trim();
+  const wheelSrc = String(race?.wheel?.src || authored?.wheel?.src || "").trim();
+  return {
+    layered: hasLayerSource(authored) || hasLayerSource(race),
+    paintable: Boolean(bodySrc),
+    animatedWheels: Boolean(bodySrc && wheelSrc),
+    certified: Boolean(String(layered?.certifiedSrc || "").trim() || layered?.certifiedAtlas?.src),
+  };
 }
 
 export function vehicleGeometry(car) {

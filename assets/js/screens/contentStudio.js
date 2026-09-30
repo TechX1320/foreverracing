@@ -1,5 +1,5 @@
 import { bindHome, escapeHtml, pageShell } from "../ui/components.js";
-import { renderVehicle } from "../ui/vehicleRenderer.js";
+import { renderVehicle, vehicleVisualCapabilities } from "../ui/vehicleRenderer.js";
 import { benchmarkPerformance, performanceClassFromIndex } from "../domain/PerformanceIndex.js";
 import { engineLabel, engineToCarSnapshot, normalizeEngineDefinition } from "../domain/EngineCatalog.js";
 import {
@@ -65,6 +65,7 @@ export async function renderContentStudio(ctx) {
 
   const renderWorkspace = () => {
     const score = scoreCar(draft, racingConfig);
+    const visualCapabilities = vehicleVisualCapabilities(draft);
     const currentLocal = findContentStudioRecord(draft.catalogId);
     const localState = currentLocal ? (currentLocal.enabled === false ? "LOCAL DRAFT" : "LOCAL ACTIVE") : "UNSAVED / SOURCE";
     host.innerHTML = `
@@ -112,16 +113,26 @@ export async function renderContentStudio(ctx) {
             </section>
 
             <section class="content-studio__preview-card">
-              <div class="content-studio__preview-head"><div><small>FACTORY PAINT</small><strong>5-color palette + preview</strong></div></div>
-              <div class="content-studio__paint-row">
-                <input type="color" value="${paintValue(draft.visual?.paintColor)}" data-studio-paint>
-                <input type="text" value="${escapeHtml(draft.visual?.paintColor || "")}" placeholder="#ffffff or blank" data-studio-field="visual.paintColor">
-                <button class="button button--small" type="button" data-clear-paint>CLEAR</button>
+              <div class="content-studio__preview-head">
+                <div><small>FACTORY PAINT</small><strong>${visualCapabilities.paintable ? "5-color palette + preview" : "Fixed livery / composite art"}</strong></div>
+                ${visualCapabilities.paintable ? "" : '<span class="pill">PAINT LOCKED</span>'}
               </div>
-              <div class="content-studio__palette" aria-label="Factory paint palette">
-                ${paintPaletteMarkup(draft.visual?.paintPalette, draft.visual?.paintColor)}
-              </div>
-              <p class="muted">These colors can be assigned to Classifieds listings so the same model does not always appear in one color. Paint needs a usable body layer; atlas-only cars stay on their authored color until layered PNGs are added.</p>
+              ${visualCapabilities.paintable ? `
+                <div class="content-studio__paint-row">
+                  <input type="color" value="${paintValue(draft.visual?.paintColor)}" data-studio-paint>
+                  <input type="text" value="${escapeHtml(draft.visual?.paintColor || "")}" placeholder="#ffffff or blank" data-studio-field="visual.paintColor">
+                  <button class="button button--small" type="button" data-clear-paint>CLEAR</button>
+                </div>
+                <div class="content-studio__palette" aria-label="Factory paint palette">
+                  ${paintPaletteMarkup(draft.visual?.paintPalette, draft.visual?.paintColor)}
+                </div>
+                <p class="muted">These colors can be assigned to Classifieds listings so the same model does not always appear in one color.</p>
+              ` : `
+                <div class="content-studio__paint-locked">
+                  <b>Composite/atlas artwork has no separate body paint layer.</b>
+                  <span>This car keeps its authored color. It can still race using static certified art; paint and spinning race wheels become available if body/wheel PNG layers are added later.</span>
+                </div>
+              `}
             </section>
 
             <section class="content-studio__actions">

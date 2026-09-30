@@ -1,5 +1,13 @@
 # Changelog
 
+## V0.5.0-c.3 — composite race-art fallback
+
+- Fixed certified/atlas-only cars disappearing in side-view race playback.
+- Animated-wheel requests now fall back to static certified art when body/wheel layer assets are unavailable.
+- Car Creator now marks composite-only cars as fixed-livery / paint locked instead of exposing nonfunctional paint controls.
+- Added visual-capability detection for paintable, layered, certified, and animated-wheel support.
+
+
 ## V0.5.0-c.2 — factory peak boost
 
 - Added optional Factory Peak Boost (PSI) to boosted Engine Creator definitions.
