@@ -173,10 +173,11 @@ function openCategory(ctx, carId, key) {
   renderStandardCategoryDialog(ctx, dialog, carId, key);
 }
 
-function renderStandardCategoryDialog(ctx, dialog, carId, key) {
+function renderStandardCategoryDialog(ctx, dialog, carId, key, viewState = {}) {
   const player = ctx.store.player;
   const car = player?.garage?.find((entry) => String(entry.carId) === String(carId));
   if (!car || !dialog) return;
+  const stage = Number(car.buildStage || 1);
   const tutorialStep = player?.tutorial?.status === "active" ? player.tutorial.step : null;
   const specs = categorySpecs(car, key);
   if (!specs.length) {
@@ -184,13 +185,48 @@ function renderStandardCategoryDialog(ctx, dialog, carId, key) {
     return;
   }
 
+  const groups = stage === 1
+    ? []
+    : [...new Set(specs.map((part) => String(part.subCategory || "General")).filter(Boolean))];
+  const selectedGroup = groups.includes(String(viewState.subCategory || ""))
+    ? String(viewState.subCategory)
+    : (groups[0] || "General");
+  const groupedSpecs = stage === 1
+    ? specs
+    : specs.filter((part) => String(part.subCategory || "General") === selectedGroup);
+  const pageSize = 3;
+  const pageCount = Math.max(1, Math.ceil(groupedSpecs.length / pageSize));
+  const page = Math.min(pageCount - 1, Math.max(0, Number(viewState.page || 0)));
+  const visibleSpecs = stage === 1
+    ? groupedSpecs
+    : groupedSpecs.slice(page * pageSize, (page + 1) * pageSize);
+
+  dialog.dataset.partsCategory = key;
+  dialog.dataset.partsSubcategory = selectedGroup;
+  dialog.dataset.partsPage = String(page);
+
+  const groupTabs = stage >= 2 && groups.length > 1
+    ? `<div class="parts-shop-subnav">${groups.map((group) => {
+        const count = specs.filter((part) => String(part.subCategory || "General") === group).length;
+        return `<button class="parts-shop-subnav__button ${group === selectedGroup ? "is-active" : ""}" type="button" data-parts-subcategory="${escapeHtml(group)}"><b>${escapeHtml(group)}</b><span>${count}</span></button>`;
+      }).join("")}</div>`
+    : "";
+
+  const pager = stage >= 2 && pageCount > 1
+    ? `<div class="parts-shop-pager">
+        <button class="button button--small" type="button" data-parts-page="${page - 1}" ${page <= 0 ? "disabled" : ""}>← PREV</button>
+        <span>PAGE <b>${page + 1}</b> / ${pageCount}</span>
+        <button class="button button--small" type="button" data-parts-page="${page + 1}" ${page >= pageCount - 1 ? "disabled" : ""}>NEXT →</button>
+      </div>`
+    : "";
+
   dialog.innerHTML = `
     <div class="dialog-body parts-shop-dialog">
       <div class="parts-shop-dialog__titlebar">
         <div>
-          <span class="section-label">${tutorialStep === "buy_first_upgrade" ? "STEP 4/5 • BUY THIS PART" : escapeHtml(buildName(Number(car.buildStage || 1)))}</span>
+          <span class="section-label">${tutorialStep === "buy_first_upgrade" ? "STEP 4/5 • BUY THIS PART" : escapeHtml(buildName(stage))}</span>
           <h2>${escapeHtml(specs[0]?.category || key)}</h2>
-          <p>${escapeHtml(carLabel(car))}</p>
+          <p>${escapeHtml(carLabel(car))}${stage >= 2 ? ` • ${visibleSpecs.length} shown / ${specs.length} available` : ""}</p>
         </div>
         <div class="parts-shop-dialog__stats">
           <span><small>HP</small><b>${number(car.derived?.hp)}</b></span>
@@ -199,14 +235,16 @@ function renderStandardCategoryDialog(ctx, dialog, carId, key) {
         </div>
       </div>
       ${tutorialStep === "buy_first_upgrade" ? '<div class="ftue-inline-command"><strong>BUY THE STAGE 1 INTAKE</strong><span>This is the only purchase available until you complete your first race.</span></div>' : ""}
+      ${groupTabs}
       <div class="parts-shop-list">
-        ${Number(car.buildStage || 1) === 1
-          ? streetCategoryRows(player, car, specs, tutorialStep)
+        ${stage === 1
+          ? streetCategoryRows(player, car, visibleSpecs, tutorialStep)
           : key === "engine_kit"
-            ? engineKitRows(player, car, specs)
-            : choiceCategoryRows(player, car, specs)}
+            ? engineKitRows(player, car, visibleSpecs)
+            : choiceCategoryRows(player, car, visibleSpecs)}
       </div>
-      <div class="parts-shop-dialog__note">BUY + INSTALL applies the part immediately. BUY ONLY keeps it in Garage Inventory for later.${Number(car.buildStage || 1) >= 2 ? " Earlier Build Type parts stay available after you advance." : ""}</div>
+      ${pager}
+      <div class="parts-shop-dialog__note">BUY + INSTALL applies the part immediately. BUY ONLY keeps it in Garage Inventory for later.${stage >= 2 ? " Earlier Build Type parts stay available after you advance." : ""}</div>
       <div class="dialog-actions"><button class="button button--small" type="button" data-close>CLOSE</button><button class="button button--primary button--small" type="button" data-inventory>GARAGE INVENTORY</button></div>
     </div>`;
 
@@ -217,11 +255,22 @@ function renderStandardCategoryDialog(ctx, dialog, carId, key) {
     ctx.router.navigate("garage");
   });
 
+  dialog.querySelectorAll("[data-parts-subcategory]").forEach((button) => {
+    button.addEventListener("click", () => {
+      renderStandardCategoryDialog(ctx, dialog, carId, key, { subCategory: button.dataset.partsSubcategory, page: 0 });
+    });
+  });
+  dialog.querySelectorAll("[data-parts-page]").forEach((button) => {
+    button.addEventListener("click", () => {
+      renderStandardCategoryDialog(ctx, dialog, carId, key, { subCategory: selectedGroup, page: Number(button.dataset.partsPage || 0) });
+    });
+  });
+
   dialog.querySelectorAll("[data-buy-part],[data-buy-install-part]").forEach((button) => {
     button.addEventListener("click", async () => {
       const installNow = Boolean(button.dataset.buyInstallPart);
       const catalogId = button.dataset.buyInstallPart || button.dataset.buyPart;
-      await purchasePart(ctx, dialog, car, catalogId, installNow, button, key);
+      await purchasePart(ctx, dialog, car, catalogId, installNow, button, key, { subCategory: selectedGroup, page });
     });
   });
 
@@ -238,8 +287,7 @@ function renderStandardCategoryDialog(ctx, dialog, carId, key) {
           return;
         }
         await renderParts(ctx);
-        if (Number(car.buildStage || 1) === 1) renderStandardCategoryDialog(ctx, dialog, carId, key);
-        else closeDialog(dialog);
+        renderStandardCategoryDialog(ctx, dialog, carId, key, { subCategory: selectedGroup, page });
       } catch (err) {
         ctx.toast("Install blocked", err.message);
         button.disabled = false;
@@ -248,7 +296,7 @@ function renderStandardCategoryDialog(ctx, dialog, carId, key) {
   });
 }
 
-async function purchasePart(ctx, dialog, car, catalogId, installNow, button, categoryKey = null) {
+async function purchasePart(ctx, dialog, car, catalogId, installNow, button, categoryKey = null, viewState = {}) {
   button.disabled = true;
   const candidate = catalogCache.find((part) => String(part.catalogId) === String(catalogId));
   if (installNow && candidate && forcedInductionSwapNeeded(car, ctx.store.player?.inventory?.parts || [], candidate, catalogCache)) {
@@ -267,9 +315,13 @@ async function purchasePart(ctx, dialog, car, catalogId, installNow, button, cat
     ctx.store.setPlayer(purchased.player);
 
     if (!installNow) {
-      closeDialog(dialog);
       ctx.toast("Part purchased", "Saved to Garage Inventory.");
       await renderParts(ctx);
+      if (categoryKey && categoryKey !== "forced_induction") {
+        renderStandardCategoryDialog(ctx, dialog, car.carId, categoryKey, viewState);
+      } else {
+        closeDialog(dialog);
+      }
       return;
     }
 
@@ -292,8 +344,8 @@ async function purchasePart(ctx, dialog, car, catalogId, installNow, button, cat
       ctx.router.navigate("quick-race");
     } else {
       await renderParts(ctx);
-      if (Number(car.buildStage || 1) === 1 && categoryKey && categoryKey !== "forced_induction") {
-        renderStandardCategoryDialog(ctx, dialog, car.carId, categoryKey);
+      if (categoryKey && categoryKey !== "forced_induction") {
+        renderStandardCategoryDialog(ctx, dialog, car.carId, categoryKey, viewState);
       } else if (categoryKey === "forced_induction" && candidate) {
         const system = String(forcedInductionMeta(candidate)?.system || "");
         closeDialog(dialog);
@@ -304,9 +356,13 @@ async function purchasePart(ctx, dialog, car, catalogId, installNow, button, cat
     }
   } catch (err) {
     if (purchased?.player) {
-      closeDialog(dialog);
       ctx.toast("Part purchased", `Installation was blocked: ${err.message}`);
       await renderParts(ctx);
+      if (categoryKey && categoryKey !== "forced_induction") {
+        renderStandardCategoryDialog(ctx, dialog, car.carId, categoryKey, viewState);
+      } else {
+        closeDialog(dialog);
+      }
       return;
     }
     ctx.toast("Purchase blocked", err.message);
