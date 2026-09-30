@@ -55,13 +55,16 @@ const required = [
   'assets/js/domain/ContentRelease.js',
   'assets/js/domain/EngineCatalog.js',
   'assets/js/domain/ForcedInduction.js',
+  'assets/js/domain/PartCatalog.js',
   'assets/js/ui/vehicleRenderer.js',
   'assets/js/ui/partDyno.js',
   'assets/js/ui/racePresentation.js',
   'assets/js/content/ContentStudioCatalog.js',
   'assets/js/content/ContentStudioEngineCatalog.js',
+  'assets/js/content/ContentStudioPartCatalog.js',
   'assets/js/screens/contentStudio.js',
   'assets/js/screens/engineStudio.js',
+  'assets/js/screens/partsStudio.js',
   'data/catalog/cars.json',
   'data/catalog/car-art.json',
   'data/catalog/parts.json',
@@ -79,7 +82,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.5.0-d.1"')) throw new Error('Static index is missing the V0.5D.1 build marker.');
+if (!html.includes('data-build="0.5.0-e"')) throw new Error('Static index is missing the V0.5E build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -155,6 +158,7 @@ if (!localProviderSource.includes('localStorage.removeItem(PLAYER_KEY)')) throw 
 if (!localProviderSource.includes('already logged in in this browser')) throw new Error('Local duplicate-login guard is missing.');
 if (!localProviderSource.includes('quickRacePreview') || !localProviderSource.includes('startQuickRace') || !localProviderSource.includes('finishQuickRace')) throw new Error('Local race preview / two-phase storage lifecycle is missing.');
 if (!localProviderSource.includes('mergeContentStudioCars')) throw new Error('Content Studio local catalog overlay is missing.');
+if (!localProviderSource.includes('mergeContentStudioParts')) throw new Error('Parts Creator local catalog overlay is missing.');
 
 const localGameSource = await fs.readFile(new URL('assets/js/domain/LocalGameService.js', root), 'utf8');
 if (!localGameSource.includes('quickRacePreview') || !localGameSource.includes('nextOpponentProfile') || !localGameSource.includes('activeRace') || !localGameSource.includes('finishQuickRace')) throw new Error('Deterministic preview / persistent active race lifecycle is missing.');
@@ -359,7 +363,7 @@ const contentStudioSource = await fs.readFile(new URL('assets/js/screens/content
 const contentStudioCatalogSource = await fs.readFile(new URL('assets/js/content/ContentStudioCatalog.js', root), 'utf8');
 if (!html.includes('CONTENT STUDIO') ||
     !contentStudioSource.includes('CAR CREATOR') ||
-    !contentStudioSource.includes('PARTS TOOL') ||
+    !contentStudioSource.includes('PARTS CREATOR') ||
     !contentStudioSource.includes('WHEELS TOOL') ||
     !contentStudioSource.includes('accept="image/png,.png"') ||
     !contentStudioSource.includes('benchmarkPerformance') ||
@@ -596,5 +600,28 @@ if (!partDynoSourceV05d1.includes('renderPartDynoChart') ||
   throw new Error('V0.5D.1 Parts / FI dyno UX is incomplete.');
 }
 console.log('V0.5D.1 parts depth / dyno UX checks passed.');
+
+const partCatalogSourceV05e = await fs.readFile(new URL('assets/js/domain/PartCatalog.js', root), 'utf8');
+const partStudioCatalogSourceV05e = await fs.readFile(new URL('assets/js/content/ContentStudioPartCatalog.js', root), 'utf8');
+const partsStudioSourceV05e = await fs.readFile(new URL('assets/js/screens/partsStudio.js', root), 'utf8');
+if (!appSource.includes("renderPartsStudio") || !appSource.includes(".register('parts-studio'") ||
+    !contentStudioSource.includes('PARTS CREATOR') || !engineStudioSource.includes('PARTS CREATOR')) {
+  throw new Error('V0.5E Parts Creator routing is incomplete.');
+}
+if (!partCatalogSourceV05e.includes('partCompatibility') ||
+    !partCatalogSourceV05e.includes('partStoreAvailable') ||
+    !partCatalogSourceV05e.includes('partRuleCompatibility') ||
+    !partStudioCatalogSourceV05e.includes('mergeContentStudioParts') ||
+    !partsStudioSourceV05e.includes('ACTIVATE PART LOCALLY') ||
+    !partsStudioSourceV05e.includes('Compatible Engine IDs') ||
+    !partsStudioSourceV05e.includes('LIVE TEST CAR') ||
+    !partsSourceV04b.includes('partStoreAvailable') ||
+    !partsSourceV04b.includes('partCompatibility') ||
+    !localGameSource.includes('partRuleCompatibility') ||
+    !serverGameSourceV04c.includes('partCompatibilityReason') ||
+    !cssV04b.includes('V0.5E Parts Creator')) {
+  throw new Error('V0.5E Parts Creator authoring / compatibility workflow is incomplete.');
+}
+console.log('V0.5E Parts Creator checks passed.');
 
 

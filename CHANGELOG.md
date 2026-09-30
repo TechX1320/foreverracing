@@ -1,5 +1,16 @@
 # Changelog
 
+## V0.5.0-e — Parts Creator MVP
+
+- Activated Parts Creator as the third Content Studio authoring module.
+- Added create, edit, clone, local draft/activation, JSON export/copy, and live test-car previews.
+- Added engine-first compatibility with exact engine IDs, car include/exclude rules, build stages, aspiration, configuration and engine tags.
+- Added requirements/conflicts metadata and active/scheduled/deprecated/retired part lifecycle.
+- Added live HP/TQ/weight/grip/PI previews for authored effects.
+- Activated local Parts Creator definitions in the browser-local Parts shop after page reload.
+- Enforced authored compatibility, requirements/conflicts and lifecycle in local gameplay and server purchase/install validation.
+
+
 ## V0.5.0-d.1 — parts depth and UX
 
 - Kept Stage 1 category modals open after Buy + Install.

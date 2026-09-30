@@ -2,6 +2,7 @@ import { bindHome, carLabel, escapeHtml, money, number, pageShell, selectedCar }
 import { renderVehicle } from "../ui/vehicleRenderer.js";
 import { showDialog, closeDialog } from "../ui/modal.js";
 import { renderPartDynoChart } from "../ui/partDyno.js";
+import { partCompatibility, partStoreAvailable } from "../domain/PartCatalog.js";
 import {
   forcedInductionCompatibility,
   forcedInductionMeta,
@@ -106,7 +107,9 @@ function categoriesForCar(car) {
   const stage = Number(car.buildStage || 1);
   if (stage === 1) return REQUIRED;
   const available = catalogCache.filter((part) =>
-    !part.simpleTier
+    partStoreAvailable(part)
+    && partCompatibility(part, car).ok
+    && !part.simpleTier
     && Number(part.buildStage || 2) <= stage
     && Number(part.persistentFromStage || part.buildStage || 2) <= stage
   );
@@ -787,10 +790,12 @@ function tutorialObjective(step, carId) {
 function categorySpecs(car, key) {
   const stage = Number(car.buildStage || 1);
   if (stage === 1) {
-    return catalogCache.filter((part) => part.categoryKey === key && Number(part.buildStage) === 1 && Number(part.simpleTier || 0) > 0);
+    return catalogCache.filter((part) => partStoreAvailable(part) && partCompatibility(part, car).ok && part.categoryKey === key && Number(part.buildStage) === 1 && Number(part.simpleTier || 0) > 0);
   }
   return catalogCache.filter((part) =>
-    part.categoryKey === key
+    partStoreAvailable(part)
+    && partCompatibility(part, car).ok
+    && part.categoryKey === key
     && !part.simpleTier
     && Number(part.buildStage || 2) <= stage
     && Number(part.persistentFromStage || part.buildStage || 2) <= stage

@@ -2059,3 +2059,37 @@ dialog.fr-dialog:has(.forced-induction-parts-dialog){
   .forced-induction-parts-list .parts-shop-row__delta,
   .forced-induction-parts-list .parts-shop-row__action{grid-column:2}
 }
+
+
+/* V0.5E Parts Creator */
+.parts-studio__workspace{grid-template-columns:minmax(300px,.78fr) minmax(0,1.42fr)}
+.parts-studio__summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--border);margin-top:8px}
+.parts-studio__summary span{display:grid;gap:2px;padding:8px;border-right:1px solid var(--border)}
+.parts-studio__summary span:last-child{border-right:0}
+.parts-studio__summary small,.parts-studio__preview-stats span{font-size:10px;color:var(--faint);font-weight:800;letter-spacing:.06em}
+.parts-studio__summary b{font-size:13px}
+.parts-studio__effect-list{display:grid;gap:5px;margin-top:8px}
+.parts-studio__effect-list>div{display:flex;justify-content:space-between;gap:10px;padding:6px 8px;border:1px solid var(--border);background:#0d1012}
+.parts-studio__effect-list span{color:var(--muted);font-size:11px;font-weight:800}
+.parts-studio__preview-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-top:8px}
+.parts-studio__preview-stats>div{display:flex;justify-content:space-between;gap:8px;padding:7px;border:1px solid var(--border);background:#0d1012}
+.parts-studio__compat{display:grid;gap:2px;margin-top:8px;padding:8px;border:1px solid var(--border)}
+.parts-studio__compat b{font-size:11px;letter-spacing:.07em}
+.parts-studio__compat span{font-size:11px;color:var(--muted)}
+.parts-studio__compat.is-good{border-color:#31583c;background:#101812}
+.parts-studio__compat.is-good b{color:#79c88b}
+.parts-studio__compat.is-bad{border-color:#6b3737;background:#1a1111}
+.parts-studio__compat.is-bad b{color:#e58b8b}
+.parts-studio__effects-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.parts-studio__effect-input{display:grid;grid-template-columns:110px minmax(0,1fr);gap:6px}
+.studio-field--wide{grid-column:1/-1}
+.studio-field textarea{width:100%;min-height:72px;resize:vertical;background:#0d1012;border:1px solid var(--border);padding:8px;color:var(--text)}
+@media(max-width:980px){
+  .parts-studio__workspace{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  .parts-studio__summary,.parts-studio__effects-grid{grid-template-columns:1fr}
+  .parts-studio__summary span{border-right:0;border-bottom:1px solid var(--border)}
+  .parts-studio__summary span:last-child{border-bottom:0}
+  .parts-studio__effect-input{grid-template-columns:1fr}
+}

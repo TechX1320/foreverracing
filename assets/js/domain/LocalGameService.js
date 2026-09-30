@@ -2,6 +2,11 @@ import { RaceSimulator } from './RaceSimulator.js';
 import { benchmarkPerformance, performanceClassFromIndex } from './PerformanceIndex.js';
 import { isContentReleased, nextScheduledReleaseAt } from './ContentRelease.js';
 import {
+  partCompatibility,
+  partRuleCompatibility,
+  partStoreAvailable,
+} from './PartCatalog.js';
+import {
   forcedInductionCompatibility,
   forcedInductionMeta,
   forcedInductionState,
@@ -156,6 +161,7 @@ export class LocalGameService {
   purchasePart(inputPlayer, catalogId) {
     const spec = this.findBy(this.parts, 'catalogId', String(catalogId));
     if (!spec) throw new LocalGameError('That part does not exist.', 404);
+    if (!partStoreAvailable(spec)) throw new LocalGameError('That part is not currently available for purchase.', 404);
     return this.mutate(inputPlayer, (player) => {
       const car = this.selectedCar(player);
       if (!car) throw new LocalGameError('Select a car before buying build parts.');
@@ -772,6 +778,18 @@ export class LocalGameService {
   }
 
   requirePartCompatible(player, car, spec, { purchasing = false } = {}) {
+    const compatibility = partCompatibility(spec, car);
+    if (!compatibility.ok) throw new LocalGameError(compatibility.reason || 'That part is not compatible with this car.');
+
+    const installedSpecs = [];
+    for (const instance of player.inventory?.parts || []) {
+      if (String(instance.installedOnCarId || '') !== String(car.carId)) continue;
+      const installed = this.findBy(this.parts, 'catalogId', String(instance.catalogId || ''));
+      if (installed) installedSpecs.push(installed);
+    }
+    const rules = partRuleCompatibility(spec, installedSpecs);
+    if (!rules.ok) throw new LocalGameError(rules.reason || 'Part requirements are not satisfied.');
+
     const stage = Number(car.buildStage || 1);
     if (stage === 1) {
       if (Number(spec.buildStage || 1) !== 1 || !Number(spec.simpleTier || 0)) throw new LocalGameError('Street Cars use the simple three-level upgrade path.');
