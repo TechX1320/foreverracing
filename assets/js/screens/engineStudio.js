@@ -276,6 +276,7 @@ function identitySection(engine) {
 }
 
 function specSection(engine) {
+  const boosted = isBoostedAspiration(engine.aspiration);
   return `
     <section class="content-studio__section">
       <header><div><small>ENGINE BASICS</small><strong>Only what Forever Racing actually needs</strong></div></header>
@@ -285,8 +286,11 @@ function specSection(engine) {
         ${select("Aspiration", "aspiration", engine.aspiration, [
           ["Naturally Aspirated","Naturally Aspirated"],["Turbo","Turbo"],["Twin Turbo","Twin Turbo"],["Supercharged","Supercharged"],["Turbo Diesel","Turbo Diesel"]
         ])}
+        ${boosted ? field("Factory Peak Boost (PSI)", "peakBoostPsi", engine.peakBoostPsi ?? "", "number", { min: 0, step: 0.1 }) : ""}
       </div>
-      <p class="muted engine-studio__simple-note">Engine swaps can use displacement limits plus explicit compatibility exceptions later. Compression ratio, engine weight, size classes and orientation are intentionally not part of the authoring workflow.</p>
+      <p class="muted engine-studio__simple-note">${boosted
+        ? "Factory Peak Boost is reference/baseline data for future turbo, supercharger, boost-controller and tuning parts. It does not calculate horsepower automatically; HP/TQ and the dyno curve stay authored directly."
+        : "Engine swaps can use displacement limits plus explicit compatibility exceptions later. Compression ratio, engine weight, size classes and orientation are intentionally not part of the authoring workflow."}</p>
     </section>`;
 }
 
@@ -413,6 +417,7 @@ function createBlankEngine() {
     displacementLiters: 2,
     configuration: "I4",
     aspiration: "Naturally Aspirated",
+    peakBoostPsi: null,
     peakHp: 200,
     peakHpRpm: 6000,
     peakTorque: 180,
@@ -470,6 +475,11 @@ function setValue(target, path, value) {
 function uniqueList(value) {
   const values = Array.isArray(value) ? value : String(value || "").split(",");
   return [...new Set(values.map((item) => String(item || "").trim()).filter(Boolean))];
+}
+
+function isBoostedAspiration(value) {
+  const aspiration = String(value || "").toLowerCase();
+  return aspiration.includes("turbo") || aspiration.includes("supercharged");
 }
 
 function numberOrDash(value) {
