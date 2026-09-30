@@ -131,7 +131,7 @@ final class PowerModel
         $hp=self::softLimit((float)($raw['hp']??1),$hpCap,0.82);
         $tq=self::softLimit((float)($raw['torque']??1),$tqCap,0.82);
         $rawHp=(float)($raw['hp']??1);$rawTq=(float)($raw['torque']??1);
-        return $raw+[
+        return array_replace($raw,[
             'hp'=>(int)round(max(1,$hp)),
             'torque'=>(int)round(max(1,$tq)),
             'powerLimit'=>[
@@ -139,7 +139,7 @@ final class PowerModel
                 'rawHp'=>(int)round($rawHp),'rawTorque'=>(int)round($rawTq),
                 'hpLimited'=>$rawHp>$hp+1,'torqueLimited'=>$rawTq>$tq+1,
             ],
-        ];
+        ]);
     }
 
     public static function softLimit(float $value,float $capacity,float $startRatio=0.82): float
