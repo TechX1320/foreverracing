@@ -35,7 +35,7 @@ final class EngineSwap
         if(!$authored&&!$factory){
             return [
                 'allowed'=>false,
-                'minBuildStage'=>max(3,(int)($source['minBuildStage']??3)),
+                'minBuildStage'=>max(2,(int)($source['minBuildStage']??2)),
                 'fitment'=>'NO FITMENT','installCost'=>0,
                 'note'=>'No chassis fitment has been authored for this engine.',
             ];
@@ -43,7 +43,7 @@ final class EngineSwap
         $fitment=$authored??[];
         return [
             'allowed'=>($fitment['allowed']??true)!==false,
-            'minBuildStage'=>max(3,(int)($fitment['minBuildStage']??$source['minBuildStage']??3)),
+            'minBuildStage'=>max(2,(int)($fitment['minBuildStage']??$source['minBuildStage']??2)),
             'fitment'=>strtoupper((string)($fitment['fitment']??($factory?'FACTORY':'CUSTOM'))),
             'installCost'=>max(0,(int)round((float)($fitment['installCost']??($factory?2500:7500)))),
             'note'=>(string)($fitment['note']??($factory
@@ -92,6 +92,29 @@ final class EngineSwap
             'failures'=>(int)($previous['failures']??0),
             'lastFailureAt'=>$previous['lastFailureAt']??null,
             'repairedAt'=>$previous['repairedAt']??null,
+        ];
+    }
+
+    public static function normalizeAssembly(array $item=[]): array
+    {
+        $parts=array_values(array_unique(array_filter(array_map(
+            fn($id): string => trim((string)$id),
+            is_array($item['attachedPartInventoryIds']??null)?$item['attachedPartInventoryIds']:[]
+        ))));
+        $stats=is_array($item['storedStats']??null)?[
+            'hp'=>max(1,(int)round((float)($item['storedStats']['hp']??1))),
+            'torque'=>max(1,(int)round((float)($item['storedStats']['torque']??1))),
+        ]:null;
+        return [
+            'inventoryId'=>(string)($item['inventoryId']??''),
+            'engineId'=>(string)($item['engineId']??''),
+            'installedOnCarId'=>!empty($item['installedOnCarId'])?(string)$item['installedOnCarId']:null,
+            'acquiredAt'=>(int)($item['acquiredAt']??0),
+            'source'=>(string)($item['source']??'owned'),
+            'condition'=>self::storedCondition(is_array($item['condition']??null)?$item['condition']:[]),
+            'attachedPartInventoryIds'=>$parts,
+            'tune'=>is_array($item['tune']??null)?$item['tune']:null,
+            'storedStats'=>$stats,
         ];
     }
 
