@@ -7,6 +7,7 @@ export function normalizePartDefinition(source = {}) {
   part.manufacturer = String(part.manufacturer || "").trim();
   part.description = String(part.description || "").trim();
   part.category = String(part.category || "Performance").trim();
+  part.subCategory = String(part.subCategory || "General").trim() || "General";
   part.categoryKey = String(part.categoryKey || "performance").trim().toLowerCase();
   part.slot = String(part.slot || part.categoryKey || "performance").trim().toLowerCase();
   part.buildStage = clampInt(part.buildStage || 2, 1, 4);

@@ -13,7 +13,7 @@ const CATEGORIES = [
   ["intake","Intake"],["exhaust","Exhaust"],["ecu","ECU"],["fuel","Fuel"],
   ["drivetrain","Drivetrain"],["suspension","Suspension"],["tires","Tires"],
   ["weight","Weight Reduction"],["engine_kit","Engine Kit"],["forced_induction","Forced Induction"],
-  ["tuning","Tuning Hardware"],["other","Other"],
+  ["engine","Engine"],["tuning","Tuning Hardware"],["other","Other"],
 ];
 
 export async function renderPartsStudio(ctx) {
@@ -265,6 +265,7 @@ function identitySection(part) {
         ${field("Part ID", "catalogId", part.catalogId, "text", { placeholder: "fiat_14t_gtx3076r" })}
         ${select("Category", "categoryKey", part.categoryKey, CATEGORIES)}
         ${field("Category Label", "category", part.category)}
+        ${field("Shop Subcategory", "subCategory", part.subCategory, "text", { placeholder: "Injectors / Clutch / Cams / Tires" })}
         ${field("Slot", "slot", part.slot, "text", { placeholder: "turbocharger" })}
         ${field("Tags", "tags", part.tags.join(", "), "text", { placeholder: "turbo, drag, high_rpm" })}
         ${field("Price (CR)", "price", part.price, "number", { min: 0, step: 50 })}
@@ -347,6 +348,7 @@ function createBlankPart() {
     description: "",
     category: "Intake",
     categoryKey: "intake",
+    subCategory: "General",
     slot: "intake",
     buildStage: 2,
     persistentFromStage: 2,
@@ -373,6 +375,7 @@ function finalizePart(source, { strict = true } = {}) {
   part.categoryKey = slugify(part.categoryKey || part.category || "part");
   part.slot = slugify(part.slot || part.categoryKey);
   part.category = String(part.category || labelForCategory(part.categoryKey)).trim();
+  part.subCategory = String(source.subCategory || part.subCategory || "General").trim() || "General";
   part.tags = list(source.tags);
   part.compatibility = {
     engineIds: list(source.compatibility?.engineIds),

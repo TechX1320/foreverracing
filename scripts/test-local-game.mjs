@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { LocalGameService } from '../assets/js/domain/LocalGameService.js';
-import { performanceClassFromIndex } from '../assets/js/domain/PerformanceIndex.js';
+import { benchmarkPerformance, performanceClassFromIndex } from '../assets/js/domain/PerformanceIndex.js';
 import { applyPartEffects, partCompatibility, partStoreAvailable } from '../assets/js/domain/PartCatalog.js';
 
 const [cars, parts, config, buildStageConfig, racingConfig] = await Promise.all([
@@ -25,6 +25,61 @@ assert.equal(partStoreAvailable({ lifecycle: { status: 'deprecated' } }), false)
 assert.equal(partStoreAvailable({ lifecycle: { status: 'retired' } }), false);
 assert.equal(partStoreAvailable({ lifecycle: { status: 'active' } }), true);
 assert.deepEqual(applyPartEffects({ hp: 200, torque: 180, weight: 3000, grip: 1 }, compatibilityFixture.effects), { hp: 225, torque: 180, weight: 3005, grip: 1 });
+
+const deepRx8 = cars.find((car) => car.catalogId === 'mazda_rx8');
+assert.ok(deepRx8);
+const stageOneMaxIds = [
+  's1_intake_3','s1_exhaust_3','s1_ecu_3','s1_fuel_3',
+  's1_drivetrain_3','s1_suspension_3','s1_tires_3','s1_weight_3',
+];
+const lowEightBuildIds = [
+  's2_intake_01','s2_exhaust_03','s4_ecu_standalone','s2_fuel_08','s2_drivetrain_09',
+  's3_suspension_drag','s4_tires_pro_radial','s2_weight_14','s3_engine_kit_3','s2_fi_turbo_upgrade_3',
+  's4_intake_sheetmetal','s4_intake_throttle','s3_intake_airbox',
+  's4_exhaust_header','s4_exhaust_4in','s3_exhaust_side_exit',
+  's4_fuel_injectors_1700','s4_fuel_dual_pump','s4_fuel_return','s3_fuel_flex_sensor',
+  's3_ecu_afc','s4_ecu_boost_by_gear','s4_ecu_race_launch',
+  's4_drivetrain_clutch','s4_drivetrain_flywheel','s4_drivetrain_sequential','s4_drivetrain_spool',
+  's3_suspension_arms','s4_suspension_front','s4_suspension_rear',
+  's3_weight_lexan','s4_weight_full_chassis',
+  's3_fi_turbo_intercooler','s3_fi_turbo_upgrade','s3_fi_turbo_piping',
+];
+const effectsFor = (ids) => ids.flatMap((id) => {
+  const part = parts.find((row) => row.catalogId === id);
+  assert.ok(part, `Missing V0.5F balance part: ${id}`);
+  return part.effects || [];
+});
+const applyBuildEffects = (base, effects) => {
+  const stats = {
+    hp: Number(base.hp || 1),
+    torque: Number(base.torque || 1),
+    weight: Number(base.weight || 500),
+    grip: Number(base.grip || 1),
+  };
+  for (const effect of effects) {
+    const stat = String(effect.stat || '');
+    if (!(stat in stats)) continue;
+    const value = Number(effect.value || 0);
+    if (String(effect.op || 'add') === 'mul') stats[stat] *= value;
+    else stats[stat] += value;
+  }
+  return {
+    hp: Math.round(stats.hp),
+    torque: Math.round(stats.torque),
+    weight: Math.round(stats.weight),
+    grip: Math.round(stats.grip * 1000) / 1000,
+  };
+};
+const rx8StageBaseline = applyBuildEffects(deepRx8.base, effectsFor(stageOneMaxIds));
+const rx8LowEightStats = {
+  ...applyBuildEffects(rx8StageBaseline, effectsFor(lowEightBuildIds)),
+  drivetrain: 'RWD',
+};
+const rx8LowEightBenchmark = benchmarkPerformance(rx8LowEightStats, racingConfig);
+assert.ok(rx8LowEightBenchmark.quarterMileEt >= 7.75 && rx8LowEightBenchmark.quarterMileEt <= 8.45,
+  `V0.5F RX-8 deep Stage 4 build should land in the low-8-second neighborhood; got ${rx8LowEightBenchmark.quarterMileEt}s.`);
+assert.ok(rx8LowEightStats.hp >= 950 && rx8LowEightStats.weight <= 2600);
+
 assert.equal(buildStageConfig.stages[0].name, 'Street Car');
 assert.equal(buildStageConfig.stages[1].name, 'Street Race Car');
 assert.equal(buildStageConfig.stages[2].name, 'Front-Half Race Car');

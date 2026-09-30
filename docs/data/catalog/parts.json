@@ -21,7 +21,8 @@
         "op": "add",
         "value": 2
       }
-    ]
+    ],
+    "subCategory": "Intake System"
   },
   {
     "catalogId": "s1_intake_2",
@@ -45,7 +46,8 @@
         "op": "add",
         "value": 4
       }
-    ]
+    ],
+    "subCategory": "Intake System"
   },
   {
     "catalogId": "s1_intake_3",
@@ -69,7 +71,8 @@
         "op": "add",
         "value": 6
       }
-    ]
+    ],
+    "subCategory": "Intake System"
   },
   {
     "catalogId": "s1_exhaust_1",
@@ -98,7 +101,8 @@
         "op": "add",
         "value": -4
       }
-    ]
+    ],
+    "subCategory": "Exhaust System"
   },
   {
     "catalogId": "s1_exhaust_2",
@@ -127,7 +131,8 @@
         "op": "add",
         "value": -7
       }
-    ]
+    ],
+    "subCategory": "Exhaust System"
   },
   {
     "catalogId": "s1_exhaust_3",
@@ -156,7 +161,8 @@
         "op": "add",
         "value": -12
       }
-    ]
+    ],
+    "subCategory": "Exhaust System"
   },
   {
     "catalogId": "s1_ecu_1",
@@ -180,7 +186,8 @@
         "op": "mul",
         "value": 1.015
       }
-    ]
+    ],
+    "subCategory": "Calibration"
   },
   {
     "catalogId": "s1_ecu_2",
@@ -204,7 +211,8 @@
         "op": "mul",
         "value": 1.03
       }
-    ]
+    ],
+    "subCategory": "Calibration"
   },
   {
     "catalogId": "s1_ecu_3",
@@ -228,7 +236,8 @@
         "op": "mul",
         "value": 1.045
       }
-    ]
+    ],
+    "subCategory": "Calibration"
   },
   {
     "catalogId": "s1_fuel_1",
@@ -252,7 +261,8 @@
         "op": "add",
         "value": 3
       }
-    ]
+    ],
+    "subCategory": "Fuel System"
   },
   {
     "catalogId": "s1_fuel_2",
@@ -276,7 +286,8 @@
         "op": "add",
         "value": 6
       }
-    ]
+    ],
+    "subCategory": "Fuel System"
   },
   {
     "catalogId": "s1_fuel_3",
@@ -300,7 +311,8 @@
         "op": "add",
         "value": 9
       }
-    ]
+    ],
+    "subCategory": "Fuel System"
   },
   {
     "catalogId": "s1_drivetrain_1",
@@ -324,7 +336,8 @@
         "op": "add",
         "value": -2
       }
-    ]
+    ],
+    "subCategory": "Gearing & Axles"
   },
   {
     "catalogId": "s1_drivetrain_2",
@@ -348,7 +361,8 @@
         "op": "add",
         "value": -4
       }
-    ]
+    ],
+    "subCategory": "Gearing & Axles"
   },
   {
     "catalogId": "s1_drivetrain_3",
@@ -372,7 +386,8 @@
         "op": "add",
         "value": -7
       }
-    ]
+    ],
+    "subCategory": "Gearing & Axles"
   },
   {
     "catalogId": "s1_tires_1",
@@ -391,7 +406,8 @@
         "op": "add",
         "value": 0.025
       }
-    ]
+    ],
+    "subCategory": "Tires"
   },
   {
     "catalogId": "s1_tires_2",
@@ -410,7 +426,8 @@
         "op": "add",
         "value": 0.055
       }
-    ]
+    ],
+    "subCategory": "Tires"
   },
   {
     "catalogId": "s1_tires_3",
@@ -434,7 +451,8 @@
         "op": "add",
         "value": 2
       }
-    ]
+    ],
+    "subCategory": "Tires"
   },
   {
     "catalogId": "s1_weight_1",
@@ -453,7 +471,8 @@
         "op": "add",
         "value": -30
       }
-    ]
+    ],
+    "subCategory": "Weight Reduction"
   },
   {
     "catalogId": "s1_weight_2",
@@ -472,7 +491,8 @@
         "op": "add",
         "value": -70
       }
-    ]
+    ],
+    "subCategory": "Weight Reduction"
   },
   {
     "catalogId": "s1_weight_3",
@@ -491,7 +511,8 @@
         "op": "add",
         "value": -120
       }
-    ]
+    ],
+    "subCategory": "Weight Reduction"
   },
   {
     "catalogId": "s2_intake_01",
@@ -515,7 +536,8 @@
         "op": "add",
         "value": 2
       }
-    ]
+    ],
+    "subCategory": "Intake System"
   },
   {
     "catalogId": "s2_intake_02",
@@ -539,7 +561,8 @@
         "op": "add",
         "value": 7
       }
-    ]
+    ],
+    "subCategory": "Intake System"
   },
   {
     "catalogId": "s2_exhaust_03",
@@ -568,7 +591,8 @@
         "op": "add",
         "value": -24
       }
-    ]
+    ],
+    "subCategory": "Exhaust System"
   },
   {
     "catalogId": "s2_exhaust_04",
@@ -597,7 +621,8 @@
         "op": "add",
         "value": -10
       }
-    ]
+    ],
+    "subCategory": "Exhaust System"
   },
   {
     "catalogId": "s2_ecu_05",
@@ -621,7 +646,8 @@
         "op": "mul",
         "value": 1.08
       }
-    ]
+    ],
+    "subCategory": "Calibration"
   },
   {
     "catalogId": "s2_ecu_06",
@@ -645,7 +671,8 @@
         "op": "mul",
         "value": 1.03
       }
-    ]
+    ],
+    "subCategory": "Calibration"
   },
   {
     "catalogId": "s2_fuel_07",
@@ -669,7 +696,8 @@
         "op": "add",
         "value": 8
       }
-    ]
+    ],
+    "subCategory": "Fuel System"
   },
   {
     "catalogId": "s2_fuel_08",
@@ -693,7 +721,8 @@
         "op": "add",
         "value": 11
       }
-    ]
+    ],
+    "subCategory": "Fuel System"
   },
   {
     "catalogId": "s2_drivetrain_09",
@@ -717,7 +746,8 @@
         "op": "add",
         "value": -5
       }
-    ]
+    ],
+    "subCategory": "Gearing & Axles"
   },
   {
     "catalogId": "s2_drivetrain_10",
@@ -741,7 +771,8 @@
         "op": "add",
         "value": 7
       }
-    ]
+    ],
+    "subCategory": "Gearing & Axles"
   },
   {
     "catalogId": "s2_tires_11",
@@ -760,7 +791,8 @@
         "op": "add",
         "value": 0.095
       }
-    ]
+    ],
+    "subCategory": "Tires"
   },
   {
     "catalogId": "s2_tires_12",
@@ -784,7 +816,8 @@
         "op": "add",
         "value": 4
       }
-    ]
+    ],
+    "subCategory": "Tires"
   },
   {
     "catalogId": "s2_weight_13",
@@ -803,7 +836,8 @@
         "op": "add",
         "value": -85
       }
-    ]
+    ],
+    "subCategory": "Weight Reduction"
   },
   {
     "catalogId": "s2_weight_14",
@@ -827,7 +861,8 @@
         "op": "add",
         "value": 0.01
       }
-    ]
+    ],
+    "subCategory": "Weight Reduction"
   },
   {
     "catalogId": "s1_suspension_1",
@@ -846,7 +881,8 @@
         "op": "add",
         "value": 0.015
       }
-    ]
+    ],
+    "subCategory": "Suspension"
   },
   {
     "catalogId": "s1_suspension_2",
@@ -865,7 +901,8 @@
         "op": "add",
         "value": 0.032
       }
-    ]
+    ],
+    "subCategory": "Suspension"
   },
   {
     "catalogId": "s1_suspension_3",
@@ -889,7 +926,8 @@
         "op": "add",
         "value": -3
       }
-    ]
+    ],
+    "subCategory": "Suspension"
   },
   {
     "catalogId": "s2_fi_turbo_kit",
@@ -925,7 +963,8 @@
         "value": 42
       }
     ],
-    "requiredEngineKit": 0
+    "requiredEngineKit": 0,
+    "subCategory": "Turbo System"
   },
   {
     "catalogId": "s2_fi_supercharger_kit",
@@ -961,7 +1000,8 @@
         "value": 50
       }
     ],
-    "requiredEngineKit": 0
+    "requiredEngineKit": 0,
+    "subCategory": "Supercharger System"
   },
   {
     "catalogId": "s2_fi_turbo_upgrade_1",
@@ -997,7 +1037,8 @@
         "value": 44
       }
     ],
-    "requiredEngineKit": 1
+    "requiredEngineKit": 1,
+    "subCategory": "Turbo System"
   },
   {
     "catalogId": "s2_fi_turbo_upgrade_2",
@@ -1033,7 +1074,8 @@
         "value": 46
       }
     ],
-    "requiredEngineKit": 1
+    "requiredEngineKit": 1,
+    "subCategory": "Turbo System"
   },
   {
     "catalogId": "s2_fi_turbo_upgrade_3",
@@ -1069,7 +1111,8 @@
         "value": 48
       }
     ],
-    "requiredEngineKit": 2
+    "requiredEngineKit": 2,
+    "subCategory": "Turbo System"
   },
   {
     "catalogId": "s2_fi_supercharger_upgrade_1",
@@ -1105,7 +1148,8 @@
         "value": 52
       }
     ],
-    "requiredEngineKit": 1
+    "requiredEngineKit": 1,
+    "subCategory": "Supercharger System"
   },
   {
     "catalogId": "s2_fi_supercharger_upgrade_2",
@@ -1141,7 +1185,8 @@
         "value": 54
       }
     ],
-    "requiredEngineKit": 1
+    "requiredEngineKit": 1,
+    "subCategory": "Supercharger System"
   },
   {
     "catalogId": "s2_fi_supercharger_upgrade_3",
@@ -1177,7 +1222,8 @@
         "value": 56
       }
     ],
-    "requiredEngineKit": 2
+    "requiredEngineKit": 2,
+    "subCategory": "Supercharger System"
   },
   {
     "catalogId": "s2_fi_factory_turbo_1",
@@ -1213,7 +1259,8 @@
         "value": 3
       }
     ],
-    "requiredEngineKit": 0
+    "requiredEngineKit": 0,
+    "subCategory": "Turbo System"
   },
   {
     "catalogId": "s2_fi_factory_turbo_2",
@@ -1249,7 +1296,8 @@
         "value": 5
       }
     ],
-    "requiredEngineKit": 1
+    "requiredEngineKit": 1,
+    "subCategory": "Turbo System"
   },
   {
     "catalogId": "s2_fi_factory_turbo_3",
@@ -1285,7 +1333,8 @@
         "value": 7
       }
     ],
-    "requiredEngineKit": 2
+    "requiredEngineKit": 2,
+    "subCategory": "Turbo System"
   },
   {
     "catalogId": "s2_fi_factory_supercharger_1",
@@ -1321,7 +1370,8 @@
         "value": 2
       }
     ],
-    "requiredEngineKit": 0
+    "requiredEngineKit": 0,
+    "subCategory": "Supercharger System"
   },
   {
     "catalogId": "s2_fi_factory_supercharger_2",
@@ -1357,7 +1407,8 @@
         "value": 3
       }
     ],
-    "requiredEngineKit": 1
+    "requiredEngineKit": 1,
+    "subCategory": "Supercharger System"
   },
   {
     "catalogId": "s2_fi_factory_supercharger_3",
@@ -1393,7 +1444,8 @@
         "value": 4
       }
     ],
-    "requiredEngineKit": 2
+    "requiredEngineKit": 2,
+    "subCategory": "Supercharger System"
   },
   {
     "catalogId": "s2_fi_nos_50",
@@ -1425,7 +1477,8 @@
         "value": 25
       }
     ],
-    "requiredEngineKit": 0
+    "requiredEngineKit": 0,
+    "subCategory": "NOS"
   },
   {
     "catalogId": "s3_fi_turbo_intercooler",
@@ -1460,7 +1513,8 @@
         "value": 8
       }
     ],
-    "requiredEngineKit": 0
+    "requiredEngineKit": 0,
+    "subCategory": "Turbo Components"
   },
   {
     "catalogId": "s3_fi_turbo_upgrade",
@@ -1495,7 +1549,8 @@
         "value": 3
       }
     ],
-    "requiredEngineKit": 2
+    "requiredEngineKit": 2,
+    "subCategory": "Turbo Components"
   },
   {
     "catalogId": "s3_fi_turbo_bov",
@@ -1520,7 +1575,8 @@
         "value": 1
       }
     ],
-    "requiredEngineKit": 0
+    "requiredEngineKit": 0,
+    "subCategory": "Turbo Components"
   },
   {
     "catalogId": "s3_fi_turbo_piping",
@@ -1555,7 +1611,8 @@
         "value": 4
       }
     ],
-    "requiredEngineKit": 1
+    "requiredEngineKit": 1,
+    "subCategory": "Turbo Components"
   },
   {
     "catalogId": "s3_fi_supercharger_upgrade",
@@ -1590,7 +1647,8 @@
         "value": 6
       }
     ],
-    "requiredEngineKit": 2
+    "requiredEngineKit": 2,
+    "subCategory": "Supercharger Components"
   },
   {
     "catalogId": "s3_fi_supercharger_pulley",
@@ -1620,7 +1678,8 @@
         "value": 1.1
       }
     ],
-    "requiredEngineKit": 2
+    "requiredEngineKit": 2,
+    "subCategory": "Supercharger Components"
   },
   {
     "catalogId": "s3_fi_nos_75",
@@ -1652,7 +1711,8 @@
         "value": 25
       }
     ],
-    "requiredEngineKit": 0
+    "requiredEngineKit": 0,
+    "subCategory": "NOS"
   },
   {
     "catalogId": "s3_fi_nos_100",
@@ -1684,7 +1744,8 @@
         "value": 25
       }
     ],
-    "requiredEngineKit": 1
+    "requiredEngineKit": 1,
+    "subCategory": "NOS"
   },
   {
     "catalogId": "s3_fi_nos_150",
@@ -1716,7 +1777,8 @@
         "value": 25
       }
     ],
-    "requiredEngineKit": 2
+    "requiredEngineKit": 2,
+    "subCategory": "NOS"
   },
   {
     "catalogId": "s4_fi_twin_turbo",
@@ -1752,7 +1814,8 @@
         "value": 35
       }
     ],
-    "requiredEngineKit": 3
+    "requiredEngineKit": 3,
+    "subCategory": "Turbo System"
   },
   {
     "catalogId": "s4_fi_twin_supercharger",
@@ -1788,7 +1851,8 @@
         "value": 45
       }
     ],
-    "requiredEngineKit": 3
+    "requiredEngineKit": 3,
+    "subCategory": "Supercharger System"
   },
   {
     "catalogId": "s4_fi_nos_175",
@@ -1820,7 +1884,8 @@
         "value": 25
       }
     ],
-    "requiredEngineKit": 2
+    "requiredEngineKit": 2,
+    "subCategory": "NOS"
   },
   {
     "catalogId": "s4_fi_nos_200",
@@ -1852,7 +1917,8 @@
         "value": 25
       }
     ],
-    "requiredEngineKit": 3
+    "requiredEngineKit": 3,
+    "subCategory": "NOS"
   },
   {
     "catalogId": "s4_fi_nos_250",
@@ -1884,7 +1950,8 @@
         "value": 25
       }
     ],
-    "requiredEngineKit": 3
+    "requiredEngineKit": 3,
+    "subCategory": "NOS"
   },
   {
     "catalogId": "s4_fi_nos_300",
@@ -1916,7 +1983,8 @@
         "value": 25
       }
     ],
-    "requiredEngineKit": 4
+    "requiredEngineKit": 4,
+    "subCategory": "NOS"
   },
   {
     "catalogId": "s2_engine_kit_1",
@@ -1950,7 +2018,8 @@
         "op": "add",
         "value": 4
       }
-    ]
+    ],
+    "subCategory": "Engine Build"
   },
   {
     "catalogId": "s2_engine_kit_2",
@@ -1984,7 +2053,8 @@
         "op": "add",
         "value": 8
       }
-    ]
+    ],
+    "subCategory": "Engine Build"
   },
   {
     "catalogId": "s3_engine_kit_3",
@@ -2018,7 +2088,8 @@
         "op": "add",
         "value": 12
       }
-    ]
+    ],
+    "subCategory": "Engine Build"
   },
   {
     "catalogId": "s4_engine_kit_4",
@@ -2051,6 +2122,2426 @@
         "stat": "weight",
         "op": "add",
         "value": 18
+      }
+    ],
+    "subCategory": "Engine Build"
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": true,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s2_suspension_coilover",
+    "name": "Street / Strip Coilover Set",
+    "category": "Suspension",
+    "categoryKey": "suspension",
+    "subCategory": "Dampers",
+    "slot": "suspension",
+    "buildStage": 2,
+    "price": 3200,
+    "description": "Adjustable dampers and springs for a repeatable street/strip launch.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.05
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -2
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": true,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s2_suspension_launch",
+    "name": "Drag Launch Spring + Damper Package",
+    "category": "Suspension",
+    "categoryKey": "suspension",
+    "subCategory": "Dampers",
+    "slot": "suspension",
+    "buildStage": 2,
+    "price": 4100,
+    "description": "Softer front rise and controlled rear compression aimed at hard RWD launches.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.07
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s2_drivetrain_clutch",
+    "name": "Heavy-Duty Street Clutch",
+    "category": "Drivetrain",
+    "categoryKey": "drivetrain",
+    "subCategory": "Clutch",
+    "slot": "drivetrain_clutch",
+    "buildStage": 2,
+    "price": 2300,
+    "description": "Higher clamp load for repeated launches without giving up all street manners.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.025
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 2,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s2_drivetrain_flywheel",
+    "name": "Lightweight Flywheel",
+    "category": "Drivetrain",
+    "categoryKey": "drivetrain",
+    "subCategory": "Flywheel",
+    "slot": "drivetrain_flywheel",
+    "buildStage": 2,
+    "price": 1900,
+    "description": "Cuts rotating mass and sharpens engine response.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.01
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -10
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_intake_manifold",
+    "name": "Ported Race Intake Manifold",
+    "category": "Intake",
+    "categoryKey": "intake",
+    "subCategory": "Manifold",
+    "slot": "intake_manifold",
+    "buildStage": 3,
+    "price": 5200,
+    "description": "Ported runners and plenum improve high-rpm cylinder filling.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.04
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.025
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_intake_throttle",
+    "name": "Large-Bore Throttle Body",
+    "category": "Intake",
+    "categoryKey": "intake",
+    "subCategory": "Throttle Body",
+    "slot": "intake_throttle",
+    "buildStage": 3,
+    "price": 3100,
+    "description": "Larger throttle area reduces inlet restriction at high airflow.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.025
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.015
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_intake_airbox",
+    "name": "Race Airbox + Ram Duct",
+    "category": "Intake",
+    "categoryKey": "intake",
+    "subCategory": "Airbox",
+    "slot": "intake_airbox",
+    "buildStage": 3,
+    "price": 2800,
+    "description": "Sealed high-flow airbox and front duct for more consistent intake charge.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.02
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -2
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_exhaust_header",
+    "name": "Race Header / Manifold",
+    "category": "Exhaust",
+    "categoryKey": "exhaust",
+    "subCategory": "Header / Manifold",
+    "slot": "exhaust_header",
+    "buildStage": 3,
+    "price": 5600,
+    "description": "Higher-flow primary runners improve scavenging and turbine feed where applicable.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.04
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.025
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_exhaust_35in",
+    "name": "3.5-Inch Race Exhaust",
+    "category": "Exhaust",
+    "categoryKey": "exhaust",
+    "subCategory": "Pipe Diameter",
+    "slot": "exhaust_diameter",
+    "buildStage": 3,
+    "price": 4300,
+    "description": "Large-bore race piping for higher-output builds.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.035
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.015
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -8
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_exhaust_side_exit",
+    "name": "Short Side-Exit Exhaust",
+    "category": "Exhaust",
+    "categoryKey": "exhaust",
+    "subCategory": "Exit / Cat-Back",
+    "slot": "exhaust_exit",
+    "buildStage": 3,
+    "price": 3500,
+    "description": "Minimal race exhaust routing removes mass and backpressure.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.02
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -20
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_fuel_injectors_1000",
+    "name": "1000 cc/min Injector Set",
+    "category": "Fuel",
+    "categoryKey": "fuel",
+    "subCategory": "Injectors",
+    "slot": "fuel_injectors",
+    "buildStage": 3,
+    "price": 4600,
+    "description": "Large injectors add headroom for serious boost, ethanol and nitrous.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.025
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.025
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_fuel_pump_450",
+    "name": "450 LPH In-Tank Fuel Pump",
+    "category": "Fuel",
+    "categoryKey": "fuel",
+    "subCategory": "Fuel Pumps",
+    "slot": "fuel_pump",
+    "buildStage": 3,
+    "price": 3200,
+    "description": "High-flow pump supports sustained fuel demand at race power.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.02
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.02
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_fuel_lines_ptfe",
+    "name": "PTFE High-Flow Fuel Lines",
+    "category": "Fuel",
+    "categoryKey": "fuel",
+    "subCategory": "Fuel Lines",
+    "slot": "fuel_lines",
+    "buildStage": 3,
+    "price": 2900,
+    "description": "Larger ethanol-safe feed and return plumbing.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.01
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_fuel_flex_sensor",
+    "name": "Flex-Fuel Sensor + Content Module",
+    "category": "Fuel",
+    "categoryKey": "fuel",
+    "subCategory": "Flex Fuel",
+    "slot": "fuel_sensor",
+    "buildStage": 3,
+    "price": 2500,
+    "description": "Lets the ECU compensate for changing ethanol content and use more aggressive calibration.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.015
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.02
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_ecu_reflash",
+    "name": "Race ECU Calibration",
+    "category": "ECU",
+    "categoryKey": "ecu",
+    "subCategory": "Calibration",
+    "slot": "ecu",
+    "buildStage": 3,
+    "price": 5200,
+    "description": "Full race-oriented calibration replacing the simpler Stage 2 tune.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.08
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.07
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_ecu_afc",
+    "name": "Piggyback A/F Controller",
+    "category": "ECU",
+    "categoryKey": "ecu",
+    "subCategory": "Piggyback Controllers",
+    "slot": "ecu_afc",
+    "buildStage": 3,
+    "price": 2600,
+    "description": "Old-school fuel-trim controller for dialing in larger injectors and power adders.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.02
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.025
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_ecu_boost_controller",
+    "name": "Electronic Boost Controller",
+    "category": "ECU",
+    "categoryKey": "ecu",
+    "subCategory": "Boost Control",
+    "slot": "ecu_boost_controller",
+    "buildStage": 3,
+    "price": 3400,
+    "description": "Electronic solenoid control for more repeatable boost and stronger power delivery.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.04
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.035
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_ecu_two_step",
+    "name": "Two-Step / Launch Control Module",
+    "category": "ECU",
+    "categoryKey": "ecu",
+    "subCategory": "Launch Control",
+    "slot": "ecu_launch",
+    "buildStage": 3,
+    "price": 2200,
+    "description": "Holds a repeatable launch RPM and helps the car leave harder.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.04
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_drivetrain_clutch",
+    "name": "6-Puck Race Clutch",
+    "category": "Drivetrain",
+    "categoryKey": "drivetrain",
+    "subCategory": "Clutch",
+    "slot": "drivetrain_clutch",
+    "buildStage": 3,
+    "price": 4400,
+    "description": "Aggressive clutch material for high-torque launches.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.045
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 3
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_drivetrain_flywheel",
+    "name": "Chromoly Lightweight Flywheel",
+    "category": "Drivetrain",
+    "categoryKey": "drivetrain",
+    "subCategory": "Flywheel",
+    "slot": "drivetrain_flywheel",
+    "buildStage": 3,
+    "price": 3300,
+    "description": "Race-weight flywheel trims rotating mass without becoming disposable.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.015
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -14
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_drivetrain_gearset",
+    "name": "Close-Ratio Race Gearset",
+    "category": "Drivetrain",
+    "categoryKey": "drivetrain",
+    "subCategory": "Transmission",
+    "slot": "drivetrain_transmission",
+    "buildStage": 3,
+    "price": 7800,
+    "description": "Shorter, stronger gearing keeps the engine in the useful powerband.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.035
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -5
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_drivetrain_lsd",
+    "name": "Race Limited-Slip Differential",
+    "category": "Drivetrain",
+    "categoryKey": "drivetrain",
+    "subCategory": "Differential",
+    "slot": "drivetrain_diff",
+    "buildStage": 3,
+    "price": 6500,
+    "description": "More aggressive lockup improves repeatability under hard acceleration.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.055
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_suspension_drag",
+    "name": "Double-Adjustable Drag Coilovers",
+    "category": "Suspension",
+    "categoryKey": "suspension",
+    "subCategory": "Dampers",
+    "slot": "suspension",
+    "buildStage": 3,
+    "price": 6200,
+    "description": "Independent compression/rebound adjustment for weight-transfer tuning.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.085
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -4
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_suspension_arms",
+    "name": "Adjustable Race Arms + Bushings",
+    "category": "Suspension",
+    "categoryKey": "suspension",
+    "subCategory": "Geometry",
+    "slot": "suspension_geometry",
+    "buildStage": 3,
+    "price": 3900,
+    "description": "More precise alignment and reduced deflection under launch load.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.035
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -3
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_tires_drag_radial",
+    "name": "Competition Drag Radial",
+    "category": "Tires",
+    "categoryKey": "tires",
+    "subCategory": "Drag Radials",
+    "slot": "tires",
+    "buildStage": 3,
+    "price": 4800,
+    "description": "Stickier race compound with enough sidewall for serious launches.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.22
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 6
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_tires_bias_slick",
+    "name": "Bias-Ply Drag Slick",
+    "category": "Tires",
+    "categoryKey": "tires",
+    "subCategory": "Slicks",
+    "slot": "tires",
+    "buildStage": 3,
+    "price": 6100,
+    "description": "Dedicated drag slick optimized for wrinkle-wall launch grip.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.28
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 10
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_weight_lexan",
+    "name": "Lexan Window Package",
+    "category": "Weight Reduction",
+    "categoryKey": "weight",
+    "subCategory": "Glass",
+    "slot": "weight_glass",
+    "buildStage": 3,
+    "price": 4200,
+    "description": "Replaces heavy glass with race polycarbonate panels.",
+    "effects": [
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -50
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_weight_doors",
+    "name": "Lightweight Door Shells",
+    "category": "Weight Reduction",
+    "categoryKey": "weight",
+    "subCategory": "Body Panels",
+    "slot": "weight_doors",
+    "buildStage": 3,
+    "price": 5600,
+    "description": "Stripped lightweight door shells remove substantial side weight.",
+    "effects": [
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -65
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 3,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s3_weight_front_half",
+    "name": "Front-Half Chassis Conversion",
+    "category": "Weight Reduction",
+    "categoryKey": "weight",
+    "subCategory": "Chassis",
+    "slot": "weight_chassis",
+    "buildStage": 3,
+    "price": 12000,
+    "description": "Front-half tube structure removes production chassis mass while improving launch control.",
+    "effects": [
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -90
+      },
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.025
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_intake_sheetmetal",
+    "name": "Sheet-Metal Race Intake Manifold",
+    "category": "Intake",
+    "categoryKey": "intake",
+    "subCategory": "Manifold",
+    "slot": "intake_manifold",
+    "buildStage": 4,
+    "price": 8800,
+    "description": "Large-plenum race manifold for maximum high-rpm airflow.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.065
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.04
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_intake_throttle",
+    "name": "Oversize Race Throttle Body",
+    "category": "Intake",
+    "categoryKey": "intake",
+    "subCategory": "Throttle Body",
+    "slot": "intake_throttle",
+    "buildStage": 4,
+    "price": 5200,
+    "description": "Maximum practical throttle area for a full-race intake path.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.04
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.025
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_exhaust_header",
+    "name": "Competition Header / Turbo Manifold",
+    "category": "Exhaust",
+    "categoryKey": "exhaust",
+    "subCategory": "Header / Manifold",
+    "slot": "exhaust_header",
+    "buildStage": 4,
+    "price": 9200,
+    "description": "Full-race manifold sized for extreme exhaust mass flow.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.065
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.04
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_exhaust_4in",
+    "name": "4-Inch Open Race Exhaust",
+    "category": "Exhaust",
+    "categoryKey": "exhaust",
+    "subCategory": "Pipe Diameter",
+    "slot": "exhaust_diameter",
+    "buildStage": 4,
+    "price": 6600,
+    "description": "Very large open exhaust for maximum-output race builds.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.05
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.025
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -12
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_fuel_injectors_1700",
+    "name": "1700 cc/min Injector Set",
+    "category": "Fuel",
+    "categoryKey": "fuel",
+    "subCategory": "Injectors",
+    "slot": "fuel_injectors",
+    "buildStage": 4,
+    "price": 7600,
+    "description": "Huge injector capacity for four-digit-power ethanol and race-fuel setups.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.045
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.04
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_fuel_dual_pump",
+    "name": "Dual 525 LPH Fuel Pump System",
+    "category": "Fuel",
+    "categoryKey": "fuel",
+    "subCategory": "Fuel Pumps",
+    "slot": "fuel_pump",
+    "buildStage": 4,
+    "price": 8200,
+    "description": "Twin high-flow pumps maintain pressure at full-race fuel demand.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.04
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.035
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 3
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_fuel_return",
+    "name": "Competition Return-Style Fuel System",
+    "category": "Fuel",
+    "categoryKey": "fuel",
+    "subCategory": "Fuel Lines",
+    "slot": "fuel_lines",
+    "buildStage": 4,
+    "price": 6900,
+    "description": "Large feed/return lines, regulator and rails for stable fuel pressure.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.025
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.02
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_ecu_standalone",
+    "name": "Standalone ECU + Laptop Interface",
+    "category": "ECU",
+    "categoryKey": "ecu",
+    "subCategory": "Standalone ECU",
+    "slot": "ecu",
+    "buildStage": 4,
+    "price": 14000,
+    "description": "Full standalone engine management. This is the hardware foundation for the upcoming home-laptop tuning system.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.11
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.09
+      }
+    ],
+    "tuning": {
+      "homeGarage": true,
+      "mode": "standalone"
+    }
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_ecu_boost_by_gear",
+    "name": "Boost-by-Gear Controller",
+    "category": "ECU",
+    "categoryKey": "ecu",
+    "subCategory": "Boost Control",
+    "slot": "ecu_boost_controller",
+    "buildStage": 4,
+    "price": 7200,
+    "description": "Advanced boost control trades wheelspin for usable power through each gear.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.055
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.045
+      },
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.035
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_ecu_race_launch",
+    "name": "Race Launch + Traction Module",
+    "category": "ECU",
+    "categoryKey": "ecu",
+    "subCategory": "Launch Control",
+    "slot": "ecu_launch",
+    "buildStage": 4,
+    "price": 5400,
+    "description": "Advanced launch strategy and power management for maximum-effort starts.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.065
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_drivetrain_clutch",
+    "name": "Triple-Disc Race Clutch",
+    "category": "Drivetrain",
+    "categoryKey": "drivetrain",
+    "subCategory": "Clutch",
+    "slot": "drivetrain_clutch",
+    "buildStage": 4,
+    "price": 9800,
+    "description": "Multi-disc clutch capacity for four-digit-power launches.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.065
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 6
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_drivetrain_flywheel",
+    "name": "Ultra-Light Chromoly Flywheel",
+    "category": "Drivetrain",
+    "categoryKey": "drivetrain",
+    "subCategory": "Flywheel",
+    "slot": "drivetrain_flywheel",
+    "buildStage": 4,
+    "price": 6200,
+    "description": "Minimum practical flywheel inertia for a competition-only drivetrain.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.02
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -20
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_drivetrain_sequential",
+    "name": "6-Speed Sequential Race Gearbox",
+    "category": "Drivetrain",
+    "categoryKey": "drivetrain",
+    "subCategory": "Transmission",
+    "slot": "drivetrain_transmission",
+    "buildStage": 4,
+    "price": 26000,
+    "description": "Dog-engagement sequential gearbox keeps shifts fast and the engine on power.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.07
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -18
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_drivetrain_spool",
+    "name": "Drag Spool / Pro Differential",
+    "category": "Drivetrain",
+    "categoryKey": "drivetrain",
+    "subCategory": "Differential",
+    "slot": "drivetrain_diff",
+    "buildStage": 4,
+    "price": 10500,
+    "description": "Maximum lockup for dedicated straight-line competition.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.085
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_suspension_front",
+    "name": "Competition Front Strut Package",
+    "category": "Suspension",
+    "categoryKey": "suspension",
+    "subCategory": "Front Suspension",
+    "slot": "suspension_front",
+    "buildStage": 4,
+    "price": 7600,
+    "description": "Long-travel front setup engineered for controlled weight transfer.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.045
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -6
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_suspension_rear",
+    "name": "4-Link / Race Rear Suspension",
+    "category": "Suspension",
+    "categoryKey": "suspension",
+    "subCategory": "Rear Suspension",
+    "slot": "suspension_rear",
+    "buildStage": 4,
+    "price": 14500,
+    "description": "Dedicated drag rear geometry with broad anti-squat adjustment.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.08
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -4
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_suspension_wheelie",
+    "name": "Adjustable Wheelie Bar",
+    "category": "Suspension",
+    "categoryKey": "suspension",
+    "subCategory": "Launch Hardware",
+    "slot": "suspension_wheelie",
+    "buildStage": 4,
+    "price": 4800,
+    "description": "Controls pitch on high-power RWD launches so more power can be applied early.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.035
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 8
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_tires_pro_radial",
+    "name": "Pro Drag Radial",
+    "category": "Tires",
+    "categoryKey": "tires",
+    "subCategory": "Drag Radials",
+    "slot": "tires",
+    "buildStage": 4,
+    "price": 8800,
+    "description": "Professional-level radial compound for very high-power drag builds.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.35
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 12
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_tires_big_slick",
+    "name": "Big-Tire Drag Slick",
+    "category": "Tires",
+    "categoryKey": "tires",
+    "subCategory": "Slicks",
+    "slot": "tires",
+    "buildStage": 4,
+    "price": 11200,
+    "description": "Maximum wrinkle-wall tire and wheel package for a full race car.",
+    "effects": [
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.42
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": 18
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_weight_full_chassis",
+    "name": "Full Tube-Chassis Conversion",
+    "category": "Weight Reduction",
+    "categoryKey": "weight",
+    "subCategory": "Chassis",
+    "slot": "weight_chassis",
+    "buildStage": 4,
+    "price": 32000,
+    "description": "Replaces major production structure with a purpose-built race chassis.",
+    "effects": [
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -170
+      },
+      {
+        "stat": "grip",
+        "op": "add",
+        "value": 0.04
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_weight_composite",
+    "name": "Carbon / Composite Body Panels",
+    "category": "Weight Reduction",
+    "categoryKey": "weight",
+    "subCategory": "Body Panels",
+    "slot": "weight_body",
+    "buildStage": 4,
+    "price": 18000,
+    "description": "Lightweight hood, hatch, fenders and other removable exterior panels.",
+    "effects": [
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -100
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {},
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_weight_race_wiring",
+    "name": "Race Wiring + Accessory Delete",
+    "category": "Weight Reduction",
+    "categoryKey": "weight",
+    "subCategory": "Accessories",
+    "slot": "weight_accessories",
+    "buildStage": 4,
+    "price": 8500,
+    "description": "Minimal harness, compact battery and removal of remaining street accessories.",
+    "effects": [
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -50
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {
+      "engineConfigurations": [
+        "I4",
+        "I6",
+        "V6",
+        "V8",
+        "H4",
+        "H6",
+        "V10",
+        "V12"
+      ]
+    },
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_engine_pistons",
+    "name": "Forged High-Compression Pistons",
+    "category": "Engine",
+    "categoryKey": "engine",
+    "subCategory": "Pistons",
+    "slot": "engine_pistons",
+    "buildStage": 4,
+    "price": 9000,
+    "description": "Forged pistons with race ring package and optimized compression.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.035
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.03
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {
+      "engineConfigurations": [
+        "I4",
+        "I6",
+        "V6",
+        "V8",
+        "H4",
+        "H6",
+        "V10",
+        "V12"
+      ]
+    },
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_engine_rods",
+    "name": "Forged H-Beam Connecting Rods",
+    "category": "Engine",
+    "categoryKey": "engine",
+    "subCategory": "Rods",
+    "slot": "engine_rods",
+    "buildStage": 4,
+    "price": 7600,
+    "description": "High-strength rods for sustained cylinder pressure and engine speed.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.02
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.025
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {
+      "engineConfigurations": [
+        "I4",
+        "I6",
+        "V6",
+        "V8",
+        "H4",
+        "H6",
+        "V10",
+        "V12"
+      ]
+    },
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_engine_block",
+    "name": "Sleeved / Reinforced Race Block",
+    "category": "Engine",
+    "categoryKey": "engine",
+    "subCategory": "Block",
+    "slot": "engine_block",
+    "buildStage": 4,
+    "price": 18000,
+    "description": "Reinforced cylinders, deck and bottom end for extreme race power.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.035
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.035
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {
+      "engineConfigurations": [
+        "I4",
+        "I6",
+        "V6",
+        "V8",
+        "H4",
+        "H6",
+        "V10",
+        "V12"
+      ]
+    },
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_engine_valves",
+    "name": "Oversize Race Valves",
+    "category": "Engine",
+    "categoryKey": "engine",
+    "subCategory": "Valves",
+    "slot": "engine_valves",
+    "buildStage": 4,
+    "price": 6800,
+    "description": "Larger lightweight valves increase high-rpm head flow.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.03
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.015
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {
+      "engineConfigurations": [
+        "I4",
+        "I6",
+        "V6",
+        "V8",
+        "H4",
+        "H6",
+        "V10",
+        "V12"
+      ]
+    },
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_engine_springs",
+    "name": "Dual Race Valve Springs",
+    "category": "Engine",
+    "categoryKey": "engine",
+    "subCategory": "Valve Springs",
+    "slot": "engine_springs",
+    "buildStage": 4,
+    "price": 4200,
+    "description": "Higher spring pressure keeps the valvetrain controlled at race RPM.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.02
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {
+      "engineConfigurations": [
+        "I4",
+        "I6",
+        "V6",
+        "V8",
+        "H4",
+        "H6",
+        "V10",
+        "V12"
+      ]
+    },
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_engine_cams",
+    "name": "High-Lift Race Camshafts",
+    "category": "Engine",
+    "categoryKey": "engine",
+    "subCategory": "Cams",
+    "slot": "engine_cams",
+    "buildStage": 4,
+    "price": 9800,
+    "description": "Aggressive race cam profiles trade manners for substantial high-rpm airflow.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.075
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.035
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {
+      "engineConfigurations": [
+        "I4",
+        "I6",
+        "V6",
+        "V8",
+        "H4",
+        "H6",
+        "V10",
+        "V12"
+      ]
+    },
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_engine_cam_gears",
+    "name": "Adjustable Cam Gears",
+    "category": "Engine",
+    "categoryKey": "engine",
+    "subCategory": "Cam Gears",
+    "slot": "engine_cam_gears",
+    "buildStage": 4,
+    "price": 3600,
+    "description": "Lets the race engine move valve timing around its intended powerband.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.025
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.02
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {
+      "engineConfigurations": [
+        "I4",
+        "I6",
+        "V6",
+        "V8",
+        "H4",
+        "H6",
+        "V10",
+        "V12"
+      ]
+    },
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_engine_head",
+    "name": "CNC-Ported Race Cylinder Head",
+    "category": "Engine",
+    "categoryKey": "engine",
+    "subCategory": "Cylinder Head",
+    "slot": "engine_head",
+    "buildStage": 4,
+    "price": 14500,
+    "description": "Extensive port work and chamber cleanup for maximum airflow.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.065
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.035
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {
+      "engineConfigurations": [
+        "Rotary"
+      ]
+    },
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_rotary_apex",
+    "name": "Competition Apex + Side Seal Package",
+    "category": "Engine",
+    "categoryKey": "engine",
+    "subCategory": "Rotary Seals",
+    "slot": "engine_seals",
+    "buildStage": 4,
+    "price": 7200,
+    "description": "Race seal package for high cylinder pressure and sustained RPM.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.025
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.02
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {
+      "engineConfigurations": [
+        "Rotary"
+      ]
+    },
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_rotary_bridgeport",
+    "name": "Bridge-Port Rotor Housings",
+    "category": "Engine",
+    "categoryKey": "engine",
+    "subCategory": "Rotary Porting",
+    "slot": "engine_porting",
+    "buildStage": 4,
+    "price": 13500,
+    "description": "Aggressive bridge-port work moves the rotary toward a dedicated high-rpm race powerband.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.09
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.035
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {
+      "engineConfigurations": [
+        "Rotary"
+      ]
+    },
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_rotary_rotors",
+    "name": "Lightweight Race Rotors",
+    "category": "Engine",
+    "categoryKey": "engine",
+    "subCategory": "Rotors",
+    "slot": "engine_rotors",
+    "buildStage": 4,
+    "price": 11800,
+    "description": "Prepared lightweight rotors reduce rotating mass while retaining race strength.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.035
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.025
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -8
+      }
+    ]
+  },
+  {
+    "simpleTier": null,
+    "persistentFromStage": 4,
+    "requiredForStageProgression": false,
+    "lifecycle": {
+      "status": "active",
+      "availableFrom": null,
+      "deprecatedAt": null,
+      "replacementPartId": null,
+      "retireFromStore": false
+    },
+    "tags": [],
+    "compatibility": {
+      "engineConfigurations": [
+        "Rotary"
+      ]
+    },
+    "requires": {},
+    "conflicts": {},
+    "catalogId": "s4_rotary_eccentric",
+    "name": "Billet Eccentric Shaft",
+    "category": "Engine",
+    "categoryKey": "engine",
+    "subCategory": "Eccentric Shaft",
+    "slot": "engine_crank",
+    "buildStage": 4,
+    "price": 10200,
+    "description": "Race-prepared eccentric shaft supports extreme RPM and power.",
+    "effects": [
+      {
+        "stat": "hp",
+        "op": "mul",
+        "value": 1.02
+      },
+      {
+        "stat": "torque",
+        "op": "mul",
+        "value": 1.02
+      },
+      {
+        "stat": "weight",
+        "op": "add",
+        "value": -4
       }
     ]
   }

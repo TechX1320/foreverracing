@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.5.0-e playable direction
+## V0.5.0-f playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,17 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.5F deep Stage 3 / Stage 4 parts
+
+- Front-Half and Full Race Cars now unlock substantial supporting-part depth rather than growing almost exclusively through Forced Induction.
+- Parts modals use **subcategories** and show at most **three parts per page**, keeping large catalogs usable without turning the modal into a long scrolling list.
+- Stage 3 expands Intake, Exhaust, Fuel, ECU, Drivetrain, Suspension, Tires and Weight Reduction.
+- Stage 4 adds more extreme versions of those systems plus a dedicated **Engine** category.
+- Piston engines can access pistons, rods, block, valves, valve springs, cams, cam gears and head work. Rotary engines receive purpose-built rotary choices such as race seals, bridge-port housings, lightweight rotors and an eccentric shaft.
+- Standalone ECU + laptop hardware is now represented in the catalog; the actual home-garage tuning interface is intentionally reserved for the next tuning-system pass.
+- A strong RWD Stage 4 RX-8 can now reach the low-8-second 1/4-mile neighborhood without requiring twin charging or a 300-shot NOS setup.
+- Engine swaps remain the next powertrain-system feature. Stage 3/4 no longer falsely claim that the current UI already implements them.
 
 ### V0.5E Parts Creator MVP
 

@@ -2093,3 +2093,58 @@ dialog.fr-dialog:has(.forced-induction-parts-dialog){
   .parts-studio__summary span:last-child{border-bottom:0}
   .parts-studio__effect-input{grid-template-columns:1fr}
 }
+
+
+/* V0.5F deep parts navigation */
+.parts-shop-subnav{
+  display:flex;
+  gap:6px;
+  overflow-x:auto;
+  padding:0 0 8px;
+  margin-bottom:8px;
+  scrollbar-width:thin;
+}
+.parts-shop-subnav__button{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:38px;
+  padding:7px 10px;
+  border:1px solid var(--border);
+  background:#0d1012;
+  color:var(--muted);
+  cursor:pointer;
+  font:inherit;
+}
+.parts-shop-subnav__button b{font-size:11px;white-space:nowrap}
+.parts-shop-subnav__button span{
+  display:grid;
+  place-items:center;
+  min-width:20px;
+  height:20px;
+  padding:0 5px;
+  border:1px solid #394149;
+  color:var(--faint);
+  font-size:10px;
+  font-weight:900;
+}
+.parts-shop-subnav__button:hover,.parts-shop-subnav__button:focus{border-color:#59636c;color:var(--text)}
+.parts-shop-subnav__button.is-active{border-color:var(--accent);background:#20150f;color:var(--accent-2)}
+.parts-shop-subnav__button.is-active span{border-color:#7c492d;color:var(--accent-2)}
+.parts-shop-pager{
+  display:grid;
+  grid-template-columns:120px 1fr 120px;
+  align-items:center;
+  gap:8px;
+  margin-top:8px;
+  padding-top:8px;
+  border-top:1px solid var(--border);
+}
+.parts-shop-pager>span{text-align:center;color:var(--muted);font-size:11px;font-weight:900;letter-spacing:.05em}
+.parts-shop-pager>span b{color:var(--text)}
+.parts-shop-pager .button{width:100%}
+@media(max-width:760px){
+  .parts-shop-subnav{padding-bottom:6px}
+  .parts-shop-pager{grid-template-columns:1fr auto 1fr}
+}

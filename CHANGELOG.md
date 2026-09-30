@@ -1,5 +1,17 @@
 # Changelog
 
+## V0.5.0-f — Stage 3/4 parts depth
+
+- Expanded the catalog from 72 to 135 parts, with Stage 3 and Stage 4 now carrying real depth outside Forced Induction.
+- Added shop subcategories and three-part pagination to normal Parts modals plus pagination to Forced Induction system pages.
+- Added deeper Intake, Exhaust, Fuel, ECU, Drivetrain, Suspension, Tires and Weight Reduction paths across Front-Half and Full Race builds.
+- Added Stage 4 Engine internals with piston-engine and rotary-specific paths; RX-8s now receive rotary seals, porting, rotors and eccentric-shaft parts instead of piston/valvetrain hardware.
+- Added standalone ECU + laptop hardware groundwork for the later home-garage tuning system.
+- Added progressive drag tire, clutch, flywheel, transmission, differential and chassis choices.
+- Balanced a strong single-turbo/no-NOS Stage 4 RX-8 build into the low-8-second 1/4-mile neighborhood under the current simulator.
+- Clarified that engine swaps are planned for the next powertrain-system pass rather than claiming the current Stage 3/4 UI already supports them.
+
+
 ## V0.5.0-e — Parts Creator MVP
 
 - Activated Parts Creator as the third Content Studio authoring module.
