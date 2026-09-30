@@ -1,6 +1,7 @@
 import { bindHome, carLabel, escapeHtml, money, number, pageShell, selectedCar } from "../ui/components.js";
 import { renderVehicle } from "../ui/vehicleRenderer.js";
 import { showDialog, closeDialog } from "../ui/modal.js";
+import { renderPartDynoChart } from "../ui/partDyno.js";
 import {
   forcedInductionCompatibility,
   forcedInductionMeta,
