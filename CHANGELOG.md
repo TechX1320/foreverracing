@@ -1,5 +1,14 @@
 # Changelog
 
+## V0.6.0-a.2 — Optional Circuit groundwork
+
+- Added hidden-until-unlocked visibility gates for optional Circuits; optionals default to appearing after B Class unlocks.
+- Split the Circuit board into required progression and optional challenge sections; hidden optionals do not count as available or appear early.
+- Expanded Circuit Creator with visibility gates and manufacturer, aspiration, engine-configuration, drivetrain, Build Type, class, PI and specific-car filters.
+- Bumped Circuit Schema to V2 and updated the LLM authoring prompt.
+- Clarified engine-swap ownership: Build Type/chassis state persists, replacement motors are complete factory assemblies, and engine-specific performance hardware remains tied to its engine assembly.
+- Added regression coverage for optional visibility/filtering and chassis Build Type persistence through engine swaps.
+
 ## V0.6.0-a.1 — Adaptive readability
 
 - Increased global typography and touch-target sizing rather than preserving a no-scroll layout by shrinking text.
@@ -11,7 +20,7 @@
 ## V0.6.0-a — The Circuit foundation
 
 - Replaced the temporary Safe/Push seven-stage Circuit prototype with catalog-driven PvE events.
-- Added Circuit Schema V1 with 1–50 races, required/optional events, authored opponents, entry filters, recommended PI/ET targets, mixed distances, loss rules, per-race rewards and completion unlocks.
+- Added Circuit Schema V2 groundwork with 1–50 races, required/optional events, authored opponents, entry filters, recommended PI/ET targets, mixed distances, loss rules, per-race rewards and completion unlocks.
 - Added **Street Roots**, a five-race required D-Class progression Circuit with four regular races and a boss/rival finale that unlocks C Class.
 - Circuit passes now use the same RaceSimulator and blocking side-view race presentation as Quick Race.
 - Added persistent per-Circuit run/progress state and C-Class career unlock tracking.
