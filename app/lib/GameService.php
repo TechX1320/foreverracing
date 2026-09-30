@@ -104,6 +104,11 @@ final class GameService
             return $normalized;
         }, $engineInventory), fn(array $item): bool => $item['engineId'] !== ''));
 
+        $partsCatalog = self::partsCatalog();
+        foreach (array_keys($player['inventory']['engines']) as $assemblyIndex) {
+            self::sanitizeEngineAssemblyParts($player, (int)$assemblyIndex, $partsCatalog);
+        }
+
         if ($previousSchemaVersion > 0 && $previousSchemaVersion < 11) {
             foreach ($player['garage'] as $car) {
                 $previousEngineId = (string)($car['engineSwap']['lastFromEngineId'] ?? '');
@@ -400,7 +405,9 @@ final class GameService
                 'hp'=>max(1,(int)round((float)($car['derived']['hp']??$car['base']['hp']??1))),
                 'torque'=>max(1,(int)round((float)($car['derived']['torque']??$car['base']['torque']??1))),
             ];
-            $attached=is_array($outgoing['attachedPartInventoryIds']??null)?$outgoing['attachedPartInventoryIds']:[];
+            unset($outgoing);
+            $attached=self::sanitizeEngineAssemblyParts($player,$outgoingIndex,$parts);
+            $outgoing=&$player['inventory']['engines'][$outgoingIndex];
             $storedPartNames=[];
             foreach($player['inventory']['parts'] as &$ownedPart){
                 if((string)($ownedPart['installedOnCarId']??'')!==$carId)continue;
@@ -1377,14 +1384,42 @@ final class GameService
         return null;
     }
 
+    private static function sanitizeEngineAssemblyParts(array &$player, int $assemblyIndex, array $catalog): array
+    {
+        if (!isset($player['inventory']['engines'][$assemblyIndex])) return [];
+        $assembly =& $player['inventory']['engines'][$assemblyIndex];
+        $safeIds = [];
+        foreach (array_values(array_unique(array_map('strval', is_array($assembly['attachedPartInventoryIds'] ?? null) ? $assembly['attachedPartInventoryIds'] : []))) as $id) {
+            $partIndex = null;
+            foreach ($player['inventory']['parts'] as $idx => $item) {
+                if ((string)($item['inventoryId'] ?? '') === $id) {
+                    $partIndex = (int)$idx;
+                    break;
+                }
+            }
+            if ($partIndex === null) continue;
+            $spec = self::findBy($catalog, 'catalogId', (string)($player['inventory']['parts'][$partIndex]['catalogId'] ?? ''));
+            if (!$spec || !EngineSwap::isEngineBoundPart($spec)) {
+                if ((string)($player['inventory']['parts'][$partIndex]['installedOnEngineInventoryId'] ?? '') === (string)($assembly['inventoryId'] ?? '')) {
+                    $player['inventory']['parts'][$partIndex]['installedOnEngineInventoryId'] = null;
+                }
+                continue;
+            }
+            $safeIds[] = $id;
+        }
+        $assembly['attachedPartInventoryIds'] = $safeIds;
+        unset($assembly);
+        return $safeIds;
+    }
+
     private static function activateEngineAssemblyParts(array &$player, array $car): array
     {
         $assemblyIndex=self::engineAssemblyIndexForCar($player,$car);
         if($assemblyIndex===null)return ['activeNames'=>[],'dormantNames'=>[]];
+        $catalog=self::partsCatalog();
+        $attachedIds=self::sanitizeEngineAssemblyParts($player,$assemblyIndex,$catalog);
         $assembly=&$player['inventory']['engines'][$assemblyIndex];
         $assembly['installedOnCarId']=(string)($car['carId']??'');
-        $attachedIds=array_values(array_unique(array_map('strval',is_array($assembly['attachedPartInventoryIds']??null)?$assembly['attachedPartInventoryIds']:[])));
-        $catalog=self::partsCatalog();
         $candidates=[];
         foreach($attachedIds as $id){
             foreach($player['inventory']['parts'] as &$item){

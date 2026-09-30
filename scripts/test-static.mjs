@@ -86,7 +86,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.5.0-h.1"')) throw new Error('Static index is missing the V0.5H.1 build marker.');
+if (!html.includes('data-build="0.5.0-h.2"')) throw new Error('Static index is missing the V0.5H.2 build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -784,33 +784,35 @@ if (runtimeConfig.schemaVersion < 11 ||
     buildStages.stages?.[2]?.engineSwaps !== true ||
     buildStages.stages?.[3]?.engineSwaps !== true ||
     buildStages.stages?.[1]?.engineSwapPlanned !== false) {
-  throw new Error('V0.5H.1 Build Type engine-swap configuration is incomplete.');
+  throw new Error('V0.5H.2 Build Type engine-swap configuration is incomplete.');
 }
 if (swapReadyEnginesV05h.length !== 3 ||
     !swapReadyEnginesV05h.every((engine) => Number(engine.swapMarket?.price || 0) > 0) ||
     engineCatalogV05c.some((engine) => engine.sourceStatus === 'legacy-fitment' && engine.swapMarket?.available === true)) {
-  throw new Error('V0.5H.1 Engine Swap Shop roster must contain only fully-authored engines.');
+  throw new Error('V0.5H.2 Engine Swap Shop roster must contain only fully-authored engines.');
 }
 for (const car of carCatalog) {
   const options = car.engineSwapFitment?.options || {};
   if (!options['vw_ea888_20t_mk6_gti_200'] ||
       !options['mazda_13b_msp_renesis_238'] ||
       !options['renault_clio_v6_29_255']) {
-    throw new Error(`V0.5H.1 engine fitments are incomplete for ${car.catalogId}.`);
+    throw new Error(`V0.5H.2 engine fitments are incomplete for ${car.catalogId}.`);
   }
 }
 if (carCatalog.find((car) => car.catalogId === 'mazda_rx8')?.engineSwapFitment?.options?.vw_ea888_20t_mk6_gti_200?.minBuildStage !== 2 ||
     carCatalog.find((car) => car.catalogId === 'golf_gti')?.engineSwapFitment?.options?.mazda_13b_msp_renesis_238?.minBuildStage !== 4) {
-  throw new Error('V0.5H.1 Stage 2/custom vs Stage 4/extreme fitment gates changed unexpectedly.');
+  throw new Error('V0.5H.2 Stage 2/custom vs Stage 4/extreme fitment gates changed unexpectedly.');
 }
 if (!html.includes('data-nav="engine-swap-shop"') ||
     !html.includes('ENGINE SWAP SHOP') ||
     !appSource.includes('renderEngineSwapShop') ||
     !appSource.includes(".register('engine-swap-shop'") ||
     !engineSwapDomainV05h.includes('ENGINE_BOUND_CATEGORIES') ||
+    !engineSwapDomainV05h.includes('CHASSIS_BOUND_CATEGORIES') ||
     !engineSwapDomainV05h.includes('normalizeEngineAssembly') ||
     !engineSwapDomainV05h.includes('attachedPartInventoryIds') ||
     !serverEngineSwapSourceV05h.includes('normalizeAssembly') ||
+    !serverEngineSwapSourceV05h.includes('CHASSIS_BOUND_CATEGORIES') ||
     !engineSwapShopV05h.includes('OPEN PARTS FOR NEW ENGINE') ||
     !engineSwapShopV05h.includes('ENGINE ASSEMBLY INVENTORY') ||
     !engineSwapShopV05h.includes('STORED COMPLETE') ||
@@ -818,9 +820,11 @@ if (!html.includes('data-nav="engine-swap-shop"') ||
     !localGameSource.includes('swapEngine(inputPlayer') ||
     !localGameSource.includes('installedOnEngineInventoryId') ||
     !localGameSource.includes('activateEngineAssemblyParts') ||
+    !localGameSource.includes('sanitizeEngineAssemblyParts') ||
     !localGameSource.includes('previousSchemaVersion < 11') ||
     !serverGameSourceV04c.includes('public static function swapEngine') ||
     !serverGameSourceV04c.includes('activateEngineAssemblyParts') ||
+    !serverGameSourceV04c.includes('sanitizeEngineAssemblyParts') ||
     !serverGameSourceV04c.includes('installedOnEngineInventoryId') ||
     !partsSourceV04b.includes('installedOnEngineInventoryId') ||
     !engineSwapApiCatalogV05h.includes('GameService::engineCatalog') ||
@@ -831,10 +835,11 @@ if (!html.includes('data-nav="engine-swap-shop"') ||
     !engineStudioSource.includes('Swap Shop Price (CR)') ||
     !engineStudioSource.includes('Swap Shop Listing') ||
     !cssV04b.includes('V0.5H Engine Swap Shop') ||
+    !cssV04b.includes('dialog.fr-dialog:has(.engine-swap-dialog)') ||
     !serviceWorkerV05h.includes('EngineSwap.js') ||
     !serviceWorkerV05h.includes('engineSwapShop.js')) {
-  throw new Error('V0.5H.1 Engine Assembly runtime / authoring workflow is incomplete.');
+  throw new Error('V0.5H.2 Engine Assembly runtime / authoring workflow is incomplete.');
 }
-console.log('V0.5H.1 Engine Assembly checks passed.');
+console.log('V0.5H.2 Engine Assembly checks passed.');
 
 

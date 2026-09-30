@@ -6,7 +6,7 @@ import { benchmarkPerformance, performanceClassFromIndex } from '../assets/js/do
 import { applyPartEffects, partCompatibility, partStoreAvailable } from '../assets/js/domain/PartCatalog.js';
 import { applyBuildPartEffect, enginePowerEnvelope, limitEngineOutput, suggestedPowerLimits } from '../assets/js/domain/PowerModel.js';
 import { baseMapProfile, defaultTuneProfile, evaluateTune, tuningFingerprint, tuningHardwareProfile } from '../assets/js/domain/Tuning.js';
-import { engineSwapEligible, engineSwapQuote } from '../assets/js/domain/EngineSwap.js';
+import { CHASSIS_BOUND_CATEGORIES, engineSwapEligible, engineSwapQuote, isEngineBoundPart } from '../assets/js/domain/EngineSwap.js';
 
 const [cars, parts, engines, config, buildStageConfig, racingConfig] = await Promise.all([
   fs.readFile(new URL('../data/catalog/cars.json', import.meta.url), 'utf8').then(JSON.parse),
@@ -530,24 +530,46 @@ swapPlayer.selectedCarId = swapRx8.carId;
 
 const engineBoundPart = partFor('s2_intake_01');
 const dormantEnginePart = partFor('s4_ecu_standalone');
-const chassisPart = partFor('s2_tires_11');
+const chassisTire = partFor('s2_tires_11');
+const chassisSuspension = partFor('s2_suspension_coilover');
+const chassisWeight = partFor('s2_weight_13');
+assert.deepEqual([...CHASSIS_BOUND_CATEGORIES].sort(), ['suspension', 'tires', 'weight']);
+for (const spec of [chassisTire, chassisSuspension, chassisWeight]) {
+  assert.equal(isEngineBoundPart(spec), false, `${spec.name} must remain chassis-bound.`);
+}
 swapPlayer.inventory.parts = [
   { inventoryId: 'swap-intake', catalogId: engineBoundPart.catalogId, purchasedForCarId: swapRx8.carId, installedOnCarId: swapRx8.carId, purchasedAt: 1 },
   { inventoryId: 'swap-ecu', catalogId: dormantEnginePart.catalogId, purchasedForCarId: swapRx8.carId, installedOnCarId: swapRx8.carId, purchasedAt: 1 },
-  { inventoryId: 'swap-tire', catalogId: chassisPart.catalogId, purchasedForCarId: swapRx8.carId, installedOnCarId: swapRx8.carId, purchasedAt: 1 },
+  { inventoryId: 'swap-tire', catalogId: chassisTire.catalogId, purchasedForCarId: swapRx8.carId, installedOnCarId: swapRx8.carId, purchasedAt: 1 },
+  { inventoryId: 'swap-suspension', catalogId: chassisSuspension.catalogId, purchasedForCarId: swapRx8.carId, installedOnCarId: swapRx8.carId, purchasedAt: 1 },
+  { inventoryId: 'swap-weight', catalogId: chassisWeight.catalogId, purchasedForCarId: swapRx8.carId, installedOnCarId: swapRx8.carId, purchasedAt: 1 },
 ];
 swapPlayer = game.normalizePlayer(swapPlayer);
 
-const initialRx8 = swapPlayer.garage[0];
-const initialAssembly = swapPlayer.inventory.engines.find((item) => item.installedOnCarId === swapRx8.carId);
+let initialRx8 = swapPlayer.garage[0];
+let initialAssembly = swapPlayer.inventory.engines.find((item) => item.installedOnCarId === swapRx8.carId);
 assert.ok(initialAssembly);
 assert.equal(initialAssembly.engineId, renesis.engineId);
 assert.ok(initialAssembly.attachedPartInventoryIds.includes('swap-intake'));
 assert.ok(initialAssembly.attachedPartInventoryIds.includes('swap-ecu'));
 assert.equal(swapPlayer.inventory.parts.find((part) => part.inventoryId === 'swap-ecu').installedOnCarId, null,
   'Stage 4 engine hardware should stay attached but dormant on a Stage 2 chassis.');
-assert.equal(swapPlayer.inventory.parts.find((part) => part.inventoryId === 'swap-tire').installedOnEngineInventoryId, null,
-  'Tires must stay chassis-bound rather than joining the engine assembly.');
+
+for (const id of ['swap-tire', 'swap-suspension', 'swap-weight']) {
+  const item = swapPlayer.inventory.parts.find((part) => part.inventoryId === id);
+  assert.equal(item.installedOnEngineInventoryId, null, `${id} must start chassis-only.`);
+  item.installedOnEngineInventoryId = initialAssembly.inventoryId;
+  initialAssembly.attachedPartInventoryIds.push(id);
+}
+swapPlayer = game.normalizePlayer(swapPlayer);
+initialRx8 = swapPlayer.garage[0];
+initialAssembly = swapPlayer.inventory.engines.find((item) => item.installedOnCarId === swapRx8.carId);
+for (const id of ['swap-tire', 'swap-suspension', 'swap-weight']) {
+  const item = swapPlayer.inventory.parts.find((part) => part.inventoryId === id);
+  assert.equal(item.installedOnEngineInventoryId, null, `${id} must be scrubbed from stale engine links.`);
+  assert.equal(item.installedOnCarId, swapRx8.carId, `${id} must remain installed on the chassis.`);
+  assert.equal(initialAssembly.attachedPartInventoryIds.includes(id), false, `${id} must not live in the engine assembly.`);
+}
 
 const eaQuote = engineSwapQuote(initialRx8, ea888, swapPlayer.inventory.engines);
 assert.equal(eaQuote.fitment.fitment, 'CUSTOM');
@@ -566,12 +588,19 @@ assert.equal(swappedRx8.stageBaseline.hp, 200);
 assert.equal(swappedRx8.stageBaseline.torque, 207);
 assert.equal(swapPlayer.wallet.credits, swapCreditsBefore - 15500);
 assert.equal(swapPlayer.inventory.parts.find((part) => part.inventoryId === 'swap-intake').installedOnCarId, null);
-assert.equal(swapPlayer.inventory.parts.find((part) => part.inventoryId === 'swap-tire').installedOnCarId, swapRx8.carId);
+for (const id of ['swap-tire', 'swap-suspension', 'swap-weight']) {
+  const item = swapPlayer.inventory.parts.find((part) => part.inventoryId === id);
+  assert.equal(item.installedOnCarId, swapRx8.carId, `${id} must stay on the RX-8 through the engine swap.`);
+  assert.equal(item.installedOnEngineInventoryId, null, `${id} must never transfer with an engine.`);
+}
 
 const storedRenesis = swapPlayer.inventory.engines.find((item) => item.engineId === renesis.engineId && !item.installedOnCarId);
 assert.ok(storedRenesis, 'The removed Renesis should remain as a detached engine assembly.');
 assert.ok(storedRenesis.attachedPartInventoryIds.includes('swap-intake'));
 assert.ok(storedRenesis.attachedPartInventoryIds.includes('swap-ecu'));
+for (const id of ['swap-tire', 'swap-suspension', 'swap-weight']) {
+  assert.equal(storedRenesis.attachedPartInventoryIds.includes(id), false, `${id} must not be stored with the Renesis.`);
+}
 assert.ok(storedRenesis.tune, 'Saved calibration should travel with the stored engine assembly.');
 assert.ok(Number(storedRenesis.storedStats?.hp || 0) > 0);
 

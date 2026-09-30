@@ -11,7 +11,14 @@ export const ENGINE_BOUND_CATEGORIES = Object.freeze([
   "engine",
 ]);
 
+export const CHASSIS_BOUND_CATEGORIES = Object.freeze([
+  "suspension",
+  "tires",
+  "weight",
+]);
+
 const ENGINE_BOUND = new Set(ENGINE_BOUND_CATEGORIES);
+const CHASSIS_BOUND = new Set(CHASSIS_BOUND_CATEGORIES);
 
 export function engineSwapEligible(engine) {
   const row = normalizeEngineDefinition(engine);
@@ -84,8 +91,13 @@ export function engineSwapQuote(car, engine, ownedEngines = []) {
   };
 }
 
+export function isChassisBoundPart(part) {
+  return CHASSIS_BOUND.has(String(part?.categoryKey || "").toLowerCase());
+}
+
 export function isEngineBoundPart(part) {
   if (Number(part?.simpleTier || 0) > 0) return false;
+  if (isChassisBoundPart(part)) return false;
   return ENGINE_BOUND.has(String(part?.categoryKey || "").toLowerCase());
 }
 
