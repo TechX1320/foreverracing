@@ -67,7 +67,7 @@ export async function renderEngineSwapShop(ctx) {
     title: "Engine Swap Shop",
     eyebrow: "POWERTRAIN",
     hint: "Swap the engine here • rebuild the combination in Parts",
-    body: \`
+    body: `
       <div class="engine-swap-current">
         <div class="engine-swap-current__visual">${renderVehicle(car, { stage, view: "showroom" })}</div>
         <div class="engine-swap-current__copy">
@@ -83,25 +83,25 @@ export async function renderEngineSwapShop(ctx) {
         </div>
       </div>
 
-      ${stage < 3 ? \`<div class="engine-swap-lock"><b>ENGINE SWAPS START AT FRONT-HALF RACE CAR</b><span>Build Type 3 opens custom powertrain fabrication. Some extreme fitments require Full Race Car / Build Type 4.</span></div>\` : ""}
+      ${stage < 3 ? `<div class="engine-swap-lock"><b>ENGINE SWAPS START AT FRONT-HALF RACE CAR</b><span>Build Type 3 opens custom powertrain fabrication. Some extreme fitments require Full Race Car / Build Type 4.</span></div>` : ""}
 
       <div class="engine-swap-shop-grid">
         ${options.map(({ engine, quote }) => engineCard(car, engine, quote)).join("")}
       </div>
 
-      ${owned.length ? \`<section class="engine-swap-owned">
+      ${owned.length ? `<section class="engine-swap-owned">
         <header><span>ENGINE INVENTORY</span><b>Swapped-out engines stay yours.</b></header>
         <div>${owned.map((item) => {
           const engine = engineCache.find((row) => row.engineId === String(item.engineId || ""));
-          const condition = item.condition?.failed ? "FAILED" : \`${number(item.condition?.healthPct ?? 100)}% HEALTH\`;
-          return \`<span><b>${escapeHtml(engine ? engineLabel(engine) : item.engineId)}</b><small>${escapeHtml(condition)}</small></span>\`;
+          const condition = item.condition?.failed ? "FAILED" : `${number(item.condition?.healthPct ?? 100)}% HEALTH`;
+          return `<span><b>${escapeHtml(engine ? engineLabel(engine) : item.engineId)}</b><small>${escapeHtml(condition)}</small></span>`;
         }).join("")}</div>
-      </section>\` : ""}
+      </section>` : ""}
 
       <div class="engine-swap-footnote">
         Engine swaps keep suspension, tires and weight-reduction hardware. Engine-bound Intake, Exhaust, Fuel, ECU, Drivetrain, Forced Induction and Engine parts are moved back to Inventory so the new engine can be rebuilt correctly.
-      </div>\`,
-    trail: \`${carLabel(car)} • ${engineLabel(currentEngine)}\`,
+      </div>`,
+    trail: `${carLabel(car)} • ${engineLabel(currentEngine)}`,
   });
 
   bindHome(ctx.screenRoot, ctx.router);
@@ -115,15 +115,15 @@ function engineCard(car, engine, quote) {
   const status = quote.current
     ? "CURRENT ENGINE"
     : quote.stageLocked
-      ? \`REQUIRES BUILD TYPE ${quote.fitment.minBuildStage}\`
+      ? `REQUIRES BUILD TYPE ${quote.fitment.minBuildStage}`
       : quote.owned
         ? "OWNED • INSTALL"
         : "BUY + INSTALL";
   const ownedFailed = quote.owned?.condition?.failed === true;
-  return \`
+  return `
     <article class="engine-swap-card ${quote.current ? "is-current" : ""} ${quote.stageLocked ? "is-locked" : ""}">
       <header>
-        <span class="engine-swap-fitment engine-swap-fitment--${escapeHtml(quote.fitment.fitment.toLowerCase().replace(/\\s+/g, "-"))}">${escapeHtml(quote.fitment.fitment)}</span>
+        <span class="engine-swap-fitment engine-swap-fitment--${escapeHtml(quote.fitment.fitment.toLowerCase().replace(/\s+/g, "-"))}">${escapeHtml(quote.fitment.fitment)}</span>
         <small>${escapeHtml(engine.manufacturer || "ENGINE CATALOG")}</small>
       </header>
       <h3>${escapeHtml(engine.name || engine.engineId)}</h3>
@@ -136,13 +136,13 @@ function engineCard(car, engine, quote) {
       </div>
       <div class="engine-swap-card__cost">
         ${quote.current
-          ? \`<strong>INSTALLED</strong><span>Current powertrain</span>\`
+          ? `<strong>INSTALLED</strong><span>Current powertrain</span>`
           : quote.stageLocked
-            ? \`<strong>LOCKED</strong><span>${escapeHtml(quote.fitment.note)}</span>\`
-            : \`<strong>${money(quote.totalCost)} CR</strong><span>${quote.owned ? \`Labor ${money(quote.installCost)} CR${ownedFailed ? " • OWNED ENGINE FAILED" : ""}\` : \`Engine ${money(quote.enginePrice)} + labor ${money(quote.installCost)}\`}</span>\`}
+            ? `<strong>LOCKED</strong><span>${escapeHtml(quote.fitment.note)}</span>`
+            : `<strong>${money(quote.totalCost)} CR</strong><span>${quote.owned ? `Labor ${money(quote.installCost)} CR${ownedFailed ? " • OWNED ENGINE FAILED" : ""}` : `Engine ${money(quote.enginePrice)} + labor ${money(quote.installCost)}`}</span>`}
       </div>
       <button class="button ${quote.current || quote.stageLocked ? "button--quiet" : "button--primary"} button--wide" type="button" data-swap-engine="${escapeHtml(engine.engineId)}" ${quote.current || quote.stageLocked ? "disabled" : ""}>${escapeHtml(status)}</button>
-    </article>\`;
+    </article>`;
 }
 
 function openSwapDialog(ctx, carId, engineId) {
@@ -158,7 +158,7 @@ function openSwapDialog(ctx, carId, engineId) {
   const invalidated = preview.uninstalled;
   const ownedFailed = quote.owned?.condition?.failed === true;
 
-  const dialog = showDialog(\`
+  const dialog = showDialog(`
     <div class="dialog-body engine-swap-dialog">
       <div class="engine-swap-dialog__head">
         <div>
@@ -168,7 +168,7 @@ function openSwapDialog(ctx, carId, engineId) {
         </div>
         <div class="engine-swap-dialog__price">
           <small>TOTAL</small><b>${money(quote.totalCost)} CR</b>
-          <span>${quote.owned ? "Owned engine • labor only" : \`${money(quote.enginePrice)} engine + ${money(quote.installCost)} labor\`}</span>
+          <span>${quote.owned ? "Owned engine • labor only" : `${money(quote.enginePrice)} engine + ${money(quote.installCost)} labor`}</span>
         </div>
       </div>
 
@@ -192,7 +192,7 @@ function openSwapDialog(ctx, carId, engineId) {
         <div>
           <small>PARTS RETURNED TO INVENTORY</small>
           <b>${invalidated.length}</b>
-          <p>${invalidated.length ? escapeHtml(invalidated.slice(0, 8).join(" • ")) : "No installed parts need to be removed."}${invalidated.length > 8 ? \` • +${invalidated.length - 8} more\` : ""}</p>
+          <p>${invalidated.length ? escapeHtml(invalidated.slice(0, 8).join(" • ")) : "No installed parts need to be removed."}${invalidated.length > 8 ? ` • +${invalidated.length - 8} more` : ""}</p>
         </div>
         <div>
           <small>OLD ENGINE</small>
@@ -212,7 +212,7 @@ function openSwapDialog(ctx, carId, engineId) {
         <button class="button button--small" type="button" data-close>CANCEL</button>
         <button class="button button--primary" type="button" data-confirm-swap>${quote.owned ? "INSTALL OWNED ENGINE" : "BUY + INSTALL ENGINE"} • ${money(quote.totalCost)} CR</button>
       </div>
-    </div>\`);
+    </div>`);
 
   dialog.querySelector("[data-close]")?.addEventListener("click", () => closeDialog(dialog));
   dialog.querySelector("[data-confirm-swap]")?.addEventListener("click", async (event) => {
@@ -223,7 +223,7 @@ function openSwapDialog(ctx, carId, engineId) {
       const updated = data.player?.garage?.find((entry) => String(entry.carId) === String(car.carId));
       const count = updated?.engineSwap?.lastUninstalledParts?.length || 0;
       closeDialog(dialog);
-      ctx.toast("Engine swap complete", \`${engine.name} installed. ${count} engine-bound part${count === 1 ? "" : "s"} moved to Inventory.\`);
+      ctx.toast("Engine swap complete", `${engine.name} installed. ${count} engine-bound part${count === 1 ? "" : "s"} moved to Inventory.`);
       showSwapComplete(ctx, updated, engine);
     } catch (error) {
       ctx.toast("Engine swap blocked", error.message);
@@ -237,7 +237,7 @@ function showSwapComplete(ctx, car, engine) {
     renderEngineSwapShop(ctx);
     return;
   }
-  const dialog = showDialog(\`
+  const dialog = showDialog(`
     <div class="dialog-body engine-swap-complete">
       <span class="section-label">POWERTRAIN INSTALLED</span>
       <h2>${escapeHtml(engine.name)}</h2>
@@ -252,7 +252,7 @@ function showSwapComplete(ctx, car, engine) {
         <button class="button button--small" type="button" data-stay>STAY IN SWAP SHOP</button>
         <button class="button button--primary" type="button" data-open-parts>OPEN PARTS FOR NEW ENGINE</button>
       </div>
-    </div>\`);
+    </div>`);
   dialog.querySelector("[data-stay]")?.addEventListener("click", () => {
     closeDialog(dialog);
     renderEngineSwapShop(ctx);
@@ -328,17 +328,17 @@ function engineSwapDyno(currentEngine, candidateEngine) {
   const plotW = width - left - right, plotH = height - top - bottom;
   const x = (rpm) => left + (rpm / maxRpm) * plotW;
   const y = (value) => top + plotH - (value / maxY) * plotH;
-  const line = (points, key) => points.map((point) => \`${x(point.rpm).toFixed(1)},${y(point[key]).toFixed(1)}\`).join(" ");
+  const line = (points, key) => points.map((point) => `${x(point.rpm).toFixed(1)},${y(point[key]).toFixed(1)}`).join(" ");
   const xTicks = [0,.25,.5,.75,1].map((ratio) => {
     const rpm = Math.round((maxRpm * ratio) / 500) * 500;
-    return \`<g><line x1="${x(rpm)}" y1="${top}" x2="${x(rpm)}" y2="${top + plotH}"/><text x="${x(rpm)}" y="${height - 8}" text-anchor="middle">${rpm}</text></g>\`;
+    return `<g><line x1="${x(rpm)}" y1="${top}" x2="${x(rpm)}" y2="${top + plotH}"/><text x="${x(rpm)}" y="${height - 8}" text-anchor="middle">${rpm}</text></g>`;
   }).join("");
   const yTicks = [0,.25,.5,.75,1].map((ratio) => {
     const value = Math.round(maxY * ratio);
-    return \`<g><line x1="${left}" y1="${y(value)}" x2="${left + plotW}" y2="${y(value)}"/><text x="${left - 6}" y="${y(value) + 3}" text-anchor="end">${value}</text></g>\`;
+    return `<g><line x1="${left}" y1="${y(value)}" x2="${left + plotW}" y2="${y(value)}"/><text x="${left - 6}" y="${y(value) + 3}" text-anchor="end">${value}</text></g>`;
   }).join("");
 
-  return \`<div class="engine-swap-dyno">
+  return `<div class="engine-swap-dyno">
     <div class="engine-swap-dyno__legend">
       <span><i class="current"></i>CURRENT HP</span>
       <span><i class="candidate"></i>SWAP HP</span>
@@ -350,7 +350,7 @@ function engineSwapDyno(currentEngine, candidateEngine) {
       <polyline points="${line(candidate,"hp")}" class="engine-swap-dyno__line engine-swap-dyno__line--candidate"/>
       <polyline points="${line(candidate,"torqueLbFt")}" class="engine-swap-dyno__line engine-swap-dyno__line--torque"/>
     </svg>
-  </div>\`;
+  </div>`;
 }
 
 function engineCurve(engine) {
