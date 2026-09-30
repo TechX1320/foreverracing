@@ -55,6 +55,7 @@ const SHELL = [
   './assets/js/domain/EngineCatalog.js',
   './assets/js/domain/ForcedInduction.js',
   './assets/js/domain/PartCatalog.js',
+  './assets/js/domain/Tuning.js',
   './assets/js/content/ContentStudioEngineCatalog.js',
   './assets/js/content/ContentStudioPartCatalog.js',
   './assets/js/screens/engineStudio.js',
