@@ -13,6 +13,11 @@ import {
   forcedInductionSwapNeeded,
 } from './ForcedInduction.js';
 import {
+  applyBuildPartEffect,
+  enginePowerEnvelope,
+  limitEngineOutput,
+} from './PowerModel.js';
+import {
   evaluateTune,
   normalizeTuneProfile,
   tuningHardwareProfile,
@@ -764,20 +769,25 @@ export class LocalGameService {
       installedParts.push(instance.inventoryId);
       installedSpecs.push(spec);
       for (const effect of spec.effects || []) {
-        const stat = String(effect.stat || '');
-        if (!(stat in derived)) continue;
-        const value = Number(effect.value || 0);
-        if (String(effect.op || 'add') === 'mul') derived[stat] *= value;
-        else derived[stat] += value;
+        applyBuildPartEffect(derived, effect, spec);
       }
     }
 
+    const envelope = enginePowerEnvelope(car, installedSpecs);
+    const limitedBuild = limitEngineOutput({
+      hp: Math.max(1, derived.hp),
+      torque: Math.max(1, derived.torque),
+      weight: Math.max(500, derived.weight),
+      grip: Math.max(0.5, derived.grip),
+    }, envelope);
     const untuned = {
-      hp: Math.round(Math.max(1, derived.hp)),
-      torque: Math.round(Math.max(1, derived.torque)),
+      hp: limitedBuild.hp,
+      torque: limitedBuild.torque,
       weight: Math.round(Math.max(500, derived.weight)),
       grip: Math.round(Math.max(0.5, derived.grip) * 1000) / 1000,
     };
+    car.powerEnvelope = clone(envelope);
+    car.powerLimit = clone(limitedBuild.powerLimit || null);
     car.untunedDerived = clone(untuned);
     const hardware = tuningHardwareProfile(car, installedSpecs);
     let benchmarkContext = untuned;
