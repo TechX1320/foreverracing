@@ -179,7 +179,7 @@ function raceResult(race) {
       </div>
       ${tuningRaceLog(player)}
       <div class="race-result-foot">
-        <span><small>MARGIN</small><b>${number(race.margin, 3)} s</b></span>
+        <span><small>MARGIN</small><b>${player.dnf ? "DNF" : `${number(race.margin, 3)} s`}</b></span>
         <span><small>REWARD</small><b class="good">+${money(race.reward)} cr</b></span>
         <span><small>EXP</small><b class="good">+${number(race.expReward)}</b></span>
         <span><small>REP</small><b>+${number(race.repReward)}</b></span>
