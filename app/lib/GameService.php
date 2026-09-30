@@ -67,7 +67,9 @@ final class GameService
     public static function normalizePlayer(array $player): array
     {
         $default = self::defaultPlayer();
-        $player['schemaVersion'] = (int)app_config()['schema_version'];
+        $previousSchemaVersion = (int)($player['schemaVersion'] ?? 0);
+        $currentSchemaVersion = (int)app_config()['schema_version'];
+        $player['schemaVersion'] = $currentSchemaVersion;
         $player['user'] = array_replace($default['user'], is_array($player['user'] ?? null) ? $player['user'] : []);
         $player['wallet'] = array_replace($default['wallet'], is_array($player['wallet'] ?? null) ? $player['wallet'] : []);
         if (strcasecmp((string)($player['user']['username'] ?? ''), (string)(app_config()['admin_username'] ?? 'Admin')) === 0) {
@@ -84,6 +86,22 @@ final class GameService
         $player['garage'] = array_map(fn(array $car): array => self::normalizeCar($car), $garage);
         $player['inventory'] = is_array($player['inventory'] ?? null) ? $player['inventory'] : $default['inventory'];
         $player['inventory']['parts'] = array_values(is_array($player['inventory']['parts'] ?? null) ? $player['inventory']['parts'] : []);
+        $needsPowerMigration = $previousSchemaVersion < $currentSchemaVersion;
+        if (!$needsPowerMigration) {
+            foreach ($player['garage'] as $savedCar) {
+                if (!is_array($savedCar['powerEnvelope'] ?? null)) {
+                    $needsPowerMigration = true;
+                    break;
+                }
+            }
+        }
+        if ($needsPowerMigration && count($player['garage'])) {
+            $catalog = self::partsCatalog();
+            $player['garage'] = array_map(
+                fn(array $savedCar): array => self::recalculateCar($savedCar, $player['inventory']['parts'], $catalog),
+                $player['garage']
+            );
+        }
         $player['roguelike'] = array_replace($default['roguelike'], is_array($player['roguelike'] ?? null) ? $player['roguelike'] : []);
         $player['activeRace'] = is_array($player['activeRace'] ?? null) ? $player['activeRace'] : null;
         $player['raceHistory'] = array_values(is_array($player['raceHistory'] ?? null) ? $player['raceHistory'] : []);
