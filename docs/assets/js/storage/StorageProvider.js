@@ -22,6 +22,7 @@ export class StorageProvider {
   async selectCar(_carId) { throw new Error('selectCar() is not implemented.'); }
   async renameCar(_carId, _name) { throw new Error('renameCar() is not implemented.'); }
   async saveTune(_carId, _tune) { throw new Error('saveTune() is not implemented.'); }
+  async repairEngine(_carId) { throw new Error('repairEngine() is not implemented.'); }
   async partsCatalog() { throw new Error('partsCatalog() is not implemented.'); }
   async buyPart(_catalogId) { throw new Error('buyPart() is not implemented.'); }
   async installPart(_inventoryId, _carId) { throw new Error('installPart() is not implemented.'); }
