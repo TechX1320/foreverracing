@@ -1,6 +1,13 @@
 import { bindHome, carLabel, escapeHtml, money, number, pageShell, selectedCar } from "../ui/components.js";
 import { renderVehicle } from "../ui/vehicleRenderer.js";
 import { showDialog, closeDialog } from "../ui/modal.js";
+import {
+  forcedInductionCompatibility,
+  forcedInductionMeta,
+  forcedInductionState,
+  forcedInductionSwapNeeded,
+  systemLabel,
+} from "../domain/ForcedInduction.js";
 
 let catalogCache = null;
 const REQUIRED = ["intake", "exhaust", "ecu", "fuel", "drivetrain", "suspension", "tires", "weight"];
@@ -64,12 +71,7 @@ export async function renderParts(ctx) {
         </div>
       </section>
 
-      ${streetCarReady(player, current)
-        ? `<div class="stage-ready stage-ready--reactive">
-            <div><span class="section-label">STREET CAR COMPLETE</span><strong>Ready to turn this into a Street Race Car?</strong><p>Every Street Car category is maxed. Conversion is permanent and unlocks the next set of named race parts.</p></div>
-            <button class="button button--primary" data-stage-up>UPGRADE TO STREET RACE CAR</button>
-          </div>`
-        : ""}
+      ${stageProgressionMarkup(player, current)}
     `
   });
 
@@ -112,6 +114,7 @@ function categoriesForCar(car) {
 
 function categoryCard(player, car, key, tutorialStep = null) {
   const stage = Number(car.buildStage || 1);
+  if (key === "forced_induction") return forcedInductionCategoryCard(player, car);
   const specs = categorySpecs(car, key);
   const label = specs[0]?.category || key;
   const scopedOwned = ownedForCar(player, car.carId).filter((item) => {
@@ -149,6 +152,11 @@ function openCategory(ctx, carId, key) {
   const car = player?.garage?.find((entry) => String(entry.carId) === String(carId));
   if (!car) return;
   const tutorialStep = player?.tutorial?.status === "active" ? player.tutorial.step : null;
+  if (key === "forced_induction") {
+    openForcedInduction(ctx, carId);
+    return;
+  }
+
   if (tutorialStep === "buy_first_upgrade" && key !== "intake") {
     ctx.toast("Tutorial step", "Buy the Stage 1 Intake first.");
     return;
@@ -217,6 +225,17 @@ function openCategory(ctx, carId, key) {
 
 async function purchasePart(ctx, dialog, car, catalogId, installNow, button) {
   button.disabled = true;
+  const candidate = catalogCache.find((part) => String(part.catalogId) === String(catalogId));
+  if (installNow && candidate && forcedInductionSwapNeeded(car, ctx.store.player?.inventory?.parts || [], candidate, catalogCache)) {
+    const state = forcedInductionState(car, ctx.store.player?.inventory?.parts || [], catalogCache);
+    const target = systemLabel(forcedInductionMeta(candidate)?.system);
+    const current = systemLabel(state.primarySystem);
+    const confirmed = globalThis.confirm?.(`Swap ${current} to ${target}? Existing ${current} forced-induction parts will be uninstalled but remain in your inventory.`) ?? true;
+    if (!confirmed) {
+      button.disabled = false;
+      return;
+    }
+  }
   let purchased = null;
   try {
     purchased = await ctx.storage.buyPart(catalogId);
