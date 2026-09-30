@@ -1008,7 +1008,7 @@ for (let index = 0; index < requiredCareerV06b.length; index += 1) {
 }
 if (!performanceIndexV06a4.includes('X: 1000') ||
     !performanceIndexV06a4.includes('if (pi < 1000) return "S";') ||
-    !serverGameSourceV04c.includes("if ($pi < 1000) return 'S';")) {
+    !serverPerformanceIndexSourceV04f.includes("if ($pi < 1000) return 'S';")) {
   throw new Error('V0.6B X Class PI 1000 threshold parity is incomplete.');
 }
 console.log('V0.6B D-through-X career path + X threshold checks passed.');
