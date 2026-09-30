@@ -8,5 +8,6 @@
   "defaultVehicleRendering": "authored",
   "tutorialCompletionCredits": 2500,
   "tutorialCompletionRep": 25,
-  "sessionActiveTtlSeconds": 7200
+  "sessionActiveTtlSeconds": 7200,
+  "localDevCredits": 10000000
 }
