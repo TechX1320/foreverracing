@@ -519,9 +519,12 @@ function openForcedInductionSystem(ctx, carId, system) {
   if (!car) return;
   const stage = Number(car.buildStage || 1);
   const state = forcedInductionState(car, player?.inventory?.parts || [], catalogCache);
-  const specs = categorySpecs(car, "forced_induction")
+  const allSpecs = categorySpecs(car, "forced_induction")
     .filter((part) => String(forcedInductionMeta(part)?.system || "") === String(system))
     .filter((part) => forcedInductionPartVisible(part, state, stage));
+  const specs = forcedInductionDisplayParts(allSpecs, state);
+  const previewPart = specs.find((part) => !findInventory(player, part.catalogId, car.carId)?.installedOnCarId) || specs[0] || null;
+  const previewStats = previewPart ? projectStats(player, car, previewPart) : car.derived;
 
   const factoryRow = system !== "nitrous" && state.factorySystem === system && state.primarySource === "factory"
     ? `<article class="parts-shop-row is-complete">
