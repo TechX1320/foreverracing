@@ -180,6 +180,9 @@ export function engineToCarSnapshot(engine, existing = {}) {
     peakTorqueRpm: row.peakTorqueRpm || Number(existing.peakTorqueRpm || 0),
     redlineRpm: row.redlineRpm || Number(existing.redlineRpm || 0),
     revCutRpm: row.revCutRpm || Number(existing.revCutRpm || 0),
+    curveProfile: row.curveProfile || String(existing.curveProfile || ""),
+    curveNotes: row.curveNotes || String(existing.curveNotes || ""),
+    powerCurve: row.powerCurve.length ? normalizePowerCurve(row.powerCurve) : normalizePowerCurve(existing.powerCurve || []),
   };
 }
 
