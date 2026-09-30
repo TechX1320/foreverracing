@@ -67,7 +67,7 @@ export async function renderParts(ctx) {
           <div><span class="section-label">PART CATEGORIES</span><strong>Open a category to compare and purchase parts.</strong></div>
           <button class="button button--small" type="button" data-open-inventory>GARAGE INVENTORY</button>
         </div>
-        <div class="parts-category-grid">
+        <div class="parts-category-grid ${stage >= 2 ? "parts-category-grid--race" : ""}">
           ${categories.map((key) => categoryCard(player, current, key, tutorialStep)).join("")}
         </div>
       </section>
@@ -718,13 +718,13 @@ function stageProgressionMarkup(player, car) {
       </div>`;
     }
     return `<div class="stage-ready stage-ready--reactive">
-      <div><span class="section-label">STREET RACE CAR COMPLETE</span><strong>Ready for a Front-Half Race Car?</strong><p>Your current parts stay installed. Stage 3 unlocks individual turbo/supercharger hardware, larger NOS foggers and engine-swap access.</p></div>
+      <div><span class="section-label">STREET RACE CAR COMPLETE</span><strong>Ready for a Front-Half Race Car?</strong><p>Forced Induction and Engine Kits are optional paths. Nothing gets locked: Stage 2 parts stay purchasable after advancing. Stage 3 adds individual boost hardware, larger NOS foggers and engine-swap access.</p></div>
       <button class="button button--primary" data-stage-up>UPGRADE TO FRONT-HALF RACE CAR</button>
     </div>`;
   }
 
   return `<div class="stage-ready stage-ready--reactive">
-    <div><span class="section-label">FRONT-HALF BUILD</span><strong>Ready for a Full Race Car?</strong><p>Stage 4 opens twin charging, extreme NOS foggers and the widest engine-swap freedom. Stage 3 has no mandatory completion gate yet while its catalog is being built.</p></div>
+    <div><span class="section-label">FRONT-HALF BUILD</span><strong>Ready for a Full Race Car?</strong><p>Earlier Stage 2/3 parts stay available after advancing. Stage 4 opens twin charging, Engine Kit 4, extreme NOS foggers and the widest engine-swap freedom.</p></div>
     <button class="button button--primary" data-stage-up>UPGRADE TO FULL RACE CAR</button>
   </div>`;
 }
