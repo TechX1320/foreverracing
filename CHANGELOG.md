@@ -1,5 +1,13 @@
 # Changelog
 
+## V0.6.0-a.1 — Adaptive readability
+
+- Increased global typography and touch-target sizing rather than preserving a no-scroll layout by shrinking text.
+- Expanded navigation, context rail, page headings, cards, forms, dialogs and common metadata to readable minimum sizes.
+- Enlarged The Circuit event board, race ladder, targets and action area so the screen uses available space.
+- Added viewport-aware desktop sizing and mobile layouts that use natural vertical scrolling.
+- Improved secondary-text contrast.
+
 ## V0.6.0-a — The Circuit foundation
 
 - Replaced the temporary Safe/Push seven-stage Circuit prototype with catalog-driven PvE events.
