@@ -55,6 +55,7 @@ const required = [
   'assets/js/domain/ContentRelease.js',
   'assets/js/domain/EngineCatalog.js',
   'assets/js/domain/EngineSwap.js',
+  'assets/js/domain/PartProjection.js',
   'assets/js/domain/CircuitCatalog.js',
   'assets/js/domain/ForcedInduction.js',
   'assets/js/domain/PartCatalog.js',
@@ -90,7 +91,7 @@ for (const file of required) {
 const html = await fs.readFile(new URL('index.html', docs), 'utf8');
 if (!html.includes('data-storage-mode="local"')) throw new Error('Static index is not configured for local storage mode.');
 if (!html.includes('CURRENT BUILD')) throw new Error('Static index is missing the dense game shell.');
-if (!html.includes('data-build="0.6.0-a.2"')) throw new Error('Static index is missing the V0.6A.2 build marker.');
+if (!html.includes('data-build="0.6.0-a.3"')) throw new Error('Static index is missing the V0.6A.3 build marker.');
 if (html.includes('<?php')) throw new Error('Static index still contains PHP source.');
 
 const carCatalog = JSON.parse(await fs.readFile(new URL('data/catalog/cars.json', docs), 'utf8'));
@@ -189,6 +190,7 @@ const modules = [
   'assets/js/domain/ContentRelease.js',
   'assets/js/domain/EngineCatalog.js',
   'assets/js/domain/EngineSwap.js',
+  'assets/js/domain/PartProjection.js',
   'assets/js/domain/CircuitCatalog.js',
   'assets/js/domain/PowerModel.js',
   'assets/js/domain/Tuning.js',
@@ -733,7 +735,7 @@ if (!powerModelSourceV05g1.includes('enginePowerEnvelope') ||
     !serverPowerModelSourceV05g1.includes('final class PowerModel') ||
     !localGameSource.includes('needsPowerMigration') ||
     !serverGameSourceV04c.includes('needsPowerMigration') ||
-    !partsSourceV04b.includes('applyBuildPartEffect') ||
+    !partsSourceV04b.includes('projectPartChange') ||
     !partsSourceV04b.includes('ENGINE CAP') ||
     !partsStudioSourceV05e.includes('limitEngineOutput') ||
     !engineStudioSource.includes('Stock Internals HP Limit') ||
@@ -925,6 +927,24 @@ if (!circuitDomainV06a.includes('circuitVisibleToPlayer') ||
   throw new Error('V0.6A.2 optional Circuit gates / Creator filters / swap ownership UX is incomplete.');
 }
 console.log('V0.6A.2 optional Circuit tooling + engine-swap ownership checks passed.');
+
+const partProjectionV06a3 = await fs.readFile(new URL('assets/js/domain/PartProjection.js', root), 'utf8');
+if (!partProjectionV06a3.includes('projectPartChange') ||
+    !partProjectionV06a3.includes('benchmarkPerformance') ||
+    !partsSourceV04b.includes('data-uninstall-shop-part') ||
+    !partsSourceV04b.includes('<small>CLASS</small>') ||
+    !partsSourceV04b.includes('<small>PI</small>') ||
+    !partsSourceV04b.includes('partProjectionMarkup') ||
+    !garageSource.includes('projectPartChange') ||
+    !garageSource.includes('data-uninstall-owned') ||
+    garageSource.includes('effect.op === "mul"') ||
+    !cssV04b.includes('V0.6A.3 parts recovery') ||
+    !cssV04b.includes('.garage-inventory-list') ||
+    !cssV04b.includes('overflow-y:auto')) {
+  throw new Error('V0.6A.3 class recovery / uninstall / inventory scrolling workflow is incomplete.');
+}
+console.log('V0.6A.3 parts recovery UI + projection checks passed.');
+
 
 
 
