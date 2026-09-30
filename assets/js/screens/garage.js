@@ -466,7 +466,7 @@ function inventoryRow(player, car, item, spec, tutorialInstall = false) {
   if (installed && stage === 1 && simpleTier) {
     action = '<span class="status-text status-text--good">INSTALLED • LOCKED</span>';
   } else if (installed) {
-    action = `<button class="button button--small" data-uninstall-owned="${escapeHtml(item.inventoryId)}">REMOVE</button>`;
+    action = `<button class="button button--small" data-uninstall-owned="${escapeHtml(item.inventoryId)}">UNINSTALL</button>`;
   } else if (completedOldStep) {
     action = '<span class="status-text">COMPLETED STEP</span>';
   } else {
@@ -505,7 +505,7 @@ function effectsSummary(player, car, item, spec) {
   const rows = [];
   if (Math.abs(hpDelta) >= 0.5) rows.push(`<span>${prefix} HP <b>${signedDelta(Math.round(hpDelta))}</b></span>`);
   if (Math.abs(torqueDelta) >= 0.5) rows.push(`<span>TQ <b>${signedDelta(Math.round(torqueDelta))}</b></span>`);
-  if (Math.abs(weightDelta) >= 0.5) rows.push(`WT <b>${signedDelta(Math.round(weightDelta))} lb</b></span>`);
+  if (Math.abs(weightDelta) >= 0.5) rows.push(`<span>WT <b>${signedDelta(Math.round(weightDelta))} lb</b></span>`);
   if (Math.abs(gripDelta) >= 0.0005) rows.push(`<span>GRIP <b>${signedDelta(gripDelta)}</b></span>`);
   rows.push(`<span>PI <b>${number(car.performanceIndex || 0)} → ${number(projected.performanceIndex || 0)} (${signedDelta(Math.round(piDelta))})</b></span>`);
   if (nextClass !== currentClass) rows.push(`<span>CLASS <b class="warn">${escapeHtml(currentClass)} → ${escapeHtml(nextClass)}</b></span>`);
