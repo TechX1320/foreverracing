@@ -85,6 +85,7 @@ export function engineSwapQuote(car, engine, ownedEngines = []) {
 }
 
 export function isEngineBoundPart(part) {
+  if (Number(part?.simpleTier || 0) > 0) return false;
   return ENGINE_BOUND.has(String(part?.categoryKey || "").toLowerCase());
 }
 
