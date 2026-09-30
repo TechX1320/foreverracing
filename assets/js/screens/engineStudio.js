@@ -64,8 +64,8 @@ export async function renderEngineStudio(ctx) {
           <button type="button" class="content-studio__module is-active">
             <b>ENGINE CREATOR</b><span>ACTIVE</span>
           </button>
-          <button type="button" class="content-studio__module" disabled>
-            <b>PARTS TOOL</b><span>NEXT</span>
+          <button type="button" class="content-studio__module" data-open-parts-creator>
+            <b>PARTS CREATOR</b><span>ACTIVE</span>
           </button>
           <button type="button" class="content-studio__module" disabled>
             <b>WHEELS TOOL</b><span>PLANNED</span>
