@@ -48,7 +48,7 @@ final class RaceSimulator
         $hp = max(1.0, (float)($context['hp'] ?? $context['horsepower'] ?? 1));
         $torque = max(1.0, (float)($context['torque'] ?? 1));
         $weight = max(500.0, (float)($context['weight'] ?? $context['weightLbs'] ?? 500));
-        $grip = self::clamp((float)($context['grip'] ?? 1.0), 0.5, 2.0);
+        $grip = self::clamp((float)($context['grip'] ?? 1.0), 0.5, 2.6);
         $level = max(1, (int)($context['level'] ?? 1));
         $drivetrain = strtoupper((string)($context['drivetrain'] ?? ''));
         $tune = is_array($context['tuning'] ?? null) ? $context['tuning'] : [];
