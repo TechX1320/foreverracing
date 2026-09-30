@@ -291,6 +291,10 @@ async function purchasePart(ctx, dialog, car, catalogId, installNow, button, cat
       await renderParts(ctx);
       if (Number(car.buildStage || 1) === 1 && categoryKey && categoryKey !== "forced_induction") {
         renderStandardCategoryDialog(ctx, dialog, car.carId, categoryKey);
+      } else if (categoryKey === "forced_induction" && candidate) {
+        const system = String(forcedInductionMeta(candidate)?.system || "");
+        closeDialog(dialog);
+        if (system) openForcedInductionSystem(ctx, car.carId, system);
       } else {
         closeDialog(dialog);
       }
@@ -605,6 +609,7 @@ function openForcedInductionSystem(ctx, carId, system) {
         closeDialog(dialog);
         ctx.toast("Forced induction updated", "The car's setup and Performance Index were recalculated.");
         await renderParts(ctx);
+        openForcedInductionSystem(ctx, carId, system);
       } catch (err) {
         ctx.toast("Install blocked", err.message);
         button.disabled = false;
