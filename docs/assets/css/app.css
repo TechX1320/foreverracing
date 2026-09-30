@@ -2457,7 +2457,21 @@ dialog.fr-dialog:has(.tuning-dialog){
   line-height:1.4;
   border-left:2px solid #4d5861;
 }
-.engine-swap-dialog{width:min(940px,calc(100vw - 28px));max-width:none}
+dialog.fr-dialog:has(.engine-swap-dialog){
+  width:min(940px,calc(100vw - 20px));
+  max-width:calc(100vw - 20px);
+  overflow-x:hidden;
+}
+.engine-swap-dialog{
+  width:100%;
+  max-width:none;
+  min-width:0;
+  box-sizing:border-box;
+}
+.engine-swap-dialog>*{min-width:0}
+.engine-swap-dialog__head>*,.engine-swap-dialog__compare>*,.engine-swap-dialog__impact>*{min-width:0}
+.engine-swap-dialog .dialog-actions{flex-wrap:wrap}
+.engine-swap-dialog .dialog-actions .button{max-width:100%}
 .engine-swap-dialog__head{
   display:grid;
   grid-template-columns:minmax(0,1fr) 240px;

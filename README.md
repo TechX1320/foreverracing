@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.5.0-h.1 playable direction
+## V0.5.0-h.2 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,13 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.5H.2 swap preview + chassis ownership hardening
+
+- Engine Swap confirmation now sizes the actual dialog to the viewport instead of forcing a wider child panel inside the default modal, removing the horizontal back-and-forth scroll.
+- **Tires, Suspension and Weight Reduction are explicit chassis-only categories.** They stay with the car during an engine swap and cannot become attached to a stored engine assembly.
+- Save normalization scrubs stale chassis-part engine links if an older/bad save ever contains them.
+- Regression coverage now verifies all three chassis-only categories remain on the RX-8 while engine-bound parts and calibration travel with the removed engine.
 
 ### V0.5H.1 complete engine assemblies
 
