@@ -223,6 +223,20 @@ final class GameService
             }
             self::requirePartCompatible($player, $car, $spec, $catalog, false);
 
+            $fiMeta = self::forcedInductionMeta($spec);
+            if ($fiMeta && (string)($fiMeta['role'] ?? '') === 'kit' && self::forcedInductionSwapNeeded($car, $player['inventory']['parts'] ?? [], $spec, $catalog)) {
+                $fiState = self::forcedInductionState($car, $player['inventory']['parts'] ?? [], $catalog);
+                $previousSystem = (string)($fiState['primarySystem'] ?? '');
+                foreach ($player['inventory']['parts'] as &$ownedPart) {
+                    if ((string)($ownedPart['installedOnCarId'] ?? '') !== $carId) continue;
+                    $installedSpec = self::findBy($catalog, 'catalogId', (string)($ownedPart['catalogId'] ?? ''));
+                    $installedMeta = $installedSpec ? self::forcedInductionMeta($installedSpec) : null;
+                    if (!$installedMeta || (string)($installedMeta['role'] ?? '') === 'nitrous') continue;
+                    if ((string)($installedMeta['system'] ?? '') === $previousSystem) $ownedPart['installedOnCarId'] = null;
+                }
+                unset($ownedPart);
+            }
+
             $slot = (string)$spec['slot'];
             if ((int)($car['buildStage'] ?? 1) === 1 && (int)($spec['simpleTier'] ?? 0) > 0) {
                 $currentTier = self::installedSimpleTier($player, $carId, (string)($spec['categoryKey'] ?? $slot), $catalog);
@@ -281,34 +295,69 @@ final class GameService
     {
         $catalog = self::partsCatalog();
         $stageConfig = JsonStore::read(FR_DATA . '/config/build-stages.json', []);
-        $required = $stageConfig['stages'][0]['requiredCategories'] ?? ['intake','exhaust','ecu','fuel','drivetrain','suspension','tires','weight'];
+        $streetRequired = $stageConfig['stages'][0]['requiredCategories'] ?? ['intake','exhaust','ecu','fuel','drivetrain','suspension','tires','weight'];
 
-        return self::mutatePlayer(function (array $player) use ($carId, $catalog, $required): array {
+        return self::mutatePlayer(function (array $player) use ($carId, $catalog, $streetRequired): array {
             $index = self::requireOwnedCarIndex($player, $carId);
             $car = $player['garage'][$index];
-            if ((int)($car['buildStage'] ?? 1) !== 1) {
-                throw new GameException('Only Street Car to Street Race Car conversion is enabled in this build.');
-            }
-            foreach ($required as $category) {
-                if (self::installedSimpleTier($player, $carId, (string)$category, $catalog) < 3) {
-                    throw new GameException('Max every Street Car upgrade category before converting to a Street Race Car.');
+            $stage = (int)($car['buildStage'] ?? 1);
+
+            if ($stage === 1) {
+                foreach ($streetRequired as $category) {
+                    if (self::installedSimpleTier($player, $carId, (string)$category, $catalog) < 3) {
+                        throw new GameException('Max every Street Car upgrade category before converting to a Street Race Car.');
+                    }
                 }
-            }
-            $car['stageBaseline'] = $car['derived'];
-            $car['buildStage'] = 2;
-            foreach ($player['inventory']['parts'] as &$ownedPart) {
-                if (($ownedPart['installedOnCarId'] ?? null) !== $carId) {
-                    continue;
+                $car['stageBaseline'] = $car['derived'];
+                $car['buildStage'] = 2;
+                foreach ($player['inventory']['parts'] as &$ownedPart) {
+                    if (($ownedPart['installedOnCarId'] ?? null) !== $carId) continue;
+                    $partSpec = self::findBy($catalog, 'catalogId', (string)($ownedPart['catalogId'] ?? ''));
+                    if (!empty($partSpec['simpleTier'])) $ownedPart['installedOnCarId'] = null;
                 }
-                $partSpec = self::findBy($catalog, 'catalogId', (string)($ownedPart['catalogId'] ?? ''));
-                if (!empty($partSpec['simpleTier'])) {
-                    $ownedPart['installedOnCarId'] = null;
-                }
+                unset($ownedPart);
+                $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'], $catalog);
+                self::addTransaction($player, 'stage_conversion', 0, self::carName($car) . ' converted to Street Race Car');
+                return $player;
             }
-            unset($ownedPart);
-            $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'], $catalog);
-            self::addTransaction($player, 'stage_conversion', 0, self::carName($car) . ' converted to Street Race Car');
-            return $player;
+
+            if ($stage === 2) {
+                $requiredCategories = [];
+                foreach ($catalog as $part) {
+                    if (!empty($part['simpleTier'])) continue;
+                    if ((int)($part['buildStage'] ?? 2) !== 2) continue;
+                    if (($part['requiredForStageProgression'] ?? true) === false) continue;
+                    $key = trim((string)($part['categoryKey'] ?? ''));
+                    if ($key !== '' && !in_array($key, $requiredCategories, true)) $requiredCategories[] = $key;
+                }
+
+                $installedCategories = [];
+                foreach (($player['inventory']['parts'] ?? []) as $ownedPart) {
+                    if ((string)($ownedPart['installedOnCarId'] ?? '') !== $carId) continue;
+                    $partSpec = self::findBy($catalog, 'catalogId', (string)($ownedPart['catalogId'] ?? ''));
+                    $key = trim((string)($partSpec['categoryKey'] ?? ''));
+                    if ($key !== '' && !in_array($key, $installedCategories, true)) $installedCategories[] = $key;
+                }
+
+                $missing = array_values(array_diff($requiredCategories, $installedCategories));
+                if ($missing) {
+                    throw new GameException('Install a Street Race Car part in every core category before moving to Front-Half Race Car. Missing: ' . implode(', ', $missing) . '.');
+                }
+
+                $car['buildStage'] = 3;
+                $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'], $catalog);
+                self::addTransaction($player, 'stage_conversion', 0, self::carName($car) . ' converted to Front-Half Race Car');
+                return $player;
+            }
+
+            if ($stage === 3) {
+                $car['buildStage'] = 4;
+                $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'], $catalog);
+                self::addTransaction($player, 'stage_conversion', 0, self::carName($car) . ' converted to Full Race Car');
+                return $player;
+            }
+
+            throw new GameException('This car is already a Full Race Car.');
         });
     }
 
@@ -917,6 +966,124 @@ final class GameService
         return $tier;
     }
 
+    private static function normalizeFiSystem(mixed $value): ?string
+    {
+        $text = strtolower(trim((string)$value));
+        if (str_contains($text, 'super')) return 'supercharger';
+        if (str_contains($text, 'turbo')) return 'turbo';
+        if (str_contains($text, 'nitrous') || str_contains($text, 'nos')) return 'nitrous';
+        return null;
+    }
+
+    private static function forcedInductionMeta(array $spec): ?array
+    {
+        return is_array($spec['forcedInduction'] ?? null) ? $spec['forcedInduction'] : null;
+    }
+
+    private static function forcedInductionState(array $car, array $inventory, array $catalog): array
+    {
+        $factorySystem = self::normalizeFiSystem($car['engine']['aspiration'] ?? '');
+        $primarySpec = $secondarySpec = $factoryUpgradeSpec = $nitrousSpec = null;
+
+        foreach ($inventory as $item) {
+            if ((string)($item['installedOnCarId'] ?? '') !== (string)($car['carId'] ?? '')) continue;
+            $part = self::findBy($catalog, 'catalogId', (string)($item['catalogId'] ?? ''));
+            if (!$part) continue;
+            $slot = (string)($part['slot'] ?? '');
+            if ($slot === 'forced_induction_primary') $primarySpec = $part;
+            elseif ($slot === 'forced_induction_secondary') $secondarySpec = $part;
+            elseif ($slot === 'forced_induction_factory_upgrade') $factoryUpgradeSpec = $part;
+            elseif ($slot === 'nitrous') $nitrousSpec = $part;
+        }
+
+        $primaryMeta = $primarySpec ? self::forcedInductionMeta($primarySpec) : null;
+        $secondaryMeta = $secondarySpec ? self::forcedInductionMeta($secondarySpec) : null;
+        $factoryUpgradeMeta = $factoryUpgradeSpec ? self::forcedInductionMeta($factoryUpgradeSpec) : null;
+        $nitrousMeta = $nitrousSpec ? self::forcedInductionMeta($nitrousSpec) : null;
+        $primaryOverride = self::normalizeFiSystem($primaryMeta['system'] ?? null);
+        $primarySystem = $primaryOverride ?: $factorySystem;
+        $secondarySystem = self::normalizeFiSystem($secondaryMeta['system'] ?? null);
+        $systems = array_values(array_unique(array_filter([$primarySystem, $secondarySystem])));
+
+        return [
+            'factorySystem' => $factorySystem,
+            'primarySystem' => $primarySystem,
+            'primarySource' => $primaryOverride ? 'aftermarket' : ($factorySystem ? 'factory' : null),
+            'primaryStep' => $primaryOverride ? max(0, (int)($primaryMeta['step'] ?? 0)) : 0,
+            'secondarySystem' => $secondarySystem,
+            'factoryUpgradeStep' => max(0, (int)($factoryUpgradeMeta['step'] ?? 0)),
+            'nitrousShot' => max(0, (int)($nitrousMeta['shot'] ?? 0)),
+            'nitrousStep' => max(0, (int)($nitrousMeta['step'] ?? 0)),
+            'systems' => $systems,
+        ];
+    }
+
+    private static function forcedInductionCompatibility(array $car, array $inventory, array $spec, array $catalog, bool $purchasing): ?string
+    {
+        $meta = self::forcedInductionMeta($spec);
+        if (!$meta) return null;
+
+        $stage = (int)($car['buildStage'] ?? 1);
+        $state = self::forcedInductionState($car, $inventory, $catalog);
+        $system = self::normalizeFiSystem($meta['system'] ?? null);
+        $role = (string)($meta['role'] ?? '');
+
+        if ($stage < 2) return 'Forced Induction unlocks with Street Race Car.';
+
+        if ($role === 'factory_upgrade') {
+            if (!$system || $state['factorySystem'] !== $system || $state['primarySource'] !== 'factory') return 'Requires the factory forced-induction system to still be installed.';
+            $step = max(1, (int)($meta['step'] ?? 1));
+            if ($purchasing && $step !== ((int)$state['factoryUpgradeStep'] + 1)) return 'Complete the previous factory-kit upgrade first.';
+            return null;
+        }
+
+        if ($role === 'kit') {
+            if ($state['primarySource'] === 'factory' && $state['primarySystem'] === $system) return 'The factory forced-induction kit is already the base system.';
+            if ($state['primarySource'] === 'aftermarket' && $state['primarySystem'] === $system) return 'That aftermarket forced-induction kit is already installed.';
+            if (!empty($state['secondarySystem']) && $stage >= 4) return 'Remove the secondary twin-charge kit before swapping the primary system.';
+            return null;
+        }
+
+        if ($role === 'kit_upgrade') {
+            if ($state['primarySource'] !== 'aftermarket' || $state['primarySystem'] !== $system) return 'Install the matching aftermarket forced-induction kit first.';
+            $step = max(1, (int)($meta['step'] ?? 1));
+            if ($purchasing && $step !== ((int)$state['primaryStep'] + 1)) return 'Complete the previous kit upgrade first.';
+            return null;
+        }
+
+        if ($role === 'component') {
+            if (!in_array($system, $state['systems'], true)) return 'Requires the matching forced-induction system.';
+            return null;
+        }
+
+        if ($role === 'twin_kit') {
+            $requires = self::normalizeFiSystem($meta['requiresSystem'] ?? null);
+            if ($stage < 4) return 'Twin charging unlocks with Full Race Car.';
+            if (!$requires || $state['primarySystem'] !== $requires) return 'Requires the opposite system as the primary forced-induction kit.';
+            if (!empty($state['secondarySystem'])) return 'A secondary twin-charge system is already installed.';
+            if ($state['primarySystem'] === $system) return 'Twin charging needs the opposite forced-induction system.';
+            return null;
+        }
+
+        if ($role === 'nitrous') {
+            $step = max(0, (int)($meta['step'] ?? 0));
+            $expected = (int)$state['nitrousStep'] + ((int)$state['nitrousShot'] > 0 ? 1 : 0);
+            if ($purchasing && $step !== $expected) return 'Buy the previous NOS fogger size first.';
+            return null;
+        }
+
+        return null;
+    }
+
+    private static function forcedInductionSwapNeeded(array $car, array $inventory, array $spec, array $catalog): bool
+    {
+        $meta = self::forcedInductionMeta($spec);
+        if (!$meta || (string)($meta['role'] ?? '') !== 'kit') return false;
+        $state = self::forcedInductionState($car, $inventory, $catalog);
+        $system = self::normalizeFiSystem($meta['system'] ?? null);
+        return !empty($state['primarySystem']) && $system && $state['primarySystem'] !== $system;
+    }
+
     private static function requirePartCompatible(array $player, array $car, array $spec, array $catalog, bool $purchasing): void
     {
         $stage = (int)($car['buildStage'] ?? 1);
@@ -942,6 +1109,9 @@ final class GameService
         if ((int)($spec['persistentFromStage'] ?? $spec['buildStage'] ?? 2) > $stage) {
             throw new GameException('This part is not available for the current Build Type.');
         }
+
+        $reason = self::forcedInductionCompatibility($car, $player['inventory']['parts'] ?? [], $spec, $catalog, $purchasing);
+        if ($reason !== null) throw new GameException($reason);
     }
 
     private static function completeTutorialStep(array &$player, string $completed, ?string $next): void
