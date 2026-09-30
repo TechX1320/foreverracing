@@ -90,7 +90,9 @@ function runPresentation(ctx, activeRace) {
         let finalized;
         for (let attempt = 0; attempt < 12; attempt += 1) {
           try {
-            finalized = await ctx.storage.finishQuickRace(activeRace.raceId);
+            finalized = activeRace.origin === "circuit"
+              ? await ctx.storage.finishCircuitRace(activeRace.raceId)
+              : await ctx.storage.finishQuickRace(activeRace.raceId);
             break;
           } catch (error) {
             if (Number(error?.status) !== 409 || attempt === 11) throw error;

@@ -206,8 +206,8 @@ function openSwapDialog(ctx, carId, engineId) {
         </div>
         <div>
           <small>CALIBRATION</small>
-          <b>${quote.owned?.tune ? "RESTORED" : "BASE / NONE"}</b>
-          <p>${quote.owned?.tune ? "The saved calibration travels with this engine assembly and returns when compatible ECU hardware is active." : "A newly purchased engine starts without a saved calibration."}</p>
+          <b>RESET / NONE</b>
+          <p>Engine swaps clear the active ECU calibration. If compatible Standalone ECU + Laptop hardware is attached, tuning is available again from a fresh base map.</p>
         </div>
       </div>
 
