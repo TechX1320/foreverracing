@@ -168,7 +168,7 @@ export function evaluateTune(car, untunedStats, inputProfile, hardware = {}) {
   };
 
   const stability = clamp(1 - (stress * 0.65) - (Math.max(0, Math.abs(fuelError) - 3) * 0.025) - (Math.max(0, timingError - 1.2) * 0.04), 0.35, 1);
-  const hints = buildHints({ profile, hardware, fuelError, timingError, tire, launch, shift, gear, stress });
+  const hints = buildHints({ profile, hardware, fuelError, timingError, tire, launch, shift, gear, stress, powerLimited: Boolean(limited.powerLimit?.hpLimited) });
 
   return {
     profile,
@@ -261,10 +261,10 @@ function gearEvaluation(profile, stats, tireGripMultiplier) {
   return { launchPowerFactor, averagePowerFactor, idealLaunch, tractionMultiplier };
 }
 
-function buildHints({ profile, hardware, fuelError, timingError, tire, launch, shift, gear, stress }) {
+function buildHints({ profile, hardware, fuelError, timingError, tire, launch, shift, gear, stress, powerLimited = false }) {
   const hints = [];
   if (hardware.boosted && profile.boostPsi > Number(hardware.safeBoostPsi || 0)) hints.push("Boost is above the engine hardware's comfortable window. It may make more power, but repeatability falls.");
-  if (hardware.powerEnvelope?.capacityHp && Number(hardware.powerEnvelope.capacityHp) <= Number(hardware.powerEnvelope.softStartHp || hardware.powerEnvelope.capacityHp)) hints.push("Engine power capacity is the current bottleneck.");
+  if (powerLimited) hints.push("The engine is near its current power envelope. More boost now gives diminishing returns; stronger engine hardware or a larger engine is the meaningful next step.");
   if (fuelError < -1.2) hints.push("Fueling is lean for the current boost. Add fuel before asking for more boost or timing.");
   else if (fuelError > 2.2) hints.push("Fueling is rich enough to start giving power away.");
   else hints.push("Fueling is in a usable window for this car.");
