@@ -45,7 +45,7 @@ final class PowerModel
         $v['kit2Hp']=max($v['kit1Hp'],$v['kit2Hp']);
         $v['kit3Hp']=max($v['kit2Hp'],$v['kit3Hp']);
         $v['kit4Hp']=max($v['kit3Hp'],$v['kit4Hp']);
-        return array_map(fn($n):(int)=> (int)round($n),$v);
+        return array_map(fn($n): int => (int) round($n), $v);
     }
 
     public static function enginePowerEnvelope(array $car, array $specs): array
