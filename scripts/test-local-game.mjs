@@ -32,6 +32,7 @@ assert.equal(player.garage.length, 0);
 
 player = game.tutorialAdvance(player, 'welcome_complete');
 assert.equal(player.tutorial.step, 'buy_first_car');
+assert.equal(player.wallet.credits, Number(config.localDevCredits));
 
 assert.throws(() => game.purchaseNewCar(player, 1), /Classifieds/i);
 const starterLot = game.generateUsedLot();
@@ -68,7 +69,7 @@ assert.equal(player.garage[0].performanceClass, 'D');
 assert.ok(player.garage[0].performanceIndex > 0);
 assert.ok(player.garage[0].benchmarkEt > 0);
 assert.equal(player.selectedCarId, player.garage[0].carId);
-assert.equal(player.wallet.credits, 75000 - Number(golfListing.price));
+assert.equal(player.wallet.credits, Number(config.localDevCredits) - Number(golfListing.price));
 assert.equal(player.tutorial.step, 'visit_garage');
 assert.equal(player.garage[0].source, 'used');
 assert.ok(player.garage[0].mileage >= 105000);
@@ -233,6 +234,20 @@ assert.ok(player.inventory.parts.filter((row) => row.installedOnCarId === player
 player = game.purchasePart(player, 's2_intake_01');
 const choicePart = player.inventory.parts.find((row) => row.catalogId === 's2_intake_01');
 player = game.installPart(player, choicePart.inventoryId, player.selectedCarId);
+assert.ok(player.garage[0].derived.hp > beforeStageUp.hp);
+
+player = game.purchasePart(player, 's2_fi_turbo_kit');
+const turboKit = player.inventory.parts.find((row) => row.catalogId === 's2_fi_turbo_kit');
+player = game.installPart(player, turboKit.inventoryId, player.selectedCarId);
+assert.throws(() => game.purchasePart(player, 's2_fi_turbo_upgrade_1'), /Engine Kit 1/i);
+
+player = game.purchasePart(player, 's2_engine_kit_1');
+const engineKit1 = player.inventory.parts.find((row) => row.catalogId === 's2_engine_kit_1');
+player = game.installPart(player, engineKit1.inventoryId, player.selectedCarId);
+assert.ok(player.garage[0].derived.hp > beforeStageUp.hp);
+player = game.purchasePart(player, 's2_fi_turbo_upgrade_1');
+const turboUpgrade1 = player.inventory.parts.find((row) => row.catalogId === 's2_fi_turbo_upgrade_1');
+player = game.installPart(player, turboUpgrade1.inventoryId, player.selectedCarId);
 assert.ok(player.garage[0].derived.hp > beforeStageUp.hp);
 
 const lot = game.generateUsedLot();
