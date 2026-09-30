@@ -77,29 +77,34 @@ export async function renderEngineSwapShop(ctx) {
           <p>${number(car.derived?.hp)} HP • ${number(car.derived?.torque)} LB-FT • ${escapeHtml(car.base?.drivetrain || "-")} • ${escapeHtml(currentEngine.aspiration || "-")}</p>
         </div>
         <div class="engine-swap-current__rules">
-          <span><small>SWAPS</small><b>${stage >= 3 ? "OPEN" : "LOCKED"}</b></span>
+          <span><small>SWAPS</small><b>${stage >= 2 ? "OPEN" : "LOCKED"}</b></span>
           <span><small>OWNED ENGINES</small><b>${owned.length}</b></span>
           <span><small>ENGINE</small><b>${car.engineCondition?.failed ? "FAILED" : "RUNNING"}</b></span>
         </div>
       </div>
 
-      ${stage < 3 ? `<div class="engine-swap-lock"><b>ENGINE SWAPS START AT FRONT-HALF RACE CAR</b><span>Build Type 3 opens custom powertrain fabrication. Some extreme fitments require Full Race Car / Build Type 4.</span></div>` : ""}
+      ${stage < 2 ? `<div class="engine-swap-lock"><b>ENGINE SWAPS START AT STREET RACE CAR</b><span>Build Type 2 opens normal/custom swaps. More invasive combinations still require Build Type 3 or Full Race Car / Build Type 4.</span></div>` : ""}
 
       <div class="engine-swap-shop-grid">
         ${options.map(({ engine, quote }) => engineCard(car, engine, quote)).join("")}
       </div>
 
       ${owned.length ? `<section class="engine-swap-owned">
-        <header><span>ENGINE INVENTORY</span><b>Swapped-out engines stay yours.</b></header>
+        <header><span>ENGINE ASSEMBLY INVENTORY</span><b>Complete built motors stay together.</b></header>
         <div>${owned.map((item) => {
           const engine = engineCache.find((row) => row.engineId === String(item.engineId || ""));
           const condition = item.condition?.failed ? "FAILED" : `${number(item.condition?.healthPct ?? 100)}% HEALTH`;
-          return `<span><b>${escapeHtml(engine ? engineLabel(engine) : item.engineId)}</b><small>${escapeHtml(condition)}</small></span>`;
+          const location = item.installedOnCarId
+            ? `INSTALLED • ${escapeHtml(player.garage?.find((car) => String(car.carId) === String(item.installedOnCarId))?.displayName || "CAR")}`
+            : "STORED";
+          const hp = Number(item.storedStats?.hp || engine?.peakHp || 0);
+          const parts = Number(item.attachedPartInventoryIds?.length || 0);
+          return `<span><b>${escapeHtml(engine ? engineLabel(engine) : item.engineId)}</b><small>${escapeHtml(location)} • ${number(hp)} HP • ${parts} ATTACHED PARTS • ${escapeHtml(condition)}${item.tune ? " • TUNE SAVED" : ""}</small></span>`;
         }).join("")}</div>
       </section>` : ""}
 
       <div class="engine-swap-footnote">
-        Engine swaps keep suspension, tires and weight-reduction hardware. Engine-bound Intake, Exhaust, Fuel, ECU, Drivetrain, Forced Induction and Engine parts are moved back to Inventory so the new engine can be rebuilt correctly.
+        Engine-bound Intake, Exhaust, Fuel, ECU, Drivetrain, Forced Induction, Engine Kit and Engine parts travel with the engine assembly. Tires, suspension and weight-reduction hardware stay with the chassis. Parts that the destination Build Type cannot support remain attached but dormant until the chassis is upgraded.
       </div>`,
     trail: `${carLabel(car)} • ${engineLabel(currentEngine)}`,
   });
@@ -154,7 +159,7 @@ function openSwapDialog(ctx, carId, engineId) {
   const quote = engineSwapQuote(car, engine, player.inventory?.engines || []);
   const currentEngine = engineCache.find((row) => row.engineId === String(car.engineId || car.factoryEngineId || ""))
     || normalizeEngineDefinition({ ...car.engine, engineId: car.engineId || car.factoryEngineId || "" });
-  const preview = projectSwap(player, car, engine);
+  const preview = projectSwap(player, car, engine, quote);
   const invalidated = preview.uninstalled;
   const ownedFailed = quote.owned?.condition?.failed === true;
 
@@ -190,19 +195,19 @@ function openSwapDialog(ctx, carId, engineId) {
 
       <div class="engine-swap-dialog__impact">
         <div>
-          <small>PARTS RETURNED TO INVENTORY</small>
-          <b>${invalidated.length}</b>
-          <p>${invalidated.length ? escapeHtml(invalidated.slice(0, 8).join(" • ")) : "No installed parts need to be removed."}${invalidated.length > 8 ? ` • +${invalidated.length - 8} more` : ""}</p>
+          <small>OUTGOING ASSEMBLY</small>
+          <b>STORED COMPLETE</b>
+          <p>${invalidated.length ? `${invalidated.length} engine-bound parts stay attached to the removed engine.` : "The removed engine is stored as a complete assembly."}</p>
         </div>
         <div>
-          <small>OLD ENGINE</small>
-          <b>KEPT</b>
-          <p>Your current engine is removed and stored in Engine Inventory. You can pay labor to swap it back later.</p>
+          <small>INCOMING ASSEMBLY</small>
+          <b>${preview.restored.length} ACTIVE • ${preview.dormant.length} DORMANT</b>
+          <p>${preview.restored.length ? escapeHtml(preview.restored.slice(0, 6).join(" • ")) : "Stock engine with no attached performance parts."}</p>
         </div>
         <div>
           <small>CALIBRATION</small>
-          <b>RESET</b>
-          <p>The old ECU tune is cleared. Install compatible management hardware on the new engine before tuning it.</p>
+          <b>${quote.owned?.tune ? "RESTORED" : "BASE / NONE"}</b>
+          <p>${quote.owned?.tune ? "The saved calibration travels with this engine assembly and returns when compatible ECU hardware is active." : "A newly purchased engine starts without a saved calibration."}</p>
         </div>
       </div>
 
@@ -223,7 +228,7 @@ function openSwapDialog(ctx, carId, engineId) {
       const updated = data.player?.garage?.find((entry) => String(entry.carId) === String(car.carId));
       const count = updated?.engineSwap?.lastUninstalledParts?.length || 0;
       closeDialog(dialog);
-      ctx.toast("Engine swap complete", `${engine.name} installed. ${count} engine-bound part${count === 1 ? "" : "s"} moved to Inventory.`);
+      ctx.toast("Engine swap complete", `${engine.name} installed. The outgoing engine was stored as a complete assembly.`);
       showSwapComplete(ctx, updated, engine);
     } catch (error) {
       ctx.toast("Engine swap blocked", error.message);
@@ -241,12 +246,12 @@ function showSwapComplete(ctx, car, engine) {
     <div class="dialog-body engine-swap-complete">
       <span class="section-label">POWERTRAIN INSTALLED</span>
       <h2>${escapeHtml(engine.name)}</h2>
-      <p>${escapeHtml(carLabel(car))} now uses <strong>${escapeHtml(engineLabel(engine))}</strong>. Parts compatibility has updated to the installed engine.</p>
+      <p>${escapeHtml(carLabel(car))} now uses <strong>${escapeHtml(engineLabel(engine))}</strong>. Its stored build has been restored where this chassis Build Type supports it; Parts compatibility has updated to the installed engine.</p>
       <div class="engine-swap-complete__stats">
         <span><small>HP</small><b>${number(car.derived?.hp)}</b></span>
         <span><small>TQ</small><b>${number(car.derived?.torque)}</b></span>
         <span><small>PI</small><b>${number(car.performanceIndex)}</b></span>
-        <span><small>ENGINE PARTS REMOVED</small><b>${number(car.engineSwap?.lastUninstalledParts?.length || 0)}</b></span>
+        <span><small>ASSEMBLY PARTS ACTIVE</small><b>${number(car.engineSwap?.lastRestoredParts?.length || 0)}</b></span>
       </div>
       <div class="dialog-actions">
         <button class="button button--small" type="button" data-stay>STAY IN SWAP SHOP</button>
@@ -263,7 +268,7 @@ function showSwapComplete(ctx, car, engine) {
   });
 }
 
-function projectSwap(player, car, engine) {
+function projectSwap(player, car, engine, quote = null) {
   const candidate = swappedCarSnapshot(car, engine);
   const seed = Number(candidate.buildStage || 1) >= 2 && candidate.stageBaseline ? candidate.stageBaseline : candidate.base;
   const stats = {
@@ -273,17 +278,37 @@ function projectSwap(player, car, engine) {
     grip: Number(seed?.grip || candidate.base?.grip || 1),
   };
   const installedSpecs = [];
-  const uninstalled = [];
+  const outgoing = [];
+  const restored = [];
+  const dormant = [];
 
   for (const item of player?.inventory?.parts || []) {
     if (String(item.installedOnCarId || "") !== String(car.carId)) continue;
     const spec = partCache.find((part) => String(part.catalogId) === String(item.catalogId));
     if (!spec) continue;
-    const compatibility = partCompatibility(spec, candidate);
-    if (isEngineBoundPart(spec) || !compatibility.ok) {
-      uninstalled.push(String(spec.name || spec.catalogId));
+    if (isEngineBoundPart(spec)) {
+      outgoing.push(String(spec.name || spec.catalogId));
       continue;
     }
+    const compatibility = partCompatibility(spec, candidate);
+    if (!compatibility.ok) continue;
+    installedSpecs.push(spec);
+    for (const effect of spec.effects || []) applyBuildPartEffect(stats, effect, spec);
+  }
+
+  const incomingAssembly = quote?.owned || null;
+  const incomingIds = new Set(incomingAssembly?.attachedPartInventoryIds || []);
+  for (const id of incomingIds) {
+    const item = player?.inventory?.parts?.find((part) => String(part.inventoryId) === String(id));
+    if (!item) continue;
+    const spec = partCache.find((part) => String(part.catalogId) === String(item.catalogId));
+    if (!spec) continue;
+    const compatibility = partCompatibility(spec, candidate);
+    if (!compatibility.ok) {
+      dormant.push(String(spec.name || spec.catalogId));
+      continue;
+    }
+    restored.push(String(spec.name || spec.catalogId));
     installedSpecs.push(spec);
     for (const effect of spec.effects || []) applyBuildPartEffect(stats, effect, spec);
   }
@@ -303,7 +328,9 @@ function projectSwap(player, car, engine) {
     performanceIndex: benchmark.performanceIndex,
     performanceClass: performanceClassFromIndex(benchmark.performanceIndex),
     benchmarkEt: benchmark.quarterMileEt,
-    uninstalled,
+    uninstalled: outgoing,
+    restored,
+    dormant,
   };
 }
 
