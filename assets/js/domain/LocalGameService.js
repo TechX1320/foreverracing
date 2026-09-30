@@ -98,6 +98,7 @@ export class LocalGameService {
   normalizePlayer(input) {
     const defaults = this.defaultPlayer();
     const player = clone(input && typeof input === 'object' ? input : {});
+    const previousSchemaVersion = Number(player.schemaVersion || 0);
     player.schemaVersion = this.config.schemaVersion;
     player.user = { ...defaults.user, ...(player.user || {}) };
     player.wallet = { ...defaults.wallet, ...(player.wallet || {}) };
@@ -112,6 +113,11 @@ export class LocalGameService {
     player.garage = Array.isArray(player.garage) ? player.garage.map((car) => this.normalizeCar(car)) : [];
     player.inventory = player.inventory && typeof player.inventory === 'object' ? player.inventory : clone(defaults.inventory);
     player.inventory.parts = Array.isArray(player.inventory.parts) ? player.inventory.parts : [];
+    const needsPowerMigration = previousSchemaVersion < Number(this.config.schemaVersion || 0)
+      || player.garage.some((car) => !car?.powerEnvelope);
+    if (needsPowerMigration && player.garage.length) {
+      player.garage = player.garage.map((car) => this.recalculateCar(car, player.inventory.parts));
+    }
     player.roguelike = { ...defaults.roguelike, ...(player.roguelike || {}) };
     player.activeRace = player.activeRace && typeof player.activeRace === 'object' ? player.activeRace : null;
     player.raceHistory = Array.isArray(player.raceHistory) ? player.raceHistory : [];
