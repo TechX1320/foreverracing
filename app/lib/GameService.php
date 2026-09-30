@@ -1292,6 +1292,90 @@ final class GameService
         return $car;
     }
 
+    private static function engineAssemblyIndexForCar(array $player, array $car): ?int
+    {
+        foreach (($player['inventory']['engines'] ?? []) as $index => $item) {
+            if ((string)($item['inventoryId'] ?? '') === (string)($car['engineInventoryId'] ?? '')
+                || (string)($item['installedOnCarId'] ?? '') === (string)($car['carId'] ?? '')) {
+                return (int)$index;
+            }
+        }
+        return null;
+    }
+
+    private static function activateEngineAssemblyParts(array &$player, array $car): array
+    {
+        $assemblyIndex=self::engineAssemblyIndexForCar($player,$car);
+        if($assemblyIndex===null)return ['activeNames'=>[],'dormantNames'=>[]];
+        $assembly=&$player['inventory']['engines'][$assemblyIndex];
+        $assembly['installedOnCarId']=(string)($car['carId']??'');
+        $attachedIds=array_values(array_unique(array_map('strval',is_array($assembly['attachedPartInventoryIds']??null)?$assembly['attachedPartInventoryIds']:[])));
+        $catalog=self::partsCatalog();
+        $candidates=[];
+        foreach($attachedIds as $id){
+            foreach($player['inventory']['parts'] as &$item){
+                if((string)($item['inventoryId']??'')!==$id)continue;
+                $item['installedOnEngineInventoryId']=$assembly['inventoryId'];
+                $spec=self::findBy($catalog,'catalogId',(string)($item['catalogId']??''));
+                if(!$spec)break;
+                if(self::partCompatibilityReason($spec,$car)===null)$candidates[]=['inventoryId'=>$id,'spec'=>$spec];
+                else $item['installedOnCarId']=null;
+                break;
+            }
+            unset($item);
+        }
+        $activeSpecs=array_map(fn(array $row):array=>$row['spec'],$candidates);
+        $engineKitLevel=0;
+        foreach($activeSpecs as $spec)$engineKitLevel=max($engineKitLevel,(int)($spec['engineKit']['level']??0));
+        $activeNames=[];$dormantNames=[];
+        foreach($candidates as $row){
+            $spec=$row['spec'];$id=$row['inventoryId'];
+            $rules=self::partRuleCompatibilityReason($spec,$activeSpecs);
+            $engineKitOk=(int)($spec['requiredEngineKit']??0)<=$engineKitLevel;
+            $name=(string)($spec['name']??$spec['catalogId']??'Part');
+            foreach($player['inventory']['parts'] as &$item){
+                if((string)($item['inventoryId']??'')!==$id)continue;
+                if($rules===null&&$engineKitOk){
+                    $item['installedOnCarId']=(string)($car['carId']??'');
+                    $activeNames[]=$name;
+                }else{
+                    $item['installedOnCarId']=null;
+                    $dormantNames[]=$name;
+                }
+                break;
+            }
+            unset($item);
+        }
+        foreach($attachedIds as $id){
+            $part=null;
+            foreach($player['inventory']['parts'] as $item){
+                if((string)($item['inventoryId']??'')===$id){$part=$item;break;}
+            }
+            if(!$part)continue;
+            $spec=self::findBy($catalog,'catalogId',(string)($part['catalogId']??''));
+            if(!$spec)continue;
+            $name=(string)($spec['name']??$spec['catalogId']??'Part');
+            if(!in_array($name,$activeNames,true)&&!in_array($name,$dormantNames,true))$dormantNames[]=$name;
+        }
+        return ['activeNames'=>$activeNames,'dormantNames'=>$dormantNames];
+    }
+
+    private static function detachPartFromEngineAssembly(array &$player, array &$item): void
+    {
+        $assemblyId=(string)($item['installedOnEngineInventoryId']??'');
+        if($assemblyId==='')return;
+        foreach($player['inventory']['engines'] as &$assembly){
+            if((string)($assembly['inventoryId']??'')!==$assemblyId)continue;
+            $assembly['attachedPartInventoryIds']=array_values(array_filter(
+                is_array($assembly['attachedPartInventoryIds']??null)?$assembly['attachedPartInventoryIds']:[],
+                fn($id):bool=>(string)$id!==(string)($item['inventoryId']??'')
+            ));
+            break;
+        }
+        unset($assembly);
+        $item['installedOnEngineInventoryId']=null;
+    }
+
     private static function engineRepairCost(array $car): int
     {
         $capacity = max(200, (float)($car['powerEnvelope']['capacityHp'] ?? $car['engine']['powerLimits']['kit4Hp'] ?? $car['derived']['hp'] ?? 200));
