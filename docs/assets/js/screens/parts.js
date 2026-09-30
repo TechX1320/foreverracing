@@ -1,6 +1,13 @@
 import { bindHome, carLabel, escapeHtml, money, number, pageShell, selectedCar } from "../ui/components.js";
 import { renderVehicle } from "../ui/vehicleRenderer.js";
 import { showDialog, closeDialog } from "../ui/modal.js";
+import {
+  forcedInductionCompatibility,
+  forcedInductionMeta,
+  forcedInductionState,
+  forcedInductionSwapNeeded,
+  systemLabel,
+} from "../domain/ForcedInduction.js";
 
 let catalogCache = null;
 const REQUIRED = ["intake", "exhaust", "ecu", "fuel", "drivetrain", "suspension", "tires", "weight"];
@@ -64,12 +71,7 @@ export async function renderParts(ctx) {
         </div>
       </section>
 
-      ${streetCarReady(player, current)
-        ? `<div class="stage-ready stage-ready--reactive">
-            <div><span class="section-label">STREET CAR COMPLETE</span><strong>Ready to turn this into a Street Race Car?</strong><p>Every Street Car category is maxed. Conversion is permanent and unlocks the next set of named race parts.</p></div>
-            <button class="button button--primary" data-stage-up>UPGRADE TO STREET RACE CAR</button>
-          </div>`
-        : ""}
+      ${stageProgressionMarkup(player, current)}
     `
   });
 
@@ -112,6 +114,7 @@ function categoriesForCar(car) {
 
 function categoryCard(player, car, key, tutorialStep = null) {
   const stage = Number(car.buildStage || 1);
+  if (key === "forced_induction") return forcedInductionCategoryCard(player, car);
   const specs = categorySpecs(car, key);
   const label = specs[0]?.category || key;
   const scopedOwned = ownedForCar(player, car.carId).filter((item) => {
@@ -149,6 +152,11 @@ function openCategory(ctx, carId, key) {
   const car = player?.garage?.find((entry) => String(entry.carId) === String(carId));
   if (!car) return;
   const tutorialStep = player?.tutorial?.status === "active" ? player.tutorial.step : null;
+  if (key === "forced_induction") {
+    openForcedInduction(ctx, carId);
+    return;
+  }
+
   if (tutorialStep === "buy_first_upgrade" && key !== "intake") {
     ctx.toast("Tutorial step", "Buy the Stage 1 Intake first.");
     return;
@@ -217,6 +225,17 @@ function openCategory(ctx, carId, key) {
 
 async function purchasePart(ctx, dialog, car, catalogId, installNow, button) {
   button.disabled = true;
+  const candidate = catalogCache.find((part) => String(part.catalogId) === String(catalogId));
+  if (installNow && candidate && forcedInductionSwapNeeded(car, ctx.store.player?.inventory?.parts || [], candidate, catalogCache)) {
+    const state = forcedInductionState(car, ctx.store.player?.inventory?.parts || [], catalogCache);
+    const target = systemLabel(forcedInductionMeta(candidate)?.system);
+    const current = systemLabel(state.primarySystem);
+    const confirmed = globalThis.confirm?.(`Swap ${current} to ${target}? Existing ${current} forced-induction parts will be uninstalled but remain in your inventory.`) ?? true;
+    if (!confirmed) {
+      button.disabled = false;
+      return;
+    }
+  }
   let purchased = null;
   try {
     purchased = await ctx.storage.buyPart(catalogId);
@@ -318,15 +337,304 @@ function choiceCategoryRows(player, car, specs) {
   }).join("");
 }
 
+function forcedInductionCategoryCard(player, car) {
+  const state = forcedInductionState(car, player?.inventory?.parts || [], catalogCache);
+  const turbo = fiSystemStatus(state, "turbo");
+  const supercharger = fiSystemStatus(state, "supercharger");
+  const nos = state.nitrousShot ? `${state.nitrousShot} SHOT` : "OFF";
+  const activeCount = state.systems.length + (state.nitrousShot ? 1 : 0);
+
+  return `
+    <button class="parts-category-card parts-category-card--forced" type="button" data-parts-category="forced_induction">
+      <span class="parts-category-card__name">FORCED INDUCTION</span>
+      <strong>${activeCount ? `${activeCount} SYSTEM${activeCount === 1 ? "" : "S"} ACTIVE` : "STOCK / N/A"}</strong>
+      <small>Turbo: ${escapeHtml(turbo)} • Supercharger: ${escapeHtml(supercharger)} • NOS: ${escapeHtml(nos)}</small>
+      <i class="parts-category-card__count">Turbo • Supercharger • NOS</i>
+    </button>`;
+}
+
+function fiSystemStatus(state, system) {
+  if (state.primarySystem === system) {
+    if (state.primarySource === "factory") {
+      const level = state.factoryUpgradeStep ? ` + UPGRADE ${state.factoryUpgradeStep}` : "";
+      return `FACTORY${level}`;
+    }
+    return state.primaryStep ? `KIT UPGRADE ${state.primaryStep}` : "KIT INSTALLED";
+  }
+  if (state.secondarySystem === system) return "TWIN-CHARGE";
+  return "OFF";
+}
+
+function openForcedInduction(ctx, carId) {
+  const player = ctx.store.player;
+  const car = player?.garage?.find((entry) => String(entry.carId) === String(carId));
+  if (!car) return;
+  const stage = Number(car.buildStage || 1);
+  const state = forcedInductionState(car, player?.inventory?.parts || [], catalogCache);
+
+  const dialog = showDialog(`
+    <div class="dialog-body forced-induction-dialog">
+      <div class="parts-shop-dialog__titlebar">
+        <div>
+          <span class="section-label">${escapeHtml(buildName(stage))} • POWER ADDERS</span>
+          <h2>Forced Induction</h2>
+          <p>${escapeHtml(carLabel(car))}</p>
+        </div>
+        <div class="parts-shop-dialog__stats">
+          <span><small>HP</small><b>${number(car.derived?.hp)}</b></span>
+          <span><small>TQ</small><b>${number(car.derived?.torque)}</b></span>
+          <span><small>WT</small><b>${number(car.derived?.weight)} lb</b></span>
+        </div>
+      </div>
+
+      <div class="forced-induction-grid">
+        ${fiSystemCard("turbo", "TURBO KIT", "Turbocharging", state, stage)}
+        ${fiSystemCard("supercharger", "SUPERCHARGER KIT", "Belt-driven boost", state, stage)}
+        ${fiSystemCard("nitrous", "NOS KIT", "Bottle + fogger", state, stage)}
+      </div>
+
+      <div class="forced-induction-note">
+        <b>STAGE ${stage}</b>
+        <span>${stage === 2
+          ? "Choose Turbo or Supercharger as the primary kit; factory boosted cars start with their factory kit already installed. NOS is independent."
+          : stage === 3
+            ? "Individual turbo/supercharger hardware is unlocked. NOS can step through 75 / 100 / 150 shots."
+            : "Full Race Car unlocks twin charging plus 175 / 200 / 250 / 300 shot NOS."}</span>
+      </div>
+
+      <div class="dialog-actions"><button class="button button--small" type="button" data-close>CLOSE</button></div>
+    </div>`);
+
+  dialog.querySelector("[data-close]")?.addEventListener("click", () => closeDialog(dialog));
+  dialog.querySelectorAll("[data-fi-open]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const system = String(button.dataset.fiOpen || "");
+      closeDialog(dialog);
+      openForcedInductionSystem(ctx, carId, system);
+    });
+  });
+}
+
+function fiSystemCard(system, title, subtitle, state, stage) {
+  let status = "NOT INSTALLED";
+  let detail = "";
+  if (system === "nitrous") {
+    status = state.nitrousShot ? `${state.nitrousShot} SHOT INSTALLED` : "NO NOS";
+    detail = stage === 2 ? "50 shot available" : stage === 3 ? "Up to 150 shot" : "Up to 300 shot";
+  } else {
+    status = fiSystemStatus(state, system);
+    detail = stage >= 4 && state.primarySystem && state.primarySystem !== system && !state.secondarySystem
+      ? "Swap kit or add as twin-charge system"
+      : state.systems.includes(system)
+        ? "Open upgrades and individual parts"
+        : "Open kit options";
+  }
+
+  return `
+    <button class="forced-induction-card ${state.systems.includes(system) || (system === "nitrous" && state.nitrousShot) ? "is-active" : ""}" type="button" data-fi-open="${escapeHtml(system)}">
+      <span>${escapeHtml(title)}</span>
+      <strong>${escapeHtml(status)}</strong>
+      <small>${escapeHtml(subtitle)} • ${escapeHtml(detail)}</small>
+    </button>`;
+}
+
+function openForcedInductionSystem(ctx, carId, system) {
+  const player = ctx.store.player;
+  const car = player?.garage?.find((entry) => String(entry.carId) === String(carId));
+  if (!car) return;
+  const stage = Number(car.buildStage || 1);
+  const state = forcedInductionState(car, player?.inventory?.parts || [], catalogCache);
+  const specs = categorySpecs(car, "forced_induction")
+    .filter((part) => String(forcedInductionMeta(part)?.system || "") === String(system))
+    .filter((part) => forcedInductionPartVisible(part, state, stage));
+
+  const factoryRow = system !== "nitrous" && state.factorySystem === system && state.primarySource === "factory"
+    ? `<article class="parts-shop-row is-complete">
+        <div class="parts-shop-row__title"><span>FACTORY BASELINE</span><strong>Factory ${escapeHtml(systemLabel(system))} System</strong><small>Installed from the factory${car.engine?.peakBoostPsi != null ? ` • ${escapeHtml(car.engine.peakBoostPsi)} PSI peak boost` : ""}.</small></div>
+        <div class="parts-shop-row__delta"><span>BASE <b>${number(car.stageBaseline?.hp || car.base?.hp)} hp</b></span><span>UPGRADE <b>${state.factoryUpgradeStep}/3</b></span></div>
+        <div class="parts-shop-row__action"><span class="status-text status-text--good">INSTALLED</span></div>
+      </article>`
+    : "";
+
+  const title = system === "nitrous" ? "NOS Kit" : `${systemLabel(system)} Kit`;
+  const dialog = showDialog(`
+    <div class="dialog-body parts-shop-dialog forced-induction-parts-dialog">
+      <div class="parts-shop-dialog__titlebar">
+        <div>
+          <span class="section-label">${escapeHtml(buildName(stage))} • FORCED INDUCTION</span>
+          <h2>${escapeHtml(title)}</h2>
+          <p>${escapeHtml(carLabel(car))}</p>
+        </div>
+        <div class="parts-shop-dialog__stats">
+          <span><small>HP</small><b>${number(car.derived?.hp)}</b></span>
+          <span><small>TQ</small><b>${number(car.derived?.torque)}</b></span>
+          <span><small>WT</small><b>${number(car.derived?.weight)} lb</b></span>
+        </div>
+      </div>
+
+      <div class="parts-shop-list">
+        ${factoryRow}
+        ${specs.length ? specs.map((part) => forcedInductionPartRow(player, car, part)).join("") : `<div class="empty-state"><strong>No ${escapeHtml(title)} upgrades available for this setup yet.</strong><span>Change build type or install the base kit first.</span></div>`}
+      </div>
+
+      <div class="parts-shop-dialog__note">${stage >= 4 ? "Full Race Cars may twin charge. Primary-kit rows swap systems; Twin-Charge rows add the opposite system." : "Changing from Turbo to Supercharger (or vice versa) swaps the primary kit. Old parts stay owned but are uninstalled."}</div>
+      <div class="dialog-actions"><button class="button button--small" type="button" data-back>BACK</button><button class="button button--small" type="button" data-close>CLOSE</button></div>
+    </div>`);
+
+  dialog.querySelector("[data-close]")?.addEventListener("click", () => closeDialog(dialog));
+  dialog.querySelector("[data-back]")?.addEventListener("click", () => {
+    closeDialog(dialog);
+    openForcedInduction(ctx, carId);
+  });
+
+  dialog.querySelectorAll("[data-buy-part],[data-buy-install-part]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const installNow = Boolean(button.dataset.buyInstallPart);
+      const catalogId = button.dataset.buyInstallPart || button.dataset.buyPart;
+      await purchasePart(ctx, dialog, car, catalogId, installNow, button);
+    });
+  });
+
+  dialog.querySelectorAll("[data-install-shop-part]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const inventoryId = String(button.dataset.installShopPart || "");
+      const item = player?.inventory?.parts?.find((row) => String(row.inventoryId) === inventoryId);
+      const spec = catalogCache.find((row) => String(row.catalogId) === String(item?.catalogId || ""));
+      if (spec && forcedInductionSwapNeeded(car, player?.inventory?.parts || [], spec, catalogCache)) {
+        const fiState = forcedInductionState(car, player?.inventory?.parts || [], catalogCache);
+        const confirmed = globalThis.confirm?.(`Swap ${systemLabel(fiState.primarySystem)} to ${systemLabel(forcedInductionMeta(spec)?.system)}? Existing parts for the old system will be uninstalled but remain owned.`) ?? true;
+        if (!confirmed) return;
+      }
+      button.disabled = true;
+      try {
+        const data = await ctx.storage.installPart(inventoryId, car.carId);
+        ctx.store.setPlayer(data.player);
+        closeDialog(dialog);
+        ctx.toast("Forced induction updated", "The car's setup and Performance Index were recalculated.");
+        await renderParts(ctx);
+      } catch (err) {
+        ctx.toast("Install blocked", err.message);
+        button.disabled = false;
+      }
+    });
+  });
+}
+
+function forcedInductionPartVisible(part, state, stage) {
+  const meta = forcedInductionMeta(part);
+  if (!meta) return false;
+  const role = String(meta.role || "");
+  const system = String(meta.system || "");
+
+  if (role === "factory_upgrade") return state.factorySystem === system && state.primarySource === "factory";
+  if (role === "kit") return !state.systems.includes(system);
+  if (role === "kit_upgrade") return state.primarySource === "aftermarket" && state.primarySystem === system;
+  if (role === "component") return stage >= 3 && state.systems.includes(system);
+  if (role === "twin_kit") return stage >= 4 && !state.secondarySystem && state.primarySystem === String(meta.requiresSystem || "");
+  if (role === "nitrous") return true;
+  return false;
+}
+
+function forcedInductionPartRow(player, car, part) {
+  const owned = findInventory(player, part.catalogId, car.carId);
+  const installed = owned && String(owned.installedOnCarId || "") === String(car.carId);
+  const purchaseCompatibility = forcedInductionCompatibility(car, player?.inventory?.parts || [], part, catalogCache, { purchasing: true });
+  const installCompatibility = forcedInductionCompatibility(car, player?.inventory?.parts || [], part, catalogCache, { purchasing: false });
+  const projected = projectStats(player, car, part);
+  const canAfford = Number(player.wallet?.credits || 0) >= Number(part.price || 0);
+  const meta = forcedInductionMeta(part) || {};
+
+  let action;
+  if (installed) {
+    action = '<span class="status-text status-text--good">INSTALLED</span>';
+  } else if (owned) {
+    action = installCompatibility.ok
+      ? `<button class="button button--primary button--small" data-install-shop-part="${escapeHtml(owned.inventoryId)}">INSTALL</button>`
+      : `<span class="status-text">${escapeHtml(installCompatibility.reason || "LOCKED")}</span>`;
+  } else if (purchaseCompatibility.ok) {
+    action = `<div class="parts-shop-row__buy-actions"><button class="button button--primary button--small" data-buy-install-part="${escapeHtml(part.catalogId)}" ${canAfford ? "" : "disabled"}>BUY + INSTALL • ${money(part.price)} CR</button><button class="button button--small" data-buy-part="${escapeHtml(part.catalogId)}" ${canAfford ? "" : "disabled"}>BUY ONLY</button></div>`;
+  } else {
+    action = `<span class="status-text">${escapeHtml(purchaseCompatibility.reason || "LOCKED")}</span>`;
+  }
+
+  const kicker = meta.role === "nitrous"
+    ? `${number(meta.shot)} SHOT`
+    : meta.role === "twin_kit"
+      ? "TWIN CHARGE"
+      : meta.role === "component"
+        ? "STAGE 3+ COMPONENT"
+        : meta.step ? `UPGRADE ${number(meta.step)}` : "BASE KIT";
+
+  return `<article class="parts-shop-row ${installed ? "is-complete" : ""}">
+    <div class="parts-shop-row__title"><span>${escapeHtml(kicker)}</span><strong>${escapeHtml(part.name)}</strong><small>${escapeHtml(part.description || "")}</small></div>
+    <div class="parts-shop-row__delta">
+      <span>HP <b>${number(car.derived?.hp)} → ${number(projected.hp)}</b></span>
+      <span>TQ <b>${number(car.derived?.torque)} → ${number(projected.torque)}</b></span>
+      <span>WT <b>${number(car.derived?.weight)} → ${number(projected.weight)}</b></span>
+    </div>
+    <div class="parts-shop-row__action">${action}</div>
+  </article>`;
+}
+
+function stageProgressionMarkup(player, car) {
+  const stage = Number(car.buildStage || 1);
+  if (stage >= 4) return "";
+
+  if (stage === 1) {
+    if (!streetCarReady(player, car)) return "";
+    return `<div class="stage-ready stage-ready--reactive">
+      <div><span class="section-label">STREET CAR COMPLETE</span><strong>Ready to turn this into a Street Race Car?</strong><p>Every Street Car category is maxed. Conversion is permanent and unlocks named race parts plus Forced Induction.</p></div>
+      <button class="button button--primary" data-stage-up>UPGRADE TO STREET RACE CAR</button>
+    </div>`;
+  }
+
+  if (stage === 2) {
+    const required = [...new Set(catalogCache
+      .filter((part) => !part.simpleTier && Number(part.buildStage || 2) === 2 && part.requiredForStageProgression !== false)
+      .map((part) => String(part.categoryKey || ""))
+      .filter(Boolean))];
+    const installed = new Set();
+    for (const item of player?.inventory?.parts || []) {
+      if (String(item.installedOnCarId || "") !== String(car.carId)) continue;
+      const spec = catalogCache.find((part) => part.catalogId === item.catalogId);
+      if (spec?.categoryKey) installed.add(String(spec.categoryKey));
+    }
+    const missing = required.filter((key) => !installed.has(key));
+    if (missing.length) {
+      return `<div class="stage-ready stage-ready--pending">
+        <div><span class="section-label">BUILD TYPE PROGRESSION</span><strong>Front-Half Race Car is not ready yet.</strong><p>Install one Street Race Car choice in every core category. Missing: ${escapeHtml(missing.join(", "))}. Forced Induction remains optional.</p></div>
+      </div>`;
+    }
+    return `<div class="stage-ready stage-ready--reactive">
+      <div><span class="section-label">STREET RACE CAR COMPLETE</span><strong>Ready for a Front-Half Race Car?</strong><p>Your current parts stay installed. Stage 3 unlocks individual turbo/supercharger hardware, larger NOS foggers and engine-swap access.</p></div>
+      <button class="button button--primary" data-stage-up>UPGRADE TO FRONT-HALF RACE CAR</button>
+    </div>`;
+  }
+
+  return `<div class="stage-ready stage-ready--reactive">
+    <div><span class="section-label">FRONT-HALF BUILD</span><strong>Ready for a Full Race Car?</strong><p>Stage 4 opens twin charging, extreme NOS foggers and the widest engine-swap freedom. Stage 3 has no mandatory completion gate yet while its catalog is being built.</p></div>
+    <button class="button button--primary" data-stage-up>UPGRADE TO FULL RACE CAR</button>
+  </div>`;
+}
+
 function promptStageConversion(ctx, carId) {
   const car = ctx.store.player?.garage?.find((entry) => String(entry.carId) === String(carId));
   if (!car) return;
+  const stage = Number(car.buildStage || 1);
+  const nextStage = Math.min(4, stage + 1);
+  const nextName = buildName(nextStage);
+  const copy = stage === 1
+    ? "Your completed Street Car setup becomes the permanent baseline. The numbered Street Car upgrade ladder is incorporated into the car and cannot be restored."
+    : stage === 2
+      ? "Your current Street Race Car parts remain installed. Front-Half Race Car unlocks Stage 3 forced-induction hardware and engine-swap access."
+      : "Your current build remains intact. Full Race Car unlocks twin charging, the highest NOS foggers and the widest powertrain freedom.";
+
   const dialog = showDialog(`<div class="dialog-body stage-conversion-dialog">
-    <div class="dialog-vehicle">${renderVehicle(car, { stage: 2, view: "sideProfile" })}</div>
-    <span class="section-label">STREET CAR COMPLETE</span>
-    <h2>Upgrade to a Street Race Car?</h2>
-    <p>Your completed Street Car setup becomes the permanent baseline. The stock body stays, but the build can become gutted, caged and much more race-focused. The numbered Street Car upgrade ladder is incorporated into the car and cannot be restored.</p>
-    <div class="dialog-actions"><button class="button button--small" data-cancel>NOT YET</button><button class="button button--primary" data-confirm>UPGRADE TO STREET RACE CAR</button></div>
+    <div class="dialog-vehicle">${renderVehicle(car, { stage: nextStage, view: "sideProfile" })}</div>
+    <span class="section-label">${escapeHtml(buildName(stage).toUpperCase())}</span>
+    <h2>Upgrade to ${escapeHtml(nextName)}?</h2>
+    <p>${escapeHtml(copy)}</p>
+    <div class="dialog-actions"><button class="button button--small" data-cancel>NOT YET</button><button class="button button--primary" data-confirm>UPGRADE TO ${escapeHtml(nextName.toUpperCase())}</button></div>
     <div class="form-error" data-error></div>
   </div>`);
   dialog.querySelector("[data-cancel]")?.addEventListener("click", () => closeDialog(dialog));
@@ -336,7 +644,7 @@ function promptStageConversion(ctx, carId) {
       const data = await ctx.storage.stageUp(carId);
       ctx.store.setPlayer(data.player);
       closeDialog(dialog);
-      ctx.toast("Street Race Car unlocked", "Named race parts are now available by category.");
+      ctx.toast(`${nextName} unlocked`, nextStage === 4 ? "Twin charging and Full Race forced-induction options are now available." : "The next build-type parts are now available.");
       await renderParts(ctx);
     } catch (err) {
       dialog.querySelector("[data-error]").textContent = err.message;
@@ -415,10 +723,18 @@ function projectStats(player, car, candidate) {
     grip: Number(seed.grip || 1)
   };
 
+  const swapState = forcedInductionSwapNeeded(car, player?.inventory?.parts || [], candidate, catalogCache)
+    ? forcedInductionState(car, player?.inventory?.parts || [], catalogCache)
+    : null;
+
   for (const item of player?.inventory?.parts || []) {
     if (String(item.installedOnCarId || "") !== String(car.carId)) continue;
     const spec = catalogCache.find((part) => part.catalogId === item.catalogId);
     if (!spec || String(spec.slot) === String(candidate.slot)) continue;
+    if (swapState) {
+      const meta = forcedInductionMeta(spec);
+      if (meta && String(meta.role || "") !== "nitrous" && String(meta.system || "") === String(swapState.primarySystem || "")) continue;
+    }
     applyEffects(stats, spec.effects || []);
   }
 
