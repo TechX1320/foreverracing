@@ -20,7 +20,7 @@ import { mergeContentStudioEngines } from "../content/ContentStudioEngineCatalog
 const BUILD_MODULES = [
   { id: "cars", label: "CAR CREATOR", state: "ACTIVE" },
   { id: "engines", label: "ENGINE CREATOR", state: "ACTIVE" },
-  { id: "parts", label: "PARTS TOOL", state: "NEXT" },
+  { id: "parts", label: "PARTS CREATOR", state: "ACTIVE" },
   { id: "wheels", label: "WHEELS TOOL", state: "PLANNED" },
 ];
 
@@ -52,7 +52,7 @@ export async function renderContentStudio(ctx) {
   root.innerHTML = pageShell({
     title: "Content Studio",
     eyebrow: "DEVELOPMENT / CONTENT TOOLS",
-    hint: "Cars + engines now • Parts Tool next",
+    hint: "Cars + engines + parts authoring",
     trail: "Browser-local authoring workspace",
     body: '<div data-content-studio></div>',
   });
@@ -74,8 +74,8 @@ export async function renderContentStudio(ctx) {
         <div class="content-studio__modules">
           ${BUILD_MODULES.map((module) => {
             const active = module.id === "cars";
-            const enabled = module.id === "cars" || module.id === "engines";
-            const routeAttr = module.id === "engines" ? ' data-open-engine-creator' : "";
+            const enabled = module.id === "cars" || module.id === "engines" || module.id === "parts";
+            const routeAttr = module.id === "engines" ? ' data-open-engine-creator' : module.id === "parts" ? ' data-open-parts-creator' : "";
             return `
             <button type="button" class="content-studio__module ${active ? "is-active" : ""}"${routeAttr} ${enabled ? "" : "disabled"}>
               <b>${module.label}</b><span>${module.state}</span>
@@ -160,6 +160,7 @@ export async function renderContentStudio(ctx) {
 
   const bindWorkspace = () => {
     host.querySelector("[data-open-engine-creator]")?.addEventListener("click", () => ctx.router.navigate("engine-studio"));
+    host.querySelector("[data-open-parts-creator]")?.addEventListener("click", () => ctx.router.navigate("parts-studio"));
 
     host.querySelector("[data-studio-load]")?.addEventListener("change", (event) => {
       const id = String(event.currentTarget.value || "");
