@@ -1,5 +1,16 @@
 # Changelog
 
+## V0.6.0-a — The Circuit foundation
+
+- Replaced the temporary Safe/Push seven-stage Circuit prototype with catalog-driven PvE events.
+- Added Circuit Schema V1 with 1–50 races, required/optional events, authored opponents, entry filters, recommended PI/ET targets, mixed distances, loss rules, per-race rewards and completion unlocks.
+- Added **Street Roots**, a five-race required D-Class progression Circuit with four regular races and a boss/rival finale that unlocks C Class.
+- Circuit passes now use the same RaceSimulator and blocking side-view race presentation as Quick Race.
+- Added persistent per-Circuit run/progress state and C-Class career unlock tracking.
+- Added Circuit PvE Creator Studio with manual editing, local activation, JSON import/export and a copyable LLM authoring prompt.
+- Added local/browser + PHP/server Circuit runtime parity.
+- Engine swaps now clear active ECU calibration instead of restoring a saved tune automatically.
+
 ## V0.5.0-h.2 — Engine Swap modal + chassis ownership hardening
 
 - Fixed the Engine Swap confirmation modal overflowing the base dialog and causing horizontal scrolling.

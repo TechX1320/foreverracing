@@ -53,7 +53,7 @@ export async function renderContentStudio(ctx) {
   root.innerHTML = pageShell({
     title: "Content Studio",
     eyebrow: "DEVELOPMENT / CONTENT TOOLS",
-    hint: "Cars + engines + parts authoring",
+    hint: "Cars + engines + parts + Circuit PvE authoring",
     trail: "Browser-local authoring workspace",
     body: '<div data-content-studio></div>',
   });

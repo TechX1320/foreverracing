@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.5.0-h.2 playable direction
+## V0.6.0-a playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -107,7 +107,17 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 7: Events.
 - Level 10: Multiplayer and 1-mile Quick Race.
 
-**The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+**The Circuit** is now a catalog of self-contained PvE mini-roguelite events. Required Circuits drive class progression; optional Circuits can use their own race counts, restrictions, distances, targets and rewards. Opponents are authored builds that use the real race simulator rather than scaling directly from the player's PI.
+
+### V0.6A The Circuit foundation
+
+- Replaced the temporary seven-stage Safe/Push prototype with data-driven Circuit events supporting **1–50 races**.
+- Added the first required progression Circuit, **Street Roots**: four regular 1/4-mile races followed by a boss/rival race.
+- Winning the Street Roots boss permanently unlocks **C Class** progression.
+- Circuit races use authored opponent HP/TQ/weight/grip/drivetrain and the same RaceSimulator + side-view race presentation as Quick Race.
+- Circuit definitions support required/optional events, repeatability, loss rules, PI/class/build/drivetrain/car filters, recommended PI/ET guidance, mixed race distances, per-race rewards and completion unlocks.
+- Added **Circuit PvE Creator** to Content Studio with manual race-by-race editing plus Circuit Schema V1 JSON import/export and a copyable LLM prompt.
+- Engine swaps now deliberately clear the active ECU calibration. Engine hardware can travel with the assembly, but tuning restarts at RESET / NONE after every swap.
 
 ### V0.5H.2 swap preview + chassis ownership hardening
 
@@ -120,7 +130,7 @@ Completing the tutorial no longer opens every system at once. The initial progre
 
 - Normal/custom swaps now open at **Build Type 2**, so players can choose an engine direction before fully maxing the factory engine.
 - Every owned engine is now an individual persistent assembly. A built 1066 hp Renesis is different inventory from a stock Renesis.
-- Engine-bound parts, engine condition and saved calibration remain attached when an engine is removed.
+- Engine-bound parts and engine condition remain attached when an engine is removed. Active ECU calibration is cleared by any engine swap.
 - Moving that engine into another compatible chassis restores the engine build automatically.
 - Parts that require a later Build Type remain physically attached to the stored engine but stay dormant until that chassis is capable of using them.
 - Tires, suspension and weight-reduction hardware remain chassis-side.
