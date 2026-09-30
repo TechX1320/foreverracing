@@ -570,11 +570,21 @@ function openForcedInductionSystem(ctx, carId, system) {
     openForcedInduction(ctx, carId);
   });
 
+  dialog.querySelectorAll("[data-fi-dyno-part]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const part = specs.find((row) => String(row.catalogId) === String(button.dataset.fiDynoPart || ""));
+      if (!part) return;
+      const panel = dialog.querySelector("[data-fi-dyno]");
+      if (panel) panel.innerHTML = renderPartDynoChart(car, car.derived, projectStats(player, car, part), part.name);
+      dialog.querySelectorAll("[data-fi-dyno-part]").forEach((node) => node.classList.toggle("is-selected", node === button));
+    });
+  });
+
   dialog.querySelectorAll("[data-buy-part],[data-buy-install-part]").forEach((button) => {
     button.addEventListener("click", async () => {
       const installNow = Boolean(button.dataset.buyInstallPart);
       const catalogId = button.dataset.buyInstallPart || button.dataset.buyPart;
-      await purchasePart(ctx, dialog, car, catalogId, installNow, button);
+      await purchasePart(ctx, dialog, car, catalogId, installNow, button, "forced_induction");
     });
   });
 
