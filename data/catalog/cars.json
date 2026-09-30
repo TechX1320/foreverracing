@@ -128,7 +128,7 @@
       "minBuildStage": 2,
       "options": {
         "vw_ea888_20t_mk6_gti_200": {
-          "minBuildStage": 3,
+          "minBuildStage": 2,
           "fitment": "Factory",
           "installCost": 2500,
           "note": "Factory Mk6 GTI powertrain fitment; reinstall labor covers fluids, wiring checks and setup."
@@ -277,7 +277,7 @@
       "minBuildStage": 2,
       "options": {
         "mazda_13b_msp_renesis_238": {
-          "minBuildStage": 3,
+          "minBuildStage": 2,
           "fitment": "Factory",
           "installCost": 2500,
           "note": "Factory RX-8 engine fitment; reinstall labor covers seals, fluids, wiring checks and setup."
@@ -426,7 +426,7 @@
       "minBuildStage": 2,
       "options": {
         "renault_clio_v6_29_255": {
-          "minBuildStage": 3,
+          "minBuildStage": 2,
           "fitment": "Factory",
           "installCost": 2500,
           "note": "Factory Clio V6 fitment; reinstall labor covers fluids, wiring checks and setup."
