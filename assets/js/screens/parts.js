@@ -804,13 +804,13 @@ function stageProgressionMarkup(player, car) {
       </div>`;
     }
     return `<div class="stage-ready stage-ready--reactive">
-      <div><span class="section-label">STREET RACE CAR COMPLETE</span><strong>Ready for a Front-Half Race Car?</strong><p>Forced Induction and Engine Kits are optional paths. Nothing gets locked: Stage 2 parts stay purchasable after advancing. Stage 3 adds individual boost hardware, larger NOS foggers and engine-swap access.</p></div>
+      <div><span class="section-label">STREET RACE CAR COMPLETE</span><strong>Ready for a Front-Half Race Car?</strong><p>Forced Induction and Engine Kits are optional paths. Nothing gets locked: Stage 2 parts stay purchasable after advancing. Stage 3 adds individual boost hardware plus deeper fueling, ECU, drivetrain, suspension, tires and weight reduction. Engine swaps are the next powertrain-system pass.</p></div>
       <button class="button button--primary" data-stage-up>UPGRADE TO FRONT-HALF RACE CAR</button>
     </div>`;
   }
 
   return `<div class="stage-ready stage-ready--reactive">
-    <div><span class="section-label">FRONT-HALF BUILD</span><strong>Ready for a Full Race Car?</strong><p>Earlier Stage 2/3 parts stay available after advancing. Stage 4 opens twin charging, Engine Kit 4, extreme NOS foggers and the widest engine-swap freedom.</p></div>
+    <div><span class="section-label">FRONT-HALF BUILD</span><strong>Ready for a Full Race Car?</strong><p>Earlier Stage 2/3 parts stay available after advancing. Stage 4 opens engine internals, standalone management hardware, professional drag components, twin charging and extreme NOS foggers.</p></div>
     <button class="button button--primary" data-stage-up>UPGRADE TO FULL RACE CAR</button>
   </div>`;
 }
@@ -824,8 +824,8 @@ function promptStageConversion(ctx, carId) {
   const copy = stage === 1
     ? "Your completed Street Car setup becomes the permanent baseline. The numbered Street Car upgrade ladder is incorporated into the car and cannot be restored."
     : stage === 2
-      ? "Your current Street Race Car parts remain installed. Front-Half Race Car unlocks Stage 3 forced-induction hardware and engine-swap access."
-      : "Your current build remains intact. Full Race Car unlocks twin charging, the highest NOS foggers and the widest powertrain freedom.";
+      ? "Your current Street Race Car parts remain installed. Front-Half Race Car unlocks Stage 3 forced-induction hardware and much deeper supporting parts. Engine swaps arrive in the next powertrain-system pass."
+      : "Your current build remains intact. Full Race Car unlocks engine internals, standalone management hardware, professional drag parts, twin charging and the highest NOS foggers.";
 
   const dialog = showDialog(`<div class="dialog-body stage-conversion-dialog">
     <div class="dialog-vehicle">${renderVehicle(car, { stage: nextStage, view: "sideProfile" })}</div>
