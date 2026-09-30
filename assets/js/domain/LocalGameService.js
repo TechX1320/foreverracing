@@ -270,6 +270,70 @@ export class LocalGameService {
     });
   }
 
+  engineAssemblyForCar(player, car) {
+    return (player?.inventory?.engines || []).find((item) =>
+      String(item.inventoryId || '') === String(car?.engineInventoryId || '')
+    ) || (player?.inventory?.engines || []).find((item) =>
+      String(item.installedOnCarId || '') === String(car?.carId || '')
+    ) || null;
+  }
+
+  activateEngineAssemblyParts(player, car) {
+    const assembly = this.engineAssemblyForCar(player, car);
+    if (!assembly) return { activeNames: [], dormantNames: [] };
+    assembly.installedOnCarId = car.carId;
+    const attachedIds = new Set(assembly.attachedPartInventoryIds || []);
+    const candidates = [];
+
+    for (const id of attachedIds) {
+      const item = player.inventory.parts.find((part) => String(part.inventoryId) === String(id));
+      if (!item) continue;
+      item.installedOnEngineInventoryId = assembly.inventoryId;
+      const spec = this.findBy(this.parts, 'catalogId', String(item.catalogId || ''));
+      if (!spec) continue;
+      const compatibility = partCompatibility(spec, car);
+      if (compatibility.ok) candidates.push({ item, spec });
+      else item.installedOnCarId = null;
+    }
+
+    const activeSpecs = candidates.map((row) => row.spec);
+    const engineKitLevel = activeSpecs.reduce((level, spec) => Math.max(level, Number(spec?.engineKit?.level || 0)), 0);
+    const activeNames = [];
+    const dormantNames = [];
+    for (const { item, spec } of candidates) {
+      const rules = partRuleCompatibility(spec, activeSpecs);
+      const engineKitOk = Number(spec?.requiredEngineKit || 0) <= engineKitLevel;
+      if (rules.ok && engineKitOk) {
+        item.installedOnCarId = car.carId;
+        activeNames.push(String(spec.name || spec.catalogId || 'Part'));
+      } else {
+        item.installedOnCarId = null;
+        dormantNames.push(String(spec.name || spec.catalogId || 'Part'));
+      }
+    }
+
+    for (const id of attachedIds) {
+      const item = player.inventory.parts.find((part) => String(part.inventoryId) === String(id));
+      if (!item) continue;
+      const spec = this.findBy(this.parts, 'catalogId', String(item.catalogId || ''));
+      if (spec && !activeNames.includes(String(spec.name || spec.catalogId || 'Part')) && !dormantNames.includes(String(spec.name || spec.catalogId || 'Part'))) {
+        dormantNames.push(String(spec.name || spec.catalogId || 'Part'));
+      }
+    }
+    return { activeNames, dormantNames };
+  }
+
+  detachPartFromEngineAssembly(player, item) {
+    const assemblyId = String(item?.installedOnEngineInventoryId || '');
+    if (!assemblyId) return;
+    const assembly = (player?.inventory?.engines || []).find((row) => String(row.inventoryId) === assemblyId);
+    if (assembly) {
+      assembly.attachedPartInventoryIds = (assembly.attachedPartInventoryIds || [])
+        .filter((id) => String(id) !== String(item.inventoryId));
+    }
+    item.installedOnEngineInventoryId = null;
+  }
+
   engineRepairCost(car) {
     const capacity = Math.max(200, Number(car?.powerEnvelope?.capacityHp || car?.engine?.powerLimits?.kit4Hp || car?.derived?.hp || 200));
     const stage = Math.max(1, Number(car?.buildStage || 1));
@@ -285,7 +349,7 @@ export class LocalGameService {
 
       const fitment = engineSwapFitment(car, engine);
       if (!fitment.allowed) throw new LocalGameError(fitment.note || 'That engine does not fit this chassis.');
-      if (Number(car.buildStage || 1) < Number(fitment.minBuildStage || 3)) {
+      if (Number(car.buildStage || 1) < Number(fitment.minBuildStage || 2)) {
         throw new LocalGameError(`This swap requires Build Type ${fitment.minBuildStage}. Upgrade the chassis first.`);
       }
       if (String(car.engineId || car.factoryEngineId || '') === String(engine.engineId)) {
@@ -295,53 +359,94 @@ export class LocalGameService {
       const quote = engineSwapQuote(car, engine, player.inventory.engines);
       this.requireCredits(player, quote.totalCost);
 
-      const ownedIndex = quote.owned
-        ? player.inventory.engines.findIndex((item) => String(item.inventoryId) === String(quote.owned.inventoryId))
-        : -1;
-      const incomingCondition = ownedIndex >= 0
-        ? normalizedStoredEngineCondition(player.inventory.engines[ownedIndex]?.condition || {})
-        : healthyEngineCondition();
-
+      const outgoingAssembly = this.engineAssemblyForCar(player, car);
+      if (!outgoingAssembly) throw new LocalGameError('The installed engine assembly could not be resolved.', 500);
       const outgoingEngineId = String(car.engineId || car.factoryEngineId || '');
-      if (outgoingEngineId) {
-        player.inventory.engines.push({
-          inventoryId: this.id('engine'),
-          engineId: outgoingEngineId,
-          acquiredAt: now(),
-          source: outgoingEngineId === String(car.factoryEngineId || '') ? 'factory_removed' : 'swap_removed',
-          condition: normalizedStoredEngineCondition(car.engineCondition || {}),
-        });
+      outgoingAssembly.engineId = outgoingEngineId;
+      outgoingAssembly.installedOnCarId = null;
+      outgoingAssembly.condition = normalizedStoredEngineCondition(car.engineCondition || {});
+      outgoingAssembly.tune = car.tune ? clone(car.tune) : null;
+      outgoingAssembly.storedStats = {
+        hp: Math.max(1, Math.round(Number(car.derived?.hp || car.base?.hp || 1))),
+        torque: Math.max(1, Math.round(Number(car.derived?.torque || car.base?.torque || 1))),
+      };
+
+      const storedPartNames = [];
+      const attached = new Set(outgoingAssembly.attachedPartInventoryIds || []);
+      for (const item of player.inventory.parts) {
+        if (String(item.installedOnCarId || '') !== String(carId)) continue;
+        const spec = this.findBy(this.parts, 'catalogId', String(item.catalogId || ''));
+        if (!spec || !isEngineBoundPart(spec)) continue;
+        item.installedOnCarId = null;
+        item.installedOnEngineInventoryId = outgoingAssembly.inventoryId;
+        attached.add(item.inventoryId);
+        storedPartNames.push(String(spec.name || spec.catalogId || 'Part'));
       }
-      if (ownedIndex >= 0) player.inventory.engines.splice(ownedIndex, 1);
+      outgoingAssembly.attachedPartInventoryIds = [...attached];
+
+      let incomingAssembly = quote.owned
+        ? player.inventory.engines.find((item) => String(item.inventoryId) === String(quote.owned.inventoryId))
+        : null;
+      if (!incomingAssembly) {
+        incomingAssembly = normalizeEngineAssembly({
+          inventoryId: this.id('engine'),
+          engineId: engine.engineId,
+          installedOnCarId: carId,
+          acquiredAt: now(),
+          source: 'swap_shop',
+          condition: healthyEngineCondition(),
+          attachedPartInventoryIds: [],
+          tune: null,
+          storedStats: { hp: engine.peakHp, torque: engine.peakTorque },
+        });
+        player.inventory.engines.push(incomingAssembly);
+      }
+      incomingAssembly.installedOnCarId = carId;
 
       const candidate = swappedCarSnapshot(car, engine);
+      candidate.engineInventoryId = incomingAssembly.inventoryId;
       candidate.engineSwapFitment = clone(car.engineSwapFitment || {});
-      candidate.engineCondition = incomingCondition;
+      candidate.engineCondition = normalizedStoredEngineCondition(incomingAssembly.condition || {});
+      candidate.tune = incomingAssembly.tune ? clone(incomingAssembly.tune) : null;
       candidate.engineSwap = {
         count: Number(car.engineSwap?.count || 0) + 1,
         lastFromEngineId: outgoingEngineId || null,
         lastToEngineId: String(engine.engineId),
         lastFitment: fitment.fitment,
         lastSwapAt: now(),
+        lastStoredParts: storedPartNames,
       };
 
-      const uninstalled = [];
+      const chassisUninstalled = [];
       for (const item of player.inventory.parts) {
         if (String(item.installedOnCarId || '') !== String(carId)) continue;
         const spec = this.findBy(this.parts, 'catalogId', String(item.catalogId || ''));
-        if (!spec) continue;
+        if (!spec || isEngineBoundPart(spec)) continue;
         const compatibility = partCompatibility(spec, candidate);
-        if (isEngineBoundPart(spec) || !compatibility.ok) {
+        if (!compatibility.ok) {
           item.installedOnCarId = null;
-          uninstalled.push(String(spec.name || spec.catalogId || 'Part'));
+          item.installedOnEngineInventoryId = null;
+          chassisUninstalled.push(String(spec.name || spec.catalogId || 'Part'));
         }
       }
+
+      const activation = this.activateEngineAssemblyParts(player, candidate);
+      candidate.engineSwap.lastRestoredParts = activation.activeNames;
+      candidate.engineSwap.lastDormantParts = activation.dormantNames;
+      candidate.engineSwap.lastChassisUninstalledParts = chassisUninstalled;
 
       player.wallet.credits -= quote.totalCost;
       if (!quote.owned) player.stats.enginesPurchased = Number(player.stats.enginesPurchased || 0) + 1;
       player.stats.engineSwaps = Number(player.stats.engineSwaps || 0) + 1;
       player.garage[carIndex] = this.recalculateCar(candidate, player.inventory.parts);
-      player.garage[carIndex].engineSwap.lastUninstalledParts = uninstalled;
+
+      incomingAssembly.condition = normalizedStoredEngineCondition(player.garage[carIndex].engineCondition || {});
+      incomingAssembly.tune = player.garage[carIndex].tune ? clone(player.garage[carIndex].tune) : null;
+      incomingAssembly.storedStats = {
+        hp: Math.max(1, Math.round(Number(player.garage[carIndex].derived?.hp || engine.peakHp || 1))),
+        torque: Math.max(1, Math.round(Number(player.garage[carIndex].derived?.torque || engine.peakTorque || 1))),
+      };
+
       this.addTransaction(
         player,
         'engine_swap',
