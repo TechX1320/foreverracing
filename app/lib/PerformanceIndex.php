@@ -32,6 +32,7 @@ final class PerformanceIndex
                 'level' => 100,
                 'allowFoul' => false,
                 'reactionOffset' => 0,
+                'tuning' => is_array($context['tuning'] ?? null) ? $context['tuning'] : null,
             ], '1/4', $condition);
             $ets[] = (float)$run['elapsedTime'];
             $traps[] = (float)$run['trapSpeed'];
@@ -56,6 +57,8 @@ final class PerformanceIndex
         $context = is_array($car['derived'] ?? null)
             ? $car['derived']
             : (is_array($car['base'] ?? null) ? $car['base'] : $car);
+        if (is_array($car['tuningRuntime'] ?? null)) $context['tuning'] = $car['tuningRuntime'];
+        if (!isset($context['drivetrain']) && isset($car['base']['drivetrain'])) $context['drivetrain'] = $car['base']['drivetrain'];
         return self::benchmark($context, $racingConfig);
     }
 
