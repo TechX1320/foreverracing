@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.5.0-g playable direction
+## V0.5.0-g.1 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,17 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.5G.1 engine-specific power envelopes
+
+- Horsepower is no longer allowed to grow exponentially just because many supporting parts are installed.
+- **Support hardware** (fuel system, Engine Kits, structural internals, standalone ECU hardware) primarily enables power instead of directly creating large percentage gains.
+- **Power-making hardware** (boost, major airflow work, intake/exhaust, porting/cams where applicable) still changes output directly.
+- Every engine carries a soft Stock / Engine Kit 1 / 2 / 3 / 4 horsepower envelope. Output begins seeing diminishing returns before the limit rather than hitting an artificial hard wall.
+- The current Renesis max-effort envelope is about **1100 crank hp**. Getting meaningfully beyond that should require an engine swap rather than another stack of multipliers.
+- Larger engines scale higher through authored or displacement/configuration-derived envelopes, preserving the future value of engine swaps.
+- Garage Tuning now shows **Engine Envelope** and **Raw Request**, making it clear when additional boost is mostly running into the engine rather than generating useful power.
+- Saved cars are migrated/recalculated automatically when this model lands.
 
 ### V0.5G garage tuning
 
