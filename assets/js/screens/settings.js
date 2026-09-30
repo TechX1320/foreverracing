@@ -45,7 +45,7 @@ export async function renderSettings(ctx) {
           <div class="game-card__actions"><button class="button button--small" type="button" data-car-art-debug>CAR ART DEBUG</button></div>
         </div>
         <div class="game-card">
-          <div class="split"><div><h3>Build & Cached Assets</h3><p>Current build: <strong>${document.documentElement.dataset.build || "unknown"}</strong>. GitHub Pages development mode disables the offline service-worker cache so refreshes pull current assets.</p></div><span class="pill pill--accent">V0.5C.2</span></div>
+          <div class="split"><div><h3>Build & Cached Assets</h3><p>Current build: <strong>${document.documentElement.dataset.build || "unknown"}</strong>. GitHub Pages development mode disables the offline service-worker cache so refreshes pull current assets.</p></div><span class="pill pill--accent">V0.5C.3</span></div>
           <div class="game-card__actions"><button class="button button--small" type="button" data-clear-assets>CLEAR CACHED ASSETS</button></div>
         </div>
         <div class="game-card">
