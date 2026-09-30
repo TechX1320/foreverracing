@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.5.0-h playable direction
+## V0.5.0-h.1 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,18 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.5H.1 complete engine assemblies
+
+- Normal/custom swaps now open at **Build Type 2**, so players can choose an engine direction before fully maxing the factory engine.
+- Every owned engine is now an individual persistent assembly. A built 1066 hp Renesis is different inventory from a stock Renesis.
+- Engine-bound parts, engine condition and saved calibration remain attached when an engine is removed.
+- Moving that engine into another compatible chassis restores the engine build automatically.
+- Parts that require a later Build Type remain physically attached to the stored engine but stay dormant until that chassis is capable of using them.
+- Tires, suspension and weight-reduction hardware remain chassis-side.
+- The normal Parts inventory hides components currently attached to a stored engine assembly.
+- Existing V0.5H saves are migrated forward and, where the previous swap record is unambiguous, loose engine parts are re-associated with their stored engine.
+- Shop listing eligibility is data-driven from Engine Creator completeness + Swap Shop visibility. **Chassis fitment remains explicitly authored** so creating an engine does not automatically claim it physically fits every car.
 
 ### V0.5H Engine Swap Shop
 
