@@ -1,6 +1,6 @@
 import { bindHome, carLabel, escapeHtml, money, number, pageShell, selectedCar } from "../ui/components.js";
 import { playRacePresentation } from "../ui/racePresentation.js";
-import { circuitEntryStatus } from "../domain/CircuitCatalog.js";
+import { circuitEntryStatus, circuitVisibleToPlayer } from "../domain/CircuitCatalog.js";
 
 let lastRace = null;
 let playbackRaceId = null;
@@ -12,6 +12,7 @@ export async function renderRoguelike(ctx) {
   const activeRun = player?.circuits?.activeRun || null;
   const activeRace = player?.activeRace?.origin === "circuit" ? player.activeRace : null;
   const current = selectedCar(player);
+  const visibleCircuitCount = circuits.filter((circuit) => circuitVisibleToPlayer(circuit, player)).length;
   const runCircuit = activeRun ? circuits.find((row) => row.circuitId === activeRun.circuitId) : null;
   const runCar = activeRun
     ? (player.garage || []).find((car) => String(car.carId) === String(activeRun.carId))
@@ -22,7 +23,7 @@ export async function renderRoguelike(ctx) {
     eyebrow: "PVE MINI-ROGUELITE EVENTS",
     hint: activeRun && runCircuit
       ? `${runCircuit.name} • Race ${Math.min(Number(activeRun.raceIndex || 0) + 1, runCircuit.races.length)}/${runCircuit.races.length}`
-      : `${circuits.length} event${circuits.length === 1 ? "" : "s"} available`,
+      : `${visibleCircuitCount} event${visibleCircuitCount === 1 ? "" : "s"} available`,
     trail: "Progression • optional challenges • rivals",
     body: `
       ${lastRace ? resultBanner(lastRace) : ""}
@@ -110,6 +111,12 @@ async function completeCircuitRace(ctx, activeRace) {
 
 function eventBoard(player, circuits, car) {
   const unlocked = (player?.progression?.unlockedClasses || ["D"]).join(" • ");
+  const progression = circuits.filter((circuit) => circuit.required || circuit.category === "progression");
+  const optionals = circuits.filter((circuit) =>
+    !circuit.required
+    && circuit.category === "optional"
+    && circuitVisibleToPlayer(circuit, player)
+  );
   return `
     <section class="circuit-career-strip">
       <span><small>UNLOCKED CLASSES</small><b>${escapeHtml(unlocked)}</b></span>
@@ -118,13 +125,27 @@ function eventBoard(player, circuits, car) {
       <span><small>CURRENT PI</small><b>${car ? `${escapeHtml(car.performanceClass || "—")} • ${number(car.performanceIndex || 0)}` : "—"}</b></span>
     </section>
     ${!car ? '<div class="empty-state"><strong>Select a Current Car first.</strong><span>The Circuit evaluates the actual car you enter, including its PI, Build Type and restrictions.</span><div style="margin-top:12px"><button class="button button--primary button--small" data-nav="garage">OPEN GARAGE</button></div></div>' : ""}
-    <div class="circuit-event-grid">
-      ${circuits
-        .slice()
-        .sort((a, b) => Number(b.required) - Number(a.required))
-        .map((circuit) => circuitCard(player, circuit, car))
-        .join("")}
-    </div>
+
+    <section class="circuit-board-section">
+      <header class="circuit-board-section__head">
+        <div><span class="section-label">CAREER PROGRESSION</span><h3>Required Circuits</h3></div>
+        <p>Clear the rival to move into the next performance class.</p>
+      </header>
+      <div class="circuit-event-grid">
+        ${progression.map((circuit) => circuitCard(player, circuit, car)).join("")}
+      </div>
+    </section>
+
+    ${optionals.length ? `
+      <section class="circuit-board-section circuit-board-section--optional">
+        <header class="circuit-board-section__head">
+          <div><span class="section-label">OPTIONAL CHALLENGES</span><h3>Side Circuits</h3></div>
+          <p>Extra mini-roguelites with their own restrictions, targets and rewards.</p>
+        </header>
+        <div class="circuit-event-grid circuit-event-grid--optional">
+          ${optionals.map((circuit) => circuitCard(player, circuit, car)).join("")}
+        </div>
+      </section>` : ""}
   `;
 }
 
@@ -138,7 +159,7 @@ function circuitCard(player, circuit, car) {
   const etText = rec.etSeconds != null ? `≤ ${number(rec.etSeconds, 2)}s 1/4` : "NO ET TARGET";
   const maxPi = circuit.entryRules?.maxPerformanceIndex;
   return `
-    <article class="circuit-event-card ${circuit.required ? "is-required" : ""} ${completed ? "is-complete" : ""}">
+    <article class="circuit-event-card ${circuit.required ? "is-required" : "is-optional"} ${completed ? "is-complete" : ""}">
       <header>
         <div><span class="section-label">${circuit.required ? "REQUIRED PROGRESSION" : "OPTIONAL CIRCUIT"}</span><h3>${escapeHtml(circuit.name)}</h3></div>
         <span class="pill ${completed ? "pill--accent" : ""}">${completed ? "CLEARED" : `${circuit.races.length} RACES`}</span>
@@ -150,6 +171,7 @@ function circuitCard(player, circuit, car) {
         <span><small>1/4 TARGET</small><b>${escapeHtml(etText)}</b></span>
         <span><small>ENTRY CAP</small><b>${maxPi == null ? "OPEN" : `PI ${number(maxPi)}`}</b></span>
       </div>
+      ${!circuit.required ? `<div class="circuit-restriction-chips">${optionalRestrictionChips(circuit).map((chip) => `<span>${escapeHtml(chip)}</span>`).join("")}</div>` : ""}
       <div class="circuit-race-dots" aria-label="${circuit.races.length} races">
         ${circuit.races.map((race) => `<i class="${race.type === "boss" ? "is-boss" : ""}" title="${escapeHtml(race.name)}"></i>`).join("")}
       </div>
@@ -160,6 +182,27 @@ function circuitCard(player, circuit, car) {
       </footer>
     </article>
   `;
+}
+
+function optionalRestrictionChips(circuit) {
+  const rules = circuit.entryRules || {};
+  const chips = [];
+  if (rules.allowedClasses?.length) chips.push(`${rules.allowedClasses.join("/")} CLASS`);
+  if (rules.minPerformanceIndex != null || rules.maxPerformanceIndex != null) {
+    const min = rules.minPerformanceIndex != null ? number(rules.minPerformanceIndex) : "OPEN";
+    const max = rules.maxPerformanceIndex != null ? number(rules.maxPerformanceIndex) : "OPEN";
+    chips.push(`PI ${min}–${max}`);
+  }
+  if (rules.buildTypes?.length && rules.buildTypes.length < 4) chips.push(`BUILD ${rules.buildTypes.join("/")}`);
+  if (rules.drivetrains?.length) chips.push(rules.drivetrains.join("/"));
+  if (rules.manufacturers?.length) chips.push(rules.manufacturers.join("/"));
+  if (rules.aspirations?.length) chips.push(rules.aspirations.join("/"));
+  if (rules.engineConfigurations?.length) chips.push(rules.engineConfigurations.join("/"));
+  if (rules.allowedCarIds?.length) chips.push(`${rules.allowedCarIds.length} SPECIFIC CAR${rules.allowedCarIds.length === 1 ? "" : "S"}`);
+  const distances = [...new Set((circuit.races || []).map((race) => race.distance))];
+  if (distances.length > 1) chips.push("MIXED DISTANCE");
+  else if (distances[0]) chips.push(`${distances[0]} MILE`);
+  return chips.length ? chips : ["OPEN RULESET"];
 }
 
 function activeRunMarkup(player, circuit, run, car) {
