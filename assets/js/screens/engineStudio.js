@@ -313,6 +313,8 @@ function outputSection(engine) {
         ${field("Engine Kit 2 HP Limit", "powerLimits.kit2Hp", engine.powerLimits?.kit2Hp, "number", { min: 1, step: 10 })}
         ${field("Engine Kit 3 HP Limit", "powerLimits.kit3Hp", engine.powerLimits?.kit3Hp, "number", { min: 1, step: 10 })}
         ${field("Engine Kit 4 / Max HP", "powerLimits.kit4Hp", engine.powerLimits?.kit4Hp, "number", { min: 1, step: 10 })}
+        ${field("Swap Shop Price (CR)", "swapMarket.price", engine.swapMarket?.price, "number", { min: 0, step: 500 })}
+        ${select("Swap Shop Listing", "swapMarket.available", String(engine.swapMarket?.available !== false), [["true","Enabled"],["false","Hidden"]])}
         ${select("Curve Profile", "curveProfile", engine.curveProfile, ENGINE_CURVE_PROFILES.map((row) => [row.id, row.label]))}
         ${field("Curve Notes", "curveNotes", engine.curveNotes, "text", { placeholder: "Optional source / shape notes..." })}
       </div>
@@ -440,6 +442,7 @@ function createBlankEngine() {
     curveNotes: "",
     powerCurve: [],
     powerLimits: suggestedPowerLimits({ displacementLiters: 2, configuration: "I4", aspiration: "Naturally Aspirated", peakHp: 200 }, 200),
+    swapMarket: { available: true, price: 10000 },
     sourceStatus: "engine-tool",
   };
 }

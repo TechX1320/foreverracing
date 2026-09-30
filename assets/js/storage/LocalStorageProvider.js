@@ -1,6 +1,7 @@
 import { StorageProvider } from './StorageProvider.js';
 import { LocalGameService } from '../domain/LocalGameService.js';
 import { mergeContentStudioCars } from '../content/ContentStudioCatalog.js';
+import { mergeContentStudioEngines } from '../content/ContentStudioEngineCatalog.js';
 import { mergeContentStudioParts } from '../content/ContentStudioPartCatalog.js';
 
 const PLAYER_KEY = 'foreverRacing.v02.player';
@@ -20,9 +21,10 @@ export class LocalStorageProvider extends StorageProvider {
 
   async #ready() {
     if (this.#service) return;
-    const [cars, parts, config, buildStages, racingConfig] = await Promise.all([
+    const [cars, parts, engines, config, buildStages, racingConfig] = await Promise.all([
       fetchJson('data/catalog/cars.json'),
       fetchJson('data/catalog/parts.json'),
+      fetchJson('data/catalog/engines.json'),
       fetchJson('data/config/game.json'),
       fetchJson('data/config/build-stages.json'),
       fetchJson('data/config/racing.json'),
@@ -30,7 +32,8 @@ export class LocalStorageProvider extends StorageProvider {
     this.#config = config;
     const authoredCars = mergeContentStudioCars(cars);
     const authoredParts = mergeContentStudioParts(parts);
-    this.#service = new LocalGameService({ cars: authoredCars, parts: authoredParts, config, buildStages: buildStages.stages || buildStages, racingConfig });
+    const authoredEngines = mergeContentStudioEngines(engines);
+    this.#service = new LocalGameService({ cars: authoredCars, parts: authoredParts, engines: authoredEngines, config, buildStages: buildStages.stages || buildStages, racingConfig });
   }
 
   async session() {
@@ -98,6 +101,18 @@ export class LocalStorageProvider extends StorageProvider {
   async repairEngine(carId) {
     await this.#ready();
     const player = this.#service.repairEngine(this.#loadPlayer(), carId);
+    this.#savePlayer(player);
+    return { ok: true, player };
+  }
+
+  async engineCatalog() {
+    await this.#ready();
+    return { ok: true, engines: structuredClone(this.#service.engines) };
+  }
+
+  async swapEngine(carId, engineId) {
+    await this.#ready();
+    const player = this.#service.swapEngine(this.#loadPlayer(), carId, engineId);
     this.#savePlayer(player);
     return { ok: true, player };
   }

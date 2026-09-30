@@ -24,7 +24,11 @@
     "curveNotes": "Legacy swap-fitment definition. Output curve has not been authored in Engine Creator yet.",
     "powerCurve": [],
     "sourceStatus": "legacy-fitment",
-    "curveProfile": "small_economy"
+    "curveProfile": "small_economy",
+    "swapMarket": {
+      "available": false,
+      "price": 0
+    }
   },
   {
     "engineId": "ford_modular_46_3v",
@@ -50,7 +54,11 @@
     "curveNotes": "Legacy swap-fitment definition. Output curve has not been authored in Engine Creator yet.",
     "powerCurve": [],
     "sourceStatus": "legacy-fitment",
-    "curveProfile": "muscle_v8"
+    "curveProfile": "muscle_v8",
+    "swapMarket": {
+      "available": false,
+      "price": 0
+    }
   },
   {
     "engineId": "nissan_vq35de_35",
@@ -76,7 +84,11 @@
     "curveNotes": "Legacy swap-fitment definition. Output curve has not been authored in Engine Creator yet.",
     "powerCurve": [],
     "sourceStatus": "legacy-fitment",
-    "curveProfile": "broad_torque"
+    "curveProfile": "broad_torque",
+    "swapMarket": {
+      "available": false,
+      "price": 0
+    }
   },
   {
     "engineId": "fiat_multiair_14t",
@@ -102,7 +114,11 @@
     "curveNotes": "Legacy swap-fitment definition. Output curve has not been authored in Engine Creator yet.",
     "powerCurve": [],
     "sourceStatus": "legacy-fitment",
-    "curveProfile": "turbo_street"
+    "curveProfile": "turbo_street",
+    "swapMarket": {
+      "available": false,
+      "price": 0
+    }
   },
   {
     "engineId": "vw_19_tdi",
@@ -128,7 +144,11 @@
     "curveNotes": "Legacy swap-fitment definition. Output curve has not been authored in Engine Creator yet.",
     "powerCurve": [],
     "sourceStatus": "legacy-fitment",
-    "curveProfile": "diesel_torque"
+    "curveProfile": "diesel_torque",
+    "swapMarket": {
+      "available": false,
+      "price": 0
+    }
   },
   {
     "engineId": "ford_ecoboost_23",
@@ -154,7 +174,11 @@
     "curveNotes": "Legacy swap-fitment definition. Output curve has not been authored in Engine Creator yet.",
     "powerCurve": [],
     "sourceStatus": "legacy-fitment",
-    "curveProfile": "turbo_street"
+    "curveProfile": "turbo_street",
+    "swapMarket": {
+      "available": false,
+      "price": 0
+    }
   },
   {
     "engineId": "ford_coyote_50",
@@ -180,7 +204,11 @@
     "curveNotes": "Legacy swap-fitment definition. Output curve has not been authored in Engine Creator yet.",
     "powerCurve": [],
     "sourceStatus": "legacy-fitment",
-    "curveProfile": "muscle_v8"
+    "curveProfile": "muscle_v8",
+    "swapMarket": {
+      "available": false,
+      "price": 0
+    }
   },
   {
     "engineId": "vw_ea888_20t_mk6_gti_200",
@@ -256,6 +284,10 @@
       "kit2Hp": 650,
       "kit3Hp": 820,
       "kit4Hp": 1000
+    },
+    "swapMarket": {
+      "available": true,
+      "price": 8500
     }
   },
   {
@@ -332,6 +364,10 @@
       "kit2Hp": 750,
       "kit3Hp": 930,
       "kit4Hp": 1100
+    },
+    "swapMarket": {
+      "available": true,
+      "price": 7000
     }
   },
   {
@@ -407,6 +443,10 @@
       "kit2Hp": 800,
       "kit3Hp": 1000,
       "kit4Hp": 1250
+    },
+    "swapMarket": {
+      "available": true,
+      "price": 11000
     }
   }
 ]

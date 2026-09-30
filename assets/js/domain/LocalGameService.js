@@ -22,6 +22,16 @@ import {
   normalizeTuneProfile,
   tuningHardwareProfile,
 } from './Tuning.js';
+import { engineToCarSnapshot, normalizeEngineDefinition } from './EngineCatalog.js';
+import {
+  engineSwapEligible,
+  engineSwapFitment,
+  engineSwapQuote,
+  healthyEngineCondition,
+  isEngineBoundPart,
+  normalizedStoredEngineCondition,
+  swappedCarSnapshot,
+} from './EngineSwap.js';
 const clone = (value) => value == null ? value : structuredClone(value);
 const now = () => Math.floor(Date.now() / 1000);
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -57,9 +67,10 @@ export class LocalGameError extends Error {
 }
 
 export class LocalGameService {
-  constructor({ cars, parts, config, buildStages = [], racingConfig = {} }) {
+  constructor({ cars, parts, engines = [], config, buildStages = [], racingConfig = {} }) {
     this.cars = clone(cars || []);
     this.parts = clone(parts || []);
+    this.engines = clone(engines || []).map((engine) => normalizeEngineDefinition(engine));
     this.buildStages = clone(buildStages || []);
     this.racingConfig = clone(racingConfig || {});
     this.raceSimulator = new RaceSimulator(this.racingConfig);
@@ -83,10 +94,10 @@ export class LocalGameService {
       wallet: { credits: this.config.startingCredits },
       progression: { level: 1, exp: 0, rep: 0 },
       tutorial: { version: this.config.tutorialVersion, status: 'active', step: 'welcome', completedSteps: [] },
-      stats: { races: 0, wins: 0, losses: 0, bestReaction: null, showroomPurchases: 0, usedPurchases: 0, partsPurchased: 0 },
+      stats: { races: 0, wins: 0, losses: 0, bestReaction: null, showroomPurchases: 0, usedPurchases: 0, partsPurchased: 0, enginesPurchased: 0, engineSwaps: 0 },
       selectedCarId: null,
       garage: [],
-      inventory: { parts: [] },
+      inventory: { parts: [], engines: [] },
       roguelike: { activeRun: null, bestStage: 0, runsStarted: 0, runsCompleted: 0 },
       activeRace: null,
       raceHistory: [],
@@ -113,6 +124,13 @@ export class LocalGameService {
     player.garage = Array.isArray(player.garage) ? player.garage.map((car) => this.normalizeCar(car)) : [];
     player.inventory = player.inventory && typeof player.inventory === 'object' ? player.inventory : clone(defaults.inventory);
     player.inventory.parts = Array.isArray(player.inventory.parts) ? player.inventory.parts : [];
+    player.inventory.engines = Array.isArray(player.inventory.engines) ? player.inventory.engines.map((item) => ({
+      inventoryId: String(item?.inventoryId || this.id('engine')),
+      engineId: String(item?.engineId || ''),
+      acquiredAt: Number(item?.acquiredAt || now()),
+      source: String(item?.source || 'owned'),
+      condition: normalizedStoredEngineCondition(item?.condition || {}),
+    })).filter((item) => item.engineId) : [];
     const needsPowerMigration = previousSchemaVersion < Number(this.config.schemaVersion || 0)
       || player.garage.some((car) => !car?.powerEnvelope);
     if (needsPowerMigration && player.garage.length) {
@@ -210,6 +228,81 @@ export class LocalGameService {
     const capacity = Math.max(200, Number(car?.powerEnvelope?.capacityHp || car?.engine?.powerLimits?.kit4Hp || car?.derived?.hp || 200));
     const stage = Math.max(1, Number(car?.buildStage || 1));
     return Math.max(5000, Math.round(((capacity * 12) + (stage * 1500)) / 100) * 100);
+  }
+
+  swapEngine(inputPlayer, carId, engineId) {
+    return this.mutate(inputPlayer, (player) => {
+      const carIndex = this.requireOwnedCarIndex(player, carId);
+      const car = player.garage[carIndex];
+      const engine = this.findBy(this.engines, 'engineId', String(engineId || ''));
+      if (!engine || !engineSwapEligible(engine)) throw new LocalGameError('That engine is not ready for the Engine Swap Shop.', 404);
+
+      const fitment = engineSwapFitment(car, engine);
+      if (!fitment.allowed) throw new LocalGameError(fitment.note || 'That engine does not fit this chassis.');
+      if (Number(car.buildStage || 1) < Number(fitment.minBuildStage || 3)) {
+        throw new LocalGameError(`This swap requires Build Type ${fitment.minBuildStage}. Upgrade the chassis first.`);
+      }
+      if (String(car.engineId || car.factoryEngineId || '') === String(engine.engineId)) {
+        throw new LocalGameError('That engine is already installed in this car.');
+      }
+
+      const quote = engineSwapQuote(car, engine, player.inventory.engines);
+      this.requireCredits(player, quote.totalCost);
+
+      const ownedIndex = quote.owned
+        ? player.inventory.engines.findIndex((item) => String(item.inventoryId) === String(quote.owned.inventoryId))
+        : -1;
+      const incomingCondition = ownedIndex >= 0
+        ? normalizedStoredEngineCondition(player.inventory.engines[ownedIndex]?.condition || {})
+        : healthyEngineCondition();
+
+      const outgoingEngineId = String(car.engineId || car.factoryEngineId || '');
+      if (outgoingEngineId) {
+        player.inventory.engines.push({
+          inventoryId: this.id('engine'),
+          engineId: outgoingEngineId,
+          acquiredAt: now(),
+          source: outgoingEngineId === String(car.factoryEngineId || '') ? 'factory_removed' : 'swap_removed',
+          condition: normalizedStoredEngineCondition(car.engineCondition || {}),
+        });
+      }
+      if (ownedIndex >= 0) player.inventory.engines.splice(ownedIndex, 1);
+
+      const candidate = swappedCarSnapshot(car, engine);
+      candidate.engineSwapFitment = clone(car.engineSwapFitment || {});
+      candidate.engineCondition = incomingCondition;
+      candidate.engineSwap = {
+        count: Number(car.engineSwap?.count || 0) + 1,
+        lastFromEngineId: outgoingEngineId || null,
+        lastToEngineId: String(engine.engineId),
+        lastFitment: fitment.fitment,
+        lastSwapAt: now(),
+      };
+
+      const uninstalled = [];
+      for (const item of player.inventory.parts) {
+        if (String(item.installedOnCarId || '') !== String(carId)) continue;
+        const spec = this.findBy(this.parts, 'catalogId', String(item.catalogId || ''));
+        if (!spec) continue;
+        const compatibility = partCompatibility(spec, candidate);
+        if (isEngineBoundPart(spec) || !compatibility.ok) {
+          item.installedOnCarId = null;
+          uninstalled.push(String(spec.name || spec.catalogId || 'Part'));
+        }
+      }
+
+      player.wallet.credits -= quote.totalCost;
+      if (!quote.owned) player.stats.enginesPurchased = Number(player.stats.enginesPurchased || 0) + 1;
+      player.stats.engineSwaps = Number(player.stats.engineSwaps || 0) + 1;
+      player.garage[carIndex] = this.recalculateCar(candidate, player.inventory.parts);
+      player.garage[carIndex].engineSwap.lastUninstalledParts = uninstalled;
+      this.addTransaction(
+        player,
+        'engine_swap',
+        -quote.totalCost,
+        `${this.carName(car)}: ${engine.name || engine.engineId} swap`
+      );
+    });
   }
 
   purchasePart(inputPlayer, catalogId) {
@@ -745,7 +838,12 @@ export class LocalGameService {
     car.factoryEngineId = car.factoryEngineId || spec?.factoryEngineId || null;
     car.engineId = car.engineId || car.factoryEngineId || null;
     car.engineBay = car.engineBay || clone(spec?.engineBay || null);
+    car.engineSwapFitment = clone(car.engineSwapFitment || spec?.engineSwapFitment || { minBuildStage: 3, options: {} });
     car.engine = { ...(clone(spec?.engine || {})), ...(car.engine || {}) };
+    const installedEngine = this.findBy(this.engines, 'engineId', String(car.engineId || ''));
+    if (installedEngine && engineSwapEligible(installedEngine)) {
+      car.engine = engineToCarSnapshot(installedEngine, car.engine);
+    }
     const catalogVisual = clone(spec?.visual || {});
     const savedVisual = car.visual && typeof car.visual === 'object' ? car.visual : {};
     car.visual = {
@@ -797,6 +895,7 @@ export class LocalGameService {
       displayName,
       nickname: '', source, purchasePrice, mileage, condition, buildStage: 1, stageBaseline: null,
       factoryEngineId: spec.factoryEngineId || null, engineId: spec.factoryEngineId || null, engineBay: clone(spec.engineBay || null),
+      engineSwapFitment: clone(spec.engineSwapFitment || { minBuildStage: 3, options: {} }),
       engine: clone(spec.engine || {}),
       visual: withPaintColor(clone(spec.visual || {}), paintColor || firstPaintColor(spec)),
       benchmark: clone(spec.benchmark || benchmark),

@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.5.0-g.2 playable direction
+## V0.5.0-h playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,20 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.5H Engine Swap Shop
+
+- **ENGINE SWAP SHOP** is a dedicated Main Menu location rather than another Parts category.
+- Front-Half Race Cars can use authored custom engine swaps; particularly extreme chassis/engine combinations can be reserved for Full Race Cars.
+- The shop only lists engines with complete authored output data and curves. Fitment-only placeholders do not enter gameplay until their Engine Creator definitions are finished.
+- Each chassis explicitly defines which engines fit, the minimum Build Type, fitment severity and installation labor.
+- Buying an engine and installing it are separate cost concepts. Once an engine is owned, swapping it again only charges installation labor.
+- Removed engines stay in **Engine Inventory**, including their failed/healthy condition, so the original engine is never destroyed by a swap.
+- Engine-bound build parts are automatically uninstalled and retained in normal Inventory. Chassis hardware such as tires, suspension and weight reduction remains where appropriate.
+- The installed Engine ID drives Parts compatibility. After a swap, opening Parts immediately shows choices for the new engine instead of the factory engine.
+- Swap confirmation previews stock output, PI and a current-vs-replacement dyno before committing.
+- Engine Creator now includes Swap Shop listing visibility and purchase price authoring.
+- Gearing is not part of V0.5H; the intended later direction is realistic final-drive choices rather than arbitrary per-gear sliders.
 
 ### V0.5G.2 tuning polish + real risk
 

@@ -123,7 +123,30 @@
       "showroom": false
     },
     "class": "D",
-    "factoryEngineId": "vw_ea888_20t_mk6_gti_200"
+    "factoryEngineId": "vw_ea888_20t_mk6_gti_200",
+    "engineSwapFitment": {
+      "minBuildStage": 3,
+      "options": {
+        "vw_ea888_20t_mk6_gti_200": {
+          "minBuildStage": 3,
+          "fitment": "Factory",
+          "installCost": 2500,
+          "note": "Factory Mk6 GTI powertrain fitment; reinstall labor covers fluids, wiring checks and setup."
+        },
+        "mazda_13b_msp_renesis_238": {
+          "minBuildStage": 4,
+          "fitment": "Extreme",
+          "installCost": 12000,
+          "note": "Full Race fabrication required to mount and adapt the rotary package in the transverse GTI chassis."
+        },
+        "renault_clio_v6_29_255": {
+          "minBuildStage": 4,
+          "fitment": "Extreme",
+          "installCost": 15000,
+          "note": "Full Race fabrication, mounts, cooling and driveline adaptation required for the larger V6 package."
+        }
+      }
+    }
   },
   {
     "stockId": 2,
@@ -249,7 +272,30 @@
       "showroom": false
     },
     "class": "D",
-    "factoryEngineId": "mazda_13b_msp_renesis_238"
+    "factoryEngineId": "mazda_13b_msp_renesis_238",
+    "engineSwapFitment": {
+      "minBuildStage": 3,
+      "options": {
+        "mazda_13b_msp_renesis_238": {
+          "minBuildStage": 3,
+          "fitment": "Factory",
+          "installCost": 2500,
+          "note": "Factory RX-8 engine fitment; reinstall labor covers seals, fluids, wiring checks and setup."
+        },
+        "vw_ea888_20t_mk6_gti_200": {
+          "minBuildStage": 3,
+          "fitment": "Custom",
+          "installCost": 7000,
+          "note": "Custom mounts, transmission adaptation, cooling and wiring integrate the compact turbo four-cylinder into the RX-8."
+        },
+        "renault_clio_v6_29_255": {
+          "minBuildStage": 3,
+          "fitment": "Custom",
+          "installCost": 8500,
+          "note": "Custom mounts, transmission adaptation, cooling and wiring are required for the V6 swap."
+        }
+      }
+    }
   },
   {
     "stockId": 3,
@@ -375,6 +421,29 @@
       "showroom": false
     },
     "class": "D",
-    "factoryEngineId": "renault_clio_v6_29_255"
+    "factoryEngineId": "renault_clio_v6_29_255",
+    "engineSwapFitment": {
+      "minBuildStage": 3,
+      "options": {
+        "renault_clio_v6_29_255": {
+          "minBuildStage": 3,
+          "fitment": "Factory",
+          "installCost": 2500,
+          "note": "Factory Clio V6 fitment; reinstall labor covers fluids, wiring checks and setup."
+        },
+        "vw_ea888_20t_mk6_gti_200": {
+          "minBuildStage": 3,
+          "fitment": "Custom",
+          "installCost": 7500,
+          "note": "Custom mounts, cooling, wiring and transaxle adaptation integrate the turbo four-cylinder package."
+        },
+        "mazda_13b_msp_renesis_238": {
+          "minBuildStage": 4,
+          "fitment": "Extreme",
+          "installCost": 11000,
+          "note": "Full Race fabrication is required to package and adapt the rotary drivetrain in the rear-engine chassis."
+        }
+      }
+    }
   }
 ]

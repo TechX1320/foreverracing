@@ -41,10 +41,11 @@ final class GameService
             'stats' => [
                 'races' => 0, 'wins' => 0, 'losses' => 0, 'bestReaction' => null,
                 'showroomPurchases' => 0, 'usedPurchases' => 0, 'partsPurchased' => 0,
+                'enginesPurchased' => 0, 'engineSwaps' => 0,
             ],
             'selectedCarId' => null,
             'garage' => [],
-            'inventory' => ['parts' => []],
+            'inventory' => ['parts' => [], 'engines' => []],
             'roguelike' => ['activeRun' => null, 'bestStage' => 0, 'runsStarted' => 0, 'runsCompleted' => 0],
             'activeRace' => null,
             'raceHistory' => [],
@@ -86,6 +87,17 @@ final class GameService
         $player['garage'] = array_map(fn(array $car): array => self::normalizeCar($car), $garage);
         $player['inventory'] = is_array($player['inventory'] ?? null) ? $player['inventory'] : $default['inventory'];
         $player['inventory']['parts'] = array_values(is_array($player['inventory']['parts'] ?? null) ? $player['inventory']['parts'] : []);
+        $engineInventory = array_values(is_array($player['inventory']['engines'] ?? null) ? $player['inventory']['engines'] : []);
+        $player['inventory']['engines'] = array_values(array_filter(array_map(function ($item): array {
+            $item = is_array($item) ? $item : [];
+            return [
+                'inventoryId' => (string)($item['inventoryId'] ?? self::id('engine')),
+                'engineId' => (string)($item['engineId'] ?? ''),
+                'acquiredAt' => (int)($item['acquiredAt'] ?? time()),
+                'source' => (string)($item['source'] ?? 'owned'),
+                'condition' => EngineSwap::storedCondition(is_array($item['condition'] ?? null) ? $item['condition'] : []),
+            ];
+        }, $engineInventory), fn(array $item): bool => $item['engineId'] !== ''));
         $needsPowerMigration = $previousSchemaVersion < $currentSchemaVersion;
         if (!$needsPowerMigration) {
             foreach ($player['garage'] as $savedCar) {
@@ -118,6 +130,12 @@ final class GameService
     public static function carCatalog(): array
     {
         $data = JsonStore::read(FR_DATA . '/catalog/cars.json', []);
+        return is_array($data) ? array_values($data) : [];
+    }
+
+    public static function engineCatalog(): array
+    {
+        $data = JsonStore::read(FR_DATA . '/catalog/engines.json', []);
         return is_array($data) ? array_values($data) : [];
     }
 
@@ -230,6 +248,103 @@ final class GameService
             ];
             $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'] ?? [], $catalog);
             self::addTransaction($player, 'engine_rebuild', -$cost, self::carName($car) . ' engine rebuild');
+            return $player;
+        });
+    }
+
+    public static function swapEngine(string $carId, string $engineId): array
+    {
+        $parts = self::partsCatalog();
+        $engine = self::findBy(self::engineCatalog(), 'engineId', $engineId);
+        if (!$engine || !EngineSwap::eligible($engine)) {
+            throw new GameException('That engine is not ready for the Engine Swap Shop.', 404);
+        }
+
+        return self::mutatePlayer(function (array $player) use ($carId, $engine, $parts): array {
+            $carIndex = self::requireOwnedCarIndex($player, $carId);
+            $car = $player['garage'][$carIndex];
+            $fitment = EngineSwap::fitment($car, $engine);
+            if (empty($fitment['allowed'])) throw new GameException((string)($fitment['note'] ?? 'That engine does not fit this chassis.'));
+            if ((int)($car['buildStage'] ?? 1) < (int)($fitment['minBuildStage'] ?? 3)) {
+                throw new GameException('This swap requires Build Type ' . (int)$fitment['minBuildStage'] . '. Upgrade the chassis first.');
+            }
+            if ((string)($car['engineId'] ?? $car['factoryEngineId'] ?? '') === (string)$engine['engineId']) {
+                throw new GameException('That engine is already installed in this car.');
+            }
+
+            $ownedIndex = -1;
+            foreach (($player['inventory']['engines'] ?? []) as $index => $ownedEngine) {
+                if ((string)($ownedEngine['engineId'] ?? '') === (string)$engine['engineId']) {
+                    $ownedIndex = (int)$index;
+                    break;
+                }
+            }
+            $enginePrice = $ownedIndex >= 0 ? 0 : EngineSwap::price($engine);
+            $installCost = max(0, (int)($fitment['installCost'] ?? 0));
+            $totalCost = $enginePrice + $installCost;
+            self::requireCredits($player, $totalCost);
+
+            $incomingCondition = $ownedIndex >= 0
+                ? EngineSwap::storedCondition(is_array($player['inventory']['engines'][$ownedIndex]['condition'] ?? null) ? $player['inventory']['engines'][$ownedIndex]['condition'] : [])
+                : EngineSwap::healthyCondition();
+
+            $outgoingEngineId = (string)($car['engineId'] ?? $car['factoryEngineId'] ?? '');
+            if ($outgoingEngineId !== '') {
+                $player['inventory']['engines'][] = [
+                    'inventoryId' => self::id('engine'),
+                    'engineId' => $outgoingEngineId,
+                    'acquiredAt' => time(),
+                    'source' => $outgoingEngineId === (string)($car['factoryEngineId'] ?? '') ? 'factory_removed' : 'swap_removed',
+                    'condition' => EngineSwap::storedCondition(is_array($car['engineCondition'] ?? null) ? $car['engineCondition'] : []),
+                ];
+            }
+            if ($ownedIndex >= 0) array_splice($player['inventory']['engines'], $ownedIndex, 1);
+
+            $candidate = $car;
+            $candidate['engineId'] = (string)$engine['engineId'];
+            $candidate['engine'] = EngineSwap::snapshot($engine, is_array($car['engine'] ?? null) ? $car['engine'] : []);
+            $candidate['base']['hp'] = (int)$engine['peakHp'];
+            $candidate['base']['torque'] = (int)$engine['peakTorque'];
+            if (is_array($candidate['stageBaseline'] ?? null)) {
+                $candidate['stageBaseline']['hp'] = (int)$engine['peakHp'];
+                $candidate['stageBaseline']['torque'] = (int)$engine['peakTorque'];
+            }
+            $candidate['tune'] = null;
+            $candidate['tuningRuntime'] = null;
+            $candidate['tuningDiagnostics'] = null;
+            $candidate['engineCondition'] = $incomingCondition;
+            $candidate['engineSwap'] = [
+                'count' => (int)($car['engineSwap']['count'] ?? 0) + 1,
+                'lastFromEngineId' => $outgoingEngineId !== '' ? $outgoingEngineId : null,
+                'lastToEngineId' => (string)$engine['engineId'],
+                'lastFitment' => (string)($fitment['fitment'] ?? 'CUSTOM'),
+                'lastSwapAt' => time(),
+            ];
+
+            $uninstalled = [];
+            foreach ($player['inventory']['parts'] as &$ownedPart) {
+                if ((string)($ownedPart['installedOnCarId'] ?? '') !== $carId) continue;
+                $part = self::findBy($parts, 'catalogId', (string)($ownedPart['catalogId'] ?? ''));
+                if (!$part) continue;
+                $incompatible = self::partCompatibilityReason($part, $candidate) !== null;
+                if (EngineSwap::isEngineBoundPart($part) || $incompatible) {
+                    $ownedPart['installedOnCarId'] = null;
+                    $uninstalled[] = (string)($part['name'] ?? $part['catalogId'] ?? 'Part');
+                }
+            }
+            unset($ownedPart);
+
+            $player['wallet']['credits'] -= $totalCost;
+            if ($ownedIndex < 0) $player['stats']['enginesPurchased'] = (int)($player['stats']['enginesPurchased'] ?? 0) + 1;
+            $player['stats']['engineSwaps'] = (int)($player['stats']['engineSwaps'] ?? 0) + 1;
+            $player['garage'][$carIndex] = self::recalculateCar($candidate, $player['inventory']['parts'], $parts);
+            $player['garage'][$carIndex]['engineSwap']['lastUninstalledParts'] = $uninstalled;
+            self::addTransaction(
+                $player,
+                'engine_swap',
+                -$totalCost,
+                self::carName($car) . ': ' . (string)($engine['name'] ?? $engine['engineId']) . ' swap'
+            );
             return $player;
         });
     }
@@ -916,10 +1031,17 @@ final class GameService
         $car['factoryEngineId'] = $car['factoryEngineId'] ?? ($spec['factoryEngineId'] ?? null);
         $car['engineId'] = $car['engineId'] ?? $car['factoryEngineId'];
         $car['engineBay'] = $car['engineBay'] ?? ($spec['engineBay'] ?? null);
+        $car['engineSwapFitment'] = is_array($car['engineSwapFitment'] ?? null)
+            ? $car['engineSwapFitment']
+            : (is_array($spec['engineSwapFitment'] ?? null) ? $spec['engineSwapFitment'] : ['minBuildStage' => 3, 'options' => []]);
         $car['engine'] = array_replace(
             is_array($spec['engine'] ?? null) ? $spec['engine'] : [],
             is_array($car['engine'] ?? null) ? $car['engine'] : []
         );
+        $installedEngine = self::findBy(self::engineCatalog(), 'engineId', (string)($car['engineId'] ?? ''));
+        if ($installedEngine && EngineSwap::eligible($installedEngine)) {
+            $car['engine'] = EngineSwap::snapshot($installedEngine, $car['engine']);
+        }
         $catalogVisual = is_array($spec['visual'] ?? null) ? $spec['visual'] : [];
         $savedVisual = is_array($car['visual'] ?? null) ? $car['visual'] : [];
         $car['visual'] = array_replace($catalogVisual, $savedVisual);
@@ -986,6 +1108,7 @@ final class GameService
             'factoryEngineId' => $spec['factoryEngineId'] ?? null,
             'engineId' => $spec['factoryEngineId'] ?? null,
             'engineBay' => $spec['engineBay'] ?? null,
+            'engineSwapFitment' => is_array($spec['engineSwapFitment'] ?? null) ? $spec['engineSwapFitment'] : ['minBuildStage' => 3, 'options' => []],
             'engine' => is_array($spec['engine'] ?? null) ? $spec['engine'] : [],
             'visual' => self::withPaintColor(is_array($spec['visual'] ?? null) ? $spec['visual'] : [], $paintColor ?? self::firstPaintColor($spec)),
             'benchmark' => is_array($spec['benchmark'] ?? null) ? $spec['benchmark'] : $benchmark,

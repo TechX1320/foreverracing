@@ -43,6 +43,7 @@ $storageText = $storageMode === 'local' ? 'BROWSER LOCAL' : 'PHP / JSON';
           <div class="nav-rail__label">MAIN</div>
           <button type="button" data-nav="home"><b>HOME</b><span>Overview</span></button>
           <button type="button" data-nav="garage"><b>GARAGE</b><span>Your cars</span></button>
+          <button type="button" data-nav="engine-swap-shop"><b>ENGINE SWAP SHOP</b><span>Powertrains</span></button>
           <button type="button" data-nav="showroom"><b>SHOWROOM</b><span>Buy new</span></button>
           <button type="button" data-nav="parts"><b>PARTS</b><span>Build car</span></button>
           <button type="button" data-nav="quick-race"><b>QUICK RACE</b><span>Run car</span></button>

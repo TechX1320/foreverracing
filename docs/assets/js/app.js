@@ -8,6 +8,7 @@ import { renderVehicle } from './ui/vehicleRenderer.js';
 import { renderShowroom } from './screens/showroom.js';
 import { renderGarage } from './screens/garage.js';
 import { renderParts } from './screens/parts.js';
+import { renderEngineSwapShop } from './screens/engineSwapShop.js';
 import { renderUsedLot } from './screens/usedlot.js';
 import { renderQuickRace } from './screens/quickRace.js';
 import { renderRoguelike } from './screens/roguelike.js';
@@ -48,6 +49,7 @@ const ROUTE_UNLOCK_LEVELS = {
   home: 1,
   garage: 1,
   parts: 1,
+  'engine-swap-shop': 1,
   'quick-race': 1,
   usedlot: 1,
   roguelike: 1,
@@ -71,6 +73,7 @@ router
   .register('showroom', feature(renderShowroom))
   .register('garage', feature(renderGarage))
   .register('parts', feature(renderParts))
+  .register('engine-swap-shop', feature(renderEngineSwapShop))
   .register('usedlot', feature(renderUsedLot))
   .register('quick-race', feature(renderQuickRace))
   .register('roguelike', feature(renderRoguelike))
