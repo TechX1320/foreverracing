@@ -2148,3 +2148,165 @@ dialog.fr-dialog:has(.forced-induction-parts-dialog){
   .parts-shop-subnav{padding-bottom:6px}
   .parts-shop-pager{grid-template-columns:1fr auto 1fr}
 }
+
+
+/* V0.5G garage laptop tuning */
+.tuning-button{border-color:#43614a}
+.tuning-button--saved{color:#91d49c;border-color:#4d7d58;background:#101812}
+dialog.fr-dialog:has(.tuning-dialog){
+  width:min(1180px,calc(100vw - 30px));
+  max-height:calc(100dvh - 24px);
+  overflow:auto;
+}
+.tuning-dialog{width:100%;max-width:none}
+.tuning-dialog__titlebar{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 300px;
+  align-items:stretch;
+  gap:12px;
+  margin-bottom:10px;
+}
+.tuning-dialog__titlebar h2{margin:2px 0 4px;font-size:25px}
+.tuning-dialog__titlebar p{margin:0;max-width:720px;color:var(--muted);font-size:11px;line-height:1.45}
+.tuning-laptop-badge{
+  display:grid;
+  align-content:center;
+  gap:2px;
+  padding:10px 12px;
+  border:1px solid #35513c;
+  background:#0c1510;
+}
+.tuning-laptop-badge span{color:var(--faint);font-size:9px;font-weight:900;letter-spacing:.08em}
+.tuning-laptop-badge b{color:#8ed099;font-size:18px;letter-spacing:.08em}
+.tuning-laptop-badge small{color:var(--muted);font-size:10px;line-height:1.35}
+.tuning-workspace{
+  display:grid;
+  grid-template-columns:minmax(0,1.55fr) minmax(300px,.72fr);
+  gap:10px;
+}
+.tuning-controls{display:grid;gap:8px}
+.tuning-panel,.tuning-monitor{
+  border:1px solid var(--border);
+  background:#0f1214;
+}
+.tuning-panel>header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:7px 9px;
+  border-bottom:1px solid var(--border);
+  background:#121619;
+}
+.tuning-panel>header span,.tuning-monitor__head span{
+  color:var(--accent-2);
+  font-size:10px;
+  font-weight:950;
+  letter-spacing:.08em;
+}
+.tuning-panel>header b{font-size:11px}
+.tuning-panel__intro{margin:7px 9px;color:var(--muted);font-size:10px;line-height:1.4}
+.tuning-slider{
+  display:grid;
+  grid-template-columns:210px minmax(180px,1fr) 230px;
+  align-items:center;
+  gap:8px;
+  min-height:42px;
+  padding:6px 9px;
+  border-bottom:1px solid #20252a;
+}
+.tuning-slider:last-child{border-bottom:0}
+.tuning-slider>div{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.tuning-slider span{font-size:10px;font-weight:900;letter-spacing:.04em}
+.tuning-slider output{color:var(--accent-2);font-size:11px;font-weight:900;white-space:nowrap}
+.tuning-slider input[type="range"]{width:100%;accent-color:#d66b2e}
+.tuning-slider small{color:var(--faint);font-size:9px;line-height:1.3}
+.tuning-locked-row{display:flex;justify-content:space-between;gap:10px;padding:10px;color:var(--faint);font-size:10px}
+.boost-gear-grid{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:5px;
+  padding:0 9px 9px;
+}
+.boost-gear{
+  display:grid;
+  gap:4px;
+  padding:7px;
+  border:1px solid var(--border);
+  background:#0b0e10;
+}
+.boost-gear span{font-size:9px;color:var(--faint);font-weight:900}
+.boost-gear b{font-size:10px;white-space:nowrap}
+.boost-gear input{width:100%;accent-color:#d66b2e}
+.tuning-monitor{align-self:start;position:sticky;top:0}
+.tuning-monitor__head{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:9px 10px;
+  border-bottom:1px solid var(--border);
+}
+.tuning-monitor__head b{font-size:11px;color:#8ed099}
+.tuning-monitor__stats{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.tuning-monitor__stats>div{
+  padding:8px 9px;
+  border-right:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+.tuning-monitor__stats>div:nth-child(2n){border-right:0}
+.tuning-monitor__stats small{display:block;color:var(--faint);font-size:9px;font-weight:900}
+.tuning-monitor__stats strong{display:block;margin-top:2px;font-size:13px}
+.tuning-monitor__states{display:grid}
+.tuning-monitor__states>div{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  padding:6px 9px;
+  border-bottom:1px solid #20252a;
+  font-size:10px;
+}
+.tuning-monitor__states span{color:var(--faint);font-weight:900}
+.tuning-monitor__hints,.tuning-monitor__physics{padding:8px 9px;border-bottom:1px solid var(--border)}
+.tuning-monitor__hints>span,.tuning-monitor__physics>b{display:block;margin-bottom:5px;color:var(--accent-2);font-size:9px;font-weight:950;letter-spacing:.08em}
+.tuning-monitor__hints p{margin:3px 0;color:var(--muted);font-size:9px;line-height:1.35}
+.tuning-monitor__physics{display:grid;gap:3px}
+.tuning-monitor__physics span{color:var(--faint);font-size:9px}
+.tuning-dialog__footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-top:9px;
+  padding-top:9px;
+  border-top:1px solid var(--border);
+}
+.tuning-dialog__footer p{margin:0;max-width:620px;color:var(--faint);font-size:9px;line-height:1.35}
+.warn{color:#e4b45c!important}
+@media(max-width:980px){
+  .tuning-dialog__titlebar,.tuning-workspace{grid-template-columns:1fr}
+  .tuning-monitor{position:static}
+  .tuning-slider{grid-template-columns:170px 1fr}
+  .tuning-slider small{grid-column:1/-1}
+  .boost-gear-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:680px){
+  .tuning-slider{grid-template-columns:1fr}
+  .boost-gear-grid{grid-template-columns:repeat(2,1fr)}
+  .tuning-dialog__footer{display:block}
+  .tuning-dialog__footer .dialog-actions{margin-top:8px}
+}
+
+.race-tuning-log{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  border:1px solid #33463a;
+  border-top:0;
+  background:#0d1410;
+}
+.race-tuning-log>div{padding:7px 8px;border-right:1px solid #29362e}
+.race-tuning-log>div:last-child{border-right:0}
+.race-tuning-log span{display:block;color:var(--faint);font-size:9px;font-weight:900}
+.race-tuning-log b{display:block;margin-top:2px;font-size:10px}
+@media(max-width:760px){.race-tuning-log{grid-template-columns:repeat(2,1fr)}.race-tuning-log>div{border-bottom:1px solid #29362e}}

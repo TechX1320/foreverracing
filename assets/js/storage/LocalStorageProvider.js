@@ -88,6 +88,13 @@ export class LocalStorageProvider extends StorageProvider {
     return { ok: true, player };
   }
 
+  async saveTune(carId, tune) {
+    await this.#ready();
+    const player = this.#service.saveTune(this.#loadPlayer(), carId, tune);
+    this.#savePlayer(player);
+    return { ok: true, player };
+  }
+
   async partsCatalog() {
     await this.#ready();
     return { ok: true, parts: structuredClone(this.#service.parts) };

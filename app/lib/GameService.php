@@ -172,6 +172,25 @@ final class GameService
         });
     }
 
+    public static function saveTune(string $carId, array $rawTune): array
+    {
+        $catalog = self::partsCatalog();
+        return self::mutatePlayer(function (array $player) use ($carId, $rawTune, $catalog): array {
+            $index = self::requireOwnedCarIndex($player, $carId);
+            $car = $player['garage'][$index];
+            $specs = self::installedPartSpecs($player, $carId, $catalog);
+            $hardware = Tuning::hardwareProfile($car, $specs);
+            if (empty($hardware['unlocked'])) {
+                throw new GameException('Install a Standalone ECU + Laptop before tuning this car.');
+            }
+            $tune = Tuning::normalizeProfile($rawTune, $car, $hardware);
+            $tune['savedAt'] = time();
+            $car['tune'] = $tune;
+            $player['garage'][$index] = self::recalculateCar($car, $player['inventory']['parts'] ?? [], $catalog);
+            return $player;
+        });
+    }
+
     public static function purchasePart(string $catalogId): array
     {
         $catalog = self::partsCatalog();
@@ -534,6 +553,7 @@ final class GameService
             $playerRun = $simulator->simulate([
                 'hp' => $hp, 'torque' => $torque, 'weight' => $weight, 'grip' => $grip, 'drivetrain' => $drivetrain, 'level' => $level,
                 'allowFoul' => !$tutorialRace,
+                'tuning' => is_array($car['tuningRuntime'] ?? null) ? $car['tuningRuntime'] : null,
             ], $distance, $weather);
             $opponentRun = $simulator->simulate([
                 'hp' => $opponentHp, 'torque' => $opponentTorque, 'weight' => $opponentWeight, 'grip' => $opponentGrip, 'drivetrain' => (string)($opponentProfile['drivetrain'] ?? '-'), 'level' => $opponentLevel,
@@ -852,6 +872,10 @@ final class GameService
             is_array($savedLayered['anchors'] ?? null) ? $savedLayered['anchors'] : []
         );
         $car['raceRecords'] = array_replace(self::emptyRaceRecords(), is_array($car['raceRecords'] ?? null) ? $car['raceRecords'] : []);
+        $car['tune'] = is_array($car['tune'] ?? null) ? $car['tune'] : null;
+        $car['tuningRuntime'] = is_array($car['tuningRuntime'] ?? null) ? $car['tuningRuntime'] : null;
+        $car['tuningDiagnostics'] = is_array($car['tuningDiagnostics'] ?? null) ? $car['tuningDiagnostics'] : null;
+        $car['untunedDerived'] = is_array($car['untunedDerived'] ?? null) ? $car['untunedDerived'] : null;
         if (!empty($car['derived']['hp']) && !empty($car['derived']['weight'])) {
             $benchmark = PerformanceIndex::forCar($car, self::racingConfig());
             $car['performanceIndex'] = (int)$benchmark['performanceIndex'];
@@ -919,42 +943,72 @@ final class GameService
             'grip' => (float)($seed['grip'] ?? 1.0),
         ];
         $installedParts = [];
+        $installedSpecs = [];
 
         foreach ($inventory as $instance) {
-            if (($instance['installedOnCarId'] ?? null) !== ($car['carId'] ?? null)) {
-                continue;
-            }
+            if (($instance['installedOnCarId'] ?? null) !== ($car['carId'] ?? null)) continue;
             $spec = self::findBy($catalog, 'catalogId', (string)($instance['catalogId'] ?? ''));
-            if (!$spec) {
-                continue;
-            }
+            if (!$spec) continue;
             $installedParts[] = $instance['inventoryId'] ?? '';
+            $installedSpecs[] = $spec;
             foreach (($spec['effects'] ?? []) as $effect) {
                 $stat = (string)($effect['stat'] ?? '');
-                if (!array_key_exists($stat, $derived)) {
-                    continue;
-                }
+                if (!array_key_exists($stat, $derived)) continue;
                 $value = (float)($effect['value'] ?? 0);
-                if ((string)($effect['op'] ?? 'add') === 'mul') {
-                    $derived[$stat] *= $value;
-                } else {
-                    $derived[$stat] += $value;
-                }
+                if ((string)($effect['op'] ?? 'add') === 'mul') $derived[$stat] *= $value;
+                else $derived[$stat] += $value;
             }
         }
 
-        $car['derived'] = [
+        $untuned = [
             'hp' => (int)round(max(1, $derived['hp'])),
             'torque' => (int)round(max(1, $derived['torque'])),
             'weight' => (int)round(max(500, $derived['weight'])),
             'grip' => round(max(0.5, $derived['grip']), 3),
         ];
+        $car['untunedDerived'] = $untuned;
+        $hardware = Tuning::hardwareProfile($car, $installedSpecs);
+
+        if (is_array($car['tune'] ?? null) && !empty($hardware['unlocked'])) {
+            $evaluation = Tuning::evaluate(
+                $car,
+                $untuned + ['drivetrain' => (string)($car['base']['drivetrain'] ?? '')],
+                $car['tune'],
+                $hardware
+            );
+            $car['tune'] = $evaluation['profile'];
+            $car['tune']['savedAt'] = (int)($car['tune']['savedAt'] ?? time());
+            $car['derived'] = [
+                'hp' => (int)$evaluation['derived']['hp'],
+                'torque' => (int)$evaluation['derived']['torque'],
+                'weight' => (int)$evaluation['derived']['weight'],
+                'grip' => (float)$evaluation['derived']['grip'],
+            ];
+            $car['tuningRuntime'] = $evaluation['race'];
+            $car['tuningDiagnostics'] = $evaluation['diagnostics'];
+        } else {
+            $car['derived'] = $untuned;
+            $car['tuningRuntime'] = null;
+            $car['tuningDiagnostics'] = null;
+        }
+
         $benchmark = PerformanceIndex::forCar($car, self::racingConfig());
         $car['performanceIndex'] = (int)$benchmark['performanceIndex'];
         $car['performanceClass'] = PerformanceIndex::classFromIndex((int)$benchmark['performanceIndex']);
         $car['benchmarkEt'] = (float)$benchmark['quarterMileEt'];
         $car['installedParts'] = array_values(array_filter($installedParts));
         return $car;
+    }
+
+    private static function installedPartSpecs(array $player, string $carId, array $catalog): array
+    {
+        $specs = [];
+        foreach (($player['inventory']['parts'] ?? []) as $instance) {
+            if ((string)($instance['installedOnCarId'] ?? '') !== $carId) continue;
+            $spec = self::findBy($catalog, 'catalogId', (string)($instance['catalogId'] ?? ''));
+            if ($spec) $specs[] = $spec;
+        }
+        return $specs;
     }
 
     private static function installedSimpleTier(array $player, string $carId, string $categoryKey, array $catalog): int

@@ -1,5 +1,17 @@
 # Changelog
 
+## V0.5.0-g — Garage tuning
+
+- Standalone ECU + Laptop now unlocks a dedicated TUNING action in the Home Garage for that car.
+- Added adjustable boost target, fuel trim, ignition advance, launch RPM, shift RPM, front/rear tire PSI and six-gear boost-by-gear control.
+- Boost, fuel and timing alter power/torque; tire PSI alters usable grip; boost-by-gear changes launch traction demand; launch/shift RPM affect ET.
+- Added tune stability/risk. Aggressive calibrations can make more peak power but intermittently pull power on individual passes.
+- Added per-owned-car calibration fingerprints, so the same copied tune does not evaluate identically on every example of the same car.
+- Added live laptop diagnostics with directional fuel/timing/tire/launch/shift feedback rather than exposing the exact hidden sweet spot.
+- Added post-race tune telemetry for boost, first-gear delivery, wheel slip, stability and ECU power-pull events.
+- Tuning behavior is mirrored in local/browser mode and the PHP server game path.
+
+
 ## V0.5.0-f — Stage 3/4 parts depth
 
 - Expanded the catalog from 72 to 135 parts, with Stage 3 and Stage 4 now carrying real depth outside Forced Induction.

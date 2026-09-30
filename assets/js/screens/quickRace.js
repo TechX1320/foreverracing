@@ -177,6 +177,7 @@ function raceResult(race) {
         ${timeRow("Trap", `${number(player.trapSpeed, 2)} mph`, `${number(opponent.trapSpeed, 2)} mph`)}
         ${timeRow("Total", player.foul ? "FOUL" : `${number(player.totalTime, 3)} s`, opponent.foul ? "FOUL" : `${number(opponent.totalTime, 3)} s`, player.foul, opponent.foul)}
       </div>
+      ${tuningRaceLog(player)}
       <div class="race-result-foot">
         <span><small>MARGIN</small><b>${number(race.margin, 3)} s</b></span>
         <span><small>REWARD</small><b class="good">+${money(race.reward)} cr</b></span>
@@ -184,6 +185,22 @@ function raceResult(race) {
         <span><small>REP</small><b>+${number(race.repReward)}</b></span>
       </div>
     </section>`;
+}
+
+function tuningRaceLog(player) {
+  const tune = player?.tuning;
+  if (!tune?.active) return "";
+  const slip = Math.round(Number(player?.traction?.wheelSlip || 0) * 100);
+  const stability = Math.round(Number(tune.stability || 0) * 100);
+  const firstGear = Array.isArray(tune.boostByGear) ? Number(tune.boostByGear[0] || 0) : 0;
+  return `<div class="race-tuning-log">
+    <div><span>CALIBRATION</span><b>${escapeHtml(tune.label || "ACTIVE")}</b></div>
+    <div><span>PEAK BOOST</span><b>${number(tune.boostPsi,1)} PSI</b></div>
+    <div><span>1ST GEAR</span><b>${number(firstGear)}%</b></div>
+    <div><span>WHEEL SLIP</span><b>${slip}%</b></div>
+    <div><span>STABILITY</span><b>${stability}%</b></div>
+    <div><span>ECU CORRECTION</span><b class="${tune.powerPull ? "bad" : "good"}">${tune.powerPull ? "POWER PULLED" : "CLEAN PASS"}</b></div>
+  </div>`;
 }
 
 function timeRow(label, player, opponent, playerBad = false, opponentBad = false) {

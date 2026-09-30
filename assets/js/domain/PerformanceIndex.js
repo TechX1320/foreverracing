@@ -22,6 +22,7 @@ export function benchmarkPerformance(context, racingConfig = {}, { passes = PERF
       level: 100,
       allowFoul: false,
       reactionOffset: 0,
+      tuning: context?.tuning && typeof context.tuning === "object" ? context.tuning : null,
     }, "1/4", condition));
   }
 
@@ -40,7 +41,8 @@ export function benchmarkPerformance(context, racingConfig = {}, { passes = PERF
 }
 
 export function performanceIndexForCar(car, racingConfig = {}) {
-  const context = car?.derived || car?.base || car || {};
+  const context = { ...(car?.derived || car?.base || car || {}) };
+  if (car?.tuningRuntime && typeof car.tuningRuntime === "object") context.tuning = car.tuningRuntime;
   return benchmarkPerformance(context, racingConfig);
 }
 

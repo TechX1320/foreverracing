@@ -82,7 +82,7 @@ Build: {$build}
 Storage mode: local
 Offline service worker: disabled in static development mode
 Race presentation: persistent two-phase start/finish with blocking real-time playback
-V0.5F: Stage 3/4 parts depth, subcategories, pagination and low-8-second balance target
+V0.5G: Garage tuning, boost-by-gear, tire pressure and per-car calibration
 Do not edit docs/ by hand; run php scripts/build-static.php.
 ");
 
