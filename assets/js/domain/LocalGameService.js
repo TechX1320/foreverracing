@@ -12,6 +12,11 @@ import {
   forcedInductionState,
   forcedInductionSwapNeeded,
 } from './ForcedInduction.js';
+import {
+  evaluateTune,
+  normalizeTuneProfile,
+  tuningHardwareProfile,
+} from './Tuning.js';
 const clone = (value) => value == null ? value : structuredClone(value);
 const now = () => Math.floor(Date.now() / 1000);
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -155,6 +160,18 @@ export class LocalGameService {
     return this.mutate(inputPlayer, (player) => {
       const index = this.requireOwnedCarIndex(player, carId);
       player.garage[index].nickname = name;
+    });
+  }
+
+  saveTune(inputPlayer, carId, rawTune) {
+    return this.mutate(inputPlayer, (player) => {
+      const index = this.requireOwnedCarIndex(player, carId);
+      const car = player.garage[index];
+      const specs = this.installedPartSpecs(player, carId);
+      const hardware = tuningHardwareProfile(car, specs);
+      if (!hardware.unlocked) throw new LocalGameError('Install a Standalone ECU + Laptop before tuning this car.');
+      car.tune = { ...normalizeTuneProfile(rawTune, car, hardware), savedAt: now() };
+      player.garage[index] = this.recalculateCar(car, player.inventory.parts);
     });
   }
 
@@ -396,7 +413,7 @@ export class LocalGameService {
     const carIndex = this.requireOwnedCarIndex(player, player.selectedCarId);
     const car = player.garage[carIndex];
     const tutorialRace = player.tutorial?.status === 'active' && player.tutorial?.step === 'first_race';
-    const playerBenchmark = benchmarkPerformance(car.derived || car.base, this.racingConfig);
+    const playerBenchmark = benchmarkPerformance({ ...(car.derived || car.base), drivetrain: car.base?.drivetrain, tuning: car.tuningRuntime || null }, this.racingConfig);
     const opponent = this.nextOpponentProfile(player, car, tutorialRace);
     return {
       carId: car.carId,
@@ -443,7 +460,7 @@ export class LocalGameService {
       const opponentGrip = Number(opponentProfile.sim.grip);
       const opponentLevel = Number(opponentProfile.level);
 
-      const playerRun = this.raceSimulator.simulate({ hp, torque, weight, grip, drivetrain, level, allowFoul: !tutorialRace }, distance, weather);
+      const playerRun = this.raceSimulator.simulate({ hp, torque, weight, grip, drivetrain, level, allowFoul: !tutorialRace, tuning: car.tuningRuntime || null }, distance, weather);
       const opponentRun = this.raceSimulator.simulate({
         hp: opponentHp, torque: opponentTorque, weight: opponentWeight, grip: opponentGrip, drivetrain: opponentProfile.drivetrain, level: opponentLevel,
         allowFoul: !tutorialRace, reactionOffset: tutorialRace ? 0.16 : 0,
@@ -695,6 +712,10 @@ export class LocalGameService {
       },
     };
     car.raceRecords = { ...this.emptyRaceRecords(), ...(car.raceRecords || {}) };
+    car.tune = car.tune && typeof car.tune === 'object' ? clone(car.tune) : null;
+    car.tuningRuntime = car.tuningRuntime && typeof car.tuningRuntime === 'object' ? clone(car.tuningRuntime) : null;
+    car.tuningDiagnostics = car.tuningDiagnostics && typeof car.tuningDiagnostics === 'object' ? clone(car.tuningDiagnostics) : null;
+    car.untunedDerived = car.untunedDerived && typeof car.untunedDerived === 'object' ? clone(car.untunedDerived) : null;
     if (car.derived?.hp && car.derived?.weight) {
       const benchmark = benchmarkPerformance(car.derived, this.racingConfig);
       car.performanceIndex = benchmark.performanceIndex;
@@ -735,11 +756,13 @@ export class LocalGameService {
     const seed = Number(car.buildStage || 1) >= 2 && car.stageBaseline ? car.stageBaseline : car.base;
     const derived = { hp: Number(seed.hp), torque: Number(seed.torque), weight: Number(seed.weight), grip: Number(seed.grip || 1) };
     const installedParts = [];
+    const installedSpecs = [];
     for (const instance of inventory) {
       if (instance.installedOnCarId !== car.carId) continue;
       const spec = this.findBy(this.parts, 'catalogId', String(instance.catalogId || ''));
       if (!spec) continue;
       installedParts.push(instance.inventoryId);
+      installedSpecs.push(spec);
       for (const effect of spec.effects || []) {
         const stat = String(effect.stat || '');
         if (!(stat in derived)) continue;
@@ -748,13 +771,52 @@ export class LocalGameService {
         else derived[stat] += value;
       }
     }
-    car.derived = { hp: Math.round(Math.max(1, derived.hp)), torque: Math.round(Math.max(1, derived.torque)), weight: Math.round(Math.max(500, derived.weight)), grip: Math.round(Math.max(0.5, derived.grip) * 1000) / 1000 };
-    const benchmark = benchmarkPerformance(car.derived, this.racingConfig);
+
+    const untuned = {
+      hp: Math.round(Math.max(1, derived.hp)),
+      torque: Math.round(Math.max(1, derived.torque)),
+      weight: Math.round(Math.max(500, derived.weight)),
+      grip: Math.round(Math.max(0.5, derived.grip) * 1000) / 1000,
+    };
+    car.untunedDerived = clone(untuned);
+    const hardware = tuningHardwareProfile(car, installedSpecs);
+    let benchmarkContext = untuned;
+
+    if (car.tune && hardware.unlocked) {
+      const evaluation = evaluateTune(car, { ...untuned, drivetrain: car.base?.drivetrain }, car.tune, hardware);
+      car.tune = { ...evaluation.profile, savedAt: Number(car.tune.savedAt || evaluation.profile.savedAt || now()) };
+      car.derived = {
+        hp: evaluation.derived.hp,
+        torque: evaluation.derived.torque,
+        weight: evaluation.derived.weight,
+        grip: evaluation.derived.grip,
+      };
+      car.tuningRuntime = clone(evaluation.race);
+      car.tuningDiagnostics = clone(evaluation.diagnostics);
+      benchmarkContext = { ...car.derived, drivetrain: car.base?.drivetrain, tuning: car.tuningRuntime };
+    } else {
+      car.derived = clone(untuned);
+      car.tuningRuntime = null;
+      car.tuningDiagnostics = null;
+      if (!hardware.unlocked) car.tune = null;
+    }
+
+    const benchmark = benchmarkPerformance(benchmarkContext, this.racingConfig);
     car.performanceIndex = benchmark.performanceIndex;
     car.performanceClass = performanceClassFromIndex(benchmark.performanceIndex);
     car.benchmarkEt = benchmark.quarterMileEt;
     car.installedParts = installedParts;
     return car;
+  }
+
+  installedPartSpecs(player, carId) {
+    const specs = [];
+    for (const instance of player.inventory?.parts || []) {
+      if (String(instance.installedOnCarId || '') !== String(carId)) continue;
+      const spec = this.findBy(this.parts, 'catalogId', String(instance.catalogId || ''));
+      if (spec) specs.push(spec);
+    }
+    return specs;
   }
 
   installedSimpleTier(player, carId, categoryKey) {
