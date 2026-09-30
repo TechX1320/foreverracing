@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.5.0-d.1 playable direction
+## V0.5.0-e playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,17 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.5E Parts Creator MVP
+
+- Content Studio now exposes **Parts Creator** beside Car Creator and Engine Creator.
+- Existing catalog parts can be loaded, edited or cloned; new definitions can be saved as browser-local drafts or activated locally for testing.
+- Performance-part compatibility can target exact Engine IDs first, then optionally narrow by car, Build Type, aspiration, engine configuration and engine tags.
+- Parts can author HP, torque, weight and grip effects using add/multiply operations, with a live test-car before/after PI preview.
+- Requirements/conflicts support part IDs and tags for build-puzzle relationships.
+- Lifecycle supports Draft, Active, Scheduled, Deprecated and Retired states plus replacement-part references.
+- Deprecated/retired/draft parts are removed from normal new purchases while existing owned inventory remains valid.
+- Local and server gameplay now validate authored compatibility and build-rule metadata rather than treating it as documentation only.
 
 ### V0.5D.1 parts depth + UX
 
