@@ -1,3 +1,4 @@
+import { normalizePowerLimits } from "./PowerModel.js";
 export const ENGINE_CURVE_PROFILES = Object.freeze([
   {
     id: "small_economy",
@@ -144,6 +145,7 @@ export function normalizeEngineDefinition(engine = {}) {
     peakHpRpm: peakHpRpm > 0 ? peakHpRpm : 0,
     peakTorque: peakTorque > 0 ? peakTorque : 0,
     peakTorqueRpm: peakTorqueRpm > 0 ? peakTorqueRpm : 0,
+    powerLimits: normalizePowerLimits({ ...engine, peakHp: peakHp > 0 ? peakHp : 0 }, peakHp > 0 ? peakHp : 0),
     redlineRpm: redlineRpm > 0 ? redlineRpm : 0,
     revCutRpm: revCutRpm > 0 ? revCutRpm : 0,
     tags: normalizeStringArray(engine.tags),
@@ -178,6 +180,7 @@ export function engineToCarSnapshot(engine, existing = {}) {
     peakHpRpm: row.peakHpRpm || Number(existing.peakHpRpm || 0),
     peakTorque: row.peakTorque || Number(existing.peakTorque || 0),
     peakTorqueRpm: row.peakTorqueRpm || Number(existing.peakTorqueRpm || 0),
+    powerLimits: { ...row.powerLimits },
     redlineRpm: row.redlineRpm || Number(existing.redlineRpm || 0),
     revCutRpm: row.revCutRpm || Number(existing.revCutRpm || 0),
     curveProfile: row.curveProfile || String(existing.curveProfile || ""),
