@@ -550,12 +550,17 @@ function openForcedInductionSystem(ctx, carId, system) {
         </div>
       </div>
 
-      <div class="parts-shop-list">
-        ${factoryRow}
-        ${specs.length ? specs.map((part) => forcedInductionPartRow(player, car, part)).join("") : `<div class="empty-state"><strong>No ${escapeHtml(title)} upgrades available for this setup yet.</strong><span>Change build type or install the base kit first.</span></div>`}
+      <div class="forced-induction-workspace">
+        <div class="parts-shop-list forced-induction-parts-list">
+          ${factoryRow}
+          ${specs.length ? specs.map((part) => forcedInductionPartRow(player, car, part, previewPart?.catalogId)).join("") : `<div class="empty-state"><strong>No ${escapeHtml(title)} upgrades available for this setup yet.</strong><span>Change build type or install the base kit first.</span></div>`}
+        </div>
+        <aside class="part-dyno" data-fi-dyno>
+          ${previewPart ? renderPartDynoChart(car, car.derived, previewStats, previewPart.name) : '<div class="part-dyno__empty">Choose a part to preview its estimated curve.</div>'}
+        </aside>
       </div>
 
-      <div class="parts-shop-dialog__note">${stage >= 4 ? "Full Race Cars may twin charge. Primary-kit rows swap systems; Twin-Charge rows add the opposite system." : "Changing from Turbo to Supercharger (or vice versa) swaps the primary kit. Old parts stay owned but are uninstalled."}</div>
+      <div class="parts-shop-dialog__note">${stage >= 4 ? "Full Race Cars may twin charge. Primary-kit rows swap systems; Twin-Charge rows add the opposite system." : "Changing from Turbo to Supercharger (or vice versa) swaps the primary kit. Old parts stay owned but are uninstalled."} Earlier-stage parts remain available after advancing Build Type.</div>
       <div class="dialog-actions"><button class="button button--small" type="button" data-back>BACK</button><button class="button button--small" type="button" data-close>CLOSE</button></div>
     </div>`);
 
