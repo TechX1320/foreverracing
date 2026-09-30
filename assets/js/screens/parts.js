@@ -723,10 +723,18 @@ function projectStats(player, car, candidate) {
     grip: Number(seed.grip || 1)
   };
 
+  const swapState = forcedInductionSwapNeeded(car, player?.inventory?.parts || [], candidate, catalogCache)
+    ? forcedInductionState(car, player?.inventory?.parts || [], catalogCache)
+    : null;
+
   for (const item of player?.inventory?.parts || []) {
     if (String(item.installedOnCarId || "") !== String(car.carId)) continue;
     const spec = catalogCache.find((part) => part.catalogId === item.catalogId);
     if (!spec || String(spec.slot) === String(candidate.slot)) continue;
+    if (swapState) {
+      const meta = forcedInductionMeta(spec);
+      if (meta && String(meta.role || "") !== "nitrous" && String(meta.system || "") === String(swapState.primarySystem || "")) continue;
+    }
     applyEffects(stats, spec.effects || []);
   }
 
