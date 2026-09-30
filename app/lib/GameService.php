@@ -639,7 +639,7 @@ final class GameService
                 'distanceFeet' => (int)($distanceConfig['feet'] ?? 1320),
                 'location' => $location,
                 'weather' => $weather,
-                'margin' => round(abs((float)$playerRun['totalTime'] - (float)$opponentRun['totalTime']), 3),
+                'margin' => $playerDnf ? null : round(abs((float)$playerRun['totalTime'] - (float)$opponentRun['totalTime']), 3),
                 'reward' => $reward,
                 'expReward' => $expReward,
                 'repReward' => $repReward,
