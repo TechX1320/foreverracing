@@ -1411,6 +1411,9 @@ export class LocalGameService {
     car.buildStage = Math.max(1, Number(car.buildStage || 1));
     car.stageBaseline = car.stageBaseline && typeof car.stageBaseline === 'object' ? car.stageBaseline : null;
     car.catalogId = car.catalogId || spec?.catalogId || spec?.visual?.layered?.assetId || null;
+    car.year = Number(car.year || spec?.year || 0) || null;
+    car.make = String(car.make || spec?.make || "").trim();
+    car.model = String(car.model || spec?.model || "").trim();
     car.factoryEngineId = car.factoryEngineId || spec?.factoryEngineId || null;
     car.engineId = car.engineId || car.factoryEngineId || null;
     car.engineBay = car.engineBay || clone(spec?.engineBay || null);
@@ -1468,6 +1471,9 @@ export class LocalGameService {
       carId: this.id('car'),
       stockId: Number(spec.stockId),
       catalogId: spec.catalogId || spec.visual?.layered?.assetId || null,
+      year: Number(spec.year || 0) || null,
+      make: String(spec.make || "").trim(),
+      model: String(spec.model || "").trim(),
       displayName,
       nickname: '', source, purchasePrice, mileage, condition, buildStage: 1, stageBaseline: null,
       factoryEngineId: spec.factoryEngineId || null, engineId: spec.factoryEngineId || null, engineBay: clone(spec.engineBay || null),
