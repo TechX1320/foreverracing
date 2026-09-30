@@ -1,6 +1,12 @@
 import { RaceSimulator } from './RaceSimulator.js';
 import { benchmarkPerformance, performanceClassFromIndex } from './PerformanceIndex.js';
 import { isContentReleased, nextScheduledReleaseAt } from './ContentRelease.js';
+import {
+  forcedInductionCompatibility,
+  forcedInductionMeta,
+  forcedInductionState,
+  forcedInductionSwapNeeded,
+} from './ForcedInduction.js';
 const clone = (value) => value == null ? value : structuredClone(value);
 const now = () => Math.floor(Date.now() / 1000);
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -178,6 +184,19 @@ export class LocalGameService {
       }
       this.requirePartCompatible(player, car, spec, { purchasing: false });
 
+      const fiMeta = forcedInductionMeta(spec);
+      if (fiMeta && String(fiMeta.role || '') === 'kit' && forcedInductionSwapNeeded(car, player.inventory.parts, spec, this.parts)) {
+        const fiState = forcedInductionState(car, player.inventory.parts, this.parts);
+        const previousSystem = String(fiState.primarySystem || '');
+        for (const ownedPart of player.inventory.parts) {
+          if (String(ownedPart.installedOnCarId || '') !== String(carId)) continue;
+          const installedSpec = this.findBy(this.parts, 'catalogId', String(ownedPart.catalogId || ''));
+          const installedMeta = forcedInductionMeta(installedSpec);
+          if (!installedMeta || String(installedMeta.role || '') === 'nitrous') continue;
+          if (String(installedMeta.system || '') === previousSystem) ownedPart.installedOnCarId = null;
+        }
+      }
+
       const slot = String(spec.slot || '');
       if (Number(car.buildStage || 1) === 1 && Number(spec.simpleTier || 0) > 0) {
         const currentTier = this.installedSimpleTier(player, carId, String(spec.categoryKey || slot));
@@ -223,19 +242,57 @@ export class LocalGameService {
     return this.mutate(inputPlayer, (player) => {
       const index = this.requireOwnedCarIndex(player, carId);
       const car = player.garage[index];
-      if (Number(car.buildStage || 1) !== 1) throw new LocalGameError('Only Street Car to Street Race Car conversion is enabled in this build.');
-      const required = this.buildStages?.[0]?.requiredCategories || ['intake','exhaust','ecu','fuel','drivetrain','suspension','tires','weight'];
-      const incomplete = required.filter((key) => this.installedSimpleTier(player, carId, key) < 3);
-      if (incomplete.length) throw new LocalGameError('Max every Street Car upgrade category before converting to a Street Race Car.');
-      car.stageBaseline = clone(car.derived);
-      car.buildStage = 2;
-      for (const ownedPart of player.inventory.parts) {
-        if (ownedPart.installedOnCarId !== carId) continue;
-        const partSpec = this.findBy(this.parts, 'catalogId', String(ownedPart.catalogId || ''));
-        if (partSpec?.simpleTier) ownedPart.installedOnCarId = null;
+      const stage = Number(car.buildStage || 1);
+
+      if (stage === 1) {
+        const required = this.buildStages?.[0]?.requiredCategories || ['intake','exhaust','ecu','fuel','drivetrain','suspension','tires','weight'];
+        const incomplete = required.filter((key) => this.installedSimpleTier(player, carId, key) < 3);
+        if (incomplete.length) throw new LocalGameError('Max every Street Car upgrade category before converting to a Street Race Car.');
+        car.stageBaseline = clone(car.derived);
+        car.buildStage = 2;
+        for (const ownedPart of player.inventory.parts) {
+          if (ownedPart.installedOnCarId !== carId) continue;
+          const partSpec = this.findBy(this.parts, 'catalogId', String(ownedPart.catalogId || ''));
+          if (partSpec?.simpleTier) ownedPart.installedOnCarId = null;
+        }
+        player.garage[index] = this.recalculateCar(car, player.inventory.parts);
+        this.addTransaction(player, 'stage_conversion', 0, `${this.carName(car)} converted to Street Race Car`);
+        return;
       }
-      player.garage[index] = this.recalculateCar(car, player.inventory.parts);
-      this.addTransaction(player, 'stage_conversion', 0, `${this.carName(car)} converted to Street Race Car`);
+
+      if (stage === 2) {
+        const requiredCategories = [...new Set(this.parts
+          .filter((part) =>
+            !part.simpleTier
+            && Number(part.buildStage || 2) === 2
+            && part.requiredForStageProgression !== false
+          )
+          .map((part) => String(part.categoryKey || ''))
+          .filter(Boolean))];
+
+        const installedCategories = new Set();
+        for (const item of player.inventory.parts) {
+          if (String(item.installedOnCarId || '') !== String(carId)) continue;
+          const part = this.findBy(this.parts, 'catalogId', String(item.catalogId || ''));
+          if (part?.categoryKey) installedCategories.add(String(part.categoryKey));
+        }
+        const missing = requiredCategories.filter((key) => !installedCategories.has(key));
+        if (missing.length) throw new LocalGameError(`Install a Street Race Car part in every core category before moving to Front-Half Race Car. Missing: ${missing.join(', ')}.`);
+
+        car.buildStage = 3;
+        player.garage[index] = this.recalculateCar(car, player.inventory.parts);
+        this.addTransaction(player, 'stage_conversion', 0, `${this.carName(car)} converted to Front-Half Race Car`);
+        return;
+      }
+
+      if (stage === 3) {
+        car.buildStage = 4;
+        player.garage[index] = this.recalculateCar(car, player.inventory.parts);
+        this.addTransaction(player, 'stage_conversion', 0, `${this.carName(car)} converted to Full Race Car`);
+        return;
+      }
+
+      throw new LocalGameError('This car is already a Full Race Car.');
     });
   }
 
@@ -709,8 +766,11 @@ export class LocalGameService {
       return;
     }
     if (spec.simpleTier) throw new LocalGameError('Street Car ladder parts are incorporated when the car converts to a Street Race Car.');
-    if (Number(spec.buildStage || 2) > stage) throw new LocalGameError(`This part requires a later Build Type.`);
+    if (Number(spec.buildStage || 2) > stage) throw new LocalGameError('This part requires a later Build Type.');
     if (Number(spec.persistentFromStage || spec.buildStage || 2) > stage) throw new LocalGameError('This part is not available for the current Build Type.');
+
+    const fi = forcedInductionCompatibility(car, player.inventory?.parts || [], spec, this.parts, { purchasing });
+    if (!fi.ok) throw new LocalGameError(fi.reason || 'That forced-induction part is not compatible with this setup.');
   }
 
   completeTutorialStep(player, completed, next) {
