@@ -363,7 +363,7 @@ const contentStudioSource = await fs.readFile(new URL('assets/js/screens/content
 const contentStudioCatalogSource = await fs.readFile(new URL('assets/js/content/ContentStudioCatalog.js', root), 'utf8');
 if (!html.includes('CONTENT STUDIO') ||
     !contentStudioSource.includes('CAR CREATOR') ||
-    !contentStudioSource.includes('PARTS TOOL') ||
+    !contentStudioSource.includes('PARTS CREATOR') ||
     !contentStudioSource.includes('WHEELS TOOL') ||
     !contentStudioSource.includes('accept="image/png,.png"') ||
     !contentStudioSource.includes('benchmarkPerformance') ||
