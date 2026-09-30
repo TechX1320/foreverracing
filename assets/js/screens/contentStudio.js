@@ -433,6 +433,7 @@ function physicsSection(car, engines = []) {
         ${readOnlyField("Displacement (L)", linked.displacementLiters)}
         ${readOnlyField("Engine Config", linked.configuration)}
         ${readOnlyField("Aspiration", linked.aspiration)}
+        ${isBoostedAspiration(linked.aspiration) ? readOnlyField("Factory Peak Boost", linked.peakBoostPsi == null ? "-" : `${linked.peakBoostPsi} PSI`) : ""}
         ${readOnlyField("Peak HP", linked.peakHp)}
         ${readOnlyField("HP RPM", linked.peakHpRpm)}
         ${readOnlyField("Peak Torque", linked.peakTorque)}
@@ -447,6 +448,7 @@ function physicsSection(car, engines = []) {
         ${selectField("Aspiration", "engine.aspiration", car.engine?.aspiration || "Naturally Aspirated", [
           ["Naturally Aspirated","Naturally Aspirated"],["Turbo","Turbo"],["Twin Turbo","Twin Turbo"],["Supercharged","Supercharged"],["Turbo Diesel","Turbo Diesel"]
         ])}
+        ${isBoostedAspiration(car.engine?.aspiration) ? inputField("Factory Peak Boost (PSI)", "engine.peakBoostPsi", car.engine?.peakBoostPsi ?? "", "number", { min: 0, step: 0.1 }) : ""}
         ${inputField("Peak HP", "base.hp", car.base?.hp, "number", { min: 1, step: 1 })}
         ${inputField("HP RPM", "engine.peakHpRpm", car.engine?.peakHpRpm, "number", { min: 500, step: 50 })}
         ${inputField("Peak Torque", "base.torque", car.base?.torque, "number", { min: 1, step: 1 })}
@@ -649,6 +651,7 @@ function createBlankCar(stockId) {
       displacementLiters: 2,
       configuration: "I4",
       aspiration: "Naturally Aspirated",
+      peakBoostPsi: null,
       layout: "Front",
       peakHp: 200,
       peakHpRpm: 6000,
@@ -744,6 +747,11 @@ function buildAvailableCars(catalogCars, artCars) {
 
 function nextStockId(cars) {
   return Math.max(0, ...cars.map((car) => Number(car.stockId || 0))) + 1;
+}
+
+function isBoostedAspiration(value) {
+  const aspiration = String(value || "").toLowerCase();
+  return aspiration.includes("turbo") || aspiration.includes("supercharged");
 }
 
 function readOnlyField(label, value) {
