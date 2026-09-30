@@ -30,7 +30,7 @@ export async function renderEngineStudio(ctx) {
   root.innerHTML = pageShell({
     title: "Content Studio",
     eyebrow: "DEVELOPMENT / CONTENT TOOLS",
-    hint: "Engine Creator • Parts Tool next",
+    hint: "Engine Creator • Parts Creator active",
     trail: "Browser-local authoring workspace",
     body: '<div data-engine-studio></div>',
   });
@@ -134,6 +134,7 @@ export async function renderEngineStudio(ctx) {
 
   const bind = () => {
     host.querySelector("[data-open-car-creator]")?.addEventListener("click", () => ctx.router.navigate("content-studio"));
+    host.querySelector("[data-open-parts-creator]")?.addEventListener("click", () => ctx.router.navigate("parts-studio"));
 
     host.querySelector("[data-engine-load]")?.addEventListener("change", (event) => {
       const id = String(event.currentTarget.value || "");
