@@ -51,6 +51,11 @@ final class RaceSimulator
         $grip = self::clamp((float)($context['grip'] ?? 1.0), 0.5, 2.0);
         $level = max(1, (int)($context['level'] ?? 1));
         $drivetrain = strtoupper((string)($context['drivetrain'] ?? ''));
+        $tune = is_array($context['tuning'] ?? null) ? $context['tuning'] : [];
+        $tuneActive = ($tune['active'] ?? false) === true;
+        $launchPowerFactor = $tuneActive ? self::clamp((float)($tune['launchPowerFactor'] ?? 1), 0.45, 1.0) : 1.0;
+        $averagePowerFactor = $tuneActive ? self::clamp((float)($tune['averagePowerFactor'] ?? 1), 0.45, 1.0) : 1.0;
+        $tuneStability = $tuneActive ? self::clamp((float)($tune['stability'] ?? 1), 0.35, 1.0) : 1.0;
 
         $reaction = $this->reaction(
             $level,
@@ -75,6 +80,19 @@ final class RaceSimulator
         $shiftSkillFactor = self::clamp($level / 100.0, 0.0, 1.0);
         $et += $estimatedGears * 0.05 * (1.0 - ($shiftSkillFactor * 0.4)) + $this->random(-0.05, 0.08);
 
+        if ($tuneActive) {
+            $et *= 1.0 + ((1.0 - $averagePowerFactor) * 0.045);
+            $et += (float)($tune['launchEtModifier'] ?? 0) + (float)($tune['shiftPenaltySec'] ?? 0) + (float)($tune['rollingPenaltySec'] ?? 0);
+        }
+
+        $tuningPowerPull = false;
+        $tuningPullFactor = 1.0;
+        if ($tuneActive && $this->random(0, 1) > $tuneStability) {
+            $tuningPowerPull = true;
+            $tuningPullFactor = 1.0 - $this->random(0.025, 0.09);
+            $et *= 1.0 + ((1.0 - $tuningPullFactor) * 0.9);
+        }
+
         if ($this->random(0, 1) < 0.10) {
             $et *= 1.0 + $this->random(0.005, 0.025);
         }
@@ -89,24 +107,29 @@ final class RaceSimulator
             if (($name === 'Drizzle' || $name === 'Misty')) $et *= 1.005 + $this->random(0, 0.01);
         }
 
+        $driveFactor = $drivetrain === 'AWD' ? 0.82 : ($drivetrain === 'FWD' ? 1.04 : 1.0);
+        $surfaceFactor = !empty($condition['slippery']) ? 0.82 : 1.0;
+        $tractionDemand = (((($torque / $weight) * 9.0) + (($hp / $weight) * 2.0)) * $driveFactor)
+            * ($tuneActive ? $launchPowerFactor : 1.0);
+        $tractionCapacity = $grip * 0.72 * $surfaceFactor;
+        $gripLoss = self::clamp(($tractionDemand - $tractionCapacity) / 0.42, 0.0, 1.0);
+        $smokeLevel = self::clamp(($gripLoss - 0.06) / 0.6, 0.0, 1.0);
+        if ($tuneActive) $et *= 1.0 + ($gripLoss * 0.105);
+
         $et = max((float)($distance['minEt'] ?? 1), $et);
 
         $baseTrap = 234.0 * pow($hp / $weight, 1.0 / 3.0);
+        $tuneTrapFactor = $tuneActive
+            ? (1.0 - ((1.0 - $averagePowerFactor) * 0.12)) * $tuningPullFactor
+            : 1.0;
         $trap = self::clamp(
-            ($baseTrap * (float)($distance['trapMultiplier'] ?? 1)) + (float)($condition['mphModifier'] ?? 0) + $this->random(-1.25, 1.25),
+            ($baseTrap * $tuneTrapFactor * (float)($distance['trapMultiplier'] ?? 1)) + (float)($condition['mphModifier'] ?? 0) + $this->random(-1.25, 1.25),
             (float)($distance['minTrap'] ?? 20),
             (float)($distance['maxTrap'] ?? 300)
         );
 
         $foul = $reaction < 0;
         $total = $foul ? $et + 60 + abs($reaction) : $et + $reaction;
-
-        $driveFactor = $drivetrain === 'AWD' ? 0.82 : ($drivetrain === 'FWD' ? 1.04 : 1.0);
-        $surfaceFactor = !empty($condition['slippery']) ? 0.82 : 1.0;
-        $tractionDemand = ((($torque / $weight) * 9.0) + (($hp / $weight) * 2.0)) * $driveFactor;
-        $tractionCapacity = $grip * 0.72 * $surfaceFactor;
-        $gripLoss = self::clamp(($tractionDemand - $tractionCapacity) / 0.42, 0.0, 1.0);
-        $smokeLevel = self::clamp(($gripLoss - 0.06) / 0.6, 0.0, 1.0);
 
         return [
             'reactionTime' => round($reaction, 3),
@@ -119,6 +142,17 @@ final class RaceSimulator
                 'wheelSlip' => round(self::clamp($gripLoss * 1.2, 0.0, 1.0), 3),
                 'smokeLevel' => round($smokeLevel, 3),
             ],
+            'tuning' => $tuneActive ? [
+                'active' => true,
+                'boostPsi' => round((float)($tune['boostPsi'] ?? 0), 1),
+                'boostByGear' => is_array($tune['boostByGear'] ?? null) ? array_map(fn($value): int => (int)round((float)$value), $tune['boostByGear']) : [],
+                'launchPowerFactor' => round($launchPowerFactor, 3),
+                'averagePowerFactor' => round($averagePowerFactor, 3),
+                'stability' => round($tuneStability, 3),
+                'stress' => round((float)($tune['stress'] ?? 0), 3),
+                'powerPull' => $tuningPowerPull,
+                'label' => (string)($tune['tuneLabel'] ?? ''),
+            ] : null,
         ];
     }
 
