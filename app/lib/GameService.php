@@ -1392,7 +1392,10 @@ final class GameService
                 $item['installedOnEngineInventoryId']=$assembly['inventoryId'];
                 $spec=self::findBy($catalog,'catalogId',(string)($item['catalogId']??''));
                 if(!$spec)break;
-                if(self::partCompatibilityReason($spec,$car)===null)$candidates[]=['inventoryId'=>$id,'spec'=>$spec];
+                $stage=(int)($car['buildStage']??1);
+                $stageOk=(int)($spec['buildStage']??1)<=$stage
+                    && (int)($spec['persistentFromStage']??$spec['buildStage']??1)<=$stage;
+                if(self::partCompatibilityReason($spec,$car)===null&&$stageOk)$candidates[]=['inventoryId'=>$id,'spec'=>$spec];
                 else $item['installedOnCarId']=null;
                 break;
             }
