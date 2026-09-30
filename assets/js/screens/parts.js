@@ -509,6 +509,7 @@ function fiSystemCard(system, title, subtitle, state, stage) {
       <span>${escapeHtml(title)}</span>
       <strong>${escapeHtml(status)}</strong>
       <small>${escapeHtml(subtitle)} • ${escapeHtml(detail)}</small>
+      <em>CLICK TO OPEN →</em>
     </button>`;
 }
 
