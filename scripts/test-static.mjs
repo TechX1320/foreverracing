@@ -56,6 +56,7 @@ const required = [
   'assets/js/domain/EngineCatalog.js',
   'assets/js/domain/ForcedInduction.js',
   'assets/js/domain/PartCatalog.js',
+  'assets/js/domain/Tuning.js',
   'assets/js/ui/vehicleRenderer.js',
   'assets/js/ui/partDyno.js',
   'assets/js/ui/racePresentation.js',
@@ -177,6 +178,7 @@ const modules = [
   'assets/js/domain/PerformanceIndex.js',
   'assets/js/domain/ContentRelease.js',
   'assets/js/domain/EngineCatalog.js',
+  'assets/js/domain/Tuning.js',
   'assets/js/ui/vehicleRenderer.js',
   'assets/js/ui/racePresentation.js',
   'assets/js/storage/StorageProvider.js',
@@ -663,5 +665,32 @@ if (buildStages.version < 5 ||
   throw new Error('V0.5F build-stage engine-swap status is misleading or stale.');
 }
 console.log('V0.5F Stage 3/4 parts depth + pagination checks passed.');
+
+const tuningSourceV05g = await fs.readFile(new URL('assets/js/domain/Tuning.js', root), 'utf8');
+const serverTuningSourceV05g = await fs.readFile(new URL('app/lib/Tuning.php', root), 'utf8');
+const apiTuneSourceV05g = await fs.readFile(new URL('api/garage/tune.php', root), 'utf8');
+if (!garageSource.includes('data-tune-car') ||
+    !garageSource.includes('SAVE CALIBRATION') ||
+    !garageSource.includes('BOOST BY GEAR') ||
+    !garageSource.includes('FRONT TIRE PSI') ||
+    !garageSource.includes('Every owned car has slightly different calibration tolerances') ||
+    !quickRaceSource.includes('tuningRaceLog') ||
+    !quickRaceSource.includes('POWER PULLED') ||
+    !localGameSource.includes('saveTune(inputPlayer') ||
+    !localGameSource.includes('tuningRuntime') ||
+    !raceSimulatorSourceV04d.includes('launchPowerFactor') ||
+    !raceSimulatorSourceV04d.includes('tuningPowerPull') ||
+    !tuningSourceV05g.includes('tuningFingerprint') ||
+    !tuningSourceV05g.includes('boostByGear') ||
+    !tuningSourceV05g.includes('fuelTrimPct') ||
+    !tuningSourceV05g.includes('tirePsiRear') ||
+    !serverTuningSourceV05g.includes('final class Tuning') ||
+    !serverGameSourceV04c.includes('public static function saveTune') ||
+    !apiTuneSourceV05g.includes('GameService::saveTune') ||
+    !cssV04b.includes('V0.5G garage laptop tuning') ||
+    !cssV04b.includes('.race-tuning-log')) {
+  throw new Error('V0.5G garage tuning / data-log workflow is incomplete.');
+}
+console.log('V0.5G garage tuning checks passed.');
 
 
