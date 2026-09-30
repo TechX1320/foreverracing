@@ -52,6 +52,8 @@ export class LocalGameService {
       schemaVersion: Number(config?.schemaVersion || 3),
       tutorialVersion: Number(config?.tutorialVersion || 1),
       startingCredits: Number(config?.startingCredits || 75000),
+      localDevUsername: String(config?.localDevUsername || 'Admin'),
+      localDevCredits: Number(config?.localDevCredits || 10000000),
       usedLotRefreshSeconds: Number(config?.usedLotRefreshSeconds || 1800),
       tutorialCompletionCredits: Number(config?.tutorialCompletionCredits || 2500),
       tutorialCompletionRep: Number(config?.tutorialCompletionRep || 25),
@@ -84,6 +86,9 @@ export class LocalGameService {
     player.schemaVersion = this.config.schemaVersion;
     player.user = { ...defaults.user, ...(player.user || {}) };
     player.wallet = { ...defaults.wallet, ...(player.wallet || {}) };
+    if (String(player.user?.username || '').toLowerCase() === this.config.localDevUsername.toLowerCase()) {
+      player.wallet.credits = Math.max(Number(player.wallet.credits || 0), this.config.localDevCredits);
+    }
     player.progression = { ...defaults.progression, ...(player.progression || {}) };
     player.tutorial = { ...defaults.tutorial, ...(player.tutorial || {}) };
     player.tutorial.completedSteps = Array.isArray(player.tutorial.completedSteps) ? player.tutorial.completedSteps : [];
