@@ -260,15 +260,22 @@ function openTuning(ctx, carId) {
       input.addEventListener("input", () => {
         const key = String(input.dataset.tuneField || "");
         draft[key] = Number(input.value);
-        render();
+        const output = input.closest(".tuning-slider")?.querySelector("output");
+        if (output) {
+          const unit = key.toLowerCase().includes("rpm") ? "RPM" : key.toLowerCase().includes("psi") ? "PSI" : key === "fuelTrimPct" ? "%" : "°";
+          output.textContent = `${input.value} ${unit}`;
+        }
       });
+      input.addEventListener("change", render);
     });
     dialog.querySelectorAll("[data-tune-gear]").forEach((input) => {
       input.addEventListener("input", () => {
         const index = Number(input.dataset.tuneGear || 0);
         draft.boostByGear[index] = Number(input.value);
-        render();
+        const output = dialog.querySelector(`[data-gear-output="${index}"]`);
+        if (output) output.textContent = `${input.value}%${hardware.boosted ? ` • ${(draft.boostPsi * (Number(input.value) / 100)).toFixed(1)} PSI` : ""}`;
       });
+      input.addEventListener("change", render);
     });
     dialog.querySelector("[data-tune-reset]")?.addEventListener("click", () => {
       draft = defaultTuneProfile(car, hardware);
