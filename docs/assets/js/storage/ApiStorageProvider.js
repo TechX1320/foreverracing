@@ -19,6 +19,7 @@ export class ApiStorageProvider extends StorageProvider {
   buyNewCar(stockId) { return this.#api.buyNewCar(stockId); }
   selectCar(carId) { return this.#api.selectCar(carId); }
   renameCar(carId, name) { return this.#api.renameCar(carId, name); }
+  saveTune(carId, tune) { return this.#api.saveTune(carId, tune); }
   partsCatalog() { return this.#api.partsCatalog(); }
   buyPart(catalogId) { return this.#api.buyPart(catalogId); }
   installPart(inventoryId, carId) { return this.#api.installPart(inventoryId, carId); }
