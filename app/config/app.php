@@ -16,6 +16,7 @@ return [
     'session_name' => 'forever_racing_session',
     'session_active_ttl_seconds' => (int)($gameConfig['sessionActiveTtlSeconds'] ?? 7200),
     'starting_credits' => (int)($gameConfig['startingCredits'] ?? 75000),
+    'local_dev_credits' => (int)($gameConfig['localDevCredits'] ?? 10000000),
     'used_lot_refresh_seconds' => (int)($gameConfig['usedLotRefreshSeconds'] ?? 1800),
     'schema_version' => (int)($gameConfig['schemaVersion'] ?? 3),
     'tutorial_version' => (int)($gameConfig['tutorialVersion'] ?? 1),
