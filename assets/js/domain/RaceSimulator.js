@@ -34,7 +34,7 @@ export class RaceSimulator {
     const hp = Math.max(1, Number(context.hp || context.horsepower || 1));
     const torque = Math.max(1, Number(context.torque || 1));
     const weight = Math.max(500, Number(context.weight || context.weightLbs || 500));
-    const grip = clamp(Number(context.grip || 1), 0.5, 2);
+    const grip = clamp(Number(context.grip || 1), 0.5, 2.6);
     const level = Math.max(1, Number(context.level || 1));
     const drivetrain = String(context.drivetrain || "").toUpperCase();
     const tune = context.tuning && typeof context.tuning === "object" ? context.tuning : {};
