@@ -1,5 +1,13 @@
 # Changelog
 
+## V0.5.0-h.2 — Engine Swap modal + chassis ownership hardening
+
+- Fixed the Engine Swap confirmation modal overflowing the base dialog and causing horizontal scrolling.
+- Added explicit chassis-only classification for **Tires, Suspension and Weight Reduction**.
+- Engine assembly normalization now removes stale/non-engine part attachment links instead of allowing chassis hardware to travel with a stored motor.
+- Added local-game regression coverage confirming chassis hardware remains installed on the car through Renesis ↔ EA888 swaps.
+- Kept browser-local and PHP/server engine assembly behavior in parity.
+
 ## V0.5.0-h.1 — Complete engine assemblies
 
 - Standard/custom engine swaps now begin at **Street Race Car / Build Type 2**. More invasive fitments can still require Build Type 3 or 4.

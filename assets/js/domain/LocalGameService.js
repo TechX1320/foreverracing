@@ -140,6 +140,10 @@ export class LocalGameService {
         }).filter((item) => item.engineId)
       : [];
 
+    for (const assembly of player.inventory.engines) {
+      this.sanitizeEngineAssemblyParts(player, assembly);
+    }
+
     if (previousSchemaVersion > 0 && previousSchemaVersion < 11) {
       for (const car of player.garage) {
         const previousEngineId = String(car.engineSwap?.lastFromEngineId || '');
@@ -325,11 +329,28 @@ export class LocalGameService {
     ) || null;
   }
 
+  sanitizeEngineAssemblyParts(player, assembly) {
+    const safeIds = [];
+    for (const id of new Set(assembly?.attachedPartInventoryIds || [])) {
+      const item = player.inventory.parts.find((part) => String(part.inventoryId) === String(id));
+      const spec = item ? this.findBy(this.parts, 'catalogId', String(item.catalogId || '')) : null;
+      if (!item || !spec || !isEngineBoundPart(spec)) {
+        if (item && String(item.installedOnEngineInventoryId || '') === String(assembly?.inventoryId || '')) {
+          item.installedOnEngineInventoryId = null;
+        }
+        continue;
+      }
+      safeIds.push(String(item.inventoryId));
+    }
+    assembly.attachedPartInventoryIds = safeIds;
+    return safeIds;
+  }
+
   activateEngineAssemblyParts(player, car) {
     const assembly = this.engineAssemblyForCar(player, car);
     if (!assembly) return { activeNames: [], dormantNames: [] };
     assembly.installedOnCarId = car.carId;
-    const attachedIds = new Set(assembly.attachedPartInventoryIds || []);
+    const attachedIds = new Set(this.sanitizeEngineAssemblyParts(player, assembly));
     const candidates = [];
 
     for (const id of attachedIds) {
@@ -422,7 +443,7 @@ export class LocalGameService {
       };
 
       const storedPartNames = [];
-      const attached = new Set(outgoingAssembly.attachedPartInventoryIds || []);
+      const attached = new Set(this.sanitizeEngineAssemblyParts(player, outgoingAssembly));
       for (const item of player.inventory.parts) {
         if (String(item.installedOnCarId || '') !== String(carId)) continue;
         const spec = this.findBy(this.parts, 'catalogId', String(item.catalogId || ''));

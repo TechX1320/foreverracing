@@ -7,6 +7,10 @@ final class EngineSwap
         'intake','exhaust','ecu','fuel','drivetrain','forced_induction','engine_kit','engine',
     ];
 
+    public const CHASSIS_BOUND_CATEGORIES = [
+        'suspension','tires','weight',
+    ];
+
     public static function eligible(array $engine): bool
     {
         if (($engine['swapMarket']['available'] ?? true) === false) return false;
@@ -52,9 +56,15 @@ final class EngineSwap
         ];
     }
 
+    public static function isChassisBoundPart(array $part): bool
+    {
+        return in_array(strtolower((string)($part['categoryKey']??'')),self::CHASSIS_BOUND_CATEGORIES,true);
+    }
+
     public static function isEngineBoundPart(array $part): bool
     {
         if((int)($part['simpleTier']??0)>0)return false;
+        if(self::isChassisBoundPart($part))return false;
         return in_array(strtolower((string)($part['categoryKey']??'')),self::ENGINE_BOUND_CATEGORIES,true);
     }
 
