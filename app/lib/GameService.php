@@ -952,20 +952,25 @@ final class GameService
             $installedParts[] = $instance['inventoryId'] ?? '';
             $installedSpecs[] = $spec;
             foreach (($spec['effects'] ?? []) as $effect) {
-                $stat = (string)($effect['stat'] ?? '');
-                if (!array_key_exists($stat, $derived)) continue;
-                $value = (float)($effect['value'] ?? 0);
-                if ((string)($effect['op'] ?? 'add') === 'mul') $derived[$stat] *= $value;
-                else $derived[$stat] += $value;
+                PowerModel::applyBuildPartEffect($derived, $effect, $spec);
             }
         }
 
+        $envelope = PowerModel::enginePowerEnvelope($car, $installedSpecs);
+        $limitedBuild = PowerModel::limitEngineOutput([
+            'hp' => max(1, $derived['hp']),
+            'torque' => max(1, $derived['torque']),
+            'weight' => max(500, $derived['weight']),
+            'grip' => max(0.5, $derived['grip']),
+        ], $envelope);
         $untuned = [
-            'hp' => (int)round(max(1, $derived['hp'])),
-            'torque' => (int)round(max(1, $derived['torque'])),
+            'hp' => (int)$limitedBuild['hp'],
+            'torque' => (int)$limitedBuild['torque'],
             'weight' => (int)round(max(500, $derived['weight'])),
             'grip' => round(max(0.5, $derived['grip']), 3),
         ];
+        $car['powerEnvelope'] = $envelope;
+        $car['powerLimit'] = $limitedBuild['powerLimit'] ?? null;
         $car['untunedDerived'] = $untuned;
         $hardware = Tuning::hardwareProfile($car, $installedSpecs);
 
