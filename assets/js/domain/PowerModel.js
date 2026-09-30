@@ -97,6 +97,7 @@ export function powerEffectScale(part = {}, stat = "hp") {
   const explicit = Number(part?.powerModel?.effectScale ?? part?.powerEffectScale);
   if (Number.isFinite(explicit)) return clamp(explicit, 0, 1.5);
 
+  if (Number(part?.simpleTier || 0) > 0) return 1;
   const category = String(part?.categoryKey || "").toLowerCase();
   const sub = String(part?.subCategory || "").toLowerCase();
   const id = String(part?.catalogId || "").toLowerCase();
