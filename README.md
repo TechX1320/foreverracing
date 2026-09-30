@@ -14,7 +14,7 @@ Development credentials: `Admin` / `12345`.
 
 The Pages build is intentionally local-only. Its login is a simulated development identity and saves are stored in the current browser. They are not shared across browsers or devices.
 
-## V0.5.0-c.2 playable direction
+## V0.5.0-c.3 playable direction
 
 This build is the first gameplay/identity pass after the dual-runtime foundation.
 
@@ -108,6 +108,14 @@ Completing the tutorial no longer opens every system at once. The initial progre
 - Level 10: Multiplayer and 1-mile Quick Race.
 
 **The Circuit** is the player-facing name for the current PvE prototype. Its seven-stage mechanic remains temporary scaffolding; the long-term direction is a single-player career through local meets, recurring NPCs, crews, rivals, increasingly professional events and faster cars.
+
+### V0.5C.3 composite/trophy art fallback
+
+- Cars that only have certified/atlas composite artwork now stay visible during race playback instead of disappearing when animated wheels are requested.
+- Race animation automatically falls back to static certified art when separate body/wheel layer sources are unavailable.
+- Car Creator now detects non-paintable composite artwork and shows **PAINT LOCKED** / fixed-livery status rather than presenting paint controls that cannot work.
+- These cars remain fully usable in garage, Classifieds, Parts, and races; layered body/wheel PNGs can be added later if paint and spinning wheels are desired.
+- This specifically covers imported/special cars like the HD Golf test without forcing us to fake a paint mask over windows/wheels/details.
 
 ### V0.5C.2 factory boost baseline
 
