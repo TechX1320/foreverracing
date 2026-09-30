@@ -127,8 +127,6 @@ export function circuitVisibilityStatus(circuitInput, player = {}) {
   }
 
   const reasons = [];
-  const visibility = circuitVisibilityStatus(circuit, player);
-  if (!visibility.ok) reasons.push("This optional Circuit has not been revealed yet.");
   const unlockedClasses = new Set((player?.progression?.unlockedClasses || ["D"]).map((value) => String(value).toUpperCase()));
   const completed = player?.circuits?.progress || {};
 
@@ -149,6 +147,8 @@ export function circuitEntryStatus(circuitInput, player = {}, car = null) {
   const circuit = normalizeCircuitDefinition(circuitInput);
   if (!car) return { ok: false, reasons: ["Select a Current Car first."] };
   const reasons = [];
+  const visibility = circuitVisibilityStatus(circuit, player);
+  if (!visibility.ok) reasons.push("This optional Circuit has not been revealed yet.");
   const unlockedClasses = new Set((player?.progression?.unlockedClasses || ["D"]).map((value) => String(value).toUpperCase()));
   const completed = player?.circuits?.progress || {};
 
