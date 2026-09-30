@@ -1,6 +1,6 @@
 import { performanceClassFromIndex } from "./PerformanceIndex.js";
 
-export const CIRCUIT_SCHEMA_VERSION = 1;
+export const CIRCUIT_SCHEMA_VERSION = 2;
 export const CIRCUIT_MAX_RACES = 50;
 export const CIRCUIT_DISTANCES = Object.freeze(["1/4", "1/2", "1"]);
 export const CIRCUIT_LOSS_RULES = Object.freeze(["retry_race", "reset_circuit"]);
@@ -15,27 +15,44 @@ export function normalizeCircuitDefinition(input = {}) {
     .slice(0, CIRCUIT_MAX_RACES)
     .map((race, index) => normalizeCircuitRace(race, index));
 
+  const category = String(source.category || (source.required ? "progression" : "optional")).trim().toLowerCase();
+  const required = source.required === true;
+
   return {
     schemaVersion: CIRCUIT_SCHEMA_VERSION,
     circuitId: String(source.circuitId || "").trim(),
     name: String(source.name || "Untitled Circuit").trim(),
     description: String(source.description || "").trim(),
-    category: String(source.category || (source.required ? "progression" : "optional")).trim().toLowerCase(),
-    required: source.required === true,
+    category,
+    required,
     repeatable: source.repeatable !== false,
     lossRule: CIRCUIT_LOSS_RULES.includes(String(source.lossRule || "")) ? String(source.lossRule) : "retry_race",
+    visibility: {
+      hiddenUntilUnlocked: source.visibility?.hiddenUntilUnlocked !== undefined
+        ? source.visibility.hiddenUntilUnlocked === true
+        : (!required && category === "optional"),
+      requiresClasses: arrayStrings(
+        source.visibility?.requiresClasses !== undefined
+          ? source.visibility.requiresClasses
+          : (!required && category === "optional" ? ["B"] : [])
+      ).map((value) => value.toUpperCase()),
+      requiresCircuitIds: arrayStrings(source.visibility?.requiresCircuitIds),
+    },
     unlock: {
-      requiresClasses: arrayStrings(source.unlock?.requiresClasses),
+      requiresClasses: arrayStrings(source.unlock?.requiresClasses).map((value) => value.toUpperCase()),
       requiresCircuitIds: arrayStrings(source.unlock?.requiresCircuitIds),
     },
     entryRules: {
-      allowedClasses: arrayStrings(source.entryRules?.allowedClasses),
+      allowedClasses: arrayStrings(source.entryRules?.allowedClasses).map((value) => value.toUpperCase()),
       minPerformanceIndex: numberOrNull(source.entryRules?.minPerformanceIndex),
       maxPerformanceIndex: numberOrNull(source.entryRules?.maxPerformanceIndex),
       buildTypes: (Array.isArray(source.entryRules?.buildTypes) ? source.entryRules.buildTypes : [])
         .map((value) => Number(value))
         .filter((value) => Number.isFinite(value) && value >= 1 && value <= 4),
       drivetrains: arrayStrings(source.entryRules?.drivetrains).map((value) => value.toUpperCase()),
+      manufacturers: arrayStrings(source.entryRules?.manufacturers),
+      aspirations: arrayStrings(source.entryRules?.aspirations),
+      engineConfigurations: arrayStrings(source.entryRules?.engineConfigurations),
       allowedCarIds: arrayStrings(source.entryRules?.allowedCarIds),
     },
     recommendation: normalizeRecommendation(source.recommendation),
@@ -103,6 +120,31 @@ export function validateCircuitDefinition(input) {
   return { ok: errors.length === 0, errors, circuit };
 }
 
+export function circuitVisibilityStatus(circuitInput, player = {}) {
+  const circuit = normalizeCircuitDefinition(circuitInput);
+  if (circuit.required || circuit.category !== "optional" || circuit.visibility.hiddenUntilUnlocked !== true) {
+    return { ok: true, reasons: [] };
+  }
+
+  const reasons = [];
+  const visibility = circuitVisibilityStatus(circuit, player);
+  if (!visibility.ok) reasons.push("This optional Circuit has not been revealed yet.");
+  const unlockedClasses = new Set((player?.progression?.unlockedClasses || ["D"]).map((value) => String(value).toUpperCase()));
+  const completed = player?.circuits?.progress || {};
+
+  for (const requiredClass of circuit.visibility.requiresClasses) {
+    if (!unlockedClasses.has(requiredClass.toUpperCase())) reasons.push(`Unlock class ${requiredClass.toUpperCase()} first.`);
+  }
+  for (const circuitId of circuit.visibility.requiresCircuitIds) {
+    if (!completed?.[circuitId]?.completed) reasons.push(`Complete ${circuitId} first.`);
+  }
+  return { ok: reasons.length === 0, reasons };
+}
+
+export function circuitVisibleToPlayer(circuitInput, player = {}) {
+  return circuitVisibilityStatus(circuitInput, player).ok;
+}
+
 export function circuitEntryStatus(circuitInput, player = {}, car = null) {
   const circuit = normalizeCircuitDefinition(circuitInput);
   if (!car) return { ok: false, reasons: ["Select a Current Car first."] };
@@ -135,6 +177,18 @@ export function circuitEntryStatus(circuitInput, player = {}, car = null) {
   const drivetrain = String(car.base?.drivetrain || car.derived?.drivetrain || "").toUpperCase();
   if (circuit.entryRules.drivetrains.length && !circuit.entryRules.drivetrains.includes(drivetrain)) {
     reasons.push(`Requires drivetrain: ${circuit.entryRules.drivetrains.join("/")}.`);
+  }
+  const make = String(car.make || "").trim().toLowerCase();
+  if (circuit.entryRules.manufacturers.length && !circuit.entryRules.manufacturers.some((value) => value.toLowerCase() === make)) {
+    reasons.push(`Requires manufacturer: ${circuit.entryRules.manufacturers.join("/")}.`);
+  }
+  const aspiration = String(car.engine?.aspiration || "").trim().toLowerCase();
+  if (circuit.entryRules.aspirations.length && !circuit.entryRules.aspirations.some((value) => value.toLowerCase() === aspiration)) {
+    reasons.push(`Requires aspiration: ${circuit.entryRules.aspirations.join("/")}.`);
+  }
+  const engineConfiguration = String(car.engine?.configuration || "").trim().toLowerCase();
+  if (circuit.entryRules.engineConfigurations.length && !circuit.entryRules.engineConfigurations.some((value) => value.toLowerCase() === engineConfiguration)) {
+    reasons.push(`Requires engine type: ${circuit.entryRules.engineConfigurations.join("/")}.`);
   }
   if (circuit.entryRules.allowedCarIds.length && !circuit.entryRules.allowedCarIds.includes(String(car.catalogId || ""))) {
     reasons.push("This car is not eligible for the event.");
