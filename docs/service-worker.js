@@ -1,4 +1,4 @@
-const CACHE = 'forever-racing-shell-v0.5.0-g';
+const CACHE = 'forever-racing-shell-v0.5.0-g.1';
 const SHELL = [
   './',
   './manifest.webmanifest',
@@ -55,6 +55,7 @@ const SHELL = [
   './assets/js/domain/EngineCatalog.js',
   './assets/js/domain/ForcedInduction.js',
   './assets/js/domain/PartCatalog.js',
+  './assets/js/domain/PowerModel.js',
   './assets/js/domain/Tuning.js',
   './assets/js/content/ContentStudioEngineCatalog.js',
   './assets/js/content/ContentStudioPartCatalog.js',
