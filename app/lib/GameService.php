@@ -31,7 +31,7 @@ final class GameService
             'schemaVersion' => (int)$config['schema_version'],
             'user' => ['id' => 1, 'username' => 'Admin', 'createdAt' => $now],
             'wallet' => ['credits' => (int)$config['starting_credits']],
-            'progression' => ['level' => 1, 'exp' => 0, 'rep' => 0],
+            'progression' => ['level' => 1, 'exp' => 0, 'rep' => 0, 'unlockedClasses' => ['D']],
             'tutorial' => [
                 'version' => (int)$config['tutorial_version'],
                 'status' => 'active',
@@ -46,6 +46,7 @@ final class GameService
             'selectedCarId' => null,
             'garage' => [],
             'inventory' => ['parts' => [], 'engines' => []],
+            'circuits' => ['activeRun' => null, 'progress' => []],
             'roguelike' => ['activeRun' => null, 'bestStage' => 0, 'runsStarted' => 0, 'runsCompleted' => 0],
             'activeRace' => null,
             'raceHistory' => [],
@@ -77,6 +78,12 @@ final class GameService
             $player['wallet']['credits'] = max((int)($player['wallet']['credits'] ?? 0), (int)(app_config()['local_dev_credits'] ?? 10000000));
         }
         $player['progression'] = array_replace($default['progression'], is_array($player['progression'] ?? null) ? $player['progression'] : []);
+        $classes = array_values(array_unique(array_filter(array_map(
+            fn($value): string => strtoupper(trim((string)$value)),
+            is_array($player['progression']['unlockedClasses'] ?? null) ? $player['progression']['unlockedClasses'] : ['D']
+        ))));
+        if (!in_array('D', $classes, true)) array_unshift($classes, 'D');
+        $player['progression']['unlockedClasses'] = $classes;
         $player['tutorial'] = array_replace($default['tutorial'], is_array($player['tutorial'] ?? null) ? $player['tutorial'] : []);
         $player['tutorial']['completedSteps'] = array_values(is_array($player['tutorial']['completedSteps'] ?? null) ? $player['tutorial']['completedSteps'] : []);
         if (($player['tutorial']['status'] ?? '') === 'active' && ($player['tutorial']['step'] ?? '') === 'build_stages') {
@@ -211,6 +218,9 @@ final class GameService
                 'torque'=>max(1,(int)round((float)($car['derived']['torque'] ?? $car['base']['torque'] ?? 1))),
             ];
         }
+        $player['circuits'] = array_replace($default['circuits'], is_array($player['circuits'] ?? null) ? $player['circuits'] : []);
+        $player['circuits']['activeRun'] = is_array($player['circuits']['activeRun'] ?? null) ? $player['circuits']['activeRun'] : null;
+        $player['circuits']['progress'] = is_array($player['circuits']['progress'] ?? null) ? $player['circuits']['progress'] : [];
         $player['roguelike'] = array_replace($default['roguelike'], is_array($player['roguelike'] ?? null) ? $player['roguelike'] : []);
         $player['activeRace'] = is_array($player['activeRace'] ?? null) ? $player['activeRace'] : null;
         $player['raceHistory'] = array_values(is_array($player['raceHistory'] ?? null) ? $player['raceHistory'] : []);
@@ -239,6 +249,12 @@ final class GameService
     public static function partsCatalog(): array
     {
         $data = JsonStore::read(FR_DATA . '/catalog/parts.json', []);
+        return is_array($data) ? array_values($data) : [];
+    }
+
+    public static function circuitCatalog(): array
+    {
+        $data = JsonStore::read(FR_DATA . '/catalog/circuits.json', []);
         return is_array($data) ? array_values($data) : [];
     }
 
@@ -400,7 +416,7 @@ final class GameService
             $outgoing['engineId']=$outgoingEngineId;
             $outgoing['installedOnCarId']=null;
             $outgoing['condition']=EngineSwap::storedCondition(is_array($car['engineCondition']??null)?$car['engineCondition']:[]);
-            $outgoing['tune']=is_array($car['tune']??null)?$car['tune']:null;
+            $outgoing['tune']=null;
             $outgoing['storedStats']=[
                 'hp'=>max(1,(int)round((float)($car['derived']['hp']??$car['base']['hp']??1))),
                 'torque'=>max(1,(int)round((float)($car['derived']['torque']??$car['base']['torque']??1))),
@@ -438,6 +454,7 @@ final class GameService
             }
             $incoming=&$player['inventory']['engines'][$ownedIndex];
             $incoming['installedOnCarId']=$carId;
+            $incoming['tune']=null;
 
             $candidate=$car;
             $candidate['engineId']=(string)$engine['engineId'];
@@ -449,7 +466,7 @@ final class GameService
                 $candidate['stageBaseline']['hp']=(int)$engine['peakHp'];
                 $candidate['stageBaseline']['torque']=(int)$engine['peakTorque'];
             }
-            $candidate['tune']=is_array($incoming['tune']??null)?$incoming['tune']:null;
+            $candidate['tune']=null;
             $candidate['tuningRuntime']=null;
             $candidate['tuningDiagnostics']=null;
             $candidate['engineCondition']=EngineSwap::storedCondition(is_array($incoming['condition']??null)?$incoming['condition']:[]);
@@ -1077,6 +1094,251 @@ final class GameService
     public static function quickRace(string $distance = '1/4'): array
     {
         return self::startQuickRace($distance);
+    }
+
+
+    public static function circuitStart(string $circuitId): array
+    {
+        return self::mutatePlayer(function(array $player) use ($circuitId): array {
+            if (is_array($player['activeRace'] ?? null)) throw new GameException('Finish the active race first.');
+            if (is_array($player['circuits']['activeRun'] ?? null)) throw new GameException('Finish or leave the current Circuit before entering another.');
+            $circuit=self::findBy(self::circuitCatalog(),'circuitId',$circuitId);
+            if(!$circuit) throw new GameException('That Circuit does not exist.',404);
+            $car=self::selectedCar($player);
+            if(!$car) throw new GameException('Select a Current Car first.');
+            $reason=self::circuitEntryReason($circuit,$player,$car);
+            if($reason!==null) throw new GameException($reason);
+            $progress=is_array($player['circuits']['progress'][$circuitId]??null)?$player['circuits']['progress'][$circuitId]:[];
+            if(($circuit['repeatable']??true)===false&&!empty($progress['completed'])) throw new GameException('That Circuit has already been completed.');
+            $player['circuits']['activeRun']=[
+                'runId'=>self::id('circuit'),
+                'circuitId'=>$circuitId,
+                'carId'=>(string)$car['carId'],
+                'raceIndex'=>0,
+                'wins'=>0,
+                'losses'=>0,
+                'runCredits'=>0,
+                'startedAt'=>time(),
+            ];
+            return $player;
+        });
+    }
+
+    public static function circuitAbandon(): array
+    {
+        return self::mutatePlayer(function(array $player): array {
+            if(is_array($player['activeRace']??null)) throw new GameException('Finish the active race first.');
+            $player['circuits']['activeRun']=null;
+            return $player;
+        });
+    }
+
+    public static function startCircuitRace(string $circuitId, ?int $timestampMs=null): array
+    {
+        $activeRace=null;
+        $racingConfig=self::racingConfig();
+        $simulator=new RaceSimulator($racingConfig);
+        $timestampMs??=(int)floor(microtime(true)*1000);
+
+        $player=self::mutatePlayer(function(array $player) use (&$activeRace,$circuitId,$timestampMs,$racingConfig,$simulator): array {
+            if(is_array($player['activeRace']??null)){
+                $activeRace=$player['activeRace'];
+                return $player;
+            }
+            $run=is_array($player['circuits']['activeRun']??null)?$player['circuits']['activeRun']:null;
+            if(!$run||(string)($run['circuitId']??'')!==$circuitId) throw new GameException('Enter this Circuit first.');
+            $circuit=self::findBy(self::circuitCatalog(),'circuitId',$circuitId);
+            if(!$circuit) throw new GameException('Circuit definition is missing.',404);
+            $races=is_array($circuit['races']??null)?array_values($circuit['races']):[];
+            $raceIndex=max(0,(int)($run['raceIndex']??0));
+            $raceDef=is_array($races[$raceIndex]??null)?$races[$raceIndex]:null;
+            if(!$raceDef) throw new GameException('This Circuit has no race at the current position.');
+
+            $carIndex=self::requireOwnedCarIndex($player,(string)($run['carId']??''));
+            $car=$player['garage'][$carIndex];
+            if(!empty($car['engineCondition']['failed'])) throw new GameException('ENGINE FAILED — rebuild it in Garage before racing again.');
+            $reason=self::circuitEntryReason($circuit,$player,$car);
+            if($reason!==null) throw new GameException($reason);
+
+            $distance=(string)($raceDef['distance']??'1/4');
+            $distanceConfig=$simulator->distance($distance);
+            $weather=self::circuitWeather((string)($raceDef['weather']??'Cool & Cloudy'),$racingConfig);
+            $location=['name'=>(string)($raceDef['location']??'The Circuit'),'weight'=>1];
+            $opponent=self::circuitOpponentProfile($raceDef,$racingConfig);
+            $level=max(1,(int)($player['progression']['level']??1));
+
+            $playerRun=$simulator->simulate([
+                'hp'=>max(1,(float)($car['derived']['hp']??1)),
+                'torque'=>max(1,(float)($car['derived']['torque']??1)),
+                'weight'=>max(500,(float)($car['derived']['weight']??500)),
+                'grip'=>max(.5,(float)($car['derived']['grip']??1)),
+                'drivetrain'=>(string)($car['derived']['drivetrain']??$car['base']['drivetrain']??'-'),
+                'level'=>$level,
+                'tuning'=>is_array($car['tuningRuntime']??null)?$car['tuningRuntime']:null,
+            ],$distance,$weather);
+            $opponentRun=$simulator->simulate([
+                'hp'=>$opponent['sim']['hp'],'torque'=>$opponent['sim']['torque'],'weight'=>$opponent['sim']['weight'],
+                'grip'=>$opponent['sim']['grip'],'drivetrain'=>$opponent['sim']['drivetrain'],'level'=>$opponent['level'],
+            ],$distance,$weather);
+
+            $playerDnf=!empty($playerRun['dnf']);
+            $won=!$playerDnf&&(float)$playerRun['totalTime']<(float)$opponentRun['totalTime'];
+            $rewards=is_array($raceDef['rewards']??null)?$raceDef['rewards']:[];
+            $reward=$won?(int)($rewards['credits']??0):0;
+            $expReward=$won?(int)($rewards['exp']??0):0;
+            $repReward=$won?(int)($rewards['rep']??0):0;
+            $timeScale=self::raceTimeScale($racingConfig);
+            $stagingMs=max(1800.0,(float)($racingConfig['presentation']['stagingMs']??2800))*$timeScale;
+            $greenAt=$timestampMs+$stagingMs;
+            $playerFinishSeconds=max(.1,(float)($playerRun['reactionTime']??0)+(float)($playerRun['elapsedTime']??0));
+            $opponentFinishSeconds=max(.1,(float)($opponentRun['reactionTime']??0)+(float)($opponentRun['elapsedTime']??0));
+            $finishAt=$greenAt+(max($playerFinishSeconds,$opponentFinishSeconds)*1000*$timeScale);
+            $race=[
+                'raceId'=>self::id('race'),
+                'origin'=>'circuit',
+                'circuitId'=>$circuitId,
+                'circuitRaceId'=>(string)($raceDef['raceId']??('race_'.($raceIndex+1))),
+                'circuitRaceIndex'=>$raceIndex,
+                'circuitRaceName'=>(string)($raceDef['name']??('Race '.($raceIndex+1))),
+                'circuitRaceType'=>(string)($raceDef['type']??'regular'),
+                'won'=>$won,
+                'distance'=>$distance,
+                'distanceLabel'=>(string)($distanceConfig['label']??$distance),
+                'distanceFeet'=>(int)($distanceConfig['feet']??1320),
+                'location'=>$location,'weather'=>$weather,
+                'margin'=>$playerDnf?null:round(abs((float)$playerRun['totalTime']-(float)$opponentRun['totalTime']),3),
+                'reward'=>$reward,'expReward'=>$expReward,'repReward'=>$repReward,'newBest'=>false,
+                'playerCarId'=>(string)$car['carId'],
+                'carName'=>self::carName($car),
+                'playerVisual'=>is_array($car['visual']??null)?$car['visual']:[],
+                'playerDrivetrain'=>(string)($car['base']['drivetrain']??'-'),
+                'playerPerformanceIndex'=>(int)($car['performanceIndex']??PerformanceIndex::forCar($car,$racingConfig)['performanceIndex']),
+                'playerPerformanceClass'=>(string)($car['performanceClass']??PerformanceIndex::classFromIndex((int)($car['performanceIndex']??0))),
+                'player'=>$playerRun,
+                'opponent'=>[
+                    'name'=>$opponent['name'],'carName'=>$opponent['carName'],'visual'=>$opponent['visual'],
+                    'performanceIndex'=>$opponent['performanceIndex'],'performanceClass'=>$opponent['performanceClass'],
+                    'drivetrain'=>$opponent['drivetrain'],'buildType'=>$opponent['buildType'],'level'=>$opponent['level'],
+                ]+$opponentRun,
+                'reaction'=>(float)$playerRun['reactionTime'],
+                'playerEt'=>(float)$playerRun['elapsedTime'],
+                'opponentEt'=>(float)$opponentRun['elapsedTime'],
+            ];
+            $activeRace=[
+                'raceId'=>$race['raceId'],'origin'=>'circuit','circuitId'=>$circuitId,'status'=>'running',
+                'startedAt'=>$timestampMs,'greenAt'=>$greenAt,'finishAt'=>$finishAt,'timeScale'=>$timeScale,
+                'revealDelayMs'=>max(0,(int)($racingConfig['presentation']['revealDelayMs']??650)),
+                'progressExponent'=>max(1.0,(float)($racingConfig['presentation']['progressExponent']??1.38)),
+                'distance'=>$distance,'race'=>$race,
+            ];
+            $player['activeRace']=$activeRace;
+            return $player;
+        });
+        return ['player'=>$player,'activeRace'=>$activeRace];
+    }
+
+    public static function finishCircuitRace(string $raceId, ?int $timestampMs=null): array
+    {
+        $result=null;$circuitResult=null;
+        $racingConfig=self::racingConfig();
+        $timestampMs??=(int)floor(microtime(true)*1000);
+
+        $player=self::mutatePlayer(function(array $player) use (&$result,&$circuitResult,$raceId,$timestampMs,$racingConfig): array {
+            $active=is_array($player['activeRace']??null)?$player['activeRace']:null;
+            if(!$active||($active['origin']??'')!=='circuit'){
+                foreach(array_reverse($player['raceHistory']??[]) as $row){
+                    if((string)($row['raceId']??'')===$raceId){$result=$row;$circuitResult=$row['circuitResult']??null;return $player;}
+                }
+                throw new GameException('No Circuit race is currently in progress.',409);
+            }
+            if((string)($active['raceId']??'')!==$raceId) throw new GameException('That Circuit race is no longer active.',409);
+            if($timestampMs<(int)round((float)($active['finishAt']??0))) throw new GameException('The race is still in progress.',409);
+
+            $result=is_array($active['race']??null)?$active['race']:[];
+            $run=is_array($player['circuits']['activeRun']??null)?$player['circuits']['activeRun']:null;
+            $circuit=$run?self::findBy(self::circuitCatalog(),'circuitId',(string)($run['circuitId']??'')):null;
+            if(!$run||!$circuit) throw new GameException('Circuit run state is missing.',409);
+            $carIndex=self::requireOwnedCarIndex($player,(string)($result['playerCarId']??''));
+            $car=$player['garage'][$carIndex];
+            $playerRun=is_array($result['player']??null)?$result['player']:[];
+            $won=!empty($result['won']);
+
+            if($won){
+                $reward=(int)($result['reward']??0);
+                $player['wallet']['credits']+=$reward;
+                $player['progression']['exp']+=(int)($result['expReward']??0);
+                $player['progression']['rep']+=(int)($result['repReward']??0);
+                $player['progression']['level']=self::levelFromExp((int)$player['progression']['exp']);
+                $run['wins']=(int)($run['wins']??0)+1;
+                $run['runCredits']=(int)($run['runCredits']??0)+$reward;
+                $run['raceIndex']=(int)($run['raceIndex']??0)+1;
+                self::addTransaction($player,'circuit_race_reward',$reward,(string)$circuit['name'].': '.(string)($result['circuitRaceName']??'Race'));
+            }else{
+                $run['losses']=(int)($run['losses']??0)+1;
+                if(($circuit['lossRule']??'retry_race')==='reset_circuit')$run['raceIndex']=0;
+            }
+
+            $player['stats']['races']=(int)($player['stats']['races']??0)+1;
+            $player['stats'][$won?'wins':'losses']=(int)($player['stats'][$won?'wins':'losses']??0)+1;
+            self::commitCircuitRaceRecord($player,$carIndex,$result);
+
+            if(!empty($playerRun['dnf'])&&($playerRun['mechanicalFailure']??'')==='ENGINE FAILURE'){
+                $previousFailures=(int)($car['engineCondition']['failures']??0);
+                $player['garage'][$carIndex]['engineCondition']=[
+                    'healthPct'=>0,'failed'=>true,'failures'=>$previousFailures+1,'lastFailureAt'=>time(),
+                    'repairedAt'=>$car['engineCondition']['repairedAt']??null,
+                ];
+                $assemblyIndex=self::engineAssemblyIndexForCar($player,$player['garage'][$carIndex]);
+                if($assemblyIndex!==null)$player['inventory']['engines'][$assemblyIndex]['condition']=EngineSwap::storedCondition($player['garage'][$carIndex]['engineCondition']);
+                $result['engineFailure']=true;
+                $result['engineRepairCost']=self::engineRepairCost($player['garage'][$carIndex]);
+            }
+
+            $races=is_array($circuit['races']??null)?$circuit['races']:[];
+            $completed=$won&&(int)($run['raceIndex']??0)>=count($races);
+            $circuitId=(string)$circuit['circuitId'];
+            $currentProgress=is_array($player['circuits']['progress'][$circuitId]??null)?$player['circuits']['progress'][$circuitId]:[];
+            if($completed){
+                $completion=is_array($circuit['completion']??null)?$circuit['completion']:[];
+                $firstClear=empty($currentProgress['completed']);
+                $bonus=(int)($completion['credits']??0);
+                $player['wallet']['credits']+=$bonus;
+                $player['progression']['exp']+=(int)($completion['exp']??0);
+                $player['progression']['rep']+=(int)($completion['rep']??0);
+                $player['progression']['level']=self::levelFromExp((int)$player['progression']['exp']);
+                $unlockClass=strtoupper(trim((string)($completion['unlockClass']??'')));
+                if($unlockClass!==''&&!in_array($unlockClass,$player['progression']['unlockedClasses'],true))$player['progression']['unlockedClasses'][]=$unlockClass;
+                if($bonus>0)self::addTransaction($player,'circuit_completion',$bonus,(string)$circuit['name'].' completion');
+                $player['circuits']['progress'][$circuitId]=array_replace($currentProgress,[
+                    'completed'=>true,'completions'=>(int)($currentProgress['completions']??0)+1,
+                    'highestRace'=>count($races),'firstClearedAt'=>$currentProgress['firstClearedAt']??time(),'lastClearedAt'=>time(),
+                ]);
+                $circuitResult=[
+                    'completed'=>true,'firstClear'=>$firstClear,'unlockClass'=>$unlockClass!==''?$unlockClass:null,
+                    'completionCredits'=>$bonus,'completionExp'=>(int)($completion['exp']??0),'completionRep'=>(int)($completion['rep']??0),
+                ];
+                $player['circuits']['activeRun']=null;
+            }else{
+                $player['circuits']['progress'][$circuitId]=array_replace($currentProgress,[
+                    'completed'=>!empty($currentProgress['completed']),
+                    'completions'=>(int)($currentProgress['completions']??0),
+                    'highestRace'=>max((int)($currentProgress['highestRace']??0),(int)($run['raceIndex']??0)),
+                    'lastPlayedAt'=>time(),
+                ]);
+                $player['circuits']['activeRun']=$run;
+                $circuitResult=['completed'=>false,'nextRaceIndex'=>(int)($run['raceIndex']??0),'lossRule'=>(string)($circuit['lossRule']??'retry_race')];
+            }
+
+            $result['circuitResult']=$circuitResult;
+            $result['completedAt']=time();
+            $player['raceHistory'][]=$result;
+            $historyLimit=max(5,(int)($racingConfig['historyLimit']??25));
+            if(count($player['raceHistory'])>$historyLimit)$player['raceHistory']=array_slice($player['raceHistory'],-$historyLimit);
+            $player['activeRace']=null;
+            return $player;
+        });
+
+        return ['player'=>$player,'race'=>$result,'circuitResult'=>$circuitResult];
     }
 
     public static function roguelikeStart(): array
@@ -2109,6 +2371,89 @@ final class GameService
         ];
     }
 
+
+
+    private static function circuitEntryReason(array $circuit, array $player, array $car): ?string
+    {
+        $unlocked=array_map(fn($value):string=>strtoupper((string)$value),is_array($player['progression']['unlockedClasses']??null)?$player['progression']['unlockedClasses']:['D']);
+        foreach((array)($circuit['unlock']['requiresClasses']??[]) as $class){
+            $class=strtoupper((string)$class);
+            if(!in_array($class,$unlocked,true))return 'Unlock class '.$class.' first.';
+        }
+        foreach((array)($circuit['unlock']['requiresCircuitIds']??[]) as $requiredId){
+            if(empty($player['circuits']['progress'][(string)$requiredId]['completed']))return 'Complete '.(string)$requiredId.' first.';
+        }
+        $rules=is_array($circuit['entryRules']??null)?$circuit['entryRules']:[];
+        $pi=(int)($car['performanceIndex']??PerformanceIndex::forCar($car,self::racingConfig())['performanceIndex']);
+        $class=strtoupper((string)($car['performanceClass']??PerformanceIndex::classFromIndex($pi)));
+        $allowedClasses=array_map(fn($value):string=>strtoupper((string)$value),is_array($rules['allowedClasses']??null)?$rules['allowedClasses']:[]);
+        if($allowedClasses&&!in_array($class,$allowedClasses,true))return 'Requires class '.implode('/',$allowedClasses).'; current car is '.$class.'.';
+        if(isset($rules['minPerformanceIndex'])&&$rules['minPerformanceIndex']!==null&&$pi<(int)$rules['minPerformanceIndex'])return 'Requires at least PI '.(int)$rules['minPerformanceIndex'].'.';
+        if(isset($rules['maxPerformanceIndex'])&&$rules['maxPerformanceIndex']!==null&&$pi>(int)$rules['maxPerformanceIndex'])return 'Maximum PI is '.(int)$rules['maxPerformanceIndex'].'.';
+        $buildTypes=array_map('intval',is_array($rules['buildTypes']??null)?$rules['buildTypes']:[]);
+        if($buildTypes&&!in_array((int)($car['buildStage']??1),$buildTypes,true))return 'This Build Type is not eligible.';
+        $drives=array_map(fn($value):string=>strtoupper((string)$value),is_array($rules['drivetrains']??null)?$rules['drivetrains']:[]);
+        $drive=strtoupper((string)($car['base']['drivetrain']??$car['derived']['drivetrain']??''));
+        if($drives&&!in_array($drive,$drives,true))return 'Requires drivetrain: '.implode('/',$drives).'.';
+        $allowedCars=array_map('strval',is_array($rules['allowedCarIds']??null)?$rules['allowedCarIds']:[]);
+        if($allowedCars&&!in_array((string)($car['catalogId']??''),$allowedCars,true))return 'This car is not eligible for the event.';
+        return null;
+    }
+
+    private static function circuitWeather(string $name,array $racingConfig): array
+    {
+        foreach((array)($racingConfig['weather']??[]) as $weather){
+            if((string)($weather['name']??'')===$name)return $weather;
+        }
+        return ['name'=>$name!==''?$name:'Cool & Cloudy','etModifier'=>0,'mphModifier'=>0,'weight'=>1];
+    }
+
+    private static function circuitOpponentProfile(array $raceDef,array $racingConfig): array
+    {
+        $opponent=is_array($raceDef['opponent']??null)?$raceDef['opponent']:[];
+        $spec=self::findBy(self::carCatalog(),'catalogId',(string)($opponent['carCatalogId']??''))??[];
+        $stats=is_array($opponent['stats']??null)?$opponent['stats']:[];
+        $sim=[
+            'hp'=>max(1,(float)($stats['hp']??1)),
+            'torque'=>max(1,(float)($stats['torque']??1)),
+            'weight'=>max(500,(float)($stats['weight']??500)),
+            'grip'=>max(.5,(float)($stats['grip']??1)),
+            'drivetrain'=>(string)($stats['drivetrain']??$spec['base']['drivetrain']??'-'),
+        ];
+        $benchmark=PerformanceIndex::benchmark($sim,$racingConfig);
+        $visual=is_array($spec['visual']??null)?$spec['visual']:[];
+        $paint=trim((string)($opponent['paintColor']??''));
+        if($paint!=='')$visual['paintColor']=$paint;
+        return [
+            'name'=>(string)($opponent['name']??'Opponent'),
+            'carName'=>(string)($spec['displayName']??$opponent['carCatalogId']??'Opponent'),
+            'visual'=>$visual,
+            'performanceIndex'=>(int)$benchmark['performanceIndex'],
+            'performanceClass'=>PerformanceIndex::classFromIndex((int)$benchmark['performanceIndex']),
+            'drivetrain'=>$sim['drivetrain'],
+            'buildType'=>'Build Type '.max(1,(int)($opponent['buildType']??1)),
+            'level'=>max(1,(int)($opponent['level']??1)),
+            'sim'=>$sim,
+        ];
+    }
+
+    private static function commitCircuitRaceRecord(array &$player,int $carIndex,array &$race): void
+    {
+        $car=$player['garage'][$carIndex];
+        $distance=(string)($race['distance']??'1/4');
+        $playerRun=is_array($race['player']??null)?$race['player']:[];
+        $records=is_array($car['raceRecords']??null)?$car['raceRecords']:self::emptyRaceRecords();
+        $record=is_array($records[$distance]??null)?$records[$distance]:['races'=>0,'bestEt'=>null,'bestTrap'=>null];
+        $record['races']=(int)($record['races']??0)+1;
+        $newBest=false;
+        if(empty($playerRun['foul'])&&empty($playerRun['dnf'])&&(($record['bestEt']??null)===null||(float)$playerRun['elapsedTime']<(float)$record['bestEt'])){
+            $record['bestEt']=(float)$playerRun['elapsedTime'];$newBest=true;
+        }
+        if(empty($playerRun['dnf'])&&(($record['bestTrap']??null)===null||(float)$playerRun['trapSpeed']>(float)$record['bestTrap']))$record['bestTrap']=(float)$playerRun['trapSpeed'];
+        $records[$distance]=$record;
+        $player['garage'][$carIndex]['raceRecords']=$records;
+        $race['newBest']=$newBest;
+    }
 
     private static function raceTimeScale(array $racingConfig): float
     {

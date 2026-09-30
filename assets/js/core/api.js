@@ -63,6 +63,11 @@ export class ApiClient {
   startQuickRace(distance = "1/4") { return this.request("race/start.php", { method: "POST", body: { distance }, csrf: true }); }
   finishQuickRace(raceId) { return this.request("race/finish.php", { method: "POST", body: { raceId }, csrf: true }); }
   quickRace(distance = "1/4") { return this.startQuickRace(distance); }
+  circuitCatalog() { return this.request("circuit/catalog.php"); }
+  circuitStart(circuitId) { return this.request("circuit/start.php", { method: "POST", body: { circuitId }, csrf: true }); }
+  circuitAbandon() { return this.request("circuit/abandon.php", { method: "POST", body: {}, csrf: true }); }
+  startCircuitRace(circuitId) { return this.request("circuit/race-start.php", { method: "POST", body: { circuitId }, csrf: true }); }
+  finishCircuitRace(raceId) { return this.request("circuit/race-finish.php", { method: "POST", body: { raceId }, csrf: true }); }
   roguelikeStart() { return this.request("roguelike/start.php", { method: "POST", body: {}, csrf: true }); }
   roguelikeStep(choice) { return this.request("roguelike/step.php", { method: "POST", body: { choice }, csrf: true }); }
 }
